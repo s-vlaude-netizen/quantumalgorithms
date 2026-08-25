@@ -10,180 +10,50 @@ what is left, add what the results suggested.
 
 ## Now
 
-### 0. Compile double excitations as Givens rotations  ← **the concrete lead**
-Results 10, 12 and 13 converge on one buildable thing.
+### 0. The scaling wall, and what could actually move it  ← **the finding that reframes everything**
+Result 34 costs the barrier: the shots to reach chemical accuracy scale as
 
-The situation is a scissor. The only ansatz that survives real device noise
-(hardware-efficient, fidelity 0.61–0.87) has **exactly zero gradient** at
-Hartree-Fock — 0 of 46 parameters at 2 reps, 0 of 114 at 6 reps — because a
-real-amplitude ansatz's first-order response reaches only single excitations and
-Brillouin's theorem decouples those. Correlation energy is in the doubles. So it
-sits at Hartree-Fock forever, at any depth. Meanwhile every ansatz that *can*
-move is destroyed by noise: PUCCD retains 10% signal on Heron, UCCSD 0.01%.
+    shots  ~  (Σ|c|)² · n / ε²
 
-But the gate counts say the gap is a **compilation** problem, not a physics one:
+measured at ~3.1M for H₂ (12 parameters, Σ|c| = 2.04) and **~170M for H₄/UCCSD**
+(26 parameters, Σ|c| = 10.94) — a 55× jump for one more pair of hydrogens,
+matching the 64× the formula predicts.
 
-| | H4 |
-|---|---|
-| PUCCD parameters (paired double excitations) | 4 |
-| Optimal 2q cost of one double-excitation Givens rotation | ~13 CNOT |
-| So achievable | **~52 two-qubit gates** |
-| What qiskit-nature's `UCC` emits | **317** |
+Everything this repository has built buys a *constant factor* against that:
+general-commuting grouping ~15×, covariance refinement ~1.6× in predicted
+variance, the shot ladder ~2× in error. None of them touches the exponent, and
+`Σ|c|` grows with system size regardless.
 
-qiskit-nature Trotterises each excitation into eight Pauli-string exponentials,
-each with its own CNOT ladder, and the transpiler does not exploit the shared
-structure. Compiling the double excitation directly as a 4-qubit Givens rotation
-should give ~6×.
+So the honest question for the remaining sessions is **what reduces `Σ|c|` or
+`n`, not what reduces the constant**:
 
-**Predicted:** 317 → ~52 two-qubit gates, moving Heron fidelity from 0.099 to
-~0.80 — comparable to the hardware-efficient ansatz, while keeping the non-zero
-gradient at Hartree-Fock that it lacks. `[unverified]`, a gate-count estimate.
+1. **Hamiltonian factorisation.** Double-factorised or tensor-hypercontracted
+   representations replace the raw Pauli sum with a smaller set of one-body
+   terms measured in rotated bases. The literature claims order-of-magnitude
+   reductions in the measurement 1-norm, which is exactly `Σ|c|`. This is the
+   single most promising direction and it is untried here.
+2. **Active-space reduction.** Fewer orbitals means fewer terms and fewer
+   parameters, at the cost of accuracy. Worth mapping the trade-off: what does
+   `Σ|c|` and the shot requirement do as the active space shrinks?
+3. **Classical shadows.** A different estimator entirely, with a different
+   scaling in the number of observables. Whether it wins for a molecular
+   Hamiltonian at these sizes is an empirical question.
 
-**Done so far** (`qres/fermionic.py`, Result 14): the gate itself is built and
-verified — **26 two-qubit gates against qiskit-nature's ~79**, exact to 1e-12
-over seven angles, with particle-number preservation, subspace confinement, the
-group law and non-zero gradient at the reference all tested.
+### 1. Retire or re-scope the covariance grouping
+Result 33: with the numerical-stability fix, the end-to-end benefit is
+0.780 / 1.085 / 0.864 across three budgets, **none significant**. The predicted
+variance benefit (0.708 H₄, 0.632 LiH) is real at a fixed state and does not
+survive a full run.
 
-**Also done** (Result 15): Z-string handling and a full `puccd_shallow`,
-verified to reproduce `qiskit_nature`'s `PUCCD` as a unitary to 8e-13 on H₄.
-**2.43× fewer two-qubit gates in the abstract count** — but only **1.31×** after
-routing on a heavy-hex device.
+Either find why (the reference goes stale as the optimiser moves — testable by
+re-grouping partway from the empirical group variances already collected), or
+record it as a fixed-state-only result and stop quoting it as a shot saving.
+Do not spend another session on it without deciding which.
 
-**Next, and it is now the blocking piece: spin-orbital ordering.** The routing
-penalty is 2.11× for this construction against 1.14× for qiskit-nature's,
-because the 4-qubit Givens gates act on `(i, M+i, a, M+a)` — scattered across the
-blocked-spin ordering — while Pauli ladders run between adjacent qubits.
-Interleaving (`α₀ β₀ α₁ β₁ …`) would make each excitation two adjacent pairs and
-should recover most of the 2.43×.
-
-The catch, found by attempting it: interleaving changes the Jordan-Wigner
-*algebra*, not just the layout — the spin partner then falls *inside* the parity
-string. So it needs the strings re-derived and re-verified against a reference in
-the same ordering, which `qiskit_nature` does not provide directly. Steps:
-1. Re-derive the paired-double parity string under interleaved ordering.
-2. Verify by permuting `qiskit_nature`'s Hamiltonian and PUCCD into that
-   ordering and comparing unitaries — the same test that caught the missing
-   Z-strings.
-3. Measure routed gate count and device fidelity against the blocked baseline.
-
-**The gap this has to close, now measured** (Result 16, experiment 005 over the
-whole excitation family on H₄):
-
-* reaching chemical accuracy needs **~1300 two-qubit gates** (`ucc-d:1`, 18
-  parameters, 1.08e-4 Ha)
-* surviving a Heron device at fidelity > 0.5 allows **~40**
-* **the gap is ~32×**, and this session's compilation buys 2.43× of it
-
-Two routes are now closed and should not be retried:
-
-* **Repetitions of paired doubles do nothing.** `puccd`, `puccd:2`, `puccd:3`
-  give *identical* error (1.631e-2) while tripling gates — the paired-doubles
-  manifold is closed under composition.
-* **Singles are not worth their cost.** `puccsd` (12 params) reaches 1.589e-2
-  against `puccd`'s (4 params) 1.631e-2. Brillouin again.
-
-So expressibility has to come from *unpaired* doubles, which is where the gate
-count lives. Realistic remaining levers, in order: qubit ordering (above),
-per-excitation compilation below 26 gates, and dropping excitations by measured
-gradient magnitude (ADAPT-style) rather than including the full set.
-
-Acceptance test: non-zero gradient at Hartree-Fock, exact-optimisation error
-better than PUCCD's 1.6e-2 on H4, and ≤ 80 two-qubit gates transpiled to
-`fake_torino`. If expressibility is short of chemical accuracy, add repetitions
-(k-UpCCGSD) and re-measure the fidelity trade.
-
-### 1. Push the shot ladder further  ← **the working lead**
-`shot_ladder` is the first thing here that reaches chemical accuracy with any
-reliability: 5/16 seeds on H₂ at 12.8M shots against SPSA's 1/16, ratio 0.465,
-and at hand-set levels 12 wins / 0 losses with p = 0.000 (Result 27). The
-diagnosis behind it is solid — precision has to escalate as the run converges,
-because the energy differences a model-based optimiser interpolates shrink
-quadratically near the optimum while shot noise stays flat (Results 25, 26).
-
-Open work, roughly in order of expected value:
-
-1. **Lower the crossover.** Below ~800k on 12-parameter H₂ the ladder is
-   *significantly worse* than SPSA (ratio 1.71, p = 0.021), because two rungs
-   cannot both be fed. Ideas: start the ladder from an SPSA warm-start rather
-   than cold, so the first rung needs fewer evaluations; or use a cheaper inner
-   optimiser for the bottom rungs.
-2. **Replace the restart with a proper noise-aware trust region.** Restarting
-   COBYLA is a blunt instrument that throws away its model each rung. A
-   stochastic trust-region method (STORM-style) that sizes its sample count from
-   the model's own uncertainty should dominate it, and would remove the
-   hand-set `growth` and `levels`.
-3. **Tune `growth` and `evals_per_level` properly.** Only `g ∈ {4, 6, 8}` and
-   `E = 2(n+1)` have been tested, on one molecule.
-4. **Confirm on a second system.** Everything above is H₂ at 12 parameters.
-
-### 1a. Does the measurement work pay off now?  *(partly answered)*
-Session 1 built covariance-aware grouping (0.63 variance ratio on LiH, validated
-against 300 sampled estimates) and concluded it had nothing to act on — but that
-conclusion came from H₄, whose ansatz was stuck at Hartree-Fock. Result 25 shows
-H₂ *is* shot-noise-limited, so the measurement side does bind after all.
-
-H₂ cannot test it (2 groups). The test needs a system that both converges and
-has groups worth arranging: H₄ + UCCSD, which reaches 1e-4 under exact
-optimisation and has 10 commuting groups. In flight.
-
-**Answered, with a caveat that matters.** At 4M shots the covariance grouping is
-significantly better end to end — ratio 0.798, 10/2 seeds, p = 0.039 (Result 30).
-That is the first time any of session 1's measurement work has shown a
-significant benefit in a full optimisation rather than at a fixed state.
-
-But both arms fail: their errors (0.08–0.11 Ha) exceed H₄'s correlation energy
-of 0.042 Ha, so both are worse than stopping at Hartree-Fock. Even after fixing
-the trust region (`rhobeg = 0.1` halves the error, Result 31) the best is
-4.86e-2 against Hartree-Fock's 4.18e-2. A 20% improvement on a method that is
-not working is not a validated benefit.
-
-To finish this:
-1. Find the budget at which H₄ + UCCSD actually converges — the exact-energy
-   control (Result 25) says the evaluations are there, so this is a shot-count
-   question. Expensive, but the 14× fast path (Result 28) makes it feasible.
-2. Re-run the grouping comparison there.
-3. Chase the unexplained group count: `covariance+refine` produced **19** groups
-   through `ShotEstimator` against the **11** experiment 003 reports for the same
-   molecule and reference. One of the two paths is not doing what it says.
-
-### 1d. `rhobeg` must scale with the ansatz
-No universal value exists: H₂'s hardware-efficient ansatz wants a *large* trust
-region on restart (1.0 was 9× better than 0.1, Result 26) and H₄'s UCCSD wants a
-*small* one (0.1 was 2× better than 1.0, Result 31). `shot_ladder` currently
-hard-codes 1.0. It should estimate the scale — from the spread of a few
-random-direction energy differences, or from the ansatz family — rather than
-being handed it.
-
-### 1a. Re-validate the measurement studies with enough seeds
-Results 3 and 18: the 3.8× allocation win became 1.3× and lost significance at
-24 seeds. Everything measured at 4 seeds in this session should be re-run at
-≥ 24 before it is believed, and the covariance-grouping win (0.63 variance ratio
-on LiH) has still only been validated **at a fixed state**, never end-to-end.
-
-The end-to-end test needs a configuration that actually converges — see item 1.
-Attempting it with UCCSD hit the budget rule instead (Result 17).
-
-### 2. Resolve the noise-floor question
-Scaling gate errors 10× down did not move the error. Ablate properly: readout
-on/off, thermal relaxation on/off, gate error scaled — one factor at a time, at
-a fixed reference state so there is no optimiser in the loop.
-
-### 3. Budget scaling: what does chemical accuracy actually cost?
-Nothing tested reaches 1.594 mHa on H₂ reliably (best: 1/8 seeds). Sweep the
-budget over 10⁵–10⁷ shots for the best configuration and find where chemical
-accuracy becomes reliable (≥ 6/8 seeds). *Shots to chemical accuracy* is the
-benchmark everything else should be measured against, and it is unknown even
-for H₂.
-
-**Size every future budget against the parameter count** (Result 17):
-
-    usable budget  ≳  10 × n_parameters × shots_per_evaluation
-
-COBYLA spends `n+1` evaluations on its initial simplex alone. A 200k budget at
-4096 shots gives 48 evaluations for UCCSD's 26 parameters, so it never starts —
-which is why an end-to-end test with a *converging* ansatz still produced
-1.39e-1 Ha. Below this threshold a comparison measures simplex construction,
-not the algorithm.
+### 2. Verify the 170M prediction  *(running)*
+H₄ + UCCSD at 256M shots, 8 seeds. If it converges there and not at 64M, the
+cost model in Result 34 is validated and becomes the benchmark every future
+result is scored against. If it does not, the model is missing something.
 
 ---
 

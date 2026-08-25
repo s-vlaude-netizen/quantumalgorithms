@@ -1178,3 +1178,88 @@ the exact-optimisation control (Result 25) shows are required. That is the next
 measurement, and it is expensive — the 14× fast path from Result 28 is what
 makes it affordable at all.
 
+---
+
+## Session 3 — 2026-08-25 (15:25 UTC)
+
+### Result 32 — a second numerical-stability hole, in the covariances this time
+
+Chasing Result 30's unexplained group count. The Hartree-Fock determinant built
+as a bare circuit and the UCCSD ansatz evaluated at `θ = 0` are **the same
+state** — overlap 1.000000, maximum amplitude difference **2.6e-12** — and gave
+**11 groups and 19 groups** on H₄.
+
+Same failure mode as Result 8, one level down. Result 8 fixed the *coefficient*
+tie-break by rounding to 12 decimals; the covariance matrix carries the same ulp
+noise and nothing rounded it, so near-ties in the greedy flipped on differences
+12 orders of magnitude below anything physical.
+
+Fixed by rounding the covariance matrix to 9 decimals before any greedy step
+consumes it — covariances here are O(1e-2) to O(1), so that discards nothing
+real and leaves 1000× margin over the noise. Both reference paths now give
+identical partitions (11 groups, 19 moves, ratio 0.708), and experiment 003's
+numbers are unchanged, meaning the fix brought the estimator path into agreement
+with the correct one rather than moving it.
+
+**Consequence: Result 30's significant end-to-end win was measured on the
+19-group accident, not the intended partition.** It had to be re-run.
+
+### Result 33 — re-run: the covariance grouping's end-to-end benefit is not robust
+
+Same experiment with the corrected partition and `rhobeg` matched to UCCSD's
+parameter scale. H₄ + UCCSD, ideal, 12 seeds, paired:
+
+| budget | commuting | covariance+refine | ratio | W/L | p |
+|---|---|---|---|---|---|
+| 4 000 000 | 4.847e-2 | 4.553e-2 | 0.780 | 8/4 | 0.388 |
+| 16 000 000 | 4.062e-2 | **4.302e-2** | **1.085** | 5/7 | 0.774 |
+| 64 000 000 | 3.913e-2 | 3.854e-2 | 0.864 | 8/4 | 0.388 |
+
+Three budgets, three different answers — 0.780, 1.085, 0.864 — **none
+significant**. The p = 0.039 of Result 30 does not survive the fix.
+
+**Honest statement, replacing Result 30's:** covariance-aware grouping's
+predicted variance benefit (0.708 on H₄, 0.632 on LiH) is real and validated
+against direct sampling *at a fixed state*. It does **not** translate into a
+reliable end-to-end shot saving in this setup. Averaged over the three budgets
+the ratio is ~0.91, which is the size of effect that 12 seeds cannot resolve.
+
+### Result 34 — why H₄ never converges: the shot cost, quantified
+
+16× more budget (4M → 64M) moved the error only from 4.85e-2 to 3.91e-2, against
+Hartree-Fock's 4.18e-2 — a 6% improvement on doing nothing, after 64 million
+shots. Meanwhile the exact-energy control at the *same* evaluation count (108,
+which is what 4M buys) reaches **9.636e-3**, four times better than Hartree-Fock.
+
+So it is shot noise again, and now it can be costed. Measuring the estimator's
+single-evaluation σ and asking what it takes to push σ below chemical accuracy:
+
+| system | params | Σ\|c\| | σ at 4096 shots | shots for σ = 1.594 mHa | × 10(n+1) evaluations |
+|---|---|---|---|---|---|
+| H₂ / hea:2 | 12 | 2.04 | 3.82e-3 | 23 556 | **~3.1M** |
+| H₄ / UCCSD | 26 | 10.94 | 1.98e-2 | 631 527 | **~170M** |
+
+The H₂ figure checks out against measurement: the shot ladder first reached
+chemical accuracy reliably at 12.8M (5/16 seeds), comfortably above the 3.1M
+floor. **The H₄ figure says every budget tested was too small** — 64M is 2.7×
+short of the requirement.
+
+The scaling is the useful part. Per-shot variance goes as `(Σ|c|)²`, and the
+evaluation count as `n`, so the shot cost to chemical accuracy scales as
+
+    shots  ~  (Σ|c|)² · n / ε²
+
+H₄'s Σ|c| is 5.4× H₂'s and it has 2.2× the parameters: 5.4² × 2.2 ≈ 64×, against
+the measured 55× (3.1M → 170M). **This is the real barrier to VQE on molecules,
+and it is not the hardware** — Σ|c| grows with system size faster than anything
+in this repository reduces it.
+
+Against that scaling, every measurement-side improvement here buys a constant
+factor: general-commuting grouping ~15×, covariance-aware refinement ~1.6× in
+predicted variance, the shot ladder ~2× in error. Useful, and none of them
+changes the exponent.
+
+Also confirmed: `rhobeg = 0.1` beats 1.0 on UCCSD **even with exact energies**
+(9.636e-3 against 2.872e-2 at 108 evaluations), so Result 31's trust-region
+finding was genuine tuning and not a noise artefact.
+
