@@ -562,6 +562,47 @@ hardware-efficient ansatz lacks.
 the single most promising concrete lead out of this session and the first thing
 to build next.
 
+### Result 14 — the double-excitation gate, built and verified: 26 gates against ~79
+
+Acting on Result 13's lead. `qres/fermionic.py` compiles the double excitation
+directly as a two-level Givens rotation instead of as eight Pauli-string
+exponentials.
+
+Construction: three CNOTs relabel the basis so that |0011> and |1100> differ in
+a single qubit — `CX(0→1), CX(2→3), CX(0→2)` sends them to |0101> and |0100> —
+a multi-controlled RY acts there, and the CNOTs are undone. The three controls
+are necessary and sufficient: solving `d^c=0, c^a=1, b^a=0` gives exactly those
+two states and no others, so the gate cannot leak outside the intended subspace.
+
+| construction | two-qubit gates | correct? |
+|---|---|---|
+| qiskit-nature (Trotterised Paulis) | ~79 per excitation | yes |
+| two `mcx` around half-angle RYs | 34 | yes |
+| **Qiskit `mcry` synthesis** | **26** | **yes** |
+| relative-phase `rccx` chain | 14 | **no** — error 0.15–1.0 |
+
+**3× fewer two-qubit gates than the Trotterised compilation**, verified as an
+operator against the exact target matrix to 1e-12 over seven angles. Not the
+~13 the literature's hand-optimised decomposition reaches, but most of the way
+there and it is exact.
+
+The `rccx` variant is instructive and is kept in the test suite as a regression
+guard. It is 14 gates — better than the target — and wrong: the relative phases
+do not cancel between the two occurrences. The error scales with the angle
+(0.15 at θ=0.3, 1.0 at θ=π), so at small angles it looks nearly right, which is
+exactly how a wrong excitation gate would get adopted.
+
+Properties verified, not assumed: exact operator match, particle-number
+preservation (no amplitude leaks between Hamming-weight sectors), action
+confined to the two-dimensional subspace, the group law `G(a)G(b) = G(a+b)`, and
+**non-zero derivative at the reference state** — the property the
+hardware-efficient ansatz lacks and the whole reason for the module.
+
+Still to do before this pays off: assembling these gates into a full ansatz
+needs the Jordan-Wigner Z-strings between non-adjacent orbitals, which the bare
+4-qubit gate does not carry. That is the next step, and until it is done the 3×
+is a per-gate figure, not an end-to-end one.
+
 ### Open question carried forward
 
 Scaling `fake_kolkata`'s gate errors to 0.5× / 0.25× / 0.1× left the energy

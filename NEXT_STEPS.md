@@ -39,13 +39,20 @@ should give ~6×.
 ~0.80 — comparable to the hardware-efficient ansatz, while keeping the non-zero
 gradient at Hartree-Fock that it lacks. `[unverified]`, a gate-count estimate.
 
-Build it as `qres/fermionic.py`:
-1. A `double_excitation(theta, i, j, k, l)` circuit — the known ~13-CNOT
-   decomposition of the |1100⟩ ↔ |0011⟩ Givens rotation.
-2. Verify against `UCC`'s unitary to machine precision. This is the step that
-   must not be skipped: a nearly-right excitation gate gives plausible energies
-   and silently wrong chemistry.
-3. A `puccd_shallow` / `k-UpCCGSD` ansatz built from them.
+**Done so far** (`qres/fermionic.py`, Result 14): the gate itself is built and
+verified — **26 two-qubit gates against qiskit-nature's ~79**, exact to 1e-12
+over seven angles, with particle-number preservation, subspace confinement, the
+group law and non-zero gradient at the reference all tested.
+
+**Next, and it is the blocking piece:** assembling these into a full ansatz needs
+the Jordan-Wigner Z-strings between non-adjacent orbitals, which the bare
+4-qubit gate does not carry. Until that lands, the 3× is per-gate, not
+end-to-end. Steps:
+1. `jw_double_excitation(theta, p, q, r, s, n_qubits)` — the gate plus the
+   correct Z-string parity on the intervening qubits.
+2. Verify against `UCC(excitations="d")`'s unitary, not just against the
+   4-qubit target matrix.
+3. A `puccd_shallow` ansatz built from them, then `k-UpCCGSD` for depth tuning.
 
 Acceptance test: non-zero gradient at Hartree-Fock, exact-optimisation error
 better than PUCCD's 1.6e-2 on H4, and ≤ 80 two-qubit gates transpiled to
