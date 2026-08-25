@@ -10,31 +10,47 @@ what is left, add what the results suggested.
 
 ## Now
 
-### 0. Build an ansatz that couples to double excitations at shallow depth  ← **the blocker**
-Result 10 is the finding that reorders everything else. The hardware-efficient
-ansatz has **exactly zero gradient** at Hartree-Fock — 0 of 46 parameters at
-2 reps, 0 of 114 at 6 reps — because a real-amplitude ansatz's first-order
-response reaches only single excitations, and Brillouin's theorem kills those.
-Correlation energy is in the doubles. So H₄ runs land on Hartree-Fock and
-recover *zero* correlation energy, at any depth and any budget.
+### 0. Compile double excitations as Givens rotations  ← **the concrete lead**
+Results 10, 12 and 13 converge on one buildable thing.
 
-UCCSD reaches chemical accuracy (9.7e-6) precisely because its generators are
-double excitations — at 1096 two-qubit gates, which is device-fatal.
+The situation is a scissor. The only ansatz that survives real device noise
+(hardware-efficient, fidelity 0.61–0.87) has **exactly zero gradient** at
+Hartree-Fock — 0 of 46 parameters at 2 reps, 0 of 114 at 6 reps — because a
+real-amplitude ansatz's first-order response reaches only single excitations and
+Brillouin's theorem decouples those. Correlation energy is in the doubles. So it
+sits at Hartree-Fock forever, at any depth. Meanwhile every ansatz that *can*
+move is destroyed by noise: PUCCD retains 10% signal on Heron, UCCSD 0.01%.
 
-**The gap to close: UCCSD-like coupling to doubles at hardware-efficient depth.**
-Candidates, cheapest first:
+But the gate counts say the gap is a **compilation** problem, not a physics one:
 
-- **Quantum-number-preserving gate fabrics** (Anselmetti et al.): four-qubit
-  blocks that conserve particle number and spin and span the doubles directly.
-- **Givens-rotation / particle-conserving networks**: shallow, and their
-  generators are single+double excitations by construction.
-- **k-UpCCGSD**: paired doubles only, so far fewer terms than UCCSD, tunable
-  depth via k.
+| | H4 |
+|---|---|
+| PUCCD parameters (paired double excitations) | 4 |
+| Optimal 2q cost of one double-excitation Givens rotation | ~13 CNOT |
+| So achievable | **~52 two-qubit gates** |
+| What qiskit-nature's `UCC` emits | **317** |
 
-Acceptance test: non-zero gradient at Hartree-Fock, chemical accuracy on H₄
-under exact optimisation, and two-qubit count within ~5× of the
-hardware-efficient ansatz. Until something passes that, no H₄ measurement of
-anything else means much.
+qiskit-nature Trotterises each excitation into eight Pauli-string exponentials,
+each with its own CNOT ladder, and the transpiler does not exploit the shared
+structure. Compiling the double excitation directly as a 4-qubit Givens rotation
+should give ~6×.
+
+**Predicted:** 317 → ~52 two-qubit gates, moving Heron fidelity from 0.099 to
+~0.80 — comparable to the hardware-efficient ansatz, while keeping the non-zero
+gradient at Hartree-Fock that it lacks. `[unverified]`, a gate-count estimate.
+
+Build it as `qres/fermionic.py`:
+1. A `double_excitation(theta, i, j, k, l)` circuit — the known ~13-CNOT
+   decomposition of the |1100⟩ ↔ |0011⟩ Givens rotation.
+2. Verify against `UCC`'s unitary to machine precision. This is the step that
+   must not be skipped: a nearly-right excitation gate gives plausible energies
+   and silently wrong chemistry.
+3. A `puccd_shallow` / `k-UpCCGSD` ansatz built from them.
+
+Acceptance test: non-zero gradient at Hartree-Fock, exact-optimisation error
+better than PUCCD's 1.6e-2 on H4, and ≤ 80 two-qubit gates transpiled to
+`fake_torino`. If expressibility is short of chemical accuracy, add repetitions
+(k-UpCCGSD) and re-measure the fidelity trade.
 
 ### 1. Re-run the measurement studies once an ansatz converges  *(blocked on 0)*
 Every H₄ number in this session was taken in a regime where the optimiser could

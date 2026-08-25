@@ -497,6 +497,71 @@ construction):
 hardware-time gain is modest because the 250 µs reset delay dominates the cost
 model; the simulation gain is what makes the research loop usable.
 
+### Result 12 — the ansatz gap, quantified on real device calibration
+
+Given Result 10 (hardware-efficient ansätze cannot leave Hartree-Fock), the
+question is what the alternatives actually cost on hardware. Transpiled to real
+device targets, with fidelity estimated as `(1 - e_2q)^n_2q` times a T1 decay
+term over the circuit's real duration:
+
+**fake_kolkata** (Eagle era, median 2q error 0.75%, median T1 111 µs):
+
+| ansatz | 2q gates | duration | total fidelity |
+|---|---|---|---|
+| hea:2:linear:cry | 20 | 6.4 µs | **0.61** |
+| puccd | 315 | 101.7 µs | 0.0004 |
+| succd | 861 | 277.9 µs | 0.0000 |
+| uccsd | 1342 | 430.8 µs | 0.0000 |
+
+**fake_torino** (Heron, median 2q error 0.42%, median T1 185 µs):
+
+| ansatz | 2q gates | duration | total fidelity |
+|---|---|---|---|
+| hea:2:linear:cry | 20 | 1.9 µs | **0.87** |
+| puccd | 317 | 30.3 µs | **0.099** |
+| succd | 867 | 82.2 µs | 0.0018 |
+| uccsd | 1350 | 127.6 µs | 0.0001 |
+
+So the situation is a clean scissor:
+
+* The only ansatz that survives the device (HEA, fidelity 0.61–0.87) **cannot
+  move off Hartree-Fock** — zero gradient, at any depth.
+* The cheapest ansatz that *can* move (PUCCD) retains **10% signal** on the best
+  simulated device and is still under-expressive: 1.6e-2 Ha, 10× worse than
+  chemical accuracy.
+* Everything expressive enough to reach chemical accuracy (UCCSD, 9.7e-6)
+  retains ~0.01% — nothing at all.
+
+**Target, now quantified:** an ansatz that couples to double excitations within
+**≲ 50 two-qubit gates**. At Heron's 0.42% that is fidelity ≈ 0.81, comparable
+to the hardware-efficient ansatz.
+
+### Result 13 — Qiskit's UCC compilation is ~6× off the achievable gate count
+
+The target above looks less remote after counting what PUCCD actually needs.
+
+On H4 (2 occupied, 2 virtual spatial orbitals), PUCCD has **4 parameters** — four
+paired double excitations. A double-excitation rotation (the 4-qubit Givens
+rotation mixing |1100⟩ and |0011⟩) has a known decomposition in **~13 CNOTs**.
+So 4 × 13 ≈ **52 two-qubit gates** should suffice.
+
+Qiskit's `UCC` produces **317**.
+
+The reason is the compilation strategy: qiskit-nature builds each excitation as
+a Trotterised product of Pauli-string exponentials, and each of the eight Pauli
+strings making up one double excitation is compiled to its own CNOT ladder. The
+ladders share structure that the generic transpiler does not exploit.
+
+**Predicted payoff of compiling double excitations directly as Givens
+rotations:** 317 → ~52 two-qubit gates on H4, which moves Heron fidelity from
+0.099 to roughly 0.80 — from unusable to comparable with the hardware-efficient
+ansatz, while *keeping* the non-zero gradient at Hartree-Fock that the
+hardware-efficient ansatz lacks.
+
+`[unverified]` — this is an estimate from gate counting, not a measurement. It is
+the single most promising concrete lead out of this session and the first thing
+to build next.
+
 ### Open question carried forward
 
 Scaling `fake_kolkata`'s gate errors to 0.5× / 0.25× / 0.1× left the energy

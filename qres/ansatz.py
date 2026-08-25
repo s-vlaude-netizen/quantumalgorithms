@@ -116,29 +116,90 @@ def _entangler_pairs(num_qubits, entanglement, coupling_map):
     raise ValueError(f"unknown entanglement {entanglement!r}")
 
 
+def _mapper_for(problem):
+    from qiskit_nature.second_q.mappers import (
+        BravyiKitaevMapper,
+        JordanWignerMapper,
+        ParityMapper,
+    )
+
+    name = problem.metadata.get("mapper", "parity")
+    if name == "parity":
+        return ParityMapper(num_particles=problem.num_particles)
+    if name == "bravyi_kitaev":
+        return BravyiKitaevMapper()
+    return JordanWignerMapper()
+
+
+def chemistry_ansatz(
+    problem,
+    family: str = "uccsd",
+    *,
+    reps: int = 1,
+    generalized: bool = False,
+) -> QuantumCircuit:
+    """A coupled-cluster-family ansatz on the Hartree-Fock reference.
+
+    These matter for one specific reason (see RESEARCH_LOG Result 10): their
+    generators include **double** excitations, so they have a non-zero gradient
+    at the Hartree-Fock determinant.  A real-amplitude hardware-efficient ansatz
+    does not -- its first-order response reaches only single excitations, which
+    Brillouin's theorem decouples from HF -- and it therefore sits at
+    Hartree-Fock forever, at any depth.
+
+    The price is circuit size, and the families differ enormously in it:
+
+    ``uccsd``   all singles and doubles.  Reaches chemical accuracy on H4
+                (9.7e-6) at ~1072 two-qubit gates.
+    ``puccd``   *paired* doubles only -- both electrons of a pair move together.
+                4 parameters and ~250 two-qubit gates on H4, non-zero gradient
+                at HF, but under-expressive (1.6e-2).
+    ``succd``   singlet-adapted doubles; between the two.
+    ``ucc:d``   doubles only, with ``reps`` repetitions.
+    """
+    from qiskit_nature.second_q.circuit.library import (
+        HartreeFock,
+        PUCCD,
+        PUCCSD,
+        SUCCD,
+        UCC,
+        UCCSD,
+    )
+
+    mapper = _mapper_for(problem)
+    initial = HartreeFock(problem.num_spatial_orbitals, problem.num_particles, mapper)
+    args = (problem.num_spatial_orbitals, problem.num_particles, mapper)
+
+    if family == "uccsd":
+        ansatz = UCCSD(*args, initial_state=initial, reps=reps, generalized=generalized)
+    elif family == "puccd":
+        ansatz = PUCCD(*args, initial_state=initial, reps=reps)
+    elif family == "puccsd":
+        ansatz = PUCCSD(*args, initial_state=initial, reps=reps)
+    elif family == "succd":
+        ansatz = SUCCD(*args, initial_state=initial, reps=reps)
+    elif family.startswith("ucc"):
+        # UCC takes `excitations` as its THIRD positional argument, ahead of the
+        # mapper, so the *args spread used above collides with it.
+        excitations = family.split("-", 1)[1] if "-" in family else "sd"
+        ansatz = UCC(
+            num_spatial_orbitals=problem.num_spatial_orbitals,
+            num_particles=problem.num_particles,
+            excitations=excitations,
+            qubit_mapper=mapper,
+            reps=reps,
+            generalized=generalized,
+            initial_state=initial,
+        )
+    else:
+        raise ValueError(f"unknown chemistry ansatz family {family!r}")
+
+    return QuantumCircuit(ansatz.num_qubits).compose(ansatz.decompose(reps=4))
+
+
 def uccsd(problem, *, reps: int = 1, generalized: bool = False) -> QuantumCircuit:
     """UCCSD on top of the Hartree-Fock reference for a MolecularProblem."""
-    from qiskit_nature.second_q.circuit.library import UCCSD, HartreeFock
-    from qiskit_nature.second_q.mappers import ParityMapper, JordanWignerMapper, BravyiKitaevMapper
-
-    mapper_name = problem.metadata.get("mapper", "parity")
-    if mapper_name == "parity":
-        mapper = ParityMapper(num_particles=problem.num_particles)
-    elif mapper_name == "bravyi_kitaev":
-        mapper = BravyiKitaevMapper()
-    else:
-        mapper = JordanWignerMapper()
-
-    initial = HartreeFock(problem.num_spatial_orbitals, problem.num_particles, mapper)
-    ansatz = UCCSD(
-        problem.num_spatial_orbitals,
-        problem.num_particles,
-        mapper,
-        initial_state=initial,
-        reps=reps,
-        generalized=generalized,
-    )
-    return QuantumCircuit(ansatz.num_qubits).compose(ansatz.decompose(reps=3))
+    return chemistry_ansatz(problem, "uccsd", reps=reps, generalized=generalized)
 
 
 def build_ansatz(spec: str, problem, environment=None) -> QuantumCircuit:
@@ -148,12 +209,16 @@ def build_ansatz(spec: str, problem, environment=None) -> QuantumCircuit:
     ``"hea:3:circular"``   circular entanglement
     ``"hea:2:device"``     entangle along the backend's real coupling map
     ``"hea:2:linear:cry"`` controlled-RY entanglers -- theta=0 is the reference
-    ``"uccsd"``            chemistry ansatz (molecular problems only)
+    ``"uccsd"``            all singles and doubles (molecular problems only)
+    ``"puccd"``            paired doubles -- far shallower, still has gradient
+    ``"succd:2"``          singlet doubles, two repetitions
+    ``"ucc-d:3"``          doubles only, three repetitions
     """
     parts = spec.split(":")
     kind = parts[0]
-    if kind == "uccsd":
-        return uccsd(problem)
+    if kind in ("uccsd", "puccd", "puccsd", "succd") or kind.startswith("ucc-"):
+        reps = int(parts[1]) if len(parts) > 1 else 1
+        return chemistry_ansatz(problem, kind, reps=reps)
     if kind == "hea":
         reps = int(parts[1]) if len(parts) > 1 else 2
         ent = parts[2] if len(parts) > 2 else "linear"
