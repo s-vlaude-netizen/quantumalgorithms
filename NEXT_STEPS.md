@@ -44,15 +44,31 @@ verified — **26 two-qubit gates against qiskit-nature's ~79**, exact to 1e-12
 over seven angles, with particle-number preservation, subspace confinement, the
 group law and non-zero gradient at the reference all tested.
 
-**Next, and it is the blocking piece:** assembling these into a full ansatz needs
-the Jordan-Wigner Z-strings between non-adjacent orbitals, which the bare
-4-qubit gate does not carry. Until that lands, the 3× is per-gate, not
-end-to-end. Steps:
-1. `jw_double_excitation(theta, p, q, r, s, n_qubits)` — the gate plus the
-   correct Z-string parity on the intervening qubits.
-2. Verify against `UCC(excitations="d")`'s unitary, not just against the
-   4-qubit target matrix.
-3. A `puccd_shallow` ansatz built from them, then `k-UpCCGSD` for depth tuning.
+**Also done** (Result 15): Z-string handling and a full `puccd_shallow`,
+verified to reproduce `qiskit_nature`'s `PUCCD` as a unitary to 8e-13 on H₄.
+**2.43× fewer two-qubit gates in the abstract count** — but only **1.31×** after
+routing on a heavy-hex device.
+
+**Next, and it is now the blocking piece: spin-orbital ordering.** The routing
+penalty is 2.11× for this construction against 1.14× for qiskit-nature's,
+because the 4-qubit Givens gates act on `(i, M+i, a, M+a)` — scattered across the
+blocked-spin ordering — while Pauli ladders run between adjacent qubits.
+Interleaving (`α₀ β₀ α₁ β₁ …`) would make each excitation two adjacent pairs and
+should recover most of the 2.43×.
+
+The catch, found by attempting it: interleaving changes the Jordan-Wigner
+*algebra*, not just the layout — the spin partner then falls *inside* the parity
+string. So it needs the strings re-derived and re-verified against a reference in
+the same ordering, which `qiskit_nature` does not provide directly. Steps:
+1. Re-derive the paired-double parity string under interleaved ordering.
+2. Verify by permuting `qiskit_nature`'s Hamiltonian and PUCCD into that
+   ordering and comparing unitaries — the same test that caught the missing
+   Z-strings.
+3. Measure routed gate count and device fidelity against the blocked baseline.
+
+Then, still open: expressibility. PUCCD stalls at 1.6e-2 Ha on H₄ (10× worse
+than chemical accuracy) however cheaply it is compiled, so a shallow build is
+necessary but not sufficient — k-UpCCGSD repetitions are the next dial.
 
 Acceptance test: non-zero gradient at Hartree-Fock, exact-optimisation error
 better than PUCCD's 1.6e-2 on H4, and ≤ 80 two-qubit gates transpiled to

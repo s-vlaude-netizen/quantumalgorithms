@@ -137,3 +137,82 @@ def _rccx_variant_error(theta: float) -> float:
     qc.cx(2, 3)
     qc.cx(0, 1)
     return float(np.abs(Operator(qc).data - double_excitation_matrix(theta)).max())
+
+
+def test_puccd_shallow_reproduces_qiskit_nature():
+    """The shallow build must be the *same operator*, not merely similar.
+
+    Checked as a unitary at random parameters. An early version handled no
+    Jordan-Wigner Z-strings at all; it matched H2 exactly -- orbitals 0 and 1
+    are adjacent so the string is empty -- and was off by 1.4 on H4. Both
+    molecules are checked here for that reason.
+    """
+    from qiskit_nature.second_q.circuit.library import PUCCD, HartreeFock
+    from qiskit_nature.second_q.mappers import JordanWignerMapper
+
+    from qres.fermionic import puccd_shallow
+    from qres.problems.chemistry import build_molecule
+
+    for molecule in ("H2", "H4"):
+        problem = build_molecule(molecule, mapper="jordan_wigner")
+        mapper = JordanWignerMapper()
+        reference = PUCCD(
+            problem.num_spatial_orbitals,
+            problem.num_particles,
+            mapper,
+            initial_state=HartreeFock(
+                problem.num_spatial_orbitals, problem.num_particles, mapper
+            ),
+        )
+        theirs = QuantumCircuit(reference.num_qubits).compose(reference.decompose(reps=4))
+        mine = puccd_shallow(problem)
+        assert mine.num_parameters == theirs.num_parameters
+
+        rng = np.random.default_rng(0)
+        for _ in range(3):
+            x = rng.normal(0, 0.6, theirs.num_parameters)
+            np.testing.assert_allclose(
+                Operator(mine.assign_parameters(x)).data,
+                Operator(theirs.assign_parameters(x)).data,
+                atol=1e-9,
+                err_msg=f"{molecule}: shallow PUCCD is not the same operator",
+            )
+
+
+def test_puccd_shallow_uses_fewer_gates_than_the_trotterised_build():
+    """Abstract two-qubit count, with device routing factored out.
+
+    Routing is measured separately (RESEARCH_LOG Result 15) because it eats
+    most of this advantage on a heavy-hex topology.
+    """
+    from qiskit import transpile
+    from qiskit_nature.second_q.circuit.library import PUCCD, HartreeFock
+    from qiskit_nature.second_q.mappers import JordanWignerMapper
+
+    from qres.fermionic import puccd_shallow
+    from qres.problems.chemistry import build_molecule
+
+    problem = build_molecule("H4", mapper="jordan_wigner")
+    mapper = JordanWignerMapper()
+    reference = PUCCD(
+        problem.num_spatial_orbitals,
+        problem.num_particles,
+        mapper,
+        initial_state=HartreeFock(problem.num_spatial_orbitals, problem.num_particles, mapper),
+    )
+    theirs = QuantumCircuit(reference.num_qubits).compose(reference.decompose(reps=4))
+
+    def count(circuit):
+        isa = transpile(circuit, basis_gates=["rz", "sx", "x", "cx"], optimization_level=3)
+        return sum(1 for inst in isa.data if len(inst.qubits) == 2)
+
+    assert count(puccd_shallow(problem)) < 0.6 * count(theirs)
+
+
+def test_puccd_shallow_rejects_the_wrong_mapping():
+    from qres.fermionic import puccd_shallow
+    from qres.problems.chemistry import build_molecule
+
+    problem = build_molecule("H4")  # parity mapping
+    with pytest.raises(ValueError, match="jordan_wigner"):
+        puccd_shallow(problem)

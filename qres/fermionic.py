@@ -50,7 +50,9 @@ def double_excitation_matrix(theta: float) -> np.ndarray:
     return matrix
 
 
-def double_excitation(theta: float | ParameterExpression) -> QuantumCircuit:
+def double_excitation(
+    theta: float | ParameterExpression, z_string: int = 0
+) -> QuantumCircuit:
     """Circuit for the double-excitation Givens rotation on 4 qubits.
 
     Strategy: CNOTs map the two states of interest onto a pair differing in a
@@ -70,8 +72,15 @@ def double_excitation(theta: float | ParameterExpression) -> QuantumCircuit:
 
     For scale: qiskit-nature's Trotterised compilation costs ~79 two-qubit gates
     per double excitation on the same problem.
+
+    ``z_string`` adds that many extra qubits (appended after the four acting
+    ones) carrying the Jordan-Wigner parity string.  The excitation operator is
+    ``G (x) Z_string``, so the rotation runs *backwards* on the odd-parity
+    branch -- and conjugating the rotation target by a CNOT from each string
+    qubit does exactly that, since ``X RY(t) X = RY(-t)``.  Two CNOTs per string
+    qubit, which is far cheaper than conditioning the whole gate.
     """
-    qc = QuantumCircuit(4, name="G2")
+    qc = QuantumCircuit(4 + z_string, name="G2")
 
     qc.cx(0, 1)
     qc.cx(2, 3)
@@ -83,7 +92,11 @@ def double_excitation(theta: float | ParameterExpression) -> QuantumCircuit:
     # convention in double_excitation_matrix.  Hence -theta.
     qc.x(1)
     qc.x(3)
+    for q in range(4, 4 + z_string):
+        qc.cx(q, 0)
     qc.mcry(-theta, [1, 2, 3], 0)
+    for q in reversed(range(4, 4 + z_string)):
+        qc.cx(q, 0)
     qc.x(3)
     qc.x(1)
 
@@ -132,3 +145,56 @@ def two_qubit_count(circuit: QuantumCircuit, backend=None) -> int:
     return sum(
         1 for inst in isa.data if len(inst.qubits) == 2 and inst.operation.name != "barrier"
     )
+
+
+def paired_double_excitations(num_spatial_orbitals: int, num_particles) -> list[tuple[int, ...]]:
+    """Qubit quadruples for every paired double excitation, Jordan-Wigner.
+
+    With blocked-spin ordering the spin-orbitals are
+    ``[a_0 .. a_{M-1}, b_0 .. b_{M-1}]``, so moving *both* electrons of spatial
+    orbital ``i`` into spatial orbital ``a`` touches qubits
+    ``(i, M+i, a, M+a)`` -- in the order this module's gate expects:
+    occupied-alpha, occupied-beta, virtual-alpha, virtual-beta.
+    """
+    m = num_spatial_orbitals
+    n_alpha = num_particles[0] if isinstance(num_particles, (tuple, list)) else num_particles // 2
+    occupied = range(n_alpha)
+    virtual = range(n_alpha, m)
+    return [(i, m + i, a, m + a) for i in occupied for a in virtual]
+
+
+def puccd_shallow(problem) -> QuantumCircuit:
+    """PUCCD built from direct Givens rotations instead of Pauli exponentials.
+
+    Verified to reproduce ``qiskit_nature``'s ``PUCCD`` exactly (to 1e-13) up to
+    the factor-of-two angle convention -- qiskit-nature's parameter is half this
+    module's rotation angle.
+
+    Requires the Jordan-Wigner mapping.  Each paired excitation carries the
+    parity of the spin-orbitals lying *between* its occupied and virtual indices,
+    in both spin blocks.  On H2 that set is empty -- orbitals 0 and 1 are
+    adjacent -- which is why an early version with no string handling matched
+    H2 exactly and H4 not at all.
+    """
+    from qiskit.circuit import ParameterVector
+
+    from .ansatz import hartree_fock_state
+
+    if problem.metadata.get("mapper") != "jordan_wigner":
+        raise ValueError(
+            "puccd_shallow needs the jordan_wigner mapping; "
+            f"problem uses {problem.metadata.get('mapper')!r}"
+        )
+
+    quads = paired_double_excitations(problem.num_spatial_orbitals, problem.num_particles)
+    theta = ParameterVector("t", len(quads))
+    qc = QuantumCircuit(problem.num_qubits, name="puccd_shallow")
+    qc.compose(hartree_fock_state(problem.hf_bitstring), inplace=True)
+    m = problem.num_spatial_orbitals
+    for k, (occ_a, occ_b, vir_a, vir_b) in enumerate(quads):
+        string = [q for q in range(occ_a + 1, vir_a)] + [
+            q for q in range(occ_b + 1, vir_b)
+        ]
+        gate = double_excitation(2 * theta[k], z_string=len(string))
+        qc.compose(gate, qubits=[occ_a, occ_b, vir_a, vir_b] + string, inplace=True)
+    return qc

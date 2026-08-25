@@ -603,6 +603,53 @@ needs the Jordan-Wigner Z-strings between non-adjacent orbitals, which the bare
 4-qubit gate does not carry. That is the next step, and until it is done the 3×
 is a per-gate figure, not an end-to-end one.
 
+### Result 15 — a shallow PUCCD that is exactly the same operator, and where its advantage goes
+
+`qres/fermionic.py` now assembles the verified Givens gates into a full PUCCD.
+It reproduces `qiskit_nature`'s `PUCCD` **as a unitary** at random parameters,
+to 8.4e-13 on H₄ and 4.9e-14 on H₂ — the same operator, not merely a similar
+ansatz.
+
+Getting there required a correction worth recording. A first version handled no
+Jordan-Wigner Z-strings and **matched H₂ exactly** — orbitals 0 and 1 are
+adjacent, so the string is empty by accident — while being off by 1.38 on H₄,
+where α₁ lies between the occupied and virtual indices. Testing on the smaller
+molecule alone would have shipped a wrong ansatz with a passing test.
+
+The string is cheap to handle: the excitation operator is `G ⊗ Z_string`, so the
+rotation runs backwards on the odd-parity branch, and conjugating the rotation
+target by a CNOT from each string qubit does exactly that (`X RY(t) X = RY(-t)`).
+Two CNOTs per string qubit, no extra controls.
+
+**Where the advantage goes**, on H₄:
+
+| circuit | abstract 2q | routed on Heron | routing penalty |
+|---|---|---|---|
+| qiskit-nature PUCCD | 277 | 315 | 1.14× |
+| **this module** | **114** | 240 | **2.11×** |
+| advantage | **2.43×** | 1.31× | |
+
+The compilation is 2.43× cheaper in gate count and keeps only **1.31×** after
+routing. The reason is locality, not compilation: qiskit-nature's Pauli ladders
+are CNOT chains between *adjacent* qubits in the Jordan-Wigner ordering, which
+map onto a heavy-hex device almost for free, while the 4-qubit Givens gates act
+on qubits `(i, M+i, a, M+a)` — scattered across the blocked-spin ordering — and
+the transpiler pays in SWAPs.
+
+**The fix is the spin-orbital ordering, and it is not free.** Interleaving
+(`α₀ β₀ α₁ β₁ …`) would put each excitation's four qubits in two adjacent pairs.
+But interleaving changes the Jordan-Wigner *algebra*, not just the layout: the
+spin partner then lies *inside* the parity string, so the strings must be
+re-derived and re-verified against a reference that uses the same ordering.
+Attempted and abandoned this session — a naive relabelling produced duplicate
+qubit indices, which is the symptom of exactly that problem. Next session's
+work.
+
+Honest summary of the lead: **2.43× in gate count, 1.31× on hardware today**, and
+a plausible route to recovering most of the gap through qubit ordering. Not the
+6× the gate-counting estimate in Result 13 suggested; that estimate ignored
+routing entirely.
+
 ### Open question carried forward
 
 Scaling `fake_kolkata`'s gate errors to 0.5× / 0.25× / 0.1× left the energy
