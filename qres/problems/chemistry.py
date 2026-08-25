@@ -131,6 +131,7 @@ def build_molecule(
 
     hamiltonian = qubit_mapper.map(problem.hamiltonian.second_q_op())
     hamiltonian = hamiltonian.simplify(atol=1e-12)
+    hamiltonian = _canonicalise(hamiltonian)
 
     nuclear = problem.nuclear_repulsion_energy or 0.0
     fci_electronic = exact_ground_energy(hamiltonian)
@@ -159,6 +160,30 @@ def build_molecule(
             "scf_total_energy": hf_energy_total,
         },
     )
+
+
+#: Coefficients are rounded to this many decimals before anything downstream
+#: sees them.  PySCF's integral transform runs on multithreaded BLAS, so the
+#: summation order -- and with it the last few ulp of every coefficient --
+#: varies between processes.  Measured: three identical ``build_molecule("H4")``
+#: calls in three processes returned three different coefficient arrays,
+#: differing in the 15th significant digit.
+#:
+#: That is far below chemical accuracy (1.6e-3 Ha) and physically irrelevant,
+#: but it is *not* irrelevant to greedy algorithms: near-ties in the grouping
+#: heuristic flip, and the same experiment returned 11, 11 and 13 groups with
+#: variance ratios of 0.809, 0.927 and 0.795 on three runs.  Rounding here makes
+#: every downstream result reproducible.
+COEFFICIENT_DECIMALS = 12
+
+
+def _canonicalise(hamiltonian: SparsePauliOp) -> SparsePauliOp:
+    """Round coefficients and fix term order, so results reproduce."""
+    coeffs = np.round(np.asarray(hamiltonian.coeffs), COEFFICIENT_DECIMALS)
+    labels = [str(p) for p in hamiltonian.paulis]
+    order = sorted(range(len(labels)), key=lambda i: labels[i])
+    kept = [i for i in order if abs(coeffs[i]) > 0]
+    return SparsePauliOp([labels[i] for i in kept], np.array([coeffs[i] for i in kept]))
 
 
 def exact_ground_energy(hamiltonian: SparsePauliOp) -> float:

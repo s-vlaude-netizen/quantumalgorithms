@@ -154,7 +154,7 @@ def covariance_grouping(
     variances: list[float] = []
 
     for i in order:
-        best_g, best_delta = None, np.inf
+        best_g, best_key = None, None
         # cost of opening a new group for this term alone
         solo = np.sqrt(max(group_variance([i], coeffs, cov), 0.0))
         for gi, members in enumerate(groups):
@@ -162,8 +162,14 @@ def covariance_grouping(
                 continue
             new_var = group_variance(members + [i], coeffs, cov)
             delta = np.sqrt(max(new_var, 0.0)) - np.sqrt(max(variances[gi], 0.0))
-            if delta < best_delta:
-                best_delta, best_g = delta, gi
+            # Rounded delta with the group index as tie-break.  Raw float
+            # comparison here is the second place near-ties made the partition
+            # depend on floating-point noise: two candidate groups agreeing to
+            # 1e-12 would swap, changing the whole downstream partition.
+            key = (round(float(delta), 12), gi)
+            if best_key is None or key < best_key:
+                best_key, best_g = key, gi
+        best_delta = best_key[0] if best_key is not None else np.inf
         allow_new = max_groups is None or len(groups) < max_groups
         if best_g is not None and (best_delta <= solo or not allow_new):
             groups[best_g].append(i)

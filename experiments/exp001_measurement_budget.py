@@ -78,12 +78,16 @@ def stage_grouping_allocation(study, molecule, cfg, env):
             label=label,
         )
         study.add(label, runs)
+        study.save()  # save after every config -- a slow tail config must not
+                      # hold the completed ones hostage
         print(f"  {label:<44} {time.perf_counter() - t0:6.1f}s", flush=True)
 
 
-def stage_optimizers(study, molecule, cfg, env, grouping="commuting", allocation="adaptive"):
+def stage_optimizers(
+    study, molecule, cfg, env, grouping="commuting", allocation="adaptive", optimizers=None
+):
     """Axis 3: how shots split across optimiser iterations."""
-    for optimizer in ["cobyla", "spsa", "icans"]:
+    for optimizer in optimizers or ["cobyla", "spsa"]:
         label = f"{molecule}|{optimizer}|{grouping}|{allocation}"
         if label in study.results:
             continue
@@ -110,6 +114,7 @@ def stage_optimizers(study, molecule, cfg, env, grouping="commuting", allocation
             **extra,
         )
         study.add(label, runs)
+        study.save()
         print(f"  {label:<44} {time.perf_counter() - t0:6.1f}s", flush=True)
 
 
@@ -122,6 +127,12 @@ def main() -> int:
                     help="comma-separated override of the size preset's molecule list")
     ap.add_argument("--seeds", type=int, default=None)
     ap.add_argument("--budget", type=int, default=None)
+    ap.add_argument("--stages", default="grouping,optimizers",
+                    help="comma-separated subset of: grouping, optimizers")
+    ap.add_argument("--optimizers", default="cobyla,spsa",
+                    help="optimisers for the optimizer stage. icans needs 2n circuit "
+                         "evaluations per step and is impractical above ~20 parameters: "
+                         "measured ~3.5 h for 8 seeds of H4 (46 params).")
     args = ap.parse_args()
 
     cfg = dict(SIZES[args.size])
@@ -142,8 +153,11 @@ def main() -> int:
         problem = build_molecule(molecule, **MOLECULE_KWARGS[molecule])
         print(f"\n{molecule}: {problem.num_qubits}q, {len(problem.hamiltonian)} terms, "
               f"FCI={problem.fci_energy:.6f}")
-        stage_grouping_allocation(study, molecule, cfg, args.env)
-        stage_optimizers(study, molecule, cfg, args.env)
+        stages = args.stages.split(",")
+        if "grouping" in stages:
+            stage_grouping_allocation(study, molecule, cfg, args.env)
+        if "optimizers" in stages:
+            stage_optimizers(study, molecule, cfg, args.env, optimizers=args.optimizers.split(","))
 
     print("\n" + study.table())
     print()

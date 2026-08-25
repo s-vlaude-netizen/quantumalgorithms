@@ -13,13 +13,31 @@ what is left, add what the results suggested.
 ### 1. Confirm the allocation win where grouping actually differs
 Result 3 (3.8× error reduction from adaptive Neyman allocation) was measured on
 H₂, where QWC and general-commuting both give 2 groups — so the grouping axis
-was degenerate. Re-run experiment 001 on **H₄ (6q, 36→10 groups)** and **LiH
-(10q, 171→41 groups)**, with `hea:2:linear:cry`, 8+ seeds, under both `ideal`
-and `medium`.
+was degenerate. Experiment 001 on **H₄** (8 seeds, 300k budget, ideal) is
+running; **LiH** (631 terms, 172→41 groups) is still to do, as is the `medium`
+device-noise repeat of both.
 
 *Result if it works:* the allocation win holds or grows with group count, and
 the grouping axis separates. *Result if it fails:* adaptive allocation was an
 H₂ artefact — equally worth knowing.
+
+Note on cost: the `none` grouping is ~11× slower to simulate than `commuting`
+(520 s vs 47 s for 8 seeds of H₄), tracking group count almost linearly, since
+Aer's cost is per-circuit. Budget for it or drop it once its baseline role is
+served.
+
+### 1b. Improve the grouping *search*, not the reference state
+Result 7's clearest signal: the free Hartree-Fock reference (0.778 on LiH)
+reproducibly **beats** the exact-ground-state oracle (0.844). Perfect covariance
+information does not produce the best partition, so the greedy placement is the
+bottleneck. Try local refinement (move/swap single terms between groups while
+the total √variance falls), or simulated annealing on the partition. There is
+headroom of unknown size below 0.778 and no reason to think greedy is near it.
+
+Also outstanding: covariance-aware grouping is implemented but **not yet wired
+into `ShotEstimator`**, so no end-to-end VQE run has used it. The 0.778 is a
+predicted-variance number, validated against direct sampling at a fixed state
+but not yet against a full optimisation.
 
 ### 2. Resolve the noise-floor question (open question, Result 6 section)
 Scaling gate errors 10× down did not move the error. Ablate properly:
@@ -46,9 +64,15 @@ readout correction, and measure error at matched total shots. A negative result
 here would be worth writing down.
 
 ### 5. Larger parameter counts, where the shot-frugal literature should win
-The adaptive-optimiser negative result was on 12–46 parameters. COBYLA degrades
-badly above ~50. Re-test iCANS and adaptive SPSA on LiH (`hea:2` ≈ 60–100
-parameters) before concluding they do not help.
+The adaptive-optimiser negative result was on 12 parameters (H₂). COBYLA
+degrades badly above ~50. Re-test adaptive SPSA on LiH (≈ 100+ parameters)
+before concluding it does not help.
+
+**iCANS is impractical here and should not be re-run naively:** it needs `2n`
+circuit evaluations per step, which measured at ~3.5 h for 8 seeds of H₄ (46
+parameters) and was aborted. If it is worth testing at scale, it needs the
+random-operator-sampling variant (Rosalin) that avoids the full parameter-shift
+sweep, not the plain version.
 
 ### 6. QAOA side of the house
 `qres/problems/optimization.py` (MaxCut, portfolio) is built and verified but

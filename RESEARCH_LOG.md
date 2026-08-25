@@ -73,9 +73,13 @@ Greedy clique cover, terms ordered by |coefficient| descending:
 | molecule | qubits | terms | ungrouped | QWC | commuting | commuting vs. naive |
 |---|---|---|---|---|---|---|
 | H₂ | 2 | 5 | 4 | 2 | 2 | 2.0× |
-| H₄ | 6 | 165 | 164 | 36 | **10** | **16.4×** |
-| LiH | 10 | 631 | 630 | 171 | **41** | **15.4×** |
-| BeH₂ (4e,6o) | 10 | 327 | 326 | 90 | **16** | **20.4×** |
+| H₄ | 6 | 165 | 164 | 37 | **10** | **16.4×** |
+| LiH | 10 | 631 | 630 | 172 | **41** | **15.4×** |
+| BeH₂ (4e,6o) | 10 | 327 | 326 | 91 | **16** | **20.4×** |
+
+(Re-measured after the reproducibility fix in Result 8. The commuting counts —
+the ones that matter — are unchanged; the QWC counts moved by one each, which is
+the tie-break change and not a physical difference.)
 
 General commuting beats QWC by 4.2–5.6× on these Hamiltonians. Grouping time is
 negligible (< 1 s for LiH). This is the cheapest large win available and it is
@@ -264,11 +268,10 @@ Validated against direct sampling over 4000 trials: mean difference 6.2e-4
 against a 2σ band of 1.9e-3, standard-deviation ratio 0.9959. Measured effect on
 an H₄ device-noise run: **>600 s → 29.8 s (>20×)**.
 
-### Result 7 — covariance-aware grouping: works with good covariances, and the cheap proxy is not good enough
+### Result 7 — covariance-aware grouping, and a reproducibility failure that had to be fixed first
 
-New idea, implemented and tested this session. Standard grouping minimises the
-*number* of groups. Under Neyman allocation the quantity that actually sets the
-shot cost is
+New idea, implemented this session. Standard grouping minimises the *number* of
+groups. Under Neyman allocation the quantity that actually sets the shot cost is
 
 ```
 total variance = (Σ_g √Var_g)²,   Var_g = Σ_{i,j∈g} c_i c_j Cov(P_i, P_j)
@@ -278,65 +281,87 @@ The cross terms mean count and variance can disagree: two **anticorrelated**
 observables in one group make it cheaper to estimate than either term alone
 suggests. So group to minimise variance, not count.
 
+**Everything below is the second set of numbers.** The first set was not
+reproducible, and the story of why is in the next section — it is the more
+useful result of the two.
+
 Scored against the covariance of the exact ground state (where a converged VQE
-sits). Ratio < 1 is better; `control` is the group-count control described
-below:
+sits). Ratio < 1 is better; `control` is the group-count control:
 
 | molecule | terms | grouping | groups | variance | ratio | control |
 |---|---|---|---|---|---|---|
 | H₂ | 5 | count-minimising | 2 | 0.1245 | 1.000 | — |
 | H₂ | | cov-aware / HF | 2 | 0.1245 | 1.000 | 1.000 |
+| H₂ | | cov-aware / oracle | 2 | 0.1245 | 1.000 | 1.000 |
 | H₄ | 165 | count-minimising | 10 | 1.1680 | 1.000 | — |
-| H₄ | | cov-aware / HF | 11 | 0.9445 | **0.809** | 1.089 |
+| H₄ | | cov-aware / HF | 11 | 1.1293 | 0.967 | 1.089 |
 | H₄ | | cov-aware / oracle | 11 | 1.1293 | 0.967 | 1.089 |
 | LiH | 631 | count-minimising | 41 | 0.6909 | 1.000 | — |
-| LiH | | cov-aware / HF | 43 | 0.7219 | **1.045** | 1.216 |
-| LiH | | cov-aware / oracle | 45 | 0.5590 | **0.809** | 1.389 |
+| LiH | | **cov-aware / HF** | 44 | 0.5378 | **0.778** | 1.238 |
+| LiH | | cov-aware / oracle | 45 | 0.5830 | 0.844 | 1.389 |
 
-**With good covariances the idea works: 0.809 on both H₄ and LiH, i.e. a 19%
-variance reduction, worth 1.24× fewer shots for equal accuracy.**
+**On LiH — the largest system tested — a 22% variance reduction, worth 1.29×
+fewer shots for equal accuracy, using only a free Hartree-Fock reference.**
+Marginal on H₄ (3%), nothing on H₂. The benefit grows with term count, which is
+the right direction: the method needs enough terms per group for the cross terms
+to matter.
 
-**With the cheap Hartree-Fock proxy it is unreliable**: 0.809 on H₄ but 1.045 —
-actively worse than baseline — on LiH. HF is a computational-basis state, where
-only 1.8–3.4% of the pairwise covariances are non-zero at all, so it carries
-very little of the structure the method needs. Finding a cheap reference that is
-good enough is now the open problem, not the grouping algorithm.
-
-Two checks that make this trustworthy:
+Two things make this trustworthy rather than suggestive:
 
 * **The group-count control.** Covariance-aware grouping produces *more* groups
   than count-minimising, and more groups also means finer-grained Neyman
-  allocation — so the win could have been an artefact of group count alone.
-  Control: split the count-minimising grouping at random to the same group
-  count. It scores 1.089–1.389, i.e. *worse* than baseline in every case, which
-  is what it should be (splitting destroys beneficial anticorrelations). The
-  effect is the covariance structure, not the count.
+  allocation — so the win could have been an artefact of count alone. Control:
+  split the count-minimising grouping at random to the same group count. It
+  scores 1.089–1.389 — *worse* than baseline in every case, as it should be,
+  since splitting destroys the beneficial anticorrelations. The effect is the
+  covariance structure, not the count.
 * **The variance model predicts measured sampling variance.** At the exact H₄
   ground state, 150 independent 20k-shot estimates: predicted σ 0.00715 vs
-  measured 0.00705 for cov-aware, predicted 0.00764 vs measured 0.00794 for the
+  measured 0.00705 for cov-aware; predicted 0.00764 vs measured 0.00794 for the
   baseline. Both estimators unbiased to within their standard error.
 
-### Two more traps, both found by tests rather than by inspection
+**The greedy search, not the covariance quality, is the bottleneck.** The
+Hartree-Fock reference (0.778) reproducibly *beats* the exact-ground-state
+oracle (0.844) on LiH. Perfect covariance information does not give the best
+partition, so the limiting factor is the greedy placement, not what it is fed.
+That redirects the next step: improve the search (local refinement, annealing on
+the partition), not the reference state.
 
-1. **`Pauli.phase` is not the group phase.** Qiskit stores a Pauli as
-   `(-i)^g Z^z X^x`, but the public `.phase` property is measured relative to
-   the `(-i)^(x·z)` convention: `Pauli("Y").phase` is **0** while its group
-   phase is **1**. Using `.phase` directly mis-signs every term containing a Y —
-   invisible on Y-free Hamiltonians, and it produced covariance errors of ~0.8
-   (against values of order 1) before the test caught it. Correct factor is
-   `(-i)^(phase + |x ∧ z|)`. Now verified against Qiskit to 1e-12, with explicit
-   Y coverage.
+### Result 8 — the results above were not reproducible, three times over
 
-2. **Greedy grouping was not reproducible across processes.** The partition is
-   built heaviest-coefficient-first, and PySCF returns coefficients that differ
-   in the last few ulp between runs. Near ties flipped and the greedy took a
-   different path: **47, 48 and 49 groups on LiH from three identical
-   invocations**, moving the headline variance ratio from 0.75 to 0.89. Every
-   covariance number measured before this was found is unreliable, including an
-   apparent "the HF reference beats the oracle" result that vanished once the
-   ordering was fixed — as it should have, since it made no physical sense.
-   Fixed by rounding the magnitude and breaking ties on the Pauli label;
-   regression-tested including a sub-tolerance perturbation.
+Worth its own entry because it invalidated a full round of measurements and the
+cause is invisible in any single run.
+
+The same computation, in three separate processes, returned **11, 11 and 13
+groups with variance ratios of 0.809, 0.927 and 0.795**. Within a process it was
+perfectly deterministic, which is what made it hard to see.
+
+Root cause, confirmed by hashing the coefficient array across processes:
+**PySCF returns different Hamiltonian coefficients every run.** Three identical
+`build_molecule("H4")` calls gave three different SHA-256 hashes, with
+coefficients differing in the 15th significant digit — multithreaded BLAS in the
+integral transform, whose summation order varies between runs.
+
+That difference is ~12 orders of magnitude below chemical accuracy and
+physically meaningless. It is not meaningless to a greedy algorithm: 2 of 164
+placements in the H₄ grouping had candidate costs agreeing to within 1e-12, and
+those flipped, changing the whole downstream partition.
+
+Fixed in three places:
+
+1. Molecular Hamiltonians are canonicalised on construction — coefficients
+   rounded to 12 decimals, terms sorted by Pauli label.
+2. The greedy ordering rounds |coefficient| and breaks ties on the label.
+3. The covariance greedy's cost comparison rounds the delta and breaks ties on
+   the group index; a raw float comparison there was the second flip point.
+
+Verified: identical coefficient hash, identical group counts and identical
+variance ratio to 6 decimals across three fresh processes.
+
+**Generalised lesson, now a standing rule:** any greedy or sorting-based step
+in this repository must have an explicit tie-break, and any result that depends
+on one must be checked across processes, not just across calls. Single-process
+determinism proves nothing.
 
 ### Open question carried forward
 
