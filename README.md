@@ -65,6 +65,9 @@ gates; surviving a Heron-class device at fidelity > 0.5 allows ~40.
 - variance-adaptive (Neyman) shot allocation: median error ratio ~0.78 on H₂,
   ≈ 1.7× fewer shots — **suggestive, not significant** (14/10 seeds, p = 0.54).
   An earlier 4-seed run of this reported 3.8×; it did not replicate.
+- **SPSA over COBYLA: 2× lower error on H₂, 15 wins of 16, p = 0.001** — the
+  one statistically significant positive result here, and it only appears once
+  shot noise is genuinely resampled between evaluations (see below)
 
 **Sizing rule for any budget-matched comparison** — below this it measures the
 optimiser's simplex construction, not the algorithm:
@@ -98,6 +101,12 @@ quantum-algorithm benchmarks usually go wrong:
 4. **Enough seeds to tell an effect from nothing.** Measured, not assumed: at
    4 seeds a 4× apparent effect on H₂ shrank to 1.3× and lost significance at
    24. Four seeds is not enough for VQE error comparisons.
+
+5. **The simulator has to actually be stochastic.** A fixed `seed_simulator`
+   makes Aer return identical counts for identical circuits, so the optimiser
+   faces a frozen rough landscape it can fit itself to rather than noise it
+   must average over. This was live for all of session 1 and reversed the
+   COBYLA-vs-SPSA verdict once fixed. `tests/test_noise.py` now checks it.
 
 ## Running
 

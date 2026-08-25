@@ -444,6 +444,94 @@ def adaptive_spsa(
     )
 
 
+def stochastic_parameter_shift(
+    oracle: EnergyOracle,
+    x0: np.ndarray,
+    maxiter: int = 100_000,
+    *,
+    coordinates: int = 1,
+    shots: int = 256,
+    learning_rate: float = 0.1,
+    beta1: float = 0.9,
+    beta2: float = 0.99,
+    epsilon: float = 1e-8,
+    seed: int = 0,
+    callback=None,
+) -> OptimizeResult:
+    """Adam on parameter-shift gradients of a random coordinate subset per step.
+
+    The reason gradient methods lost in session 1 is arithmetic, not principle.
+    A full parameter-shift gradient costs ``2n`` circuit evaluations, so H2's
+    12-parameter ansatz at 2048 shots and a 200k budget affords **four**
+    gradient steps.  iCANS, which needs the same sweep, measured at ~3.5 h for
+    8 seeds of H4 and was abandoned.
+
+    Two knobs make the exchange rate tunable instead of fixed:
+
+    * ``coordinates`` -- update ``k`` randomly chosen parameters per step rather
+      than all of them, at ``2k`` evaluations. The estimator stays unbiased in
+      expectation (it is randomised coordinate descent), and ``k = 1`` buys
+      ``n`` times as many steps.
+    * ``shots`` -- each parameter-shift evaluation is a *difference*, so it
+      tolerates far more shot noise than an absolute energy does. Spending 256
+      shots where the fixed-shot optimisers spend 2048 buys another 8×.
+
+    Adam rather than plain descent because the gradient scale varies by orders
+    of magnitude across parameters and a single hand-set step size does not fit
+    both ends.  Adam's moments are kept per-coordinate and updated only for the
+    coordinates actually sampled, so a rarely-visited parameter does not have
+    its history decayed away by steps that never looked at it.
+    """
+    rng = np.random.default_rng(seed)
+    x = np.asarray(x0, dtype=float).copy()
+    n = len(x)
+    k = max(1, min(coordinates, n))
+
+    m = np.zeros(n)
+    v = np.zeros(n)
+    visits = np.zeros(n, dtype=int)
+
+    history: list[float] = []
+    shot_history: list[int] = []
+    best_x, best_f = x.copy(), np.inf
+
+    for _ in range(maxiter):
+        picks = rng.choice(n, size=k, replace=False)
+        for i in picks:
+            plus, minus = x.copy(), x.copy()
+            plus[i] += np.pi / 2
+            minus[i] -= np.pi / 2
+            f_plus = oracle(plus, shots)
+            f_minus = oracle(minus, shots)
+            gradient = (f_plus - f_minus) / 2
+
+            visits[i] += 1
+            m[i] = beta1 * m[i] + (1 - beta1) * gradient
+            v[i] = beta2 * v[i] + (1 - beta2) * gradient**2
+            # bias correction uses this coordinate's own visit count
+            m_hat = m[i] / (1 - beta1 ** visits[i])
+            v_hat = v[i] / (1 - beta2 ** visits[i])
+            x[i] -= learning_rate * m_hat / (np.sqrt(v_hat) + epsilon)
+
+            value = 0.5 * (f_plus + f_minus)
+            history.append(value)
+            shot_history.append(oracle.shots_used)
+            if value < best_f:
+                best_f, best_x = value, x.copy()
+        if callback:
+            callback(x, history[-1] if history else np.inf)
+
+    return OptimizeResult(
+        x=x,
+        fun=float(best_f),
+        nit=len(history),
+        history=history,
+        shot_history=shot_history,
+        message=f"sps k={k} shots={shots} lr={learning_rate}",
+        extra={"visits": visits.tolist()},
+    )
+
+
 OPTIMIZERS: dict[str, Callable] = {
     "cobyla": lambda o, x0, **kw: scipy_minimize(o, x0, method="COBYLA", **kw),
     "powell": lambda o, x0, **kw: scipy_minimize(o, x0, method="Powell", **kw),
@@ -451,4 +539,5 @@ OPTIMIZERS: dict[str, Callable] = {
     "spsa": spsa,
     "icans": icans,
     "aspsa": adaptive_spsa,
+    "sps": stochastic_parameter_shift,
 }

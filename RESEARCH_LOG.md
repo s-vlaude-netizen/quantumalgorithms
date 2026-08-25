@@ -880,3 +880,87 @@ likely readout error, or the scaling not reaching the channel it should.
 the noise floor comes from.
 
 ---
+
+---
+
+## Session 2 — 2026-08-25 (10:24 UTC)
+
+### Result 22 — shot noise was never being resampled, and it changed the answers
+
+Found while trying to separate the shot-noise floor from the optimiser limit:
+`NoiseEnvironment.run` passed a **fixed** `seed_simulator` on every call, so Aer
+returned the *identical* counts for the same circuit every time.
+
+```
+raw env.run twice gives identical counts: True
+```
+
+Repeated estimates at the same parameters differed only because the adaptive
+allocation drifted, not because any noise was redrawn. The optimiser was
+therefore facing a **frozen rough landscape**, not a stochastic one — and could
+fit itself to one particular noise realisation instead of averaging over it.
+This looks entirely normal from the outside and silently distorted every
+optimisation result in session 1.
+
+Fixed by advancing a per-environment run counter, which keeps runs reproducible
+(the seed sequence is fixed by the base seed) while making each draw
+independent. Verified: the measured sampling error is now ~6× larger than the
+apparent variation before, and scales correctly as 1/√N —
+
+| shots | measured σ | bias / sem |
+|---|---|---|
+| 512 | 0.0177 | 0.50 |
+| 2 048 | 0.0076 | 2.23 |
+| 20 000 | 0.0024 | −1.88 |
+| 200 000 | 0.00076 | −1.83 |
+
+— unbiased, and 4× the shots gives 2× the precision as it must. Regression-tested
+on both ideal and noisy backends.
+
+### Result 23 — with real shot noise, SPSA beats COBYLA by 2× (p = 0.001)
+
+Re-ran the optimiser comparison with the fix. H₂, ideal simulator, 200k budget,
+**16 seeds**, paired against `hea:2` + COBYLA:
+
+| ansatz | optimiser | median | IQR | ratio | W/L | p |
+|---|---|---|---|---|---|---|
+| `hea:2` | COBYLA | 1.84e-2 | [9.0e-3, 2.3e-2] | 1.000 | — | — |
+| **`hea:2`** | **SPSA** | **5.80e-3** | [4.5e-3, 8.9e-3] | **0.485** | **15/1** | **0.001** |
+| `hea:2` | SPS k=1, 512 shots | 1.04e-2 | [5.5e-3, 1.7e-2] | 0.642 | 10/6 | 0.454 |
+| `hea:2` | SPS k=2, 512 shots | 8.74e-3 | [5.0e-3, 1.9e-2] | 0.771 | 9/7 | 0.804 |
+| `hea:2:linear:cry` | COBYLA | 2.84e-2 | [2.4e-2, 3.3e-2] | 1.685 | 1/15 | **0.001** |
+| `hea:2:linear:cry` | SPSA | 1.07e-2 | [9.0e-3, 1.2e-2] | 0.641 | 12/4 | 0.077 |
+
+**The first statistically significant positive result in this repository:
+SPSA halves COBYLA's error, 15 wins out of 16, p = 0.001.**
+
+And it only appears once the noise is real. In session 1 COBYLA measured 7.21e-3
+against SPSA's 4.46e-3 — nearly competitive. With resampled noise COBYLA
+degrades to 1.84e-2 while SPSA barely moves (5.80e-3). **COBYLA's apparent
+competence was an artefact of the frozen landscape**: it builds a local
+quadratic model, which is exactly the thing that works on a deterministic rough
+function and fails on a genuinely stochastic one. SPSA is designed for the
+stochastic case and is unaffected.
+
+Also now significant, and negative: the reference-preserving `cry` ansatz is
+**worse** than fixed CX under COBYLA (ratio 1.685, 1/15, p = 0.001), consistent
+with Result 19's stationary-start diagnosis.
+
+### Result 24 — stochastic parameter-shift solves the step-count problem and does not help
+
+Built to address the arithmetic that killed gradient methods in session 1: a
+full parameter-shift gradient costs `2n` evaluations, so H₂ at 2048 shots and a
+200k budget affords **four** gradient steps. `stochastic_parameter_shift`
+updates `k` randomly chosen coordinates per step at `2k` evaluations, with Adam
+moments kept per-coordinate and bias-corrected by each coordinate's own visit
+count.
+
+It does what it was designed to do — **195 to 781 gradient steps** instead of
+four — and it does not help: 8.74e-3 at best against SPSA's 5.80e-3, and no
+configuration significant against the COBYLA baseline (p ≥ 0.45).
+
+So the step count was never the binding constraint either. Sweeping `k ∈ {1,2}`
+and shots ∈ {128, 512} moved the median by less than 1.4× across the whole grid.
+Nothing tested reaches chemical accuracy on H₂ at 200k shots: **0 of 16** for
+every configuration.
+

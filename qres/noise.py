@@ -82,9 +82,28 @@ class NoiseEnvironment:
             seed_transpiler=self.seed,
         )
 
+    #: incremented on every run so each call draws fresh shot noise
+    _run_index: int = 0
+
     def run(self, circuits, shots: int):
-        """Execute ISA circuits, returning a list of count dicts."""
-        result = self.simulator.run(circuits, shots=shots, seed_simulator=self.seed).result()
+        """Execute ISA circuits, returning a list of count dicts.
+
+        The simulator seed **advances every call**.  Passing a fixed
+        ``seed_simulator`` -- which this did originally -- makes Aer return the
+        *identical* counts for the same circuit every time, so shot noise is
+        never resampled.  An optimiser then faces a frozen rough landscape
+        rather than a stochastic one: repeated evaluations at a point agree
+        exactly, and the optimiser can fit itself to a particular noise
+        realisation instead of averaging over it.  That distorts every
+        optimisation result while looking perfectly normal.
+
+        Advancing a counter keeps runs reproducible (the seed sequence is fixed
+        by the environment's base seed) while making each draw independent.
+        """
+        self._run_index += 1
+        result = self.simulator.run(
+            circuits, shots=shots, seed_simulator=self.seed + self._run_index
+        ).result()
         if isinstance(circuits, list):
             return [result.get_counts(i) for i in range(len(circuits))]
         return result.get_counts()

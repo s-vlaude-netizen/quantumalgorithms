@@ -92,27 +92,36 @@ better than PUCCD's 1.6e-2 on H4, and ≤ 80 two-qubit gates transpiled to
 `fake_torino`. If expressibility is short of chemical accuracy, add repetitions
 (k-UpCCGSD) and re-measure the fidelity trade.
 
-### 1. An affordable gradient-based optimiser  ← **now the binding constraint**
-The session ended with the ingredients for a working start but no way to use it
-(Result 20). Offsetting the entangler parameters gives an ansatz that both
-preserves the Hartree-Fock reference *and* has a non-zero gradient there — and
-under noiseless BFGS that takes H₂ from stuck at Hartree-Fock to **9.1e-11 Ha**.
-Under shot noise with COBYLA it makes things *worse*, because a gradient-free
-optimiser cannot use the gradient and only pays for starting further out.
+### 1. Why does nothing reach chemical accuracy on H₂?  ← **the live question**
+Session 2 closed off two explanations and left the question sharper.
 
-Every gradient method tried is too expensive: parameter-shift needs `2n` circuit
-evaluations per step, which measured at ~3.5 h for 8 seeds of H₄. Worth trying,
-cheapest first:
+Not the step count: `stochastic_parameter_shift` gets 195–781 gradient steps
+instead of COBYLA's four, and is no better (Result 24). Not the optimiser
+family either, beyond a point — SPSA beats COBYLA 2× with p = 0.001 (Result 23),
+but still lands at 5.8e-3, and **0 of 16 seeds reach 1.594 mHa** at a 200k
+budget for *any* configuration tested.
 
-- **SPSA already estimates a gradient** in two evaluations. It was tested as a
-  fixed-shot baseline, never paired with the offset start. Cheap to check.
-- **Rosalin / random operator sampling**: parameter-shift over a random subset
-  of terms per step, so the cost stops scaling with `n`.
-- **Quantum natural gradient** — more expensive per step but far fewer steps;
-  worth a cost-per-accuracy comparison rather than a dismissal.
+The measured shot-noise floor on H₂ is σ = 7.6e-4 at 200k shots in a single
+evaluation, so the budget is not obviously the wall either — but a run spends
+its budget across ~100 evaluations, each at σ ≈ 7.6e-3. Two things to measure,
+in order:
 
-Acceptance test: beat `hea:2` + COBYLA's 3.34e-3 median on H₂ at a 200k budget
-over ≥ 12 seeds, and reach chemical accuracy on more than 1/6 of runs.
+1. **Budget scaling.** Sweep 10⁵–10⁷ shots for `hea:2` + SPSA, 16 seeds, and
+   find where chemical accuracy becomes reliable. If it never does, the limit is
+   not the budget.
+2. **The exact-energy control at matched evaluation counts.** Run the same
+   optimiser on noiseless energies with the same *number* of evaluations. If it
+   reaches 1e-6, the gap is shot noise and the answer is better estimators; if
+   it plateaus at 5e-3 too, the gap is the optimiser or the landscape.
+
+Only the second answers *which* problem to work on, so do it first — it costs
+minutes.
+
+### 1b. Remaining optimiser candidates
+Untested: Rosalin's random operator sampling (parameter-shift over a sampled
+subset of Hamiltonian terms, so per-evaluation cost stops scaling with the term
+count) and quantum natural gradient (expensive per step, far fewer steps —
+worth a cost-per-accuracy comparison rather than a dismissal).
 
 ### 1a. Re-validate the measurement studies with enough seeds
 Results 3 and 18: the 3.8× allocation win became 1.3× and lost significance at
