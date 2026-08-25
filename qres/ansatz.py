@@ -75,6 +75,7 @@ def hardware_efficient(
         qc.compose(initial_state, inplace=True)
 
     k = 0
+    entangler_params: list[int] = []
     for layer in range(reps + 1):
         for q in range(num_qubits):
             for gate in rotation_gates:
@@ -86,9 +87,11 @@ def hardware_efficient(
                     qc.cx(a, b)
                 elif entangler in ("cry", "crx", "crz"):
                     getattr(qc, entangler)(theta[k], a, b)
+                    entangler_params.append(k)
                     k += 1
                 else:
                     raise ValueError(f"unknown entangler {entangler!r}")
+    qc.metadata = {"entangler_params": entangler_params}
     return qc
 
 
@@ -237,12 +240,48 @@ def build_ansatz(spec: str, problem, environment=None) -> QuantumCircuit:
     raise ValueError(f"unknown ansatz spec {spec!r}")
 
 
-def initial_point(ansatz: QuantumCircuit, seed: int = 0, scale: float = 0.05) -> np.ndarray:
-    """Small random start.
+def initial_point(
+    ansatz: QuantumCircuit,
+    seed: int = 0,
+    scale: float = 0.05,
+    entangler_offset: float = 0.0,
+) -> np.ndarray:
+    """Small random start, with the entangler parameters deliberately offset.
 
-    Starting *near zero* keeps a hardware-efficient ansatz near its
-    Hartree-Fock initial state, where the gradient is large; a uniform random
-    start on [0, 2pi) lands on a barren plateau for anything but tiny systems.
+    The offset is the fix for a real conflict (RESEARCH_LOG Result 19): a
+    controlled-rotation entangler preserves the reference state at theta = 0
+    precisely *because* it is the identity there -- and that is exactly what
+    makes every gradient vanish, since each layer then sees a computational
+    basis state and Brillouin's theorem applies.  Reference preservation and
+    non-zero gradient cannot both come from the entangler at zero.
+
+    Offsetting only the entangler parameters breaks the stationarity while
+    keeping the state close to the reference.  Measured (Result 20):
+
+        offset   H2 overlap  |grad|   H2 error   H4 error
+        0.0      1.0000      0.000    2.0e-2     4.2e-2     (stuck at HF)
+        0.1      0.9988      0.092    9.1e-11    4.2e-2
+        0.5      0.9689      0.435    2.5e-9     2.0e-2
+        pi       0.0000      0.000    7.9e-1     3.3e+0     (stationary again)
+
+    Note both 0 *and* pi are stationary points, so a useful offset has to be
+    genuinely interior.
+
+    **The default is 0.0 anyway**, because the fix does not survive the regime
+    it was meant for.  Those numbers come from noiseless BFGS, which can exploit
+    a small gradient.  Under shot noise with COBYLA the offset *hurts*: on H2 at
+    a 200k budget it gives 2.4e-2 against 3.3e-3 for a zero offset, because a
+    gradient-free optimiser cannot use the gradient it buys and only pays for
+    starting further from the reference (overlap 0.97 rather than 1.00).
+
+    So: set it when using a gradient-based optimiser, leave it at zero
+    otherwise.  The underlying conflict is not solved, only relocated.
+
+    Has no effect on an ansatz with fixed CX entanglers, which has no entangler
+    parameters and gets its gradient from the entanglers acting unconditionally.
     """
     rng = np.random.default_rng(seed)
-    return rng.normal(0.0, scale, size=ansatz.num_parameters)
+    point = rng.normal(0.0, scale, size=ansatz.num_parameters)
+    for index in (ansatz.metadata or {}).get("entangler_params", []):
+        point[index] += entangler_offset
+    return point

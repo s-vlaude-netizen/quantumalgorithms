@@ -771,6 +771,50 @@ Plausible resolution, untested: initialise the *entangler* parameters away from
 zero while leaving the rotation parameters at zero — entanglement enough for a
 gradient, while staying near the reference. `[unverified]`
 
+### Result 20 — the stationarity fix works, and does not help where it was needed
+
+Result 19 left a candidate fix: offset only the *entangler* parameters from
+zero, buying a gradient while staying near the reference. Tested.
+
+**It works, under noiseless gradient-based optimisation.** BFGS from the offset
+start:
+
+| entangler offset | H₂ overlap w/ HF | \|∇\| at start | H₂ error | H₄ error |
+|---|---|---|---|---|
+| 0.0 | 1.0000 | **0.000** | 2.03e-2 (= E_corr) | 4.18e-2 (= E_corr) |
+| **0.1** | 0.9988 | 0.092 | **9.1e-11** | 4.18e-2 |
+| **0.5** | 0.9689 | 0.435 | **2.5e-9** | **2.01e-2** |
+| π/2 | 0.7071 | 0.865 | 2.03e-2 | 3.52e-2 |
+| π | 0.0000 | **0.000** | 7.9e-1 | 3.27 |
+
+H₂ goes from stuck at Hartree-Fock to **chemical accuracy by seven orders of
+magnitude**, from an offset of 0.1. H₄ halves its error. The diagnosis is
+confirmed exactly: 0 *and* π are both stationary (a controlled rotation is
+identity at 0 and a Clifford at π), and anything interior is not.
+
+**It does not help under shot noise with a gradient-free optimiser.** Same
+ansätze through the actual VQE driver, COBYLA, 200k budget, 6 seeds, ideal
+simulator:
+
+| ansatz | H₂ median | H₂ ≤ chem acc | H₄ median |
+|---|---|---|---|
+| `hea:2` (fixed CX, no offset) | **3.34e-3** | 1/6 | 1.53 |
+| `hea:2:linear:cry` (offset 0.5) | 2.36e-2 | 0/6 | 0.248 |
+
+The offset *hurts* on H₂ — 2.4e-2 against 3.3e-3. COBYLA cannot exploit the
+gradient the offset buys; it only pays for starting further from the reference
+(overlap 0.97 rather than 1.00) at a worse energy.
+
+**So the conflict is relocated, not solved.** The ingredients now exist —
+a start that both preserves the reference and has a gradient — but extracting
+value from a gradient needs an optimiser that uses gradients, and every
+gradient-based method tested this session (iCANS, parameter-shift) is far too
+expensive in circuit evaluations to be affordable. Default left at 0.0;
+the parameter is there for gradient-based use.
+
+That is a fair summary of the whole session's arc: each fix exposes that the
+next thing along was the real constraint.
+
 ### Open question carried forward
 
 Scaling `fake_kolkata`'s gate errors to 0.5× / 0.25× / 0.1× left the energy

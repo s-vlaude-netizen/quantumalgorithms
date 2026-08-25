@@ -92,30 +92,36 @@ better than PUCCD's 1.6e-2 on H4, and ≤ 80 two-qubit gates transpiled to
 `fake_torino`. If expressibility is short of chemical accuracy, add repetitions
 (k-UpCCGSD) and re-measure the fidelity trade.
 
-### 1. Re-run the measurement studies once an ansatz converges  *(blocked on 0)*
-Every H₄ number in this session was taken in a regime where the optimiser could
-not move, so the H₄ allocation/grouping/optimiser comparisons say nothing about
-those methods. Experiment 001 on H₄ gave ratios 0.90–1.01, all with p ≥ 0.29 —
-not a negative result about allocation, just a dead problem.
+### 1. An affordable gradient-based optimiser  ← **now the binding constraint**
+The session ended with the ingredients for a working start but no way to use it
+(Result 20). Offsetting the entangler parameters gives an ansatz that both
+preserves the Hartree-Fock reference *and* has a non-zero gradient there — and
+under noiseless BFGS that takes H₂ from stuck at Hartree-Fock to **9.1e-11 Ha**.
+Under shot noise with COBYLA it makes things *worse*, because a gradient-free
+optimiser cannot use the gradient and only pays for starting further out.
 
-The H₂ results stand (adaptive allocation ratio 0.264, 4/4 seeds), because H₂
-converges. Repeat on H₄/LiH once item 0 lands, and under `medium` device noise.
+Every gradient method tried is too expensive: parameter-shift needs `2n` circuit
+evaluations per step, which measured at ~3.5 h for 8 seeds of H₄. Worth trying,
+cheapest first:
 
-### 1b. Covariance grouping end-to-end  *(also blocked on 0)*
-Now reachable via `grouping="covariance"` / `"covariance+refine"`. Validated at
-a fixed state: 0.708 (H₄) / 0.632 (LiH) variance ratio, empirically confirmed
-against 300 sampled estimates. But at a 150k budget on H₄ it changes nothing
-(5.15e-2 vs 5.07e-2) because the run is not shot-noise-limited — see item 0.
+- **SPSA already estimates a gradient** in two evaluations. It was tested as a
+  fixed-shot baseline, never paired with the offset start. Cheap to check.
+- **Rosalin / random operator sampling**: parameter-shift over a random subset
+  of terms per step, so the cost stops scaling with `n`.
+- **Quantum natural gradient** — more expensive per step but far fewer steps;
+  worth a cost-per-accuracy comparison rather than a dismissal.
 
-Still to measure once it can matter: whether the win survives a full run, given
-that covariances are computed once at Hartree-Fock and the optimiser walks away
-from there. And whether re-grouping partway (from the empirical group variances
-already collected) recovers any decay.
+Acceptance test: beat `hea:2` + COBYLA's 3.34e-3 median on H₂ at a 200k budget
+over ≥ 12 seeds, and reach chemical accuracy on more than 1/6 of runs.
 
-### 1c. Better partition search
-Local refinement converges to a local optimum of *single-term* moves (Result 9).
-Untried: pairwise swaps, multi-start from perturbed greedy solutions, annealing.
-Unknown how far 0.632 is from optimal — worth bounding exactly on a small case.
+### 1a. Re-validate the measurement studies with enough seeds
+Results 3 and 18: the 3.8× allocation win became 1.3× and lost significance at
+24 seeds. Everything measured at 4 seeds in this session should be re-run at
+≥ 24 before it is believed, and the covariance-grouping win (0.63 variance ratio
+on LiH) has still only been validated **at a fixed state**, never end-to-end.
+
+The end-to-end test needs a configuration that actually converges — see item 1.
+Attempting it with UCCSD hit the budget rule instead (Result 17).
 
 ### 2. Resolve the noise-floor question
 Scaling gate errors 10× down did not move the error. Ablate properly: readout
@@ -213,3 +219,11 @@ knowing whether that is the cost model's fault or a real fact.
 6. Every greedy or sorting step needs an explicit tie-break, and any result
    depending on one must be checked **across processes**, not just across calls.
    Single-process determinism proves nothing — see Result 8.
+7. **At least 24 seeds before believing a VQE error comparison.** Measured, not
+   assumed: a 4-seed result showing a 3.8× effect with 4/0 wins became 1.3× and
+   p = 0.54 at 24 seeds (Results 3 and 18). At 4 seeds, 4/0 is the best
+   obtainable outcome and carries almost no evidence.
+8. **Check the gradient at the starting point** before running anything. Three
+   separate multi-hour detours this session were an ansatz sitting on an exact
+   stationary point (Results 10, 19, 20). It costs `n` statevector evaluations
+   to rule out.
