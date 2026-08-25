@@ -10,53 +10,68 @@ what is left, add what the results suggested.
 
 ## Now
 
-### 1. Confirm the allocation win where grouping actually differs
-Result 3 (3.8× error reduction from adaptive Neyman allocation) was measured on
-H₂, where QWC and general-commuting both give 2 groups — so the grouping axis
-was degenerate. Experiment 001 on **H₄** (8 seeds, 300k budget, ideal) is
-running; **LiH** (631 terms, 172→41 groups) is still to do, as is the `medium`
-device-noise repeat of both.
+### 0. Build an ansatz that couples to double excitations at shallow depth  ← **the blocker**
+Result 10 is the finding that reorders everything else. The hardware-efficient
+ansatz has **exactly zero gradient** at Hartree-Fock — 0 of 46 parameters at
+2 reps, 0 of 114 at 6 reps — because a real-amplitude ansatz's first-order
+response reaches only single excitations, and Brillouin's theorem kills those.
+Correlation energy is in the doubles. So H₄ runs land on Hartree-Fock and
+recover *zero* correlation energy, at any depth and any budget.
 
-*Result if it works:* the allocation win holds or grows with group count, and
-the grouping axis separates. *Result if it fails:* adaptive allocation was an
-H₂ artefact — equally worth knowing.
+UCCSD reaches chemical accuracy (9.7e-6) precisely because its generators are
+double excitations — at 1096 two-qubit gates, which is device-fatal.
 
-Note on cost: the `none` grouping is ~11× slower to simulate than `commuting`
-(520 s vs 47 s for 8 seeds of H₄), tracking group count almost linearly, since
-Aer's cost is per-circuit. Budget for it or drop it once its baseline role is
-served.
+**The gap to close: UCCSD-like coupling to doubles at hardware-efficient depth.**
+Candidates, cheapest first:
 
-### 1b. Wire covariance-aware grouping into `ShotEstimator`  ← **the gap**
-Results 7 and 9 give a validated 0.708 (H₄) / 0.632 (LiH) variance ratio — 1.4×
-to 1.6× fewer shots — but every number is measured **at a fixed state**. The
-grouping is not reachable from `run_vqe`, so no end-to-end optimisation has ever
-used it. Add `grouping="covariance"` with a reference state, then re-run
-experiment 001 and check the win survives a full run, where the state moves away
-from the reference the covariances were computed at.
+- **Quantum-number-preserving gate fabrics** (Anselmetti et al.): four-qubit
+  blocks that conserve particle number and spin and span the doubles directly.
+- **Givens-rotation / particle-conserving networks**: shallow, and their
+  generators are single+double excitations by construction.
+- **k-UpCCGSD**: paired doubles only, so far fewer terms than UCCSD, tunable
+  depth via k.
 
-That last point is the real open risk: the covariances are evaluated once at
-Hartree-Fock, and the optimiser walks away from it. Two things to measure:
-whether the win decays along the trajectory, and whether re-grouping partway
-(using the empirical group variances already being collected) recovers it.
+Acceptance test: non-zero gradient at Hartree-Fock, chemical accuracy on H₄
+under exact optimisation, and two-qubit count within ~5× of the
+hardware-efficient ansatz. Until something passes that, no H₄ measurement of
+anything else means much.
+
+### 1. Re-run the measurement studies once an ansatz converges  *(blocked on 0)*
+Every H₄ number in this session was taken in a regime where the optimiser could
+not move, so the H₄ allocation/grouping/optimiser comparisons say nothing about
+those methods. Experiment 001 on H₄ gave ratios 0.90–1.01, all with p ≥ 0.29 —
+not a negative result about allocation, just a dead problem.
+
+The H₂ results stand (adaptive allocation ratio 0.264, 4/4 seeds), because H₂
+converges. Repeat on H₄/LiH once item 0 lands, and under `medium` device noise.
+
+### 1b. Covariance grouping end-to-end  *(also blocked on 0)*
+Now reachable via `grouping="covariance"` / `"covariance+refine"`. Validated at
+a fixed state: 0.708 (H₄) / 0.632 (LiH) variance ratio, empirically confirmed
+against 300 sampled estimates. But at a 150k budget on H₄ it changes nothing
+(5.15e-2 vs 5.07e-2) because the run is not shot-noise-limited — see item 0.
+
+Still to measure once it can matter: whether the win survives a full run, given
+that covariances are computed once at Hartree-Fock and the optimiser walks away
+from there. And whether re-grouping partway (from the empirical group variances
+already collected) recovers any decay.
 
 ### 1c. Better partition search
 Local refinement converges to a local optimum of *single-term* moves (Result 9).
-Cheap things left untried: pairwise swaps, multi-start from perturbed greedy
-solutions, simulated annealing. Unknown how far 0.632 is from optimal — worth
-bounding on a small case where the optimum can be found exactly.
+Untried: pairwise swaps, multi-start from perturbed greedy solutions, annealing.
+Unknown how far 0.632 is from optimal — worth bounding exactly on a small case.
 
-### 2. Resolve the noise-floor question (open question, Result 6 section)
-Scaling gate errors 10× down did not move the error. Ablate properly:
-readout error on/off, thermal relaxation on/off, gate error scaled — one factor
-at a time, at the fixed reference state so there is no optimiser in the loop.
-Until this is settled, no claim about *where* device error comes from is safe.
+### 2. Resolve the noise-floor question
+Scaling gate errors 10× down did not move the error. Ablate properly: readout
+on/off, thermal relaxation on/off, gate error scaled — one factor at a time, at
+a fixed reference state so there is no optimiser in the loop.
 
 ### 3. Budget scaling: what does chemical accuracy actually cost?
-Nothing tested so far reaches 1.594 mHa on H₂ (best: 1/8 seeds). Sweep the
-budget over 10⁵–10⁷ shots for the best-known configuration and find where
-chemical accuracy becomes reliable (≥ 6/8 seeds). That number — *shots to
-chemical accuracy* — is the headline benchmark everything else should be
-measured against, and it is currently unknown even for H₂.
+Nothing tested reaches 1.594 mHa on H₂ reliably (best: 1/8 seeds). Sweep the
+budget over 10⁵–10⁷ shots for the best configuration and find where chemical
+accuracy becomes reliable (≥ 6/8 seeds). *Shots to chemical accuracy* is the
+benchmark everything else should be measured against, and it is unknown even
+for H₂.
 
 ---
 

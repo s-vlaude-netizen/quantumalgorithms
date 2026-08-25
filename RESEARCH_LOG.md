@@ -413,6 +413,90 @@ Caveats kept in view: H₂ shows nothing (2 groups either way), the benefit grow
 with term count, and this is still a fixed-state measurement — the grouping is
 **not yet wired into `ShotEstimator`**, so no end-to-end VQE run has used it.
 
+### Result 10 — the hardware-efficient ansatz is stuck at Hartree-Fock *by construction*
+
+This supersedes the optimistic reading of Result 5 and explains every flat H₄
+measurement in this session.
+
+Experiment 001 repeated on H₄ (8 seeds, 300k budget, ideal simulator,
+`hea:2:linear:cry`) showed the allocation effect **vanishing**: every
+configuration landed at 5.0–5.9e-2 Ha, ratios 0.90–1.01 against the baseline,
+nothing significant (p ≥ 0.29). On H₂ the same comparison gave 0.264.
+
+Chasing that down:
+
+1. **Budget is not the limit.** 150k and 600k shot budgets give bit-identical
+   errors (5.1476e-2). COBYLA spends the whole budget (49 and 196 evaluations)
+   and gets nowhere.
+2. **Shot noise is not the limit.** With exact noiseless energies and up to
+   10 000 evaluations, COBYLA converges to **4.182e-2 Ha** — and H₄'s
+   correlation energy is **0.04182 Ha**. The optimiser lands on Hartree-Fock and
+   recovers *exactly zero* correlation energy.
+3. **The start is an exact stationary point.** Finite-difference gradient of
+   `hea:2:linear:cry` at θ = 0: `|∇| = 0.00e+00`, with **0 of 46** parameters
+   having a non-zero derivative.
+4. **Depth does not fix it.** `hea:6:linear:cry`, 114 parameters, 30 two-qubit
+   gates: `|∇| = 0.00e+00`, 0 of 114, BFGS from zero converges to 4.182e-2 —
+   Hartree-Fock again.
+5. **Larger initial perturbations make it worse**, not better: median error over
+   5 seeds goes 4.182e-2 (scale 0) → 4.225e-2 (0.2) → 4.993e-2 (1.0).
+
+**Why**, and this is the useful part: the first-order response of a
+real-amplitude ansatz at the Hartree-Fock determinant connects only to *single*
+excitations, and Brillouin's theorem says those have zero coupling to HF.
+Correlation energy lives in *double* excitations, which such an ansatz reaches
+only at second order. So the gradient vanishes identically, at any depth.
+
+The contrast makes it unambiguous:
+
+| ansatz | params | 2q gates | \|∇\| at θ=0 | non-zero grads | best exact error |
+|---|---|---|---|---|---|
+| **UCCSD** | 26 | **1096** | **0.551** | 14/26 | **9.7e-06** ✓ chemical accuracy |
+| hea:2:linear:cry | 46 | 10 | 0.000 | 0/46 | 4.182e-2 (= HF) |
+| hea:6:linear:cry | 114 | 30 | 0.000 | 0/114 | 4.182e-2 (= HF) |
+
+UCCSD's generators *are* double excitations, so it has gradient at HF and
+reaches chemical accuracy. It also has **110× more two-qubit gates**, which at
+realistic error rates is fatal.
+
+Even given a good start, the hardware-efficient ansatz is under-expressive here:
+BFGS from large random starts reaches only 2.155e-2 on H₄ — still 13× worse than
+chemical accuracy.
+
+**Consequences for this project, which are large:**
+
+* Result 5's "32× improvement" from reference-preserving entanglers is real
+  *relative to the fixed-CX ansatz*, but it buys a graceful failure, not a
+  solution: the run now lands exactly on Hartree-Fock instead of on garbage.
+  Zero correlation energy either way.
+* Every H₄ measurement of allocation, grouping and optimiser in this session was
+  taken in a regime where the optimiser could not move. Those H₄ numbers say
+  nothing about the methods, only about the ansatz. The H₂ results (Results 3
+  and 4) stand — H₂ converges.
+* The bottleneck is not measurement. **It is the ansatz.** Measurement-side
+  work — which is most of this session — only pays off once a run is actually
+  shot-noise-limited, and on H₄ nothing was.
+
+The real gap this opens: UCCSD-like coupling to double excitations at
+hardware-efficient depth. That is the next thing to build (candidates in
+NEXT_STEPS: quantum-number-preserving gate fabrics, Givens-rotation networks,
+k-UpCCGSD).
+
+### Result 11 — grouping still pays for wall-clock and hardware time
+
+Independent of the above, from the same H₄ run (identical shot counts by
+construction):
+
+| grouping | groups | hardware seconds | simulator wall seconds |
+|---|---|---|---|
+| none | 164 | 92.6 | 63.4 |
+| qwc | 37 | 80.1 | 17.9 |
+| commuting | 10 | 78.0 | 6.5 |
+
+**10× faster to simulate and 16% less hardware time**, at identical shots. The
+hardware-time gain is modest because the 250 µs reset delay dominates the cost
+model; the simulation gain is what makes the research loop usable.
+
 ### Open question carried forward
 
 Scaling `fake_kolkata`'s gate errors to 0.5× / 0.25× / 0.1× left the energy
