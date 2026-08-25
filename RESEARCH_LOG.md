@@ -815,6 +815,60 @@ the parameter is there for gradient-based use.
 That is a fair summary of the whole session's arc: each fix exposes that the
 next thing along was the real constraint.
 
+### Result 21 — SPSA uses the offset, but not enough to win
+
+The cheapest candidate from Result 20's open item, tested: SPSA already
+estimates a gradient in two evaluations per step, so it should be able to use
+the offset start that COBYLA cannot. H₂, 200k budget, **12 seeds**, ideal
+simulator:
+
+| ansatz | offset | optimiser | median error | best | ≤ chem acc |
+|---|---|---|---|---|---|
+| `hea:2` (fixed CX) | 0.0 | COBYLA | 7.21e-3 | 1.47e-3 | 1/12 |
+| **`hea:2` (fixed CX)** | **0.0** | **SPSA** | **4.46e-3** | 2.61e-3 | 0/12 |
+| `hea:2:linear:cry` | 0.0 | COBYLA | 2.17e-2 | 2.04e-2 | 0/12 |
+| `hea:2:linear:cry` | 0.0 | SPSA | 2.10e-2 | 3.43e-3 | 0/12 |
+| `hea:2:linear:cry` | 0.3 | SPSA | 1.43e-2 | 9.57e-3 | 0/12 |
+| `hea:2:linear:cry` | 0.5 | SPSA | 1.36e-2 | 4.23e-3 | 0/12 |
+
+**Half-confirmed.** SPSA *does* extract value from the offset where COBYLA could
+not: 2.10e-2 → 1.36e-2, a 1.5× improvement, and monotone in the offset. So the
+mechanism is right.
+
+But it does not clear the bar. The best configuration remains the plain
+fixed-CX ansatz with SPSA at 4.46e-3, and the acceptance test set in NEXT_STEPS
+(beat 3.34e-3 median, chemical accuracy in more than 1/6 of runs) is **not
+met** by any combination tested. Nothing reaches chemical accuracy reliably on
+H₂ — the best single run out of 96 was 1.47e-3, and the best rate 1/12.
+
+The remaining candidates from that item — Rosalin's random operator sampling
+and quantum natural gradient — are untested.
+
+---
+
+## Session 1 — closing state
+
+**What is solid and reproducible:**
+
+* general-commuting grouping: 15–20× fewer circuits than ungrouped (Result 1)
+* covariance-aware grouping with local refinement: 0.63 variance ratio on LiH,
+  predicted variance confirmed against 300 sampled estimates, group-count
+  confound controlled for (Results 7, 9)
+* direct Givens compilation of double excitations: 2.43× fewer two-qubit gates,
+  verified to be the *same operator* as qiskit-nature's to 8e-13 (Results 14, 15)
+* an interior optimum in shots-per-evaluation, with an analytic reason (Result 4)
+* 81 tests, every piece of measurement machinery checked algebraically
+
+**What was retracted within the session:**
+
+* the 3.8× allocation win → 1.3× and not significant at 24 seeds (Results 3, 18)
+* "32× from reference-preserving entanglers" → true on H₄, false on H₂, and
+  neither ansatz is right (Results 5, 19)
+
+**The one thing that would unblock the rest:** an optimiser that can use a
+gradient at a cost the shot budget can bear. Every measurement-side result in
+this repository is worth 1.3–1.6×; the ansatz/optimiser gap is 32×.
+
 ### Open question carried forward
 
 Scaling `fake_kolkata`'s gate errors to 0.5× / 0.25× / 0.1× left the energy
