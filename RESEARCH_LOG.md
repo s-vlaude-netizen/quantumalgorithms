@@ -964,3 +964,102 @@ and shots ∈ {128, 512} moved the median by less than 1.4× across the whole gr
 Nothing tested reaches chemical accuracy on H₂ at 200k shots: **0 of 16** for
 every configuration.
 
+### Result 25 — the gap is shot noise, not the optimiser and not the step count
+
+The decisive control from NEXT_STEPS, run first because it says *which* problem
+to work on. Same optimisers, **exact** energies, matched evaluation counts —
+98 evaluations is what a 200k budget at 2048 shots affords:
+
+| evaluations | COBYLA | SPSA | SPS k=1 |
+|---|---|---|---|
+| **98** | **4.96e-05** | 2.00e-03 | 4.06e-03 |
+| 390 | 2.24e-09 | 1.30e-03 | 1.66e-03 |
+| 1 562 | 2.24e-09 | 8.06e-04 | 8.52e-04 |
+| 10 000 | 2.24e-09 | 5.98e-04 | 5.47e-05 |
+
+**COBYLA reaches chemical accuracy on H₂ in 98 noiseless evaluations** — the
+exact count the shot-noise run gets, where it manages only 1.84e-2. A 370× gap
+with the evaluation count held fixed. The optimiser has plenty of steps; each
+one is just too noisy.
+
+This reverses session 1's conclusion that measurement-side work "has nothing to
+act on". That was true of H₄, where the ansatz was stuck at Hartree-Fock. H₂ is
+genuinely shot-noise-limited, and it is the measurement side that binds.
+
+Second thing the table shows: **SPSA is a slow optimiser even without noise**,
+plateauing near 6e-4 at 10 000 evaluations where COBYLA hits 2.2e-9 at 390.
+So neither baseline has both properties — COBYLA converges fast and collapses
+under noise; SPSA tolerates noise and converges slowly.
+
+### Result 26 — precision alone does not rescue COBYLA; it has to arrive on a schedule
+
+If COBYLA's failure were simple noise sensitivity, precise evaluations would fix
+it. They do not. H₂, 12 seeds, 48 evaluations each, varying shots per evaluation:
+
+| σ per evaluation | COBYLA | SPSA |
+|---|---|---|
+| 7.60e-3 | 1.93e-2 | 3.53e-3 |
+| 1.90e-3 | 1.19e-2 | 2.80e-3 |
+| 9.50e-4 | 4.57e-3 | 2.95e-3 |
+| 4.75e-4 (51.2M shots) | 2.68e-3 | — |
+
+At σ = 4.75e-4, already **below** chemical accuracy, COBYLA still manages only
+2.68e-3 — 54× worse than its own noiseless 4.96e-5.
+
+The reason is structural: near the optimum the energy *differences* a
+model-based method interpolates shrink quadratically in the distance to the
+minimum, while shot noise stays flat. Whatever fixed precision is chosen, the
+model eventually fits noise. Precision has to escalate as the run converges.
+
+A second measurement pins the mechanism. Restarting COBYLA from its own
+converged point with more shots:
+
+| restart `rhobeg` | error before | error after |
+|---|---|---|
+| **1.0** | 2.008e-2 | **2.223e-3** |
+| 0.3 | 2.008e-2 | 1.895e-2 |
+| 0.1 | 2.008e-2 | 1.744e-2 |
+| 0.03 | 2.008e-2 | 2.044e-2 |
+
+A *large* trust region on restart is 9× better than a small one — the opposite
+of the natural guess. A small region re-converges inside the same
+noise-induced basin; a large one escapes it and re-explores with the newly
+precise evaluations.
+
+### Result 27 — the shot ladder: 2.1× better than SPSA, p = 0.006, and it needs headroom
+
+`shot_ladder` runs a model-based optimiser to convergence at one shot count,
+then restarts it from that point with more shots, repeating. H₂, ideal, paired
+against SPSA:
+
+| budget | levels | SPSA median | ladder median | ratio | W/L | p | ladder ≤ chem acc |
+|---|---|---|---|---|---|---|---|
+| 200 000 | 2 | 4.10e-3 | 6.83e-3 | 1.710 | 3/13 | **0.021** | 0/16 |
+| 800 000 | 2 | 4.56e-3 | 3.11e-3 | 0.825 | 10/6 | 0.454 | 2/16 |
+| 3 200 000 | 2 | 4.20e-3 | 2.90e-3 | 0.594 | 11/5 | 0.210 | 4/16 |
+| 12 800 000 | 3 | 4.54e-3 | **2.50e-3** | **0.465** | 12/4 | 0.077 | **5/16** |
+
+and at 12 seeds with hand-set levels, the best configuration was significant:
+**L=3, growth 6 at 12.8M — ratio 0.467, 12 wins / 0 losses, p = 0.000.**
+
+Chemical-accuracy hit rate goes from SPSA's 1/16 to **5/16**. Nothing in this
+repository had reached it reliably before.
+
+Two engineering points that make the difference between working and not:
+
+* **The schedule must be derived from the budget.** Splitting a budget
+  geometrically across levels whose shot counts *also* grow geometrically
+  starves the expensive rungs: 4 levels growing 8× on 200k hands the top rung
+  262 144 shots per evaluation and a 175k allowance — not one evaluation. Fixing
+  the evaluations per rung at `E = 2(n+1)` and solving
+  `s₀·E·(gᴸ−1)/(g−1) = budget` spends the whole budget with every rung fed.
+* **Over-laddering is worse than not laddering.** At 800k, four levels measured
+  2.48× *worse* than SPSA (0/12 wins, p = 0.000). The automatic level rule keeps
+  the bottom rung at ≥ 4096 shots, which reproduces the measured best count at
+  every budget tested (800k → 2, 3.2M → 2, 12.8M → 3).
+
+**Honest limit:** below roughly `8 · E · min_useful_shots` (≈ 800k for
+12-parameter H₂) there is no room for two well-fed rungs and the ladder is
+significantly *worse* than SPSA. It is a budget-rich method, and the crossover
+is now measured rather than guessed.
+

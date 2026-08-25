@@ -532,6 +532,141 @@ def stochastic_parameter_shift(
     )
 
 
+def shot_ladder(
+    oracle: EnergyOracle,
+    x0: np.ndarray,
+    maxiter: int = 100_000,
+    *,
+    inner: str = "COBYLA",
+    levels: int | None = None,
+    growth: float = 6.0,
+    evals_per_level: int | None = None,
+    min_useful_shots: int = 4096,
+    rhobeg: float = 1.0,
+    seed: int = 0,
+    callback=None,
+) -> OptimizeResult:
+    """Restart a model-based optimiser repeatedly with escalating shot counts.
+
+    The diagnosis this implements (RESEARCH_LOG Result 26): near the optimum the
+    energy *differences* a model-based method must resolve shrink quadratically
+    in the distance to the minimum, while shot noise stays flat.  No fixed shot
+    count works -- early on any rough model suffices and the shots are wasted;
+    late on the model is fitting pure noise.  Measured on H2, COBYLA reaches
+    4.96e-5 on exact energies but only 2.68e-3 at 524 288 shots per evaluation,
+    a noise level already *below* chemical accuracy.  Precision has to arrive on
+    a schedule, not all at once.
+
+    **The shot schedule is derived from the budget, not chosen independently.**
+    A geometric split of the budget across levels whose shot counts also grow
+    geometrically starves the expensive levels: with 4 levels growing 8x on a
+    200k budget, the top level needs 262 144 shots per evaluation and is handed
+    175k in total -- not one evaluation.  Instead, fix the evaluations per level
+    at ``E`` and solve
+
+        s_0 * E * (g^L - 1) / (g - 1) = budget
+
+    so every level gets ``E`` evaluations and the whole budget is spent.
+    ``E`` defaults to ``2(n+1)``, since COBYLA needs ``n+1`` evaluations just to
+    build its initial simplex.
+
+    ``rhobeg`` stays *large* on every restart, which is counter-intuitive and
+    measured: restarting from a converged point with ``rhobeg = 1.0`` improved
+    the error 9x (2.0e-2 to 2.2e-3), while 0.3, 0.1 and 0.03 barely moved it.
+    A small trust region re-converges inside the same noise-induced basin; a
+    large one escapes it and re-explores with the newly precise evaluations.
+
+    ``levels`` defaults to the most the budget can actually afford, since the
+    number of affordable rungs grows with it and over-laddering is *worse* than
+    not laddering: on H2 at 800k, four levels measured 2.48x worse than SPSA
+    (0/12 wins, p = 0.000), while at 12.8M three levels measured 2.1x better
+    (12/0, p = 0.000).  The rule keeps the bottom rung at ``min_useful_shots``
+    or above, and reproduces the measured best level count at every budget
+    tested (800k -> 2, 3.2M -> 2, 12.8M -> 3).
+
+    **This method needs budget headroom and is the wrong choice without it.**
+    Measured against SPSA on H2 (16 seeds, paired):
+
+        budget       ratio   W/L     p
+        200 000      1.710   3/13    0.021   <- significantly WORSE
+        800 000      0.825   10/6    0.454
+        3 200 000    0.594   11/5    0.210
+        12 800 000   0.465   12/4    0.077
+
+    The crossover sits near ``budget ~ 8 * evals_per_level * min_useful_shots``.
+    Below it there is no room for two well-fed rungs and SPSA is the better
+    choice; ``levels`` falls to 1 there, which is plain COBYLA and worse than
+    SPSA -- so the caller should be choosing SPSA, not this.
+    """
+    from scipy.optimize import minimize
+
+    x = np.asarray(x0, dtype=float).copy()
+    n = len(x)
+    evals = evals_per_level if evals_per_level is not None else 2 * (n + 1)
+
+    remaining = (oracle.budget - oracle.shots_used) if oracle.budget else None
+
+    def span(count: int) -> float:
+        return (growth**count - 1) / (growth - 1)
+
+    if levels is None:
+        if remaining is None:
+            levels = 3
+        else:
+            # the most rungs whose bottom one still gets min_useful_shots
+            affordable = remaining / (evals * min_useful_shots)
+            levels = 1
+            while span(levels + 1) <= affordable and levels < 8:
+                levels += 1
+    if remaining is None:
+        schedule = [int(min_useful_shots * growth**i) for i in range(levels)]
+    else:
+        base = max(1.0, remaining / (evals * span(levels)))
+        schedule = [max(1, int(base * growth**i)) for i in range(levels)]
+
+    history: list[float] = []
+    shot_history: list[int] = []
+    levels_run = []
+
+    for level, shots in enumerate(schedule):
+        spent_at_start = oracle.shots_used
+        level_budget = evals * shots
+
+        def f(y):
+            if oracle.shots_used - spent_at_start >= level_budget:
+                raise _LevelDone()
+            value = oracle(y, shots)
+            history.append(value)
+            shot_history.append(oracle.shots_used)
+            if callback:
+                callback(y, value)
+            return value
+
+        try:
+            result = minimize(f, x, method=inner, options={"maxiter": 10**6, "rhobeg": rhobeg})
+            x = np.asarray(result.x, dtype=float)
+        except _LevelDone:
+            if oracle.best_params is not None:
+                x = oracle.best_params.copy()
+        levels_run.append(
+            {"level": level, "shots": shots, "spent": oracle.shots_used - spent_at_start}
+        )
+
+    return OptimizeResult(
+        x=x,
+        fun=float(oracle.best_value),
+        nit=len(history),
+        history=history,
+        shot_history=shot_history,
+        message=f"ladder {inner} L={levels} g={growth} E={evals} schedule={schedule}",
+        extra={"levels": levels_run, "schedule": schedule},
+    )
+
+
+class _LevelDone(Exception):
+    """Internal: one rung of the shot ladder has spent its share."""
+
+
 OPTIMIZERS: dict[str, Callable] = {
     "cobyla": lambda o, x0, **kw: scipy_minimize(o, x0, method="COBYLA", **kw),
     "powell": lambda o, x0, **kw: scipy_minimize(o, x0, method="Powell", **kw),
@@ -540,4 +675,5 @@ OPTIMIZERS: dict[str, Callable] = {
     "icans": icans,
     "aspsa": adaptive_spsa,
     "sps": stochastic_parameter_shift,
+    "ladder": shot_ladder,
 }
