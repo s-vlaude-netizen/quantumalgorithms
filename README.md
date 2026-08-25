@@ -57,12 +57,14 @@ gates; surviving a Heron-class device at fidelity > 0.5 allows ~40.
 **What does work, where a run is actually shot-noise-limited:**
 
 - general-commuting grouping: 15–20× fewer circuits than ungrouped
-- variance-adaptive (Neyman) shot allocation: 3.8× error reduction on H₂ at
-  equal shots, ≈ 14× fewer shots for equal accuracy
 - covariance-aware grouping with local refinement: 0.63 variance ratio on LiH,
-  validated against 300 sampled estimates
+  validated against 300 sampled estimates at a fixed state
 - direct Givens compilation of double excitations: 2.43× fewer two-qubit gates
-  than the Trotterised build (1.31× after device routing)
+  than the Trotterised build (1.31× after device routing), verified to be the
+  same operator as `qiskit_nature`'s to 8e-13
+- variance-adaptive (Neyman) shot allocation: median error ratio ~0.78 on H₂,
+  ≈ 1.7× fewer shots — **suggestive, not significant** (14/10 seeds, p = 0.54).
+  An earlier 4-seed run of this reported 3.8×; it did not replicate.
 
 **Sizing rule for any budget-matched comparison** — below this it measures the
 optimiser's simplex construction, not the algorithm:
@@ -87,8 +89,15 @@ quantum-algorithm benchmarks usually go wrong:
    with a sign test — the spread across random initialisations is routinely
    larger than the effect being measured.
 
-3. **Negative results are recorded.** `RESEARCH_LOG.md` keeps what did not work
-   alongside what did. An idea that fails under realistic noise is a result.
+3. **Negative results and retractions are recorded.** `RESEARCH_LOG.md` keeps
+   what did not work alongside what did, and corrections stay next to the
+   claims they correct rather than replacing them. Two headline results from
+   session 1 were overturned by later measurements in the same session; both
+   are still in the log.
+
+4. **Enough seeds to tell an effect from nothing.** Measured, not assumed: at
+   4 seeds a 4× apparent effect on H₂ shrank to 1.3× and lost significance at
+   24. Four seeds is not enough for VQE error comparisons.
 
 ## Running
 

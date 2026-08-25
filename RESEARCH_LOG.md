@@ -134,29 +134,21 @@ running variance estimate. Two choices that differ from the literature:
 Shrinkage toward the `(Σ|c_i|)²` prior with pseudo-count 64 keeps early
 allocations from chasing noise in a variance estimated from a handful of shots.
 
-### Result 3 — variance-adaptive shot allocation is the big win
+### Result 3 — variance-adaptive shot allocation  ⚠️ **SUPERSEDED — see Result 18**
 
-Experiment 001, H₂, ideal simulator, 120k shot budget, 4 seeds, all
-configurations stopped at exactly the same shot count. Paired against
-`cobyla|qwc|uniform`, on `noiseless_error` (ratio < 1 is better):
+*Original entry, kept because the correction is the point.* Experiment 001, H₂,
+ideal simulator, 120k shot budget, **4 seeds**. Paired against
+`cobyla|qwc|uniform` on `noiseless_error`:
 
 | configuration | ratio | W/L/T |
 |---|---|---|
 | `qwc \| coefficient` | 0.628 | 4/0/0 |
-| `commuting \| coefficient` | 0.628 | 4/0/0 |
 | **`qwc \| adaptive`** | **0.264** | **4/0/0** |
-| **`commuting \| adaptive`** | **0.264** | **4/0/0** |
 | `spsa \| commuting \| adaptive` | 0.487 | 4/0/0 |
 
-**Neyman allocation on the running empirical variance gives a 3.8× error
-reduction at equal shot count.** Since a shot-noise-limited error scales as
-1/√N, that is worth roughly **14× fewer shots for the same accuracy**.
-Coefficient-weighted allocation captures about half the benefit. `p = 0.125`
-is the floor achievable with 4 seeds (4/0 wins); needs more seeds to call
-significant, but the direction is unambiguous and consistent.
-
-H₂ is *not* a discriminating test for grouping — QWC and commuting both give 2
-groups, so their rows are identical by construction. Grouping needs H₄/LiH.
+At the time this was read as "Neyman allocation gives a 3.8× error reduction at
+equal shot count, worth ~14× fewer shots". **That reading does not survive more
+seeds.** See Result 18.
 
 ### Result 4 — a fixed shot budget has an interior optimum in shots-per-evaluation
 
@@ -714,6 +706,70 @@ once properly:
 For H4/UCCSD at 4096 shots that is ≈ 1.07M shots minimum; 200k is 5× short. Any
 future budget-matched comparison has to be sized against the parameter count, or
 it measures the simplex construction rather than the algorithm.
+
+### Result 18 — the headline allocation result does not replicate at 24 seeds
+
+Re-ran experiment 001 on H₂ with **24 seeds** instead of 4, same budget, same
+everything else. Adaptive Neyman allocation against uniform:
+
+| | 4 seeds (Result 3) | 24 seeds |
+|---|---|---|
+| median ratio | **0.264** | **0.776** |
+| wins / losses | 4 / 0 | 14 / 10 |
+| sign-test p | 0.125 (the floor at n=4) | **0.541** |
+
+The effect is real in the median — 4.19e-3 against 8.25e-3, a ~1.7× shot saving
+— but it is **not statistically significant**, and the interquartile ranges
+overlap heavily ([1.9e-3, 7.0e-3] against [2.9e-3, 1.7e-2]). The 3.8× was a
+small-sample artefact: with 4 seeds, 4/0 wins is the best obtainable outcome and
+carries almost no evidence.
+
+**Honest restatement:** variance-adaptive allocation gives a median error ratio
+of ~0.78 on H₂ (≈ 1.7× fewer shots for equal accuracy), suggestive but not
+significant at 24 seeds. It is not the 14× the first entry claimed.
+
+One result *is* significant, and it is negative: ungrouped measurement with
+coefficient-weighted allocation is reliably **worse** than the baseline —
+ratio 1.271, 5/19, **p = 0.007**.
+
+I set "multiple seeds, median + IQR, paired sign test" as a standing rule at the
+start of this session and then reported a 4-seed result as a headline anyway.
+The rule now has a number attached: **for VQE error comparisons, 4 seeds is not
+enough to distinguish a 4× effect from nothing.**
+
+### Result 19 — reference preservation and non-zero gradient are in direct conflict
+
+Chasing Result 18 turned up why the same experiment gave 2.3e-3 in the first
+session and 2.1e-2 later: **the ansatz had changed**, and the "fixed" version is
+worse on H₂.
+
+Gradient at θ = 0 on H₂, where both ansätze start *exactly* on the Hartree-Fock
+determinant (overlap 1.0000):
+
+| ansatz | overlap with HF | \|∇\| at θ=0 | non-zero | converged error |
+|---|---|---|---|---|
+| `hea:2` (fixed CX) | 1.0000 | **0.181** | 1/12 | **4.2e-3** |
+| `hea:2:linear:cry` | 1.0000 | **0.000** | 0/14 | 2.1e-2 (= E_corr, stuck) |
+
+**The mechanism**: fixed entangling gates act whatever the parameters are, so
+the later rotation layers see an *entangled* state and acquire a non-zero
+derivative. Controlled-rotation entanglers are the identity at θ=0 — which is
+exactly how they preserve the reference — so every layer sees a computational
+basis state and Brillouin's theorem zeroes every gradient.
+
+**The property that preserves the reference is the property that kills the
+gradient.** They cannot both come from the entangler.
+
+This corrects Result 5, which reported the controlled-rotation ansatz as a "32×
+improvement". That is true on H₄, where fixed CX *destroys* the reference
+(overlap 0.0000) and lands on garbage. It is false on H₂, where fixed CX
+preserves the reference *and* has gradient, and the controlled version is 5×
+worse. Neither ansatz is right; the requirement is both properties at once, and
+neither construction delivers them.
+
+Plausible resolution, untested: initialise the *entangler* parameters away from
+zero while leaving the rotation parameters at zero — entanglement enough for a
+gradient, while staying near the reference. `[unverified]`
 
 ### Open question carried forward
 

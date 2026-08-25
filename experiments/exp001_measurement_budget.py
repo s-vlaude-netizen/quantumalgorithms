@@ -36,10 +36,20 @@ def _run(seed: int, molecule: str, molecule_kwargs: dict, **kwargs):
     return run_vqe(problem, seed=seed, **kwargs)
 
 
-# Controlled-rotation entanglers, so theta=0 IS the Hartree-Fock reference.
-# With fixed CX entanglers the zero-parameter state is orthogonal to it and
-# every run below starts 4 Ha from the answer -- see RESEARCH_LOG Result 5.
-ANSATZ = "hea:2:linear:cry"
+# There is no good default here, and pretending otherwise silently changed a
+# headline result once already (RESEARCH_LOG Results 18 and 19).
+#
+#   "hea:2"             fixed CX entanglers.  Has a non-zero gradient at
+#                       Hartree-Fock (0.181 on H2) because the fixed gates
+#                       entangle regardless of parameters -- but on H4 it
+#                       *destroys* the reference (overlap 0.0000).
+#   "hea:2:linear:cry"  controlled rotations.  Reproduces the reference exactly
+#                       at theta=0 -- and therefore has EXACTLY ZERO gradient
+#                       there, so it never leaves Hartree-Fock.
+#
+# The property that preserves the reference is the property that kills the
+# gradient.  Choose deliberately per problem and record which was used.
+ANSATZ = "hea:2"
 
 SIZES = {
     "small": dict(seeds=range(4), budget=120_000, shots=2048, molecules=["H2"]),
@@ -55,7 +65,7 @@ MOLECULE_KWARGS = {
 }
 
 
-def stage_grouping_allocation(study, molecule, cfg, env):
+def stage_grouping_allocation(study, molecule, cfg, env, ansatz=ANSATZ):
     """Axis 1+2: how many circuits, and how shots split across them."""
     for grouping, allocation in itertools.product(
         ["none", "qwc", "commuting"], ["uniform", "coefficient", "adaptive"]
@@ -67,7 +77,7 @@ def stage_grouping_allocation(study, molecule, cfg, env):
             cfg["seeds"],
             molecule=molecule,
             molecule_kwargs=MOLECULE_KWARGS[molecule],
-            ansatz=ANSATZ,
+            ansatz=ansatz,
             environment=env,
             grouping=grouping,
             allocation=allocation,
@@ -84,7 +94,8 @@ def stage_grouping_allocation(study, molecule, cfg, env):
 
 
 def stage_optimizers(
-    study, molecule, cfg, env, grouping="commuting", allocation="adaptive", optimizers=None
+    study, molecule, cfg, env, grouping="commuting", allocation="adaptive",
+    optimizers=None, ansatz=ANSATZ,
 ):
     """Axis 3: how shots split across optimiser iterations."""
     for optimizer in optimizers or ["cobyla", "spsa"]:
@@ -102,7 +113,7 @@ def stage_optimizers(
             cfg["seeds"],
             molecule=molecule,
             molecule_kwargs=MOLECULE_KWARGS[molecule],
-            ansatz=ANSATZ,
+            ansatz=ansatz,
             environment=env,
             grouping=grouping,
             allocation=allocation,
@@ -126,6 +137,9 @@ def main() -> int:
     ap.add_argument("--molecules", default=None,
                     help="comma-separated override of the size preset's molecule list")
     ap.add_argument("--seeds", type=int, default=None)
+    ap.add_argument("--ansatz", default=ANSATZ,
+                    help="see the ANSATZ comment in this file -- neither choice is "
+                         "safe by default")
     ap.add_argument("--budget", type=int, default=None)
     ap.add_argument("--stages", default="grouping,optimizers",
                     help="comma-separated subset of: grouping, optimizers")
@@ -155,9 +169,10 @@ def main() -> int:
               f"FCI={problem.fci_energy:.6f}")
         stages = args.stages.split(",")
         if "grouping" in stages:
-            stage_grouping_allocation(study, molecule, cfg, args.env)
+            stage_grouping_allocation(study, molecule, cfg, args.env, ansatz=args.ansatz)
         if "optimizers" in stages:
-            stage_optimizers(study, molecule, cfg, args.env, optimizers=args.optimizers.split(","))
+            stage_optimizers(study, molecule, cfg, args.env,
+                             optimizers=args.optimizers.split(","), ansatz=args.ansatz)
 
     print("\n" + study.table())
     print()
