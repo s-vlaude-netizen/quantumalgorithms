@@ -10,61 +10,48 @@ what is left, add what the results suggested.
 
 ## Now
 
-### 0. The scaling wall, and what could actually move it  ← **the finding that reframes everything**
-Result 34 costs the barrier: the shots to reach chemical accuracy scale as
+### The measurement side is settled; the optimiser side is not
+Three sessions of measurement-scheme work end in a clean ranking (Result 38).
+Five schemes, one metric — total estimator variance under Neyman allocation at
+the Hartree-Fock reference — three molecules:
 
-    shots  ~  (Σ|c|)² · n / ε²
+| scheme | H₂ | H₄ | LiH | settings on LiH |
+|---|---|---|---|---|
+| **general commuting + Neyman** | **1.00** | **1.00** | **1.00** | 41 |
+| QWC + Neyman | 1.00 | 1.67 | 3.24 | 172 |
+| derandomised shadows | 3.00 | 3.20 | 4.79 | 351 |
+| double factorisation | 4.00 | 10.05 | 6.82 | **21** |
+| random-Pauli shadows | 38.1 | 44.5 | 368.5 | — |
 
-measured at ~3.1M for H₂ (12 parameters, Σ|c| = 2.04) and **~170M for H₄/UCCSD**
-(26 parameters, Σ|c| = 10.94) — a 55× jump for one more pair of hydrogens,
-matching the 64× the formula predicts.
+**What the repository already defaults to wins on every molecule**, and none of
+the alternatives changes the `(Σ|c|)²` scaling. Do not re-open this without a
+scheme that is not on this list.
 
-Everything this repository has built buys a *constant factor* against that:
-general-commuting grouping ~15×, covariance refinement ~1.6× in predicted
-variance, the shot ladder ~2× in error. None of them touches the exponent, and
-`Σ|c|` grows with system size regardless.
+### 1. The optimiser is what binds now  ← **the live question**
+Result 37 falsified the cost model as a *budget*: H₄ + UCCSD at 256M shots —
+above the 170M the estimator noise predicted — still reaches **0/8** chemical
+accuracy, and 4× the budget moved the median 4%. The estimator side of the model
+is right (the H₂ figure checked out); what it omits is that a precise evaluation
+is only worth something if the optimiser can use it, and Result 26 showed COBYLA
+cannot: at σ *below* chemical accuracy it still managed 2.68e-3 against its own
+noiseless 4.96e-5.
 
-So the honest question for the remaining sessions is **what reduces `Σ|c|` or
-`n`, not what reduces the constant**:
+One clue in the 256M data: the *best* seed improves markedly (3.25e-2 → 1.77e-2)
+where the median does not. That is optimiser variance, not estimator noise.
 
-1. ~~**Hamiltonian factorisation.**~~ **Measured and closed (Result 35).**
-   Double factorisation is **4–10× worse** for VQE sampling variance (H₂ 4.00×,
-   H₄ 10.05×, LiH 6.82×), despite needing fewer measurement settings, because
-   each factor is a *squared* one-body operator and squaring inflates variance.
-   Its 1-norm advantage is real for qubitisation/QPE, where λ enters a block
-   encoding's query complexity — a different quantity from a sampling variance.
-   Kept as a regression test; reopen only if that ratio inverts.
-2. **Active-space reduction.** Fewer orbitals means fewer terms and fewer
-   parameters, at the cost of accuracy. Worth mapping the trade-off: what does
-   `Σ|c|` and the shot requirement do as the active space shrinks?
-3. ~~**Classical shadows (random Pauli).**~~ **Measured and closed (Result 36).**
-   **38–369× worse** than grouping, and worsening with system size, because the
-   `3^k` weight penalty falls on exactly the high-weight Paulis that
-   Jordan-Wigner strings produce: on LiH, 33 of 631 terms carry 67% of the
-   variance.
+So the work is on the optimiser, in rough order:
 
-   **Still open: derandomised shadows** (Huang et al. 2021), which choose
-   settings to target the observables at hand rather than sampling bases at
-   random. That is the last untested candidate, and the same cheap check
-   applies — predicted variance at a reference state, before any circuits.
-   If it also fails, VQE's measurement cost on molecules is not fixable at the
-   estimator level and the remaining routes are algorithmic.
-
-### 1. Retire or re-scope the covariance grouping
-Result 33: with the numerical-stability fix, the end-to-end benefit is
-0.780 / 1.085 / 0.864 across three budgets, **none significant**. The predicted
-variance benefit (0.708 H₄, 0.632 LiH) is real at a fixed state and does not
-survive a full run.
-
-Either find why (the reference goes stale as the optimiser moves — testable by
-re-grouping partway from the empirical group variances already collected), or
-record it as a fixed-state-only result and stop quoting it as a shot saving.
-Do not spend another session on it without deciding which.
-
-### 2. Verify the 170M prediction  *(running)*
-H₄ + UCCSD at 256M shots, 8 seeds. If it converges there and not at 64M, the
-cost model in Result 34 is validated and becomes the benchmark every future
-result is scored against. If it does not, the model is missing something.
+1. **A noise-aware trust region.** `shot_ladder` restarts COBYLA, which throws
+   away its model each rung. A stochastic trust-region method (STORM-style)
+   that sizes its sample count from the model's own uncertainty should dominate
+   it and would remove the hand-set `growth`, `levels` and `rhobeg`.
+2. **`rhobeg` must be estimated, not hard-coded.** H₂'s hardware-efficient
+   ansatz wants 1.0 on restart and H₄'s UCCSD wants 0.1 (Results 26, 31) — a 10×
+   spread with no universal value. Estimate it from the spread of a few
+   random-direction energy differences.
+3. **Restarts and seed variance.** With a 40% failure rate on some
+   configurations, spending part of the budget on multiple starts and keeping
+   the best may beat one long run. Cheap to test, never tested.
 
 ---
 

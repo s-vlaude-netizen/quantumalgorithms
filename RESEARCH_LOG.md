@@ -1372,3 +1372,75 @@ conclusion is that VQE's measurement cost on molecules is not fixable at the
 estimator level, and the remaining routes are algorithmic — fewer parameters, or
 a different algorithm entirely.
 
+### Result 37 — the 170M prediction is falsified: the cost model is a lower bound, not a budget
+
+Result 34 predicted H₄ + UCCSD needs ~170M shots from the estimator's noise
+scaling. Tested at 256M, 8 seeds, above the predicted requirement:
+
+| budget | median | best seed | beats Hartree-Fock | ≤ chemical accuracy |
+|---|---|---|---|---|
+| 64 000 000 | 3.799e-2 | 3.246e-2 | 5/8 | **0/8** |
+| 256 000 000 | 3.656e-2 | **1.766e-2** | 5/8 | **0/8** |
+
+**4× the budget moves the median 4%** (3.80e-2 → 3.66e-2), and nothing reaches
+chemical accuracy at either. The prediction is wrong.
+
+What the model got right is the estimator: σ does fall as 1/√shots, and the H₂
+figure (~3.1M) checked out against measurement. What it omits is that a precise
+evaluation is only useful if the optimiser can exploit it — and Result 26 had
+already shown it cannot: COBYLA at σ = 4.75e-4, *below* chemical accuracy,
+still managed only 2.68e-3 against its noiseless 4.96e-5.
+
+So the correct statement is that
+
+    shots  ≳  (Σ|c|)² n / ε²
+
+is a **lower bound on the estimator side**, not a sufficient budget. The
+optimiser adds a second requirement that the model does not capture, and on H₄
+that one binds first.
+
+One thing does improve with budget: the *best* seed goes from 3.25e-2 to
+1.77e-2, so the tail is moving even where the median is not. That points at
+optimiser variance rather than estimator noise as what is left.
+
+### Result 38 — the complete measurement-scheme ranking
+
+Derandomised shadows implemented (greedy over product bases, minimising
+`Σ_i c_i² exp(-decay·hits_i)`, with coverage enforced afterwards — a first
+version left terms at zero hits, which makes the estimator undefined rather
+than imprecise and showed up as an infinite variance).
+
+All five schemes scored on the same metric — total estimator variance under
+Neyman allocation, at the Hartree-Fock reference:
+
+| scheme | H₂ | H₄ | LiH | settings on LiH |
+|---|---|---|---|---|
+| **general commuting + Neyman** | **1.00** | **1.00** | **1.00** | **41** |
+| QWC + Neyman | 1.00 | 1.67 | 3.24 | 172 |
+| derandomised shadows | 3.00 | 3.20 | 4.79 | 351 |
+| double factorisation | 4.00 | 10.05 | 6.82 | 21 |
+| random-Pauli shadows | 38.1 | 44.5 | 368.5 | — |
+
+**General-commuting grouping with Neyman allocation wins on every molecule.**
+
+Derandomisation is a large improvement on random shadows (369× → 4.8× on LiH)
+but still loses, and the reason is structural rather than a tuning failure: its
+settings are **product bases**, so it can only ever measure qubit-wise-commuting
+sets together, while commuting grouping uses a Clifford. It also needs *more*
+settings than a QWC cover (351 against 172 on LiH) because coverage forces
+redundancy. Its better allocation does not make up for its weaker grouping.
+
+Double factorisation is the interesting outlier: it needs the **fewest settings
+of all** (21 against 41) and is still 6.8× worse, because each of those settings
+measures a *squared* operator.
+
+Caveat: this derandomisation is a simplified greedy, not the paper's exact
+algorithm, so the 3–5× is an upper bound on how well it does. The structural
+argument — product bases cannot beat Clifford grouping on setting count — does
+not depend on the implementation.
+
+**Conclusion for the measurement side.** Five schemes, one metric, three
+molecules: the scheme this repository already defaults to is the best of them,
+and none of the alternatives changes the `(Σ|c|)²` scaling. The measurement
+question is, as far as these tests reach, settled.
+
