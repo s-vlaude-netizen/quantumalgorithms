@@ -1,0 +1,7 @@
+qiskit>=2.5
+qiskit-aer>=0.17
+qiskit-ibm-runtime>=0.49
+qiskit-nature>=0.8
+pyscf>=2.14
+numpy>=2.0
+scipy>=1.14
