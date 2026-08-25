@@ -1,0 +1,80 @@
+{
+  "method": "commuting",
+  "rows": [
+    {
+      "molecule": "H2",
+      "num_qubits": 2,
+      "num_terms": 5,
+      "baseline_groups": 2,
+      "baseline_variance": 0.1245095238616203,
+      "variants": {
+        "hartree_fock": {
+          "groups": 2,
+          "variance": 0.1245095238616203,
+          "ratio": 1.0,
+          "control_ratio_median": 1.0,
+          "control_ratio_min": 1.0,
+          "seconds": 0.0057876339997164905
+        },
+        "oracle_ground_state": {
+          "groups": 3,
+          "variance": 0.1245095238616203,
+          "ratio": 1.0,
+          "control_ratio_median": 1.0,
+          "control_ratio_min": 1.0,
+          "seconds": 0.00620749599966075
+        }
+      }
+    },
+    {
+      "molecule": "H4",
+      "num_qubits": 6,
+      "num_terms": 165,
+      "baseline_groups": 10,
+      "baseline_variance": 1.1680061213118833,
+      "variants": {
+        "hartree_fock": {
+          "groups": 11,
+          "variance": 0.9444765044283935,
+          "ratio": 0.8086229063316677,
+          "control_ratio_median": 1.0890224736366962,
+          "control_ratio_min": 1.0433565413221866,
+          "seconds": 0.6862412419995962
+        },
+        "oracle_ground_state": {
+          "groups": 11,
+          "variance": 1.1292722223609504,
+          "ratio": 0.9668375890809308,
+          "control_ratio_median": 1.0890224736366962,
+          "control_ratio_min": 1.0433565413221866,
+          "seconds": 0.6310000900002706
+        }
+      }
+    },
+    {
+      "molecule": "LiH",
+      "num_qubits": 10,
+      "num_terms": 631,
+      "baseline_groups": 41,
+      "baseline_variance": 0.6909140087565856,
+      "variants": {
+        "hartree_fock": {
+          "groups": 43,
+          "variance": 0.7219266738944484,
+          "ratio": 1.0448864326744152,
+          "control_ratio_median": 1.2158154751208052,
+          "control_ratio_min": 1.0898016373609645,
+          "seconds": 10.308023350999974
+        },
+        "oracle_ground_state": {
+          "groups": 45,
+          "variance": 0.5589735385852815,
+          "ratio": 0.8090348892928763,
+          "control_ratio_median": 1.3889245401362114,
+          "control_ratio_min": 1.173354368770119,
+          "seconds": 10.023842018999858
+        }
+      }
+    }
+  ]
+}

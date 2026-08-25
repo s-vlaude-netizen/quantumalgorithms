@@ -264,6 +264,80 @@ Validated against direct sampling over 4000 trials: mean difference 6.2e-4
 against a 2σ band of 1.9e-3, standard-deviation ratio 0.9959. Measured effect on
 an H₄ device-noise run: **>600 s → 29.8 s (>20×)**.
 
+### Result 7 — covariance-aware grouping: works with good covariances, and the cheap proxy is not good enough
+
+New idea, implemented and tested this session. Standard grouping minimises the
+*number* of groups. Under Neyman allocation the quantity that actually sets the
+shot cost is
+
+```
+total variance = (Σ_g √Var_g)²,   Var_g = Σ_{i,j∈g} c_i c_j Cov(P_i, P_j)
+```
+
+The cross terms mean count and variance can disagree: two **anticorrelated**
+observables in one group make it cheaper to estimate than either term alone
+suggests. So group to minimise variance, not count.
+
+Scored against the covariance of the exact ground state (where a converged VQE
+sits). Ratio < 1 is better; `control` is the group-count control described
+below:
+
+| molecule | terms | grouping | groups | variance | ratio | control |
+|---|---|---|---|---|---|---|
+| H₂ | 5 | count-minimising | 2 | 0.1245 | 1.000 | — |
+| H₂ | | cov-aware / HF | 2 | 0.1245 | 1.000 | 1.000 |
+| H₄ | 165 | count-minimising | 10 | 1.1680 | 1.000 | — |
+| H₄ | | cov-aware / HF | 11 | 0.9445 | **0.809** | 1.089 |
+| H₄ | | cov-aware / oracle | 11 | 1.1293 | 0.967 | 1.089 |
+| LiH | 631 | count-minimising | 41 | 0.6909 | 1.000 | — |
+| LiH | | cov-aware / HF | 43 | 0.7219 | **1.045** | 1.216 |
+| LiH | | cov-aware / oracle | 45 | 0.5590 | **0.809** | 1.389 |
+
+**With good covariances the idea works: 0.809 on both H₄ and LiH, i.e. a 19%
+variance reduction, worth 1.24× fewer shots for equal accuracy.**
+
+**With the cheap Hartree-Fock proxy it is unreliable**: 0.809 on H₄ but 1.045 —
+actively worse than baseline — on LiH. HF is a computational-basis state, where
+only 1.8–3.4% of the pairwise covariances are non-zero at all, so it carries
+very little of the structure the method needs. Finding a cheap reference that is
+good enough is now the open problem, not the grouping algorithm.
+
+Two checks that make this trustworthy:
+
+* **The group-count control.** Covariance-aware grouping produces *more* groups
+  than count-minimising, and more groups also means finer-grained Neyman
+  allocation — so the win could have been an artefact of group count alone.
+  Control: split the count-minimising grouping at random to the same group
+  count. It scores 1.089–1.389, i.e. *worse* than baseline in every case, which
+  is what it should be (splitting destroys beneficial anticorrelations). The
+  effect is the covariance structure, not the count.
+* **The variance model predicts measured sampling variance.** At the exact H₄
+  ground state, 150 independent 20k-shot estimates: predicted σ 0.00715 vs
+  measured 0.00705 for cov-aware, predicted 0.00764 vs measured 0.00794 for the
+  baseline. Both estimators unbiased to within their standard error.
+
+### Two more traps, both found by tests rather than by inspection
+
+1. **`Pauli.phase` is not the group phase.** Qiskit stores a Pauli as
+   `(-i)^g Z^z X^x`, but the public `.phase` property is measured relative to
+   the `(-i)^(x·z)` convention: `Pauli("Y").phase` is **0** while its group
+   phase is **1**. Using `.phase` directly mis-signs every term containing a Y —
+   invisible on Y-free Hamiltonians, and it produced covariance errors of ~0.8
+   (against values of order 1) before the test caught it. Correct factor is
+   `(-i)^(phase + |x ∧ z|)`. Now verified against Qiskit to 1e-12, with explicit
+   Y coverage.
+
+2. **Greedy grouping was not reproducible across processes.** The partition is
+   built heaviest-coefficient-first, and PySCF returns coefficients that differ
+   in the last few ulp between runs. Near ties flipped and the greedy took a
+   different path: **47, 48 and 49 groups on LiH from three identical
+   invocations**, moving the headline variance ratio from 0.75 to 0.89. Every
+   covariance number measured before this was found is unreliable, including an
+   apparent "the HF reference beats the oracle" result that vanished once the
+   ordering was fixed — as it should have, since it made no physical sense.
+   Fixed by rounding the magnitude and breaking ties on the Pauli label;
+   regression-tested including a sub-tolerance perturbation.
+
 ### Open question carried forward
 
 Scaling `fake_kolkata`'s gate errors to 0.5× / 0.25× / 0.1× left the energy

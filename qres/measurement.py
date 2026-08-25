@@ -132,8 +132,15 @@ def _greedy_colouring(
     energetically dominant terms into groups first, which empirically yields
     groups whose variances are more even and so allocate shots better than a
     pure size-optimal cover would.
+
+    Ties are broken on the Pauli label, and the magnitude is rounded before
+    sorting.  Without that the partition is not reproducible *across processes*:
+    PySCF returns coefficients that differ in the last few ulp between runs, near
+    ties flip, and the greedy takes a different path.  Measured on LiH: 47, 48
+    and 49 groups from three identical invocations, moving a headline variance
+    ratio from 0.75 to 0.89.
     """
-    order = sorted(indices, key=lambda i: -abs(coeffs[i]))
+    order = sorted(indices, key=lambda i: (-round(abs(coeffs[i]), 12), str(paulis[i])))
     groups: list[list[int]] = []
     for i in order:
         for g in groups:
