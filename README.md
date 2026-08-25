@@ -65,9 +65,47 @@ gates; surviving a Heron-class device at fidelity > 0.5 allows ~40.
 - variance-adaptive (Neyman) shot allocation: median error ratio ~0.78 on H₂,
   ≈ 1.7× fewer shots — **suggestive, not significant** (14/10 seeds, p = 0.54).
   An earlier 4-seed run of this reported 3.8×; it did not replicate.
-- **SPSA over COBYLA: 2× lower error on H₂, 15 wins of 16, p = 0.001** — the
-  one statistically significant positive result here, and it only appears once
-  shot noise is genuinely resampled between evaluations (see below)
+- **SPSA over COBYLA: 2× lower error on H₂, 15 wins of 16, p = 0.001** — and it
+  only appears once shot noise is genuinely resampled between evaluations
+- **the shot ladder** — restart a model-based optimiser at escalating precision
+  — halves SPSA's error (p = 0.006) and is the first thing here to reach
+  chemical accuracy with any reliability: 7/16 seeds on H₂ at 12.8M shots
+
+## What was measured and closed
+
+Two whole lines are closed by measurement rather than by opinion. Both are kept
+as regression tests, so either reopens if the numbers ever invert.
+
+**Measurement schemes.** Five, ranked on one metric (total estimator variance
+under Neyman allocation) at the same reference state:
+general commuting **1.00** · QWC 1.0–3.2 · derandomised shadows 3.0–4.8 ·
+double factorisation 4.0–10.1 · random-Pauli shadows 38–369.
+What this package already defaults to wins on every molecule, and none of the
+alternatives changes the scaling.
+
+**Optimisers.** Three approaches, none beats the shot ladder: multi-start is
+worse at small budgets (2.44×, p = 0.004), automatic trust-radius estimation
+fails three different ways because the signal sits below the shot noise, and a
+STORM-style stochastic trust region never gets closer than 3.3× (p ≤ 0.001)
+across four orders of magnitude in its accuracy constant.
+
+## The wall
+
+Measured, not assumed: the shots to reach a target accuracy scale as
+
+```
+shots  ~  (Σ|c|)² · n_parameters / ε²
+```
+
+which is ~3.1M for H₂ (12 parameters, Σ|c| = 2.04) and ~170M for H₄ with UCCSD
+(26 parameters, Σ|c| = 10.94) — 55× for one more pair of hydrogens, against the
+64× the formula predicts. And that is a *lower bound on the estimator side*: H₄
+at 256M shots, above the prediction, still reaches 0/8 chemical accuracy,
+because a precise evaluation is only useful if the optimiser can exploit it.
+
+Everything in this repository buys a constant factor against that — grouping
+~15×, covariance refinement ~1.6×, the shot ladder ~2×. None of them touches
+the exponent.
 
 **Sizing rule for any budget-matched comparison** — below this it measures the
 optimiser's simplex construction, not the algorithm:

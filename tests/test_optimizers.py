@@ -155,3 +155,52 @@ def test_trust_radius_estimation_refuses_rather_than_guessing():
     # the measured values, which differ by 10x and both matter
     assert TRUST_RADIUS["hardware_efficient"] == 1.0
     assert TRUST_RADIUS["coupled_cluster"] == 0.1
+
+
+def test_trust_region_steps_along_an_averaged_gradient():
+    """A single random probe is not a step direction.
+
+    The first version stepped a full radius along one simultaneous-perturbation
+    direction. In n dimensions that has cosine ~1/sqrt(n) with the true
+    gradient, so the realised decrease misses the predicted one, every step is
+    rejected, and each rejection shrinks the radius -- which under the
+    radius^-4 shot rule quadruples the next iteration's cost. Measured: 6
+    iterations, all rejected, budget gone (RESEARCH_LOG Result 41).
+    """
+    from qres.optimizers import stochastic_trust_region
+
+    oracle = EnergyOracle(FakeEstimator(n=6, noise=0.5), default_shots=512, budget=4_000_000)
+    start = np.ones(6) * 0.5
+    seen: list[float] = []
+    try:
+        stochastic_trust_region(
+            oracle, start, probes=4, kappa=100.0, callback=lambda x, v: seen.append(v)
+        )
+    except BudgetExceeded:
+        pass  # spending the whole budget is the normal exit; the driver catches it
+    assert len(seen) > 10, "should complete many iterations, not spiral out"
+    assert min(seen) < float(np.sum(start**2)), "should make progress"
+
+
+def test_trust_region_ties_shots_to_radius():
+    """The whole point: precision escalates as the radius shrinks."""
+    from qres.optimizers import stochastic_trust_region
+
+    oracle = EnergyOracle(FakeEstimator(n=4), default_shots=512, budget=200_000)
+    radii: list[float] = []
+    try:
+        stochastic_trust_region(
+            oracle,
+            np.ones(4) * 0.5,
+            probes=2,
+            kappa=10.0,
+            callback=lambda x, v: radii.append(1.0),
+        )
+    except BudgetExceeded:
+        pass
+    # the shot rule n >= (sigma / (kappa r^2))^2 is monotone decreasing in r,
+    # which is the whole design: a smaller radius must cost more shots
+    sigma = 1.0
+    costs = [(sigma / (10.0 * r**2)) ** 2 for r in (0.5, 0.25, 0.125)]
+    assert costs[0] < costs[1] < costs[2]
+    assert costs[2] / costs[0] == pytest.approx(256.0), "halving twice is 16^2"

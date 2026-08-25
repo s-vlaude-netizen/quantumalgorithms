@@ -850,6 +850,120 @@ class _BudgetWindow:
         return self._oracle.estimator
 
 
+def stochastic_trust_region(
+    oracle: EnergyOracle,
+    x0: np.ndarray,
+    maxiter: int = 100_000,
+    *,
+    radius: float = 0.5,
+    min_radius: float = 1e-3,
+    max_radius: float = 2.0,
+    kappa: float = 1.0,
+    probes: int = 4,
+    accept: float = 0.1,
+    expand: float = 1.6,
+    shrink: float = 0.5,
+    min_shots: int = 256,
+    max_shots: int = 4_194_304,
+    seed: int = 0,
+    callback=None,
+) -> OptimizeResult:
+    """Trust region whose *sample count* is set by its own radius.
+
+    This is the design Result 26 argues for.  Near the optimum the energy
+    differences a model interpolates shrink quadratically in the distance to the
+    minimum while shot noise stays flat, so any fixed precision eventually fits
+    noise -- and precision therefore has to be tied to the radius rather than to
+    a schedule.  ``shot_ladder`` does that by hand with a fixed ladder of rungs;
+    this does it from the geometry.
+
+    The STORM condition is that the model be *fully linear* on the trust region,
+    ``|model - f| <= kappa * radius^2``.  With shot noise ``sigma_1 / sqrt(n)``
+    per evaluation that is
+
+        n  >=  (sigma_1 / (kappa * radius^2))^2
+
+    so the shot count grows as ``radius^-4``.  Shrinking the radius by 2 costs
+    16x the shots -- which is exactly the escalation the ladder was built to
+    approximate, arriving here for a reason rather than by tuning.
+
+    The gradient is estimated by **averaging several** simultaneous-perturbation
+    probes at the trust-region scale, and the step goes along that average.  A
+    first version used a single probe and stepped along that one random
+    direction: in 12 dimensions a random direction has cosine ~1/sqrt(n) with
+    the true gradient, so the realised decrease was far below the predicted one,
+    every step was rejected, and each rejection shrank the radius -- which under
+    the ``radius^-4`` shot rule quadruples the cost of the next iteration.  That
+    is a death spiral, and it was: **6 iterations, all rejected, energy never
+    moving off Hartree-Fock, and the whole 12.8M budget gone.**
+
+    Averaging costs ``2 * probes`` evaluations per iteration instead of two, and
+    is still independent of dimension, unlike the ``n+1`` interpolation set a
+    classical trust-region method would build.
+    """
+    rng = np.random.default_rng(seed)
+    x = np.asarray(x0, dtype=float).copy()
+    n = len(x)
+
+    # single-shot standard deviation, measured once and rescaled thereafter
+    probe_shots = max(min_shots, 1024)
+    _, probe_error = oracle.with_error(x, probe_shots)
+    sigma_one = float(probe_error * np.sqrt(probe_shots))
+
+    current, _ = oracle.with_error(x, probe_shots)
+    history: list[float] = [current]
+    shot_history: list[int] = [oracle.shots_used]
+    radii: list[float] = []
+
+    for _ in range(maxiter):
+        shots = int(np.clip((sigma_one / (kappa * radius**2)) ** 2, min_shots, max_shots))
+
+        gradient = np.zeros(n)
+        for _ in range(probes):
+            direction = rng.choice([-1.0, 1.0], size=n)
+            plus = oracle(x + radius * direction, shots)
+            minus = oracle(x - radius * direction, shots)
+            gradient += ((plus - minus) / (2.0 * radius)) * direction
+        gradient /= probes
+
+        norm = float(np.linalg.norm(gradient))
+        if norm < 1e-15:
+            radius = max(min_radius, radius * shrink)
+            continue
+
+        step = -radius * gradient / norm
+        predicted = -radius * norm
+
+        candidate = oracle(x + step, shots)
+        actual = candidate - current
+        rho = actual / predicted if predicted != 0 else 0.0
+
+        if rho >= accept:
+            x = x + step
+            current = candidate
+            radius = min(max_radius, radius * expand)
+        else:
+            radius = max(min_radius, radius * shrink)
+
+        history.append(current)
+        shot_history.append(oracle.shots_used)
+        radii.append(radius)
+        if callback:
+            callback(x, current)
+        if radius <= min_radius and shots >= max_shots:
+            break
+
+    return OptimizeResult(
+        x=x,
+        fun=float(current),
+        nit=len(history),
+        history=history,
+        shot_history=shot_history,
+        message=f"storm kappa={kappa} final_radius={radius:.4g}",
+        extra={"radii": radii, "sigma_one": sigma_one},
+    )
+
+
 OPTIMIZERS: dict[str, Callable] = {
     "cobyla": lambda o, x0, **kw: scipy_minimize(o, x0, method="COBYLA", **kw),
     "powell": lambda o, x0, **kw: scipy_minimize(o, x0, method="Powell", **kw),
@@ -860,4 +974,5 @@ OPTIMIZERS: dict[str, Callable] = {
     "sps": stochastic_parameter_shift,
     "ladder": shot_ladder,
     "multistart": multi_start,
+    "storm": stochastic_trust_region,
 }

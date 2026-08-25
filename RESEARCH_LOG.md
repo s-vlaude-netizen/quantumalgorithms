@@ -1525,3 +1525,65 @@ while a coupled-cluster ansatz's are cluster amplitudes, physically O(0.1), so a
 Shipping a heuristic that is right on one system and wrong on the other would be
 worse than requiring the choice.
 
+### Result 41 — the shot ladder already *is* the practical stochastic trust region
+
+The last open optimiser item, and it closes negatively for a reason worth
+keeping.
+
+A STORM-style method ties its **sample count to its trust radius**: the model
+must be fully linear on the region, `|model − f| ≤ κ·radius²`, and with shot
+noise `σ₁/√n` per evaluation that is `n ≥ (σ₁/(κ·radius²))²`. Shots therefore
+grow as `radius⁻⁴` — halving the radius costs 16× the shots, which is exactly
+the escalation `shot_ladder` performs by hand, arriving from the geometry
+instead of from tuning. That is the design Result 26 argues for.
+
+It loses anyway. H₂, `hea:2`, 12.8M shots, 16 seeds, paired against the ladder,
+sweeping the accuracy constant over four orders of magnitude:
+
+| configuration | median | iterations | ≤ chem acc | ratio | p |
+|---|---|---|---|---|---|
+| **shot ladder** | **1.691e-3** | — | **7/16** | 1.000 | — |
+| STORM κ=1, 4 probes | 1.152e-2 | 68 | 0/16 | 6.24 | 0.000 |
+| STORM κ=100, 4 probes | 9.875e-3 | 112 | 1/16 | 4.44 | 0.001 |
+| **STORM κ=1000, 4 probes** | **8.263e-3** | 187 | 1/16 | **3.28** | 0.001 |
+| STORM κ=10000, 4 probes | 1.127e-2 | 7340 | 0/16 | 4.45 | 0.000 |
+
+**Never closer than 3.3×, always significant.** And κ=10 000 gives 7 340
+iterations while still losing 4.4×, so it is not iteration starvation either.
+
+One real bug was found and fixed along the way, worth its own note. The first
+version estimated the gradient with a *single* simultaneous-perturbation probe
+and then stepped a full radius **along that random direction**. In 12 dimensions
+a random direction has cosine ~1/√n with the true gradient, so the realised
+decrease fell far short of the predicted one, every step was rejected, and each
+rejection shrank the radius — which under the `radius⁻⁴` rule quadruples the
+next iteration's cost. A death spiral, and measurably so: **6 iterations, all
+rejected, the energy never moving off Hartree-Fock, and the whole 12.8M budget
+spent.** Averaging four probes and stepping along the average fixed the spiral
+and bought 2× (9.5 → 6.2), which was not enough.
+
+**Why it loses, and the useful part of the finding.** The comparison is not
+really "trust region versus ladder". It is *a four-probe gradient plus a trust
+region* versus *a full COBYLA model plus precision escalation*. COBYLA builds an
+`n`-dimensional linear model from `n+1` points and takes model-informed steps; a
+four-probe average in 12 dimensions is a far cruder direction. Doing STORM
+properly needs the `n+1`-point interpolation set — at which point it *is*
+COBYLA with adaptive sampling, which is what the ladder already assembles.
+
+So: **the precision-escalation idea is right and already implemented; the model
+is what the ladder gets for free by delegating to COBYLA, and hand-rolling a
+cheaper one loses more than the adaptive radius gains.**
+
+### Session 4 closing state
+
+All three optimiser sub-items are now measured and all three close negatively:
+
+| item | result |
+|---|---|
+| Multi-start | significantly worse at small budgets (2.44×, p = 0.004); indistinguishable at best (0.827, p = 0.80) |
+| Automatic `rhobeg` | three principled heuristics, three failures; the signal is below the shot noise |
+| Noise-aware trust region | never closer than 3.3×, p ≤ 0.001 across four orders of magnitude in κ |
+
+`shot_ladder` with a per-ansatz `rhobeg` remains the best optimiser found, at
+1.691e-3 median and 7/16 chemical accuracy on H₂ at 12.8M shots.
+

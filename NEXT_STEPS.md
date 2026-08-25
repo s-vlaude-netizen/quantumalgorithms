@@ -27,42 +27,55 @@ the Hartree-Fock reference — three molecules:
 the alternatives changes the `(Σ|c|)²` scaling. Do not re-open this without a
 scheme that is not on this list.
 
-### 1. The optimiser is what binds — and two of three sub-items are now closed
-Result 37 falsified the shot-cost model as a *budget*: H₄ + UCCSD at 256M, above
-the 170M the estimator noise predicted, still reaches 0/8 chemical accuracy. The
-estimator side is right; what it omits is that a precise evaluation is only
-useful if the optimiser can exploit it.
+### The optimiser line is closed too; what is left is not optimiser work
+All three optimiser sub-items are measured and all three close negatively
+(Results 39, 40, 41):
 
-**Closed this session:**
+| item | result |
+|---|---|
+| multi-start | worse at small budgets (2.44×, p = 0.004); indistinguishable at best |
+| automatic `rhobeg` | three heuristics, three failures — signal is below the noise |
+| noise-aware trust region | never closer than 3.3×, p ≤ 0.001 over four orders of magnitude in κ |
 
-* ~~Multi-start~~ (Result 39). Significantly *worse* at small budgets
-  (2.44× at 3.2M, p = 0.004) and indistinguishable at the best audit setting
-  (0.827, p = 0.804). The optimiser variance is real, but selecting the good
-  run costs about as much as producing it, so diversification cannot capture it
-  at equal budget.
-* ~~Automatic `rhobeg`~~ (Result 40). Three principled heuristics, three
-  failures — the last one correctly matched to COBYLA's linear model and still
-  defeated by shot noise. The signal is smaller than σ at any affordable probe
-  cost. Now a documented table, `optimizers.TRUST_RADIUS`, with the measured
-  values and the physical reason they differ by 10×.
+`shot_ladder` with a per-ansatz `rhobeg` stands as the best optimiser found:
+**1.691e-3 median, 7/16 chemical accuracy on H₂ at 12.8M shots**. The useful
+insight from the last one: the ladder already *is* the practical stochastic
+trust region — COBYLA supplies the model, the ladder supplies the precision
+escalation, and hand-rolling a cheaper model loses more than an adaptive radius
+gains.
 
-**Still open, and now the only optimiser item left:**
+**Where that leaves the project.** Two whole lines are now closed by
+measurement:
 
-**A noise-aware trust region.** `shot_ladder` restarts COBYLA, throwing away its
-model at every rung, and COBYLA assumes exact function values. A stochastic
-trust-region method (STORM-style) instead sizes its *sample count* from the
-model's own uncertainty: it re-samples until the model is trustworthy at the
-current radius, shrinks the radius when it is not, and accepts a step only when
-the predicted decrease is large against the noise.
+* *Measurement schemes* (Session 3): five schemes ranked, the repository's
+  default wins, none changes the `(Σ|c|)²` scaling.
+* *Optimisers* (Session 4): three approaches, none beats the shot ladder.
 
-That is the one design that addresses Result 26 directly — near the optimum the
-differences a model interpolates shrink quadratically while noise stays flat, so
-the sample count *has* to be tied to the radius. It would also subsume
-`shot_ladder`'s hand-set `growth` and `levels`, and possibly `rhobeg` too, since
-the radius becomes adaptive rather than initial.
+So the remaining levers are neither estimator nor optimiser. In order of what
+the measurements point at:
 
-Acceptance test: beat `shot_ladder`'s 1.691e-3 median and 7/16 chemical-accuracy
-rate on H₂ at 12.8M over ≥ 16 seeds, and do it without a per-ansatz constant.
+### 1. Fewer parameters, not better optimisation  ← **the live direction**
+Result 34's scaling is `shots ~ (Σ|c|)² · n / ε²`, and `n` is the one factor
+still untouched. ADAPT-VQE grows the ansatz operator by operator from a measured
+gradient pool, reaching a given accuracy with far fewer parameters than a fixed
+UCCSD — and every measurement here says parameter count is what the budget buys.
+The measurement machinery it needs (grouped estimation of an operator pool's
+gradients) already exists.
+
+Acceptance test: reach chemical accuracy on H₄ at a budget where fixed UCCSD
+does not (it fails at 256M, Result 37).
+
+### 2. Smaller problems, honestly scored
+Everything here is H₂/H₄/LiH at STO-3G. Before any of these conclusions is
+generalised, one of them should be checked on a system where the answer is
+known and the size is larger — H₂O or an active-space BeH₂ — to see whether the
+rankings hold or are an artefact of very small Hamiltonians.
+
+### 3. A classical baseline on every result
+Nothing in this repository is compared against what a laptop does with the same
+problem. CCSD(T) reaches chemical accuracy on all of these in milliseconds. That
+comparison belongs in the README, not because it is flattering, but because
+without it none of the shot counts mean anything.
 
 ---
 
