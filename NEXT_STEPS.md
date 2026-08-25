@@ -27,17 +27,23 @@ variance, the shot ladder ~2× in error. None of them touches the exponent, and
 So the honest question for the remaining sessions is **what reduces `Σ|c|` or
 `n`, not what reduces the constant**:
 
-1. **Hamiltonian factorisation.** Double-factorised or tensor-hypercontracted
-   representations replace the raw Pauli sum with a smaller set of one-body
-   terms measured in rotated bases. The literature claims order-of-magnitude
-   reductions in the measurement 1-norm, which is exactly `Σ|c|`. This is the
-   single most promising direction and it is untried here.
+1. ~~**Hamiltonian factorisation.**~~ **Measured and closed (Result 35).**
+   Double factorisation is **4–10× worse** for VQE sampling variance (H₂ 4.00×,
+   H₄ 10.05×, LiH 6.82×), despite needing fewer measurement settings, because
+   each factor is a *squared* one-body operator and squaring inflates variance.
+   Its 1-norm advantage is real for qubitisation/QPE, where λ enters a block
+   encoding's query complexity — a different quantity from a sampling variance.
+   Kept as a regression test; reopen only if that ratio inverts.
 2. **Active-space reduction.** Fewer orbitals means fewer terms and fewer
    parameters, at the cost of accuracy. Worth mapping the trade-off: what does
    `Σ|c|` and the shot requirement do as the active space shrinks?
-3. **Classical shadows.** A different estimator entirely, with a different
-   scaling in the number of observables. Whether it wins for a molecular
-   Hamiltonian at these sizes is an empirical question.
+3. **Classical shadows.**  ← **now the only untested candidate**
+   A different estimator entirely, with a different scaling in the number of
+   observables. It is the last of the three that changes *how* observables are
+   estimated rather than how the same estimator is arranged. Whether it wins for
+   a molecular Hamiltonian at these sizes is an empirical question, and the
+   cheap version of it is the same one that settled factorisation: compute the
+   predicted variance at a reference state before building any circuits.
 
 ### 1. Retire or re-scope the covariance grouping
 Result 33: with the numerical-stability fix, the end-to-end benefit is

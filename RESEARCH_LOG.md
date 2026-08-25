@@ -1263,3 +1263,57 @@ Also confirmed: `rhobeg = 0.1` beats 1.0 on UCCSD **even with exact energies**
 (9.636e-3 against 2.872e-2 at 108 evaluations), so Result 31's trust-region
 finding was genuine tuning and not a noise artefact.
 
+### Result 35 — double factorisation is a qubitisation technique, not a VQE one
+
+Acting on Result 34's conclusion that only `Σ|c|` matters, and on NEXT_STEPS
+naming Hamiltonian factorisation "the single most promising direction". It is
+not, and the measurement was cheap enough that it should have come first.
+
+Implemented double factorisation properly — eigendecompose the reshaped
+two-electron tensor, diagonalise each symmetric factor — and verified it
+reconstructs the two-body integrals to **1.9e-15**.
+
+**The 1-norm goes the wrong way**, 5–10× *up*:
+
+| molecule | Pauli Σ\|c\| | DF factors | DF 1-norm | ratio |
+|---|---|---|---|---|
+| H₂ | 0.988 | 3 | 10.401 | 10.53 |
+| H₄ | 8.466 | 10 | 41.149 | 4.86 |
+| LiH | 12.342 | 21 | 60.482 | 4.90 |
+| BeH₂ (4e,6o) | 14.763 | 28 | 114.535 | 7.76 |
+
+That comparison is asymmetric and I do not rest anything on it: the qubit
+Hamiltonian's identity term needs no measurement and is excluded, while the
+corresponding constant is still inside the factorised form. The 1-norm is only a
+proxy anyway.
+
+**The symmetric comparison, on the quantity that actually sets shot cost** —
+total estimator variance under Neyman allocation, both schemes scored at the
+Hartree-Fock reference:
+
+| molecule | Pauli groups | Pauli variance | DF factors | DF variance | ratio |
+|---|---|---|---|---|---|
+| H₂ | 2 | 0.0327 | 3 | 0.1309 | **4.00** |
+| H₄ | 10 | 0.5811 | 10 | 5.8409 | **10.05** |
+| LiH | 41 | 0.4146 | 21 | 2.8281 | **6.82** |
+
+**Double factorisation is 4–10× worse for VQE sampling**, even though it needs
+*fewer* measurement settings (21 factors against 41 groups on LiH).
+
+The reason is structural and should have been predictable: each factor is a
+**squared** one-body operator, and squaring inflates the variance. Double
+factorisation's 1-norm advantage is real for **qubitisation and QPE**, where λ
+enters the query complexity of a block encoding. VQE pays a *sampling variance*,
+which is a different quantity, and the transformation that helps one hurts the
+other.
+
+So the direction NEXT_STEPS ranked first is closed. Recorded as a regression
+test rather than just prose: if the ratio ever inverts, this finding is wrong
+and the direction reopens.
+
+**What this leaves.** Of the three levers named for attacking the scaling wall,
+one is now measured and dead. Active-space reduction trades accuracy for cost
+and does not change the exponent either. Classical shadows remain untested and
+are the only candidate left that changes *how* observables are estimated rather
+than how the same estimator is arranged.
+
