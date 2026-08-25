@@ -650,6 +650,71 @@ a plausible route to recovering most of the gap through qubit ordering. Not the
 6× the gate-counting estimate in Result 13 suggested; that estimate ignored
 routing entirely.
 
+### Result 16 — the gap, measured across the whole excitation family: ~32×
+
+Experiment 005 screens every candidate on the three things that must hold at
+once. H4, `fake_torino` (Heron), exact optimisation for the accuracy column:
+
+| ansatz | params | 2q | \|grad@0\| | exact error | chem? | fidelity | verdict |
+|---|---|---|---|---|---|---|---|
+| hea:2:linear:cry | 46 | 20 | **0.000** | 3.67e-2 | no | 0.865 | stuck |
+| hea:4:linear:cry | 80 | 40 | **0.000** | 1.72e-2 | no | 0.767 | stuck |
+| puccd | 4 | 317 | 0.446 | 1.63e-2 | no | 0.099 | inexact |
+| puccd:2 | 8 | 638 | 0.630 | **1.63e-2** | no | 0.0095 | inexact |
+| puccd:3 | 12 | 959 | 0.772 | **1.63e-2** | no | 0.0009 | inexact |
+| puccsd | 12 | 460 | 0.446 | 1.59e-2 | no | 0.038 | inexact |
+| succd | 10 | 867 | 0.489 | 9.02e-3 | no | 0.0018 | inexact |
+| succd:2 | 20 | 1738 | 0.691 | 2.23e-3 | no | 0.0000 | inexact |
+| **ucc-d:1** | 18 | 1308 | 0.551 | **1.08e-4** | **YES** | 0.0001 | noisy |
+
+**Nothing passes.** The requirement is a scissor with a measured width:
+
+* reaching chemical accuracy needs **~1300 two-qubit gates**
+* surviving the device (fidelity > 0.5) allows **~40**
+* **the gap is ~32×**
+
+Two sub-results that sharpen it:
+
+**Repeating paired doubles is useless.** `puccd`, `puccd:2` and `puccd:3` give
+*identical* error — 1.631e-2 at k = 1, 2 and 3 — while tripling the gate count
+and dropping fidelity from 0.099 to 0.0009. The paired-doubles manifold is
+closed under composition, so extra repetitions add parameters that reach no new
+states. This kills "add k-fold repetitions" as a route to expressibility for
+paired doubles specifically.
+
+**Singles contribute essentially nothing**, as Brillouin's theorem predicts:
+`puccsd` (12 parameters, singles + paired doubles) reaches 1.589e-2 against
+`puccd`'s (4 parameters, doubles only) 1.631e-2 — a 2.6% improvement for three
+times the parameters. And `ucc-d:1`, doubles only, reaches chemical accuracy
+with 18 parameters where full UCCSD needs 26 for 9.7e-6. **Doubles are where
+essentially all of the correlation energy is**, which is exactly why the
+hardware-efficient ansatz — whose first-order response reaches only singles —
+cannot move.
+
+Against that 32× gap, this session's compilation work (Result 15) buys 2.43×
+abstract, 1.31× routed. Useful, and nowhere near sufficient on its own.
+
+### Result 17 — evaluations-per-parameter is the binding constraint everywhere
+
+Repeating the end-to-end measurement-grouping test with UCCSD — chosen because
+it *does* have gradient at Hartree-Fock and therefore converges — at a 200k shot
+budget gave **1.39e-1 Ha**, worse than the stuck hardware-efficient ansatz's
+5e-2.
+
+Not a contradiction: 200 000 shots at 4096 per evaluation is **48 evaluations
+for 26 parameters**, and COBYLA spends 27 of them constructing its initial
+simplex. The optimiser barely starts, and with UCCSD's large gradient it
+overshoots when it does.
+
+This is the same constraint behind every flat result in this session, stated
+once properly:
+
+    usable budget  ≳  10 × n_parameters × shots_per_evaluation
+
+For H4/UCCSD at 4096 shots that is ≈ 1.07M shots minimum; 200k is 5× short. Any
+future budget-matched comparison has to be sized against the parameter count, or
+it measures the simplex construction rather than the algorithm.
+
 ### Open question carried forward
 
 Scaling `fake_kolkata`'s gate errors to 0.5× / 0.25× / 0.1× left the energy

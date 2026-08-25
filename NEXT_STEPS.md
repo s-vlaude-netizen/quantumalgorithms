@@ -66,9 +66,26 @@ the same ordering, which `qiskit_nature` does not provide directly. Steps:
    Z-strings.
 3. Measure routed gate count and device fidelity against the blocked baseline.
 
-Then, still open: expressibility. PUCCD stalls at 1.6e-2 Ha on H₄ (10× worse
-than chemical accuracy) however cheaply it is compiled, so a shallow build is
-necessary but not sufficient — k-UpCCGSD repetitions are the next dial.
+**The gap this has to close, now measured** (Result 16, experiment 005 over the
+whole excitation family on H₄):
+
+* reaching chemical accuracy needs **~1300 two-qubit gates** (`ucc-d:1`, 18
+  parameters, 1.08e-4 Ha)
+* surviving a Heron device at fidelity > 0.5 allows **~40**
+* **the gap is ~32×**, and this session's compilation buys 2.43× of it
+
+Two routes are now closed and should not be retried:
+
+* **Repetitions of paired doubles do nothing.** `puccd`, `puccd:2`, `puccd:3`
+  give *identical* error (1.631e-2) while tripling gates — the paired-doubles
+  manifold is closed under composition.
+* **Singles are not worth their cost.** `puccsd` (12 params) reaches 1.589e-2
+  against `puccd`'s (4 params) 1.631e-2. Brillouin again.
+
+So expressibility has to come from *unpaired* doubles, which is where the gate
+count lives. Realistic remaining levers, in order: qubit ordering (above),
+per-excitation compilation below 26 gates, and dropping excitations by measured
+gradient magnitude (ADAPT-style) rather than including the full set.
 
 Acceptance test: non-zero gradient at Hartree-Fock, exact-optimisation error
 better than PUCCD's 1.6e-2 on H4, and ≤ 80 two-qubit gates transpiled to
@@ -111,6 +128,16 @@ budget over 10⁵–10⁷ shots for the best configuration and find where chemic
 accuracy becomes reliable (≥ 6/8 seeds). *Shots to chemical accuracy* is the
 benchmark everything else should be measured against, and it is unknown even
 for H₂.
+
+**Size every future budget against the parameter count** (Result 17):
+
+    usable budget  ≳  10 × n_parameters × shots_per_evaluation
+
+COBYLA spends `n+1` evaluations on its initial simplex alone. A 200k budget at
+4096 shots gives 48 evaluations for UCCSD's 26 parameters, so it never starts —
+which is why an end-to-end test with a *converging* ansatz still produced
+1.39e-1 Ha. Below this threshold a comparison measures simplex construction,
+not the algorithm.
 
 ---
 
