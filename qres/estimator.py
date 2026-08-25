@@ -62,6 +62,7 @@ class ShotEstimator:
         min_shots_per_group: int = 8,
         prior_strength: float = 64.0,
         optimization_level: int = 2,
+        reference_params: Sequence[float] | None = None,
     ):
         self.hamiltonian = hamiltonian
         self.ansatz = ansatz
@@ -71,7 +72,7 @@ class ShotEstimator:
         self.min_shots_per_group = min_shots_per_group
 
         t0 = time.perf_counter()
-        self.groups, self.identity_coeff = group_paulis(hamiltonian, method=grouping)
+        self.groups, self.identity_coeff = self._build_groups(grouping, reference_params)
         self.grouping_seconds = time.perf_counter() - t0
         self.variance_model = VarianceModel.from_groups(self.groups, prior_strength)
 
@@ -83,8 +84,59 @@ class ShotEstimator:
         self.report = grouping_report(self.groups, self.identity_coeff)
         self.report["transpile_seconds"] = self.transpile_seconds
         self.report["grouping_seconds"] = self.grouping_seconds
+        self.report["method"] = grouping
+        self.report["refinement_moves"] = getattr(self, "refinement_moves", 0)
 
     # -- setup ------------------------------------------------------------
+
+    #: Above this qubit count the covariance reference cannot be simulated, so
+    #: the covariance-aware groupings are unavailable and we say so rather than
+    #: silently falling back.
+    MAX_COVARIANCE_QUBITS = 16
+
+    def _build_groups(self, grouping: str, reference_params):
+        """Partition the Hamiltonian, including the covariance-aware options.
+
+        The covariance reference defaults to the ansatz at zero parameters.
+        With the reference-preserving entanglers that is exactly the
+        Hartree-Fock determinant, and more generally it is wherever the
+        optimiser starts -- which is the best guess available for free.
+
+        Caveat this cannot fix: the covariances are evaluated **once**, and the
+        optimiser then walks away from that state.  How far the benefit
+        survives along a trajectory is an open measurement, not something the
+        estimator knows.
+        """
+        if grouping in ("qwc", "commuting", "none"):
+            return group_paulis(self.hamiltonian, method=grouping)
+
+        if grouping not in ("covariance", "covariance+refine"):
+            raise ValueError(f"unknown grouping method {grouping!r}")
+
+        n = self.hamiltonian.num_qubits
+        if n > self.MAX_COVARIANCE_QUBITS:
+            raise ValueError(
+                f"grouping={grouping!r} needs a simulable reference state; "
+                f"{n} qubits exceeds MAX_COVARIANCE_QUBITS={self.MAX_COVARIANCE_QUBITS}"
+            )
+
+        from .covariance import covariance_grouping, refined_covariance_grouping
+
+        params = (
+            np.zeros(self.ansatz.num_parameters)
+            if reference_params is None
+            else np.asarray(reference_params, dtype=float)
+        )
+        reference = Statevector(self.ansatz.assign_parameters(params))
+        if grouping == "covariance":
+            groups, identity = covariance_grouping(self.hamiltonian, reference, "commuting")
+            self.refinement_moves = 0
+        else:
+            groups, identity, moves = refined_covariance_grouping(
+                self.hamiltonian, reference, "commuting"
+            )
+            self.refinement_moves = moves
+        return groups, identity
 
     def _build_circuits(self, optimization_level: int) -> None:
         t0 = time.perf_counter()

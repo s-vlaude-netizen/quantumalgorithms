@@ -212,3 +212,62 @@ def test_refinement_is_deterministic_across_calls():
         groups, _, moves = refined_covariance_grouping(problem.hamiltonian, reference, "commuting")
         signatures.append((moves, tuple(tuple(sorted(g.indices)) for g in groups)))
     assert signatures[0] == signatures[1]
+
+
+def test_shot_estimator_accepts_covariance_groupings():
+    """The covariance groupings must be reachable from the normal estimator path."""
+    from qres.ansatz import build_ansatz
+    from qres.estimator import ShotEstimator
+    from qres.noise import make_environment
+
+    problem = build_molecule("H4")
+    env = make_environment("ideal")
+    ansatz = build_ansatz("hea:1:linear:cry", problem, env)
+
+    reports = {}
+    for method in ("commuting", "covariance", "covariance+refine"):
+        est = ShotEstimator(problem.hamiltonian, ansatz, env, grouping=method)
+        reports[method] = est.report
+        assert est.report["method"] == method
+        assert est.report["num_terms"] == len(problem.hamiltonian) - 1  # identity dropped
+        # the estimator must still produce the right energy
+        params = np.zeros(ansatz.num_parameters)
+        assert est.exact(params) == pytest.approx(problem.hartree_fock_energy, abs=1e-9)
+
+    assert reports["covariance+refine"]["refinement_moves"] > 0
+    assert reports["commuting"]["refinement_moves"] == 0
+
+
+def test_covariance_grouping_refuses_rather_than_silently_degrading():
+    """Beyond the simulable size it must raise, not quietly fall back."""
+    from qres.ansatz import hardware_efficient
+    from qres.estimator import ShotEstimator
+    from qres.noise import make_environment
+
+    n = ShotEstimator.MAX_COVARIANCE_QUBITS + 2
+    ham = SparsePauliOp(["Z" * n, "X" * n], np.array([1.0, 0.5], dtype=complex))
+    ansatz = hardware_efficient(n, reps=1)
+    env = make_environment("ideal")
+    with pytest.raises(ValueError, match="MAX_COVARIANCE_QUBITS"):
+        ShotEstimator(ham, ansatz, env, grouping="covariance")
+
+
+def test_sampled_energy_agrees_with_exact_for_every_grouping():
+    """A grouping change must never move the energy, only its variance."""
+    from qres.ansatz import build_ansatz
+    from qres.estimator import ShotEstimator
+    from qres.noise import make_environment
+
+    problem = build_molecule("H4")
+    env = make_environment("ideal")
+    ansatz = build_ansatz("hea:1:linear:cry", problem, env)
+    rng = np.random.default_rng(0)
+    params = rng.normal(0, 0.3, ansatz.num_parameters)
+
+    for method in ("commuting", "covariance", "covariance+refine"):
+        est = ShotEstimator(problem.hamiltonian, ansatz, env, grouping=method)
+        exact = est.exact(params)
+        result = est.estimate(params, 400_000)
+        # within 5 sigma of the exact value, and sigma itself must be sane
+        assert result.stderr > 0
+        assert abs(result.value - exact) < 5 * result.stderr + 1e-9

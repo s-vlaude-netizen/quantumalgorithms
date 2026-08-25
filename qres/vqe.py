@@ -81,6 +81,7 @@ def run_vqe(
     ansatz: str = "hea:2",
     environment: str | NoiseEnvironment = "ideal",
     grouping: str = "commuting",
+    reference_params=None,
     allocation: str = "adaptive",
     optimizer: str = "cobyla",
     shots: int = 4096,
@@ -109,6 +110,7 @@ def run_vqe(
         grouping=grouping,
         allocation=allocation,
         ledger=ledger,
+        reference_params=reference_params,
     )
     oracle = EnergyOracle(estimator, default_shots=shots, budget=shot_budget)
     x0 = initial_point(circuit, seed=seed)
