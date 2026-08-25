@@ -1317,3 +1317,58 @@ and does not change the exponent either. Classical shadows remain untested and
 are the only candidate left that changes *how* observables are estimated rather
 than how the same estimator is arranged.
 
+### Result 36 — classical shadows are worse too, and get worse with size
+
+The third and last lever named against the scaling wall, checked the same cheap
+way. The random-Pauli shadow estimator's variance carries a `3^k` factor for a
+Pauli of weight `k`, so the question is whether molecular Hamiltonians'
+high-weight terms kill it. Scored against general-commuting grouping at the
+Hartree-Fock reference:
+
+| molecule | terms | max weight | grouped variance | shadow variance | ratio |
+|---|---|---|---|---|---|
+| H₂ | 5 | 2 | 0.0327 | 1.246 | **38×** |
+| H₄ | 165 | 6 | 0.5811 | 25.86 | **44×** |
+| LiH | 631 | 10 | 0.4146 | 152.77 | **369×** |
+
+The weight distribution shows exactly where it goes. On LiH the weight-9 and
+weight-10 terms are **33 of 631** and carry **67% of the shadow variance**,
+because `3^10 = 59 049`:
+
+```
+LiH   w=1:12t/5%   w=2:51t/3%   w=3:98t/4%   w=4:124t/6%   w=5:118t/1%
+      w=6:88t/3%   w=7:72t/4%   w=8:34t/7%   w=9:20t/27%   w=10:13t/40%
+```
+
+And the penalty **grows** with system size — 38× → 44× → 369× — which is the
+opposite of what a scaling fix has to do. Fermionic Hamiltonians produce
+high-weight Paulis by construction (the Jordan-Wigner strings), so this is
+structural rather than an artefact of these particular molecules.
+
+**Caveat, and it is a real one:** this is the *random-Pauli* shadow estimator.
+Derandomised shadows (Huang et al. 2021) choose measurement settings to target
+the specific observables at hand and are substantially better. That variant is
+**untested here**, and this result does not speak to it.
+
+### Where that leaves the three levers
+
+All three candidates named in Result 34 for attacking `shots ~ (Σ|c|)² n / ε²`
+are now measured:
+
+| lever | result |
+|---|---|
+| Double factorisation | **4–10× worse** for sampling variance (Result 35) |
+| Active-space reduction | trades accuracy for cost; does not change the exponent |
+| Classical shadows (random Pauli) | **38–369× worse**, worsening with size |
+
+**General-commuting grouping with Neyman allocation is the best measurement
+scheme available here**, and nothing tested changes the scaling. That is the
+honest state of the question: the constant factors this repository has found are
+real (grouping ~15×, refinement ~1.6×, the shot ladder ~2×), and the exponent is
+untouched.
+
+The one candidate left standing is derandomised shadows. If that also fails, the
+conclusion is that VQE's measurement cost on molecules is not fixable at the
+estimator level, and the remaining routes are algorithmic — fewer parameters, or
+a different algorithm entirely.
+

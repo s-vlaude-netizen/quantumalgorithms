@@ -37,13 +37,18 @@ So the honest question for the remaining sessions is **what reduces `Σ|c|` or
 2. **Active-space reduction.** Fewer orbitals means fewer terms and fewer
    parameters, at the cost of accuracy. Worth mapping the trade-off: what does
    `Σ|c|` and the shot requirement do as the active space shrinks?
-3. **Classical shadows.**  ← **now the only untested candidate**
-   A different estimator entirely, with a different scaling in the number of
-   observables. It is the last of the three that changes *how* observables are
-   estimated rather than how the same estimator is arranged. Whether it wins for
-   a molecular Hamiltonian at these sizes is an empirical question, and the
-   cheap version of it is the same one that settled factorisation: compute the
-   predicted variance at a reference state before building any circuits.
+3. ~~**Classical shadows (random Pauli).**~~ **Measured and closed (Result 36).**
+   **38–369× worse** than grouping, and worsening with system size, because the
+   `3^k` weight penalty falls on exactly the high-weight Paulis that
+   Jordan-Wigner strings produce: on LiH, 33 of 631 terms carry 67% of the
+   variance.
+
+   **Still open: derandomised shadows** (Huang et al. 2021), which choose
+   settings to target the observables at hand rather than sampling bases at
+   random. That is the last untested candidate, and the same cheap check
+   applies — predicted variance at a reference state, before any circuits.
+   If it also fails, VQE's measurement cost on molecules is not fixable at the
+   estimator level and the remaining routes are algorithmic.
 
 ### 1. Retire or re-scope the covariance grouping
 Result 33: with the numerical-stability fix, the end-to-end benefit is
