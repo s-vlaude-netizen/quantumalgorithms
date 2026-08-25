@@ -69,7 +69,9 @@ def test_covariance_matrix_matches_dense_computation():
                 psi.conj() @ (mi @ mj) @ psi
                 - (psi.conj() @ mi @ psi) * (psi.conj() @ mj @ psi)
             )
-            assert cov[i, j] == pytest.approx(want, abs=1e-12)
+            # tolerance follows COVARIANCE_DECIMALS: the matrix is rounded to
+            # 1e-9 so the partition cannot depend on ulp-scale noise
+            assert cov[i, j] == pytest.approx(want, abs=1e-9)
 
 
 def test_covariance_matrix_is_symmetric():
@@ -102,7 +104,10 @@ def test_group_variance_matches_direct_sampling_variance():
         mean = probs @ values
         want = probs @ (values - mean) ** 2
         got = group_variance(group.indices, coeffs, cov)
-        assert got == pytest.approx(want, rel=1e-8, abs=1e-10)
+        # Var_g sums up to ~900 rounded covariances, so the 1e-9 rounding can
+        # accumulate to ~1e-6 here.  Against group variances of order 0.01-1
+        # that is 5+ orders below anything physical.
+        assert got == pytest.approx(want, rel=1e-5, abs=1e-6)
 
 
 def test_covariance_grouping_covers_every_term_exactly_once():
@@ -271,3 +276,51 @@ def test_sampled_energy_agrees_with_exact_for_every_grouping():
         # within 5 sigma of the exact value, and sigma itself must be sane
         assert result.stderr > 0
         assert abs(result.value - exact) < 5 * result.stderr + 1e-9
+
+
+def test_grouping_survives_a_numerically_equivalent_reference():
+    """Two references that are the same state must give the same partition.
+
+    The Hartree-Fock determinant built as a bare circuit and the UCCSD ansatz
+    evaluated at theta = 0 are the same state -- overlap 1.000000, max amplitude
+    difference 2.6e-12. Before covariances were rounded, those two produced
+    **11 and 19 groups** on H4, because the ~1e-12 difference in the covariance
+    matrix flipped near-ties in the greedy.
+
+    That is the same failure mode as the coefficient tie-break, one level down,
+    and it silently changed which partition an end-to-end experiment measured.
+    """
+    from qres.ansatz import build_ansatz, hartree_fock_state
+    from qres.covariance import refined_covariance_grouping
+
+    problem = build_molecule("H4")
+    bare = Statevector(hartree_fock_state(problem.hf_bitstring))
+    ansatz = build_ansatz("uccsd", problem)
+    at_zero = Statevector(ansatz.assign_parameters(np.zeros(ansatz.num_parameters)))
+
+    assert abs(bare.inner(at_zero)) == pytest.approx(1.0, abs=1e-9)
+    assert 0 < np.abs(bare.data - at_zero.data).max() < 1e-9, "should differ at ulp scale"
+
+    first, _, moves_a = refined_covariance_grouping(problem.hamiltonian, bare, "commuting")
+    second, _, moves_b = refined_covariance_grouping(problem.hamiltonian, at_zero, "commuting")
+
+    assert [sorted(g.indices) for g in first] == [sorted(g.indices) for g in second]
+    assert moves_a == moves_b
+
+
+def test_covariance_matrix_is_rounded_below_the_physical_scale():
+    """A perturbation far below anything physical must not change the matrix."""
+    from qres.covariance import COVARIANCE_DECIMALS
+
+    state = random_state(3, 9)
+    rng = np.random.default_rng(9)
+    labels = sorted({"".join(rng.choice(list("IXYZ"), size=3)) for _ in range(10)})
+    ham = SparsePauliOp(labels, rng.normal(size=len(labels)).astype(complex))
+
+    perturbed = Statevector(state.data + 1e-13 * rng.normal(size=state.data.shape))
+    perturbed = Statevector(perturbed.data / np.linalg.norm(perturbed.data))
+
+    np.testing.assert_array_equal(
+        covariance_matrix(ham, state), covariance_matrix(ham, perturbed)
+    )
+    assert COVARIANCE_DECIMALS <= 12

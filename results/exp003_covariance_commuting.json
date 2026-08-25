@@ -6,34 +6,34 @@
       "num_qubits": 2,
       "num_terms": 5,
       "baseline_groups": 2,
-      "baseline_variance": 0.12450952386131199,
+      "baseline_variance": 0.12450952422898924,
       "variants": {
         "hartree_fock": {
           "groups": 2,
-          "variance": 0.12450952386131199,
+          "variance": 0.12450952422898924,
           "ratio": 1.0,
           "refinement_moves": 0,
           "control_ratio_median": 1.0,
           "control_ratio_min": 1.0,
-          "seconds": 0.005104513999867777
+          "seconds": 0.0032639830000107395
         },
         "oracle_ground_state": {
           "groups": 2,
-          "variance": 0.12450952386131199,
+          "variance": 0.12450952422898924,
           "ratio": 1.0,
           "refinement_moves": 0,
           "control_ratio_median": 1.0,
           "control_ratio_min": 1.0,
-          "seconds": 0.0036393860000316636
+          "seconds": 0.0030049959999587372
         },
         "hartree_fock+refined": {
           "groups": 2,
-          "variance": 0.12450952386131199,
+          "variance": 0.12450952422898924,
           "ratio": 1.0,
           "refinement_moves": 0,
           "control_ratio_median": 1.0,
           "control_ratio_min": 1.0,
-          "seconds": 0.006314494999969611
+          "seconds": 0.0051713990000052945
         }
       }
     },
@@ -42,34 +42,34 @@
       "num_qubits": 6,
       "num_terms": 165,
       "baseline_groups": 10,
-      "baseline_variance": 1.1680061213006492,
+      "baseline_variance": 1.1680061249371505,
       "variants": {
         "hartree_fock": {
           "groups": 11,
-          "variance": 1.129272222346589,
-          "ratio": 0.9668375890779344,
+          "variance": 1.1292722259700212,
+          "ratio": 0.9668375891699938,
           "refinement_moves": 0,
-          "control_ratio_median": 1.089022473636034,
-          "control_ratio_min": 1.0433565413224355,
-          "seconds": 0.6273472789998777
+          "control_ratio_median": 1.0890224704444222,
+          "control_ratio_min": 1.043356541888048,
+          "seconds": 0.5186828419999756
         },
         "oracle_ground_state": {
           "groups": 11,
-          "variance": 1.129272222346589,
-          "ratio": 0.9668375890779344,
+          "variance": 1.1292722259700212,
+          "ratio": 0.9668375891699938,
           "refinement_moves": 0,
-          "control_ratio_median": 1.089022473636034,
-          "control_ratio_min": 1.0433565413224355,
-          "seconds": 0.6641032400002587
+          "control_ratio_median": 1.0890224704444222,
+          "control_ratio_min": 1.043356541888048,
+          "seconds": 0.5233070010000347
         },
         "hartree_fock+refined": {
           "groups": 11,
-          "variance": 0.8268621402517461,
-          "ratio": 0.7079262044714136,
+          "variance": 0.8268621434442278,
+          "ratio": 0.7079262050006121,
           "refinement_moves": 19,
-          "control_ratio_median": 1.089022473636034,
-          "control_ratio_min": 1.0433565413224355,
-          "seconds": 2.13753544499923
+          "control_ratio_median": 1.0890224704444222,
+          "control_ratio_min": 1.043356541888048,
+          "seconds": 1.6491158459999724
         }
       }
     },
@@ -78,34 +78,34 @@
       "num_qubits": 10,
       "num_terms": 631,
       "baseline_groups": 41,
-      "baseline_variance": 0.6909140087633948,
+      "baseline_variance": 0.6909140241483468,
       "variants": {
         "hartree_fock": {
           "groups": 44,
-          "variance": 0.5377669482886163,
-          "ratio": 0.7783413586462333,
+          "variance": 0.5377669616400184,
+          "ratio": 0.7783413606387499,
           "refinement_moves": 0,
-          "control_ratio_median": 1.2383256661941686,
-          "control_ratio_min": 1.1066482945655662,
-          "seconds": 9.670422840000356
+          "control_ratio_median": 1.2383256615431042,
+          "control_ratio_min": 1.106648285497319,
+          "seconds": 8.075430544000028
         },
         "oracle_ground_state": {
           "groups": 45,
-          "variance": 0.5830379204188252,
-          "ratio": 0.8438646677064091,
+          "variance": 0.5830379351383691,
+          "ratio": 0.8438646702200743,
           "refinement_moves": 0,
-          "control_ratio_median": 1.388924540137716,
-          "control_ratio_min": 1.1733543687765686,
-          "seconds": 10.242662650999591
+          "control_ratio_median": 1.388924518395624,
+          "control_ratio_min": 1.1733543566243296,
+          "seconds": 8.824555516999965
         },
         "hartree_fock+refined": {
           "groups": 44,
-          "variance": 0.43659686789043367,
-          "ratio": 0.6319120213988125,
+          "variance": 0.4365968799150199,
+          "ratio": 0.6319120247315717,
           "refinement_moves": 82,
-          "control_ratio_median": 1.2383256661941686,
-          "control_ratio_min": 1.1066482945655662,
-          "seconds": 82.97951729299984
+          "control_ratio_median": 1.2383256615431042,
+          "control_ratio_min": 1.106648285497319,
+          "seconds": 67.90663065500001
         }
       }
     }

@@ -30,6 +30,11 @@ from qiskit.quantum_info import Pauli, SparsePauliOp, Statevector
 
 from .measurement import MeasurementGroup, _build_commuting_group, _build_qwc_group
 
+#: Covariances are rounded to this many decimals before any greedy step sees
+#: them.  See :func:`covariance_matrix` -- without it the partition depends on
+#: numerical noise 12 orders of magnitude below anything physical.
+COVARIANCE_DECIMALS = 9
+
 
 def pauli_expectations(paulis, state: Statevector) -> np.ndarray:
     """<P> for a list of Paulis at ``state``, vectorised over the state."""
@@ -106,7 +111,13 @@ def covariance_matrix(hamiltonian: SparsePauliOp, state: Statevector) -> np.ndar
             product = paulis[i].compose(paulis[j])
             val = _single_expectation(product, data, idx, n)
             cov[i, j] = cov[j, i] = val - means[i] * means[j]
-    return cov
+    # Rounded before anything greedy consumes it.  Two reference states that
+    # agree to overlap 1.000000 (max amplitude difference 2.6e-12) produced
+    # covariance matrices differing at ~1e-12, which flipped near-ties in the
+    # grouping and changed H4's partition from 11 groups to 19.  Covariances
+    # here are O(1e-2) to O(1), so discarding everything below 1e-9 is
+    # physically meaningless and removes the whole failure mode.
+    return np.round(cov, COVARIANCE_DECIMALS)
 
 
 def group_variance(indices, coeffs: np.ndarray, cov: np.ndarray) -> float:
