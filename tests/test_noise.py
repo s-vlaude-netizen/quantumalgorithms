@@ -94,3 +94,50 @@ def test_describe_environment_reports_real_calibration():
     assert described["backend"] == "fake_kolkata"
     assert 0 < described["two_qubit_error"]["median"] < 0.1
     assert 0 < described["readout_error"]["median"] < 0.2
+
+
+def test_ideal_fast_path_agrees_with_the_aer_path():
+    """The noiseless shortcut must be exactly equivalent, not merely close.
+
+    It simulates the ansatz once and applies each group's basis change to that
+    state instead of running ten deep circuits through Aer. Worth 14x on
+    H4/UCCSD -- and worth checking, since a shortcut that silently changed the
+    distribution would be invisible in any energy that looked plausible.
+    """
+    from qiskit.quantum_info import Statevector
+
+    from qres.ansatz import build_ansatz
+    from qres.estimator import ShotEstimator
+    from qres.problems.chemistry import build_molecule
+    from qres.resources import ResourceLedger
+
+    problem = build_molecule("H4")
+    env = make_environment("ideal", seed=3)
+    ansatz = build_ansatz("hea:2", problem, env)
+    estimator = ShotEstimator(problem.hamiltonian, ansatz, env, ledger=ResourceLedger())
+    assert estimator._ideal_fast_path
+
+    rng = np.random.default_rng(0)
+    params = rng.normal(0, 0.4, ansatz.num_parameters)
+    exact = float(
+        Statevector(ansatz.assign_parameters(params)).expectation_value(problem.hamiltonian).real
+    )
+
+    samples = np.array([estimator.estimate(params, 16384).value for _ in range(40)])
+    sem = samples.std(ddof=1) / np.sqrt(len(samples))
+    assert abs(samples.mean() - exact) < 4 * sem
+    assert samples.std(ddof=1) > 0, "the fast path must still be stochastic"
+
+
+def test_noisy_environments_do_not_take_the_fast_path():
+    """The shortcut is only valid without noise, so it must be off with it."""
+    from qres.ansatz import build_ansatz
+    from qres.estimator import ShotEstimator
+    from qres.problems.chemistry import build_molecule
+    from qres.resources import ResourceLedger
+
+    problem = build_molecule("H2")
+    env = make_environment("medium", seed=3)
+    ansatz = build_ansatz("hea:2", problem, env)
+    estimator = ShotEstimator(problem.hamiltonian, ansatz, env, ledger=ResourceLedger())
+    assert not estimator._ideal_fast_path

@@ -84,22 +84,43 @@ def test_default_angles_are_an_adiabatic_ramp():
     assert np.all(np.diff(betas) < 0)  # mixer weight shrinks
 
 
-def test_deeper_qaoa_does_not_do_worse_on_a_small_instance():
+def test_deeper_qaoa_widens_the_spread_faster_than_it_helps():
+    """Depth costs reliability, and at this budget it does not buy a median.
+
+    Measured on an 8-node 3-regular instance over 8 seeds:
+
+        p=1  median AR 0.492, range [0.474, 0.506]
+        p=2  median AR 0.513, range [0.188, 0.599]
+        p=3  median AR 0.584, range [0.010, 0.706]
+
+    Three of eight seeds at p=3 fail almost completely, and over seeds 0-5 the
+    p=3 median (0.343) is *below* p=1's (0.492) -- the failure rate grows with
+    depth faster than the reachable ratio improves at a fixed shot budget.
+
+    So the robust claim is about spread, not about the median. An earlier
+    version asserted single-seed monotonicity and passed only because shot noise
+    was frozen; with noise resampled it is false, and so is the median version.
+    """
     problem = random_regular_maxcut(8, 3, seed=5)
-    ratios = [
-        run_qaoa(
-            problem,
-            reps=reps,
-            environment="ideal",
-            optimizer="cobyla",
-            shots=2048,
-            shot_budget=60_000,
-            maxiter=1000,
-            seed=0,
-        ).approximation_ratio
-        for reps in (1, 3)
-    ]
-    assert ratios[1] >= ratios[0] - 0.05
+
+    def ratios(reps):
+        return np.array([
+            run_qaoa(
+                problem,
+                reps=reps,
+                environment="ideal",
+                optimizer="cobyla",
+                shots=2048,
+                shot_budget=60_000,
+                maxiter=1000,
+                seed=s,
+            ).approximation_ratio
+            for s in range(6)
+        ])
+
+    shallow, deep = ratios(1), ratios(3)
+    assert deep.std() > 2 * shallow.std(), "depth should widen the spread"
+    assert deep.max() > shallow.max(), "depth should raise the ceiling"
 
 
 def test_scoring_is_consistent_with_brute_force():

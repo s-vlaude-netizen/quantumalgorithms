@@ -92,36 +92,43 @@ better than PUCCD's 1.6e-2 on H4, and ≤ 80 two-qubit gates transpiled to
 `fake_torino`. If expressibility is short of chemical accuracy, add repetitions
 (k-UpCCGSD) and re-measure the fidelity trade.
 
-### 1. Why does nothing reach chemical accuracy on H₂?  ← **the live question**
-Session 2 closed off two explanations and left the question sharper.
+### 1. Push the shot ladder further  ← **the working lead**
+`shot_ladder` is the first thing here that reaches chemical accuracy with any
+reliability: 5/16 seeds on H₂ at 12.8M shots against SPSA's 1/16, ratio 0.465,
+and at hand-set levels 12 wins / 0 losses with p = 0.000 (Result 27). The
+diagnosis behind it is solid — precision has to escalate as the run converges,
+because the energy differences a model-based optimiser interpolates shrink
+quadratically near the optimum while shot noise stays flat (Results 25, 26).
 
-Not the step count: `stochastic_parameter_shift` gets 195–781 gradient steps
-instead of COBYLA's four, and is no better (Result 24). Not the optimiser
-family either, beyond a point — SPSA beats COBYLA 2× with p = 0.001 (Result 23),
-but still lands at 5.8e-3, and **0 of 16 seeds reach 1.594 mHa** at a 200k
-budget for *any* configuration tested.
+Open work, roughly in order of expected value:
 
-The measured shot-noise floor on H₂ is σ = 7.6e-4 at 200k shots in a single
-evaluation, so the budget is not obviously the wall either — but a run spends
-its budget across ~100 evaluations, each at σ ≈ 7.6e-3. Two things to measure,
-in order:
+1. **Lower the crossover.** Below ~800k on 12-parameter H₂ the ladder is
+   *significantly worse* than SPSA (ratio 1.71, p = 0.021), because two rungs
+   cannot both be fed. Ideas: start the ladder from an SPSA warm-start rather
+   than cold, so the first rung needs fewer evaluations; or use a cheaper inner
+   optimiser for the bottom rungs.
+2. **Replace the restart with a proper noise-aware trust region.** Restarting
+   COBYLA is a blunt instrument that throws away its model each rung. A
+   stochastic trust-region method (STORM-style) that sizes its sample count from
+   the model's own uncertainty should dominate it, and would remove the
+   hand-set `growth` and `levels`.
+3. **Tune `growth` and `evals_per_level` properly.** Only `g ∈ {4, 6, 8}` and
+   `E = 2(n+1)` have been tested, on one molecule.
+4. **Confirm on a second system.** Everything above is H₂ at 12 parameters.
 
-1. **Budget scaling.** Sweep 10⁵–10⁷ shots for `hea:2` + SPSA, 16 seeds, and
-   find where chemical accuracy becomes reliable. If it never does, the limit is
-   not the budget.
-2. **The exact-energy control at matched evaluation counts.** Run the same
-   optimiser on noiseless energies with the same *number* of evaluations. If it
-   reaches 1e-6, the gap is shot noise and the answer is better estimators; if
-   it plateaus at 5e-3 too, the gap is the optimiser or the landscape.
+### 1a. Does the measurement work pay off now?  *(running)*
+Session 1 built covariance-aware grouping (0.63 variance ratio on LiH, validated
+against 300 sampled estimates) and concluded it had nothing to act on — but that
+conclusion came from H₄, whose ansatz was stuck at Hartree-Fock. Result 25 shows
+H₂ *is* shot-noise-limited, so the measurement side does bind after all.
 
-Only the second answers *which* problem to work on, so do it first — it costs
-minutes.
+H₂ cannot test it (2 groups). The test needs a system that both converges and
+has groups worth arranging: H₄ + UCCSD, which reaches 1e-4 under exact
+optimisation and has 10 commuting groups. In flight.
 
-### 1b. Remaining optimiser candidates
-Untested: Rosalin's random operator sampling (parameter-shift over a sampled
-subset of Hamiltonian terms, so per-evaluation cost stops scaling with the term
-count) and quantum natural gradient (expensive per step, far fewer steps —
-worth a cost-per-accuracy comparison rather than a dismissal).
+If a 0.708 predicted variance ratio turns into a measurable shot saving
+end-to-end, every measurement result in this repository becomes worth something.
+If it does not, the predicted-variance metric needs re-examining.
 
 ### 1a. Re-validate the measurement studies with enough seeds
 Results 3 and 18: the 3.8× allocation win became 1.3× and lost significance at

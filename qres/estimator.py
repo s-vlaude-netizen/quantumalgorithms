@@ -81,6 +81,16 @@ class ShotEstimator:
         self._build_circuits(optimization_level)
 
         self._rng = np.random.default_rng(environment.seed)
+        # A noiseless environment gets an exact fast path: every group circuit
+        # shares the same ansatz prefix, so the expensive work is done once and
+        # only the shallow basis changes differ.
+        self._ideal_fast_path = environment.backend is None
+        if self._ideal_fast_path:
+            from qiskit_aer import AerSimulator
+
+            self._state_simulator = AerSimulator(method="statevector")
+            self._bound_ansatz: QuantumCircuit | None = None
+
         self.report = grouping_report(self.groups, self.identity_coeff)
         self.report["transpile_seconds"] = self.transpile_seconds
         self.report["grouping_seconds"] = self.grouping_seconds
@@ -148,6 +158,11 @@ class ShotEstimator:
             isa = self.env.prepare(qc, optimization_level=optimization_level)
             self._isa.append(isa)
             self._durations.append(circuit_duration_seconds(isa, self.env.target))
+        # Depth and two-qubit counts are fixed by the circuit structure, not by
+        # the parameters, so they are computed once. Recomputing depth() inside
+        # the loop cost 28 ms per group per evaluation.
+        self._depths = [c.depth() for c in self._isa]
+        self._two_qubit_counts = [_two_qubit_count(c) for c in self._isa]
         self.transpile_seconds = time.perf_counter() - t0
 
     @property
@@ -155,10 +170,10 @@ class ShotEstimator:
         return self.ansatz.num_parameters
 
     def two_qubit_gate_count(self) -> int:
-        return max(_two_qubit_count(c) for c in self._isa) if self._isa else 0
+        return max(self._two_qubit_counts) if self._isa else 0
 
     def circuit_depth(self) -> int:
-        return max(c.depth() for c in self._isa) if self._isa else 0
+        return max(self._depths) if self._isa else 0
 
     # -- estimation -------------------------------------------------------
 
@@ -170,10 +185,19 @@ class ShotEstimator:
         """Sample the energy with ``total_shots`` spread over the groups."""
         with self.ledger.time_classical():
             plan = self.shot_plan(total_shots)
-            bound = [
-                circuit.assign_parameters(np.asarray(params, dtype=float))
-                for circuit in self._isa
-            ]
+            if self._ideal_fast_path:
+                # Only the ansatz needs binding; the basis changes carry no
+                # parameters.  Binding all ten transpiled group circuits was 65%
+                # of an H4/UCCSD evaluation (5.07 s of 7.76 s over three calls).
+                self._bound_ansatz = self.ansatz.assign_parameters(
+                    np.asarray(params, dtype=float)
+                )
+                bound = None
+            else:
+                bound = [
+                    circuit.assign_parameters(np.asarray(params, dtype=float))
+                    for circuit in self._isa
+                ]
 
         total = self.identity_coeff
         variance_sum = 0.0
@@ -190,8 +214,8 @@ class ShotEstimator:
                 shots=n_shots,
                 duration_s=self._durations[gi],
                 n_circuits=1,
-                two_qubit_gates=_two_qubit_count(self._isa[gi]),
-                depth=self._isa[gi].depth(),
+                two_qubit_gates=self._two_qubit_counts[gi],
+                depth=self._depths[gi],
             )
 
         self.ledger.bump("estimate_calls")
@@ -224,6 +248,11 @@ class ShotEstimator:
         active = [(gi, int(n)) for gi, n in enumerate(plan) if n > 0]
         if not active:
             return
+
+        if self._ideal_fast_path:
+            yield from self._sample_groups_ideal(active)
+            return
+
         distinct = {n for _, n in active}
 
         if len(distinct) <= 2 or len(active) <= 2:
@@ -245,6 +274,46 @@ class ShotEstimator:
             counts_list = [counts_list]
         for (gi, n_shots), counts in zip(active, counts_list):
             yield gi, (counts if n_shots == top else _subsample(counts, n_shots, self._rng)), n_shots
+
+    def _sample_groups_ideal(self, active):
+        """Exact noiseless sampling without an Aer run per group.
+
+        Every group circuit is ``ansatz + basis_change``, so the expensive
+        prefix is shared.  Simulating the ansatz once and applying each group's
+        shallow Clifford basis change to that state is exactly equivalent and
+        far cheaper: on H4 with UCCSD, binding the ten transpiled group circuits
+        alone was 65% of an energy evaluation.
+
+        Valid only without noise -- under a noise model the ansatz produces a
+        mixed state and this shortcut would silently discard the noise, which is
+        why it is gated on ``backend is None`` rather than on a flag.
+        """
+        state = self._ansatz_statevector()
+        n_qubits = self.ansatz.num_qubits
+        for gi, n_shots in active:
+            group = self.groups[gi]
+            with self.ledger.time_simulator():
+                rotated = state.evolve(group.basis_change) if group.basis_change else state
+                probs = np.abs(np.asarray(rotated.data)) ** 2
+                probs = probs / probs.sum()
+                draws = self._rng.multinomial(n_shots, probs)
+            nonzero = np.flatnonzero(draws)
+            counts = {format(int(i), f"0{n_qubits}b"): int(draws[i]) for i in nonzero}
+            yield gi, counts, n_shots
+
+    def _ansatz_statevector(self) -> Statevector:
+        """Simulate the bound ansatz once, in Aer rather than in Python.
+
+        ``Statevector(circuit)`` walks the circuit gate by gate in Python, which
+        costs 2.3 s for the depth-1826 UCCSD circuit on H4 -- as much as the ten
+        Aer runs this path exists to avoid.  Aer's C++ statevector does the same
+        work in milliseconds.
+        """
+        with self.ledger.time_simulator():
+            circuit = self._bound_ansatz.copy()
+            circuit.save_statevector()
+            result = self._state_simulator.run(circuit).result()
+            return Statevector(result.get_statevector(circuit))
 
     def _group_statistics(self, group_index: int, counts: dict) -> tuple[float, float]:
         """Weighted mean and variance of this group's per-shot value.

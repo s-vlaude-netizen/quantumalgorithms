@@ -1063,3 +1063,49 @@ Two engineering points that make the difference between working and not:
 significantly *worse* than SPSA. It is a budget-rich method, and the crossover
 is now measured rather than guessed.
 
+### Result 28 — an exact fast path for noiseless runs, 14x
+
+Every group circuit is `ansatz + basis_change`, so the expensive prefix is
+shared. Profiling an H4/UCCSD evaluation showed where the time actually went:
+
+| step | share |
+|---|---|
+| `assign_parameters` on the ten transpiled group circuits | **65%** (5.07 s of 7.76 s) |
+| Aer runs | 19% |
+| `depth()` recomputed inside the loop | 11% |
+
+So the fix is not a faster simulator. Without noise, simulating the ansatz once
+and applying each group's shallow Clifford basis change to that state is
+*exactly* equivalent, and only the ansatz needs its parameters bound. Depths and
+two-qubit counts are structural and are now computed once at construction.
+
+**2.31 s → 0.164 s per evaluation, 14×**, verified unbiased against the exact
+energy (bias/sem = −0.65 over 10 samples) and still stochastic. Gated on
+`backend is None`: under a noise model the ansatz produces a mixed state and the
+shortcut would silently discard the noise, so it must not be reachable by a
+flag.
+
+### Result 29 — deeper QAOA widens the spread faster than it raises the median
+
+Fell out of a test that broke once shot noise was resampled. 8-node 3-regular
+MaxCut, 60k budget, 8 seeds:
+
+| depth | median AR | range |
+|---|---|---|
+| p = 1 | 0.492 | [0.474, 0.506] |
+| p = 2 | 0.513 | [0.188, 0.599] |
+| p = 3 | 0.584 | [0.010, **0.706**] |
+
+Depth raises the *ceiling* — 0.706 against 0.506 — and destroys reliability:
+**three of eight seeds at p = 3 fail almost completely** (0.010–0.025). Over
+seeds 0–5 the p = 3 median (0.343) is *below* p = 1's (0.492); the 8-seed median
+only looks better because two good seeds happened to land in it.
+
+At a fixed shot budget the optimiser's failure rate grows with depth faster than
+the reachable approximation ratio improves. Reporting a median over a handful of
+seeds — which is what QAOA depth studies usually show — hides a 40% failure rate.
+
+The test that caught this had asserted single-seed monotonicity and passed only
+because the noise was frozen. Its replacement asserts the spread claim, which is
+the part that survives.
+
