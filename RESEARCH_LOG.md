@@ -1109,3 +1109,72 @@ The test that caught this had asserted single-seed monotonicity and passed only
 because the noise was frozen. Its replacement asserts the spread claim, which is
 the part that survives.
 
+### Result 30 — the measurement work does pay off, once the regime is shot-limited
+
+The question session 1 could not answer, now answerable because Result 25 showed
+where the binding constraint actually is.
+
+H₂ is shot-noise-limited but has only 2 measurement groups, so grouping cannot
+matter there. H₄ has 10 commuting groups but its hardware-efficient ansatz is
+stuck at Hartree-Fock. **H₄ + UCCSD** has both: it converges (1.08e-4 under exact
+optimisation) and has groups worth arranging. Run with `shot_ladder`, ideal
+simulator, 12 seeds, paired:
+
+| budget | grouping | groups | median error | ratio | W/L | p |
+|---|---|---|---|---|---|---|
+| 4 000 000 | commuting | 10 | 1.131e-1 | 1.000 | — | — |
+| 4 000 000 | **covariance+refine** | 19 | **8.269e-2** | **0.798** | **10/2** | **0.039** |
+| 16 000 000 | commuting | 10 | 7.549e-2 | 1.000 | — | — |
+| 16 000 000 | covariance+refine | 19 | 7.831e-2 | 0.884 | 7/5 | 0.774 |
+
+**At 4M the covariance-aware grouping is significantly better end to end**
+(ratio 0.798, p = 0.039) — the first time any of session 1's measurement work has
+shown a significant benefit in a full optimisation rather than at a fixed state.
+Not significant at 16M.
+
+Three caveats that keep this honest, and the third is serious:
+
+* This compares two *badly converged* runs. Both errors (0.08–0.11 Ha) exceed
+  H₄'s correlation energy of 0.042 Ha, so both are worse than simply stopping at
+  Hartree-Fock. A ratio between two failures is weak evidence.
+* The covariance grouping produced **19** groups here against the **11** measured
+  in session 1's experiment 003 for the same molecule and reference. That
+  discrepancy is unexplained and needs chasing before the number is trusted.
+* The likely cause of the poor convergence is that `shot_ladder`'s `rhobeg = 1.0`
+  was tuned on H₂'s hardware-efficient ansatz. UCCSD's meaningful parameter scale
+  is ~0.1, so a 1-radian initial trust region throws the optimiser away from
+  Hartree-Fock in a 26-dimensional space. `[unverified]` — the probe testing this
+  was lost to a container restart and needs re-running.
+
+### Result 31 — the trust region has to match the ansatz, and H4/UCCSD needs more budget than 4M
+
+Chasing Result 30's third caveat. `shot_ladder`'s `rhobeg = 1.0` was tuned on
+H₂'s hardware-efficient ansatz; UCCSD's meaningful parameter scale is ~0.1.
+H₄ + UCCSD, 4M budget, 8 seeds (stopping at Hartree-Fock would score 0.0418):
+
+| `rhobeg` | median error | best seed |
+|---|---|---|
+| 1.00 | 1.002e-1 | 7.39e-2 |
+| 0.30 | 1.485e-1 | 8.67e-2 |
+| **0.10** | **4.856e-2** | 4.15e-2 |
+| 0.03 | 5.201e-2 | **3.86e-2** |
+
+The trust region matters a lot — 0.1 halves the error against the default — and
+it is **the opposite direction from H₂**, where a *large* `rhobeg` was 9× better
+on restart (Result 26). There is no universal value: it has to scale with the
+ansatz's parameter scale, which for a coupled-cluster ansatz is set by the
+amplitudes and for a hardware-efficient one by nothing in particular.
+
+**But even at the best setting, H₄ + UCCSD at 4M shots barely beats Hartree-Fock**
+(4.86e-2 against 4.18e-2; only the best of 8 seeds, 3.86e-2, is below it at all).
+So Result 30's significant covariance-grouping win (ratio 0.798, p = 0.039) is
+confirmed as a comparison between two runs that both fail. It is real — the
+pairing is seed-matched and the sign test is sound — but it is a 20% improvement
+on a method that is not working, and it should not be quoted as a validated
+end-to-end benefit until the underlying run converges.
+
+What that needs: enough budget that UCCSD's 26 parameters get the evaluations
+the exact-optimisation control (Result 25) shows are required. That is the next
+measurement, and it is expensive — the 14× fast path from Result 28 is what
+makes it affordable at all.
+

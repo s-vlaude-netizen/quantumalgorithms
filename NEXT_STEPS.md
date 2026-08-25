@@ -116,7 +116,7 @@ Open work, roughly in order of expected value:
    `E = 2(n+1)` have been tested, on one molecule.
 4. **Confirm on a second system.** Everything above is H₂ at 12 parameters.
 
-### 1a. Does the measurement work pay off now?  *(running)*
+### 1a. Does the measurement work pay off now?  *(partly answered)*
 Session 1 built covariance-aware grouping (0.63 variance ratio on LiH, validated
 against 300 sampled estimates) and concluded it had nothing to act on — but that
 conclusion came from H₄, whose ansatz was stuck at Hartree-Fock. Result 25 shows
@@ -126,9 +126,33 @@ H₂ cannot test it (2 groups). The test needs a system that both converges and
 has groups worth arranging: H₄ + UCCSD, which reaches 1e-4 under exact
 optimisation and has 10 commuting groups. In flight.
 
-If a 0.708 predicted variance ratio turns into a measurable shot saving
-end-to-end, every measurement result in this repository becomes worth something.
-If it does not, the predicted-variance metric needs re-examining.
+**Answered, with a caveat that matters.** At 4M shots the covariance grouping is
+significantly better end to end — ratio 0.798, 10/2 seeds, p = 0.039 (Result 30).
+That is the first time any of session 1's measurement work has shown a
+significant benefit in a full optimisation rather than at a fixed state.
+
+But both arms fail: their errors (0.08–0.11 Ha) exceed H₄'s correlation energy
+of 0.042 Ha, so both are worse than stopping at Hartree-Fock. Even after fixing
+the trust region (`rhobeg = 0.1` halves the error, Result 31) the best is
+4.86e-2 against Hartree-Fock's 4.18e-2. A 20% improvement on a method that is
+not working is not a validated benefit.
+
+To finish this:
+1. Find the budget at which H₄ + UCCSD actually converges — the exact-energy
+   control (Result 25) says the evaluations are there, so this is a shot-count
+   question. Expensive, but the 14× fast path (Result 28) makes it feasible.
+2. Re-run the grouping comparison there.
+3. Chase the unexplained group count: `covariance+refine` produced **19** groups
+   through `ShotEstimator` against the **11** experiment 003 reports for the same
+   molecule and reference. One of the two paths is not doing what it says.
+
+### 1d. `rhobeg` must scale with the ansatz
+No universal value exists: H₂'s hardware-efficient ansatz wants a *large* trust
+region on restart (1.0 was 9× better than 0.1, Result 26) and H₄'s UCCSD wants a
+*small* one (0.1 was 2× better than 1.0, Result 31). `shot_ladder` currently
+hard-codes 1.0. It should estimate the scale — from the spread of a few
+random-direction energy differences, or from the ansatz family — rather than
+being handed it.
 
 ### 1a. Re-validate the measurement studies with enough seeds
 Results 3 and 18: the 3.8× allocation win became 1.3× and lost significance at
