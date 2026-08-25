@@ -26,18 +26,24 @@ Note on cost: the `none` grouping is ~11× slower to simulate than `commuting`
 Aer's cost is per-circuit. Budget for it or drop it once its baseline role is
 served.
 
-### 1b. Improve the grouping *search*, not the reference state
-Result 7's clearest signal: the free Hartree-Fock reference (0.778 on LiH)
-reproducibly **beats** the exact-ground-state oracle (0.844). Perfect covariance
-information does not produce the best partition, so the greedy placement is the
-bottleneck. Try local refinement (move/swap single terms between groups while
-the total √variance falls), or simulated annealing on the partition. There is
-headroom of unknown size below 0.778 and no reason to think greedy is near it.
+### 1b. Wire covariance-aware grouping into `ShotEstimator`  ← **the gap**
+Results 7 and 9 give a validated 0.708 (H₄) / 0.632 (LiH) variance ratio — 1.4×
+to 1.6× fewer shots — but every number is measured **at a fixed state**. The
+grouping is not reachable from `run_vqe`, so no end-to-end optimisation has ever
+used it. Add `grouping="covariance"` with a reference state, then re-run
+experiment 001 and check the win survives a full run, where the state moves away
+from the reference the covariances were computed at.
 
-Also outstanding: covariance-aware grouping is implemented but **not yet wired
-into `ShotEstimator`**, so no end-to-end VQE run has used it. The 0.778 is a
-predicted-variance number, validated against direct sampling at a fixed state
-but not yet against a full optimisation.
+That last point is the real open risk: the covariances are evaluated once at
+Hartree-Fock, and the optimiser walks away from it. Two things to measure:
+whether the win decays along the trajectory, and whether re-grouping partway
+(using the empirical group variances already being collected) recovers it.
+
+### 1c. Better partition search
+Local refinement converges to a local optimum of *single-term* moves (Result 9).
+Cheap things left untried: pairwise swaps, multi-start from perturbed greedy
+solutions, simulated annealing. Unknown how far 0.632 is from optimal — worth
+bounding on a small case where the optimum can be found exactly.
 
 ### 2. Resolve the noise-floor question (open question, Result 6 section)
 Scaling gate errors 10× down did not move the error. Ablate properly:
@@ -74,9 +80,8 @@ parameters) and was aborted. If it is worth testing at scale, it needs the
 random-operator-sampling variant (Rosalin) that avoids the full parameter-shift
 sweep, not the plain version.
 
-### 6. QAOA side of the house
-`qres/problems/optimization.py` (MaxCut, portfolio) is built and verified but
-has no driver yet. Write `qres/qaoa.py` mirroring `run_vqe`, then test the
+### 6. QAOA parameter transfer  *(driver now built — `qres/qaoa.py`)*
+The driver exists and is tested; nothing has been measured with it yet. Test the
 fixed-angle / parameter-transfer literature (LINXFER and relatives, 2025):
 pre-trained angles claim to remove instance-specific optimisation entirely,
 which under a shot-budget metric would be a very large win. Transfer from small
@@ -95,10 +100,6 @@ knowing whether that is the cost model's fault or a real fact.
 
 ## Later / speculative
 
-- **Variance-aware grouping.** Current grouping minimises group *count* via
-  greedy clique cover. The quantity that actually matters is total variance,
-  `(Σ_g √Var_g)²`. Grouping to minimise that instead is under-explored and
-  composes directly with the Neyman allocation already implemented.
 - **Ablate the variance model.** `decay = 0.85` and `prior_strength = 64` are
   guesses. Sweep them; check whether the non-stationarity argument for `decay`
   holds up.
@@ -128,3 +129,6 @@ knowing whether that is the cost model's fault or a real fact.
    expectation values, not by whether the energies look plausible.
 5. Record negative results in `RESEARCH_LOG.md`. They are the cheapest thing in
    the repository to produce and the most expensive to re-derive.
+6. Every greedy or sorting step needs an explicit tie-break, and any result
+   depending on one must be checked **across processes**, not just across calls.
+   Single-process determinism proves nothing — see Result 8.

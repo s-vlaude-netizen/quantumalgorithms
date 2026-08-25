@@ -183,6 +183,109 @@ def covariance_grouping(
     return built, float(identity_coeff)
 
 
+def refine_partition(
+    partition: list[list[int]],
+    coeffs: np.ndarray,
+    cov: np.ndarray,
+    compatible,
+    *,
+    max_sweeps: int = 20,
+    allow_new_groups: bool = True,
+) -> tuple[list[list[int]], int]:
+    """Local search: move single terms between groups while total sqrt-var falls.
+
+    Motivated by a measurement, not by taste.  In Result 7 the *free*
+    Hartree-Fock covariance reference beat the exact-ground-state oracle
+    (0.778 vs 0.844 on LiH).  Perfect information producing a worse partition
+    means the greedy placement -- not the covariance -- is what limits the
+    method, so there should be headroom below the greedy result reachable
+    without any better reference.
+
+    Steepest-descent over single-term moves.  Each sweep evaluates every term
+    against every compatible destination and applies the single best improving
+    move, repeating until no move helps.  Returns the refined partition and the
+    number of moves applied.
+    """
+    parts = [list(g) for g in partition]
+    variances = [group_variance(g, coeffs, cov) for g in parts]
+    moves = 0
+
+    for _ in range(max_sweeps):
+        best = None  # (gain, term, source, destination)
+        for src, members in enumerate(parts):
+            if len(members) == 0:
+                continue
+            src_root = np.sqrt(max(variances[src], 0.0))
+            for term in members:
+                remainder = [t for t in members if t != term]
+                new_src = np.sqrt(max(group_variance(remainder, coeffs, cov), 0.0))
+                freed = src_root - new_src
+
+                destinations = [
+                    d
+                    for d in range(len(parts))
+                    if d != src and all(compatible(term, t) for t in parts[d])
+                ]
+                for dst in destinations:
+                    added = (
+                        np.sqrt(max(group_variance(parts[dst] + [term], coeffs, cov), 0.0))
+                        - np.sqrt(max(variances[dst], 0.0))
+                    )
+                    gain = freed - added
+                    if gain > 1e-12 and (best is None or gain > best[0]):
+                        best = (gain, term, src, dst)
+                if allow_new_groups and len(members) > 1:
+                    solo = np.sqrt(max(group_variance([term], coeffs, cov), 0.0))
+                    gain = freed - solo
+                    if gain > 1e-12 and (best is None or gain > best[0]):
+                        best = (gain, term, src, None)
+
+        if best is None:
+            break
+        _, term, src, dst = best
+        parts[src].remove(term)
+        variances[src] = group_variance(parts[src], coeffs, cov)
+        if dst is None:
+            parts.append([term])
+            variances.append(group_variance([term], coeffs, cov))
+        else:
+            parts[dst].append(term)
+            variances[dst] = group_variance(parts[dst], coeffs, cov)
+        # Only the two touched groups changed; recomputing every group's
+        # variance here costs more than the whole move search on LiH.
+        if not parts[src]:
+            parts.pop(src)
+            variances.pop(src)
+        moves += 1
+
+    return parts, moves
+
+
+def refined_covariance_grouping(
+    hamiltonian: SparsePauliOp,
+    reference: Statevector,
+    method: str = "commuting",
+    max_sweeps: int = 20,
+) -> tuple[list[MeasurementGroup], float, int]:
+    """Covariance grouping followed by local refinement."""
+    paulis = list(hamiltonian.paulis)
+    coeffs = np.asarray(hamiltonian.coeffs).real
+    n = hamiltonian.num_qubits
+
+    groups, identity = covariance_grouping(hamiltonian, reference, method)
+    cov = covariance_matrix(hamiltonian, reference)
+    compatible = (
+        (lambda a, b: paulis[a].commutes(paulis[b]))
+        if method == "commuting"
+        else (lambda a, b: _qwc(paulis[a], paulis[b]))
+    )
+    partition, moves = refine_partition(
+        [list(g.indices) for g in groups], coeffs, cov, compatible, max_sweeps=max_sweeps
+    )
+    builder = _build_commuting_group if method == "commuting" else _build_qwc_group
+    return [builder(g, paulis, coeffs, n) for g in partition], identity, moves
+
+
 def _qwc(a: Pauli, b: Pauli) -> bool:
     from .measurement import qwc_compatible
 

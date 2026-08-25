@@ -154,3 +154,61 @@ def test_predicted_variance_is_positive_and_matches_manual_sum():
     manual = sum(np.sqrt(max(group_variance(g.indices, coeffs, cov), 0.0)) for g in groups) ** 2
     assert total == pytest.approx(manual)
     assert total > 0
+
+
+def test_refinement_never_increases_predicted_variance():
+    """Local search is steepest-descent, so the objective can only fall."""
+    from qres.covariance import refine_partition
+
+    problem = build_molecule("H4")
+    coeffs = np.asarray(problem.hamiltonian.coeffs).real
+    state = Statevector(
+        np.ascontiguousarray(np.linalg.eigh(problem.hamiltonian.to_matrix())[1][:, 0])
+    )
+    cov = covariance_matrix(problem.hamiltonian, state)
+    paulis = list(problem.hamiltonian.paulis)
+    groups, _ = group_paulis(problem.hamiltonian, "commuting")
+    start = [list(g.indices) for g in groups]
+
+    def objective(parts):
+        return float(sum(np.sqrt(max(group_variance(p, coeffs, cov), 0.0)) for p in parts) ** 2)
+
+    before = objective(start)
+    refined, moves = refine_partition(
+        start, coeffs, cov, lambda a, b: paulis[a].commutes(paulis[b]), max_sweeps=400
+    )
+    assert objective(refined) <= before + 1e-12
+    assert moves > 0
+
+
+def test_refinement_preserves_the_partition_and_commutation():
+    from qres.covariance import refined_covariance_grouping
+    from qres.ansatz import hartree_fock_state
+
+    problem = build_molecule("H4")
+    reference = Statevector(hartree_fock_state(problem.hf_bitstring))
+    groups, _, _ = refined_covariance_grouping(problem.hamiltonian, reference, "commuting")
+
+    covered = sorted(i for g in groups for i in g.indices)
+    expected = sorted(
+        i for i, p in enumerate(problem.hamiltonian.paulis) if p.x.any() or p.z.any()
+    )
+    assert covered == expected, "refinement must not lose or duplicate a term"
+    assert all(len(g.indices) > 0 for g in groups), "no empty groups"
+    for g in groups:
+        for a in g.paulis:
+            for b in g.paulis:
+                assert a.commutes(b), "refinement must not break simultaneous measurability"
+
+
+def test_refinement_is_deterministic_across_calls():
+    from qres.covariance import refined_covariance_grouping
+    from qres.ansatz import hartree_fock_state
+
+    problem = build_molecule("H4")
+    reference = Statevector(hartree_fock_state(problem.hf_bitstring))
+    signatures = []
+    for _ in range(2):
+        groups, _, moves = refined_covariance_grouping(problem.hamiltonian, reference, "commuting")
+        signatures.append((moves, tuple(tuple(sorted(g.indices)) for g in groups)))
+    assert signatures[0] == signatures[1]

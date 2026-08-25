@@ -363,6 +363,56 @@ in this repository must have an explicit tie-break, and any result that depends
 on one must be checked across processes, not just across calls. Single-process
 determinism proves nothing.
 
+### Result 9 — local refinement of the partition is the bigger lever
+
+Direct follow-up on Result 7's diagnosis that the greedy placement, not the
+covariance quality, was the bottleneck. Added a steepest-descent local search:
+repeatedly move the single term whose relocation most reduces total √variance,
+until no move helps. Compatibility is enforced, so every group stays
+simultaneously measurable.
+
+Final reproducible numbers (experiment 003, commuting grouping, scored against
+the exact-ground-state covariance; `control` = random split to the same group
+count):
+
+| molecule | terms | grouping | groups | variance | ratio | control |
+|---|---|---|---|---|---|---|
+| H₂ | 5 | count-minimising | 2 | 0.1245 | 1.000 | — |
+| H₂ | | all cov-aware variants | 2 | 0.1245 | 1.000 | 1.000 |
+| H₄ | 165 | count-minimising | 10 | 1.1680 | 1.000 | — |
+| H₄ | | cov-aware / HF | 11 | 1.1293 | 0.967 | 1.089 |
+| H₄ | | cov-aware / oracle | 11 | 1.1293 | 0.967 | 1.089 |
+| H₄ | | **cov-aware / HF + refined** | 11 | 0.8269 | **0.708** | 1.089 |
+| LiH | 631 | count-minimising | 41 | 0.6909 | 1.000 | — |
+| LiH | | cov-aware / HF | 44 | 0.5378 | 0.778 | 1.238 |
+| LiH | | cov-aware / oracle | 45 | 0.5830 | 0.844 | 1.389 |
+| LiH | | **cov-aware / HF + refined** | 44 | 0.4366 | **0.632** | 1.238 |
+
+**29% (H₄) and 37% (LiH) variance reduction, worth 1.41× and 1.58× fewer shots
+for equal accuracy** — using only a free Hartree-Fock covariance reference. Both
+converge to a local optimum of single-term moves (19 moves / 2 s on H₄, 82 moves
+/ 85 s on LiH), which is negligible against the shots saved.
+
+Refinement matters more than the covariance-greedy itself: refining the *plain
+count-minimising* partition already reaches 0.858 (H₄) and 0.700 (LiH). The
+greedy start still helps, but the search is where the value is — exactly what
+Result 7's "oracle loses to Hartree-Fock" signal implied.
+
+**Validated empirically, not just predicted.** 300 independent 20k-shot
+estimates at the exact H₄ ground state:
+
+| grouping | predicted σ | measured σ | bias (sem 4e-4) |
+|---|---|---|---|
+| count-minimising | 0.007642 | 0.007858 | −0.000054 |
+| cov-aware + refined | 0.006430 | 0.006241 | −0.000073 |
+
+Model accurate to ~3%, both estimators unbiased, and the *measured* variance
+ratio (0.631) slightly beats the predicted one (0.708).
+
+Caveats kept in view: H₂ shows nothing (2 groups either way), the benefit grows
+with term count, and this is still a fixed-state measurement — the grouping is
+**not yet wired into `ShotEstimator`**, so no end-to-end VQE run has used it.
+
 ### Open question carried forward
 
 Scaling `fake_kolkata`'s gate errors to 0.5× / 0.25× / 0.1× left the energy

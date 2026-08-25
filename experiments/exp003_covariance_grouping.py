@@ -45,6 +45,7 @@ from qres.covariance import (
     covariance_matrix,
     group_variance,
     predicted_total_variance,
+    refined_covariance_grouping,
 )
 from qres.measurement import group_paulis
 from qres.problems.chemistry import build_molecule
@@ -107,9 +108,20 @@ def study_molecule(name: str, method: str = "commuting") -> dict:
         "variants": {},
     }
 
-    for label, reference in [("hartree_fock", reference_hf), ("oracle_ground_state", ground)]:
+    variants = [
+        ("hartree_fock", reference_hf, False),
+        ("oracle_ground_state", ground, False),
+        ("hartree_fock+refined", reference_hf, True),
+    ]
+    for label, reference, refine in variants:
         t0 = time.perf_counter()
-        groups, _ = covariance_grouping(problem.hamiltonian, reference, method)
+        if refine:
+            groups, _, moves = refined_covariance_grouping(
+                problem.hamiltonian, reference, method, max_sweeps=400
+            )
+        else:
+            groups, _ = covariance_grouping(problem.hamiltonian, reference, method)
+            moves = 0
         variance = predicted_total_variance(groups, cov_true, coeffs)
         controls = [
             random_split_control(baseline, len(groups), coeffs, cov_true, s) for s in range(20)
@@ -118,6 +130,7 @@ def study_molecule(name: str, method: str = "commuting") -> dict:
             "groups": len(groups),
             "variance": variance,
             "ratio": variance / var_base,
+            "refinement_moves": moves,
             "control_ratio_median": float(np.median(controls)) / var_base,
             "control_ratio_min": float(np.min(controls)) / var_base,
             "seconds": time.perf_counter() - t0,
