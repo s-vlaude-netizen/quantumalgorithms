@@ -1444,3 +1444,84 @@ molecules: the scheme this repository already defaults to is the best of them,
 and none of the alternatives changes the `(Σ|c|)²` scaling. The measurement
 question is, as far as these tests reach, settled.
 
+---
+
+## Session 4 — 2026-08-25 (20:24 UTC)
+
+### Result 39 — multi-start does not beat one long run; selection eats the gain
+
+The clue from Result 37 was that at 256M on H₄ the *best* seed reached 1.77e-2
+while the median stayed at 3.66e-2 — a 2× gap that is optimiser variance, not
+estimator noise. Splitting the budget across starts is the obvious way to buy
+it, so it was implemented, with the selection charged honestly: a fraction of
+the budget is reserved to re-evaluate every candidate at equal precision and
+pick the lowest.
+
+That honesty matters. Ranking candidates by each run's own best *observed* value
+would be free and wrong — it is the minimum of many noisy draws, biased low by
+roughly the run's own noise, so it would systematically favour the **noisiest**
+run rather than the best one.
+
+H₂, `hea:2`, 16 seeds, paired against the single-start ladder:
+
+| budget | K=2 | K=4 | K=8 |
+|---|---|---|---|
+| 3 200 000 | 1.93 (3/13, **p=0.021**) | 2.05 (3/13, **p=0.021**) | 2.44 (2/14, **p=0.004**) |
+| 12 800 000 | 1.02 (8/8) | 1.32 (7/9) | 1.30 (5/11) |
+
+**Significantly worse at the smaller budget**, and no better at the larger one.
+The mechanism is the one Result 27 already established: the shot ladder needs
+budget headroom, and eight starts of 400k each all sit below its crossover.
+
+H₄ + UCCSD at 16M agrees — single start 4.062e-2, K=2 4.989e-2, K=4 4.811e-2.
+
+**But the selection was also being done badly**, which is worth separating. At
+`audit_fraction = 0.1` of 12.8M split eight ways, each candidate is scored with
+160k shots — σ ≈ 6.1e-4 against a candidate spread of ~1e-3, so the ranking is
+barely better than a coin flip. Sweeping it:
+
+| configuration | median | ≤ chemical accuracy | ratio vs single |
+|---|---|---|---|
+| ladder, single start | 1.691e-3 | 7/16 | 1.000 |
+| K=8, audit 0.10 | 2.544e-3 | 4/16 | 1.298 |
+| **K=8, audit 0.30** | **1.517e-3** | **9/16** | 0.827 (9/7, p=0.804) |
+| K=8, audit 0.50 | 2.281e-3 | 4/16 | 1.244 |
+| K=3, audit 0.30 | 2.073e-3 | 6/16 | 1.402 |
+
+Non-monotone, with an optimum: too little audit makes the ranking unreliable,
+too much starves the starts. **At the best setting multi-start is
+statistically indistinguishable from a single run** (ratio 0.827, p = 0.804) —
+it reaches chemical accuracy on 9/16 seeds against 7/16, which is worth noting
+and is not significant.
+
+**Conclusion:** the optimiser variance is real, and diversification cannot
+capture it at equal budget because selecting the good run costs about as much as
+producing it.
+
+### Result 40 — automatic trust-radius estimation: three principled attempts, three failures
+
+`rhobeg` has no universal value — H₂'s hardware-efficient ansatz wants 1.0 and
+H₄'s UCCSD wants 0.1, each 2–9× worse at the other's setting (Results 26, 31) —
+so estimating it from the problem seemed like the obvious cleanup. It does not
+work, and the three failures are each instructive:
+
+| attempt | rule | H₂ (wants 1.0) | H₄ (wants 0.1) | why it failed |
+|---|---|---|---|---|
+| 1 | step that moves E by 10σ | 0.8 ✓ | 0.2 / 0.8, unstable ✗ | keys on *noise* scale; UCCSD's noise is large while its parameter scale is small |
+| 2 | where quadratic breaks, `E(2r)=4E(r)` | 0.05 ✗ | 0.05 ✗ | wrong model — at a non-stationary point the energy is linear-dominated, ratio 2 not 4, so the test fails everywhere |
+| 3 | where linear breaks, `E(2r)=2E(r)` | 0.05 ✗ | 0.05 ✗ | right test (COBYLA *is* a linear-model method), defeated by noise: σ is 2.7e-3 / 1.4e-2 at 8192 shots and swamps the departure from linearity |
+
+Attempt 3 is the one matched to the algorithm and it still fails, which makes
+the common cause clear: **the signal — where a model stops holding — is smaller
+than the shot noise at any affordable probe cost.** Each estimate cost 90k shots
+and bought nothing.
+
+So the function now refuses rather than guessing, and the measured values live
+in a documented table with the physical reason they differ: a hardware-efficient
+ansatz's parameters are rotation angles with period 2π and no preferred scale,
+while a coupled-cluster ansatz's are cluster amplitudes, physically O(0.1), so a
+1-radian step leaves the region where the ansatz means anything.
+
+Shipping a heuristic that is right on one system and wrong on the other would be
+worse than requiring the choice.
+

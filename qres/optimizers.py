@@ -667,6 +667,189 @@ class _LevelDone(Exception):
     """Internal: one rung of the shot ladder has spent its share."""
 
 
+#: Measured initial trust radii, by ansatz family.  There is no automatic way
+#: to get these -- see :func:`estimate_trust_radius` for three attempts that
+#: failed and why -- so they are set explicitly and the measurements are cited.
+#:
+#: The physical reason they differ: a hardware-efficient ansatz's parameters are
+#: rotation angles with period 2*pi and no preferred scale, so a large restart
+#: radius explores usefully.  A coupled-cluster ansatz's parameters are cluster
+#: amplitudes, which are physically O(0.1); a 1-radian step leaves the region
+#: where the ansatz means anything.
+TRUST_RADIUS = {
+    "hardware_efficient": 1.0,  # H2/hea:2, 9x better than 0.1 on restart (Result 26)
+    "coupled_cluster": 0.1,  # H4/UCCSD, 2x better than 1.0 (Result 31)
+}
+
+
+def estimate_trust_radius(*_args, **_kwargs) -> float:
+    """Not implemented, deliberately: three principled attempts all failed.
+
+    Kept as a record so the next attempt does not repeat them.  Each probes the
+    energy at a few radii along random directions and picks where some model
+    assumption breaks; each fails for a different reason:
+
+    1. **Target a step that moves the energy by ten times the estimator noise.**
+       Measures the wrong quantity.  Right on H2 (picked 0.8 against a measured
+       optimum of 1.0), wrong and unstable on H4 (0.2 or 0.8 across seeds
+       against a measured 0.1) -- UCCSD's *noise* is large while its *parameter*
+       scale is small, and the heuristic keys on the former.
+
+    2. **Find where the quadratic model breaks**, using
+       ``E(2r) - E(0) = 4 (E(r) - E(0))``.  Wrong model: at a general,
+       non-stationary point the energy is *linear*-dominated at small radius, so
+       the ratio is 2 rather than 4 and the test fails at every radius.  Both
+       systems collapsed to the smallest.
+
+    3. **Find where the linear model breaks** -- ratio 2, matched to COBYLA,
+       which builds a linear approximation.  The right test, defeated by noise:
+       at 8192 shots sigma is 2.7e-3 on H2 and 1.4e-2 on H4, which swamps the
+       departure from linearity at small radius.  Both collapsed to 0.05 again,
+       and 90k shots per estimate bought nothing.
+
+    The common failure is that the signal (where a model stops holding) is
+    smaller than the shot noise at any affordable probe cost.  Use
+    :data:`TRUST_RADIUS` and choose per ansatz family.
+    """
+    raise NotImplementedError(
+        "automatic trust-radius estimation does not work at these noise levels; "
+        "use TRUST_RADIUS[<ansatz family>] and see this docstring for why"
+    )
+
+
+def multi_start(
+    oracle: EnergyOracle,
+    x0: np.ndarray,
+    maxiter: int = 100_000,
+    *,
+    inner: Callable | None = None,
+    starts: int = 4,
+    audit_fraction: float = 0.1,
+    spread: float = 0.1,
+    seed: int = 0,
+    callback=None,
+    **inner_kwargs,
+) -> OptimizeResult:
+    """Split the budget across several starts and keep the best.
+
+    Motivated by a measurement, not by hope: at 256M shots on H4 + UCCSD the
+    *best* of eight seeds reached 1.77e-2 while the median stayed at 3.66e-2,
+    and four times the budget moved the median by 4% (RESEARCH_LOG Result 37).
+    That gap is optimiser variance, and running fewer shots more times is the
+    obvious way to buy it -- if the selection can be done honestly.
+
+    **Selection costs budget and is charged for it.**  On hardware there is no
+    exact energy to rank candidates by, so ``audit_fraction`` of the budget is
+    reserved to re-evaluate every candidate at equal precision and pick the
+    lowest.  Ranking by each run's own best observed value instead would be
+    free and wrong: that value is the minimum of many noisy draws and is biased
+    low by roughly the run's own noise, so it would systematically favour the
+    *noisiest* run rather than the best one.
+    """
+    from .optimizers import shot_ladder  # local import keeps the registry simple
+
+    inner = inner or shot_ladder
+    rng = np.random.default_rng(seed)
+    total = (oracle.budget - oracle.shots_used) if oracle.budget else None
+
+    audit_budget = int(total * audit_fraction) if total else 0
+    per_start = (total - audit_budget) // starts if total else None
+
+    candidates: list[np.ndarray] = []
+    history: list[float] = []
+    shot_history: list[int] = []
+
+    for index in range(starts):
+        start = np.asarray(x0, dtype=float) + (
+            rng.normal(0.0, spread, size=len(x0)) if index else 0.0
+        )
+        limit = None if per_start is None else oracle.shots_used + per_start
+        guard = _BudgetWindow(oracle, limit)
+        try:
+            result = inner(guard, start, maxiter=maxiter, **inner_kwargs)
+            candidates.append(np.asarray(result.x, dtype=float))
+            history.extend(result.history)
+            shot_history.extend(result.shot_history)
+        except (_WindowClosed, BudgetExceeded):
+            candidates.append(
+                oracle.best_params.copy() if oracle.best_params is not None else start
+            )
+        if callback:
+            callback(candidates[-1], history[-1] if history else np.inf)
+
+    # honest selection: equal shots to each candidate, pick the lowest
+    audit_shots = max(1, audit_budget // max(1, len(candidates)))
+    scores = []
+    for candidate in candidates:
+        try:
+            scores.append(oracle(candidate, audit_shots))
+        except BudgetExceeded:
+            scores.append(np.inf)
+    winner = int(np.argmin(scores))
+
+    return OptimizeResult(
+        x=candidates[winner],
+        fun=float(scores[winner]),
+        nit=len(history),
+        history=history,
+        shot_history=shot_history,
+        message=f"multi_start starts={starts} audit={audit_fraction} winner={winner}",
+        extra={"audit_scores": [float(s) for s in scores], "winner": winner},
+    )
+
+
+class _WindowClosed(Exception):
+    """Internal: one start has spent its share of the budget."""
+
+
+class _BudgetWindow:
+    """Oracle view that stops after a per-start allowance.
+
+    Wraps rather than mutates the real oracle so the global budget, the best
+    point seen and the trace all stay on the original.
+    """
+
+    def __init__(self, oracle: EnergyOracle, limit: int | None):
+        self._oracle = oracle
+        self._limit = limit
+
+    def _check(self):
+        if self._limit is not None and self._oracle.shots_used >= self._limit:
+            raise _WindowClosed()
+
+    def __call__(self, params, shots: int | None = None) -> float:
+        self._check()
+        return self._oracle(params, shots)
+
+    def with_error(self, params, shots: int | None = None):
+        self._check()
+        return self._oracle.with_error(params, shots)
+
+    @property
+    def budget(self):
+        return self._limit
+
+    @property
+    def shots_used(self) -> int:
+        return self._oracle.shots_used
+
+    @property
+    def best_params(self):
+        return self._oracle.best_params
+
+    @property
+    def best_value(self):
+        return self._oracle.best_value
+
+    @property
+    def default_shots(self) -> int:
+        return self._oracle.default_shots
+
+    @property
+    def estimator(self):
+        return self._oracle.estimator
+
+
 OPTIMIZERS: dict[str, Callable] = {
     "cobyla": lambda o, x0, **kw: scipy_minimize(o, x0, method="COBYLA", **kw),
     "powell": lambda o, x0, **kw: scipy_minimize(o, x0, method="Powell", **kw),
@@ -676,4 +859,5 @@ OPTIMIZERS: dict[str, Callable] = {
     "aspsa": adaptive_spsa,
     "sps": stochastic_parameter_shift,
     "ladder": shot_ladder,
+    "multistart": multi_start,
 }

@@ -114,3 +114,44 @@ def test_spsa_and_ladder_return_the_expected_shape():
         assert isinstance(result, OptimizeResult)
         assert len(result.x) == 4
         assert np.isfinite(result.fun)
+
+
+def test_multi_start_charges_for_its_own_selection():
+    """The audit must come out of the budget, not be free.
+
+    Ranking candidates by each run's own best observed value would cost nothing
+    and be wrong: that value is the minimum of many noisy draws, biased low by
+    roughly the run's noise, so it favours the noisiest run rather than the best.
+    """
+    from qres.optimizers import multi_start
+
+    oracle = EnergyOracle(FakeEstimator(n=4, noise=1.0), default_shots=512, budget=2_000_000)
+    result = multi_start(oracle, np.ones(4) * 0.3, starts=3, audit_fraction=0.2)
+    assert len(result.extra["audit_scores"]) == 3
+    assert 0 <= result.extra["winner"] < 3
+    assert oracle.shots_used <= 2_000_000
+
+
+def test_multi_start_splits_the_budget_between_starts():
+    from qres.optimizers import multi_start
+
+    for starts in (2, 4):
+        oracle = EnergyOracle(FakeEstimator(n=4), default_shots=512, budget=4_000_000)
+        multi_start(oracle, np.ones(4) * 0.3, starts=starts, audit_fraction=0.1)
+        assert oracle.shots_used <= 4_000_000
+        assert oracle.shots_used > 0.4 * 4_000_000
+
+
+def test_trust_radius_estimation_refuses_rather_than_guessing():
+    """Three principled heuristics failed; a wrong guess is worse than none.
+
+    See RESEARCH_LOG Result 40 -- the signal each one needs is smaller than the
+    shot noise at any affordable probe cost.
+    """
+    from qres.optimizers import TRUST_RADIUS, estimate_trust_radius
+
+    with pytest.raises(NotImplementedError):
+        estimate_trust_radius()
+    # the measured values, which differ by 10x and both matter
+    assert TRUST_RADIUS["hardware_efficient"] == 1.0
+    assert TRUST_RADIUS["coupled_cluster"] == 0.1

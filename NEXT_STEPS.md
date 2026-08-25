@@ -27,31 +27,42 @@ the Hartree-Fock reference — three molecules:
 the alternatives changes the `(Σ|c|)²` scaling. Do not re-open this without a
 scheme that is not on this list.
 
-### 1. The optimiser is what binds now  ← **the live question**
-Result 37 falsified the cost model as a *budget*: H₄ + UCCSD at 256M shots —
-above the 170M the estimator noise predicted — still reaches **0/8** chemical
-accuracy, and 4× the budget moved the median 4%. The estimator side of the model
-is right (the H₂ figure checked out); what it omits is that a precise evaluation
-is only worth something if the optimiser can use it, and Result 26 showed COBYLA
-cannot: at σ *below* chemical accuracy it still managed 2.68e-3 against its own
-noiseless 4.96e-5.
+### 1. The optimiser is what binds — and two of three sub-items are now closed
+Result 37 falsified the shot-cost model as a *budget*: H₄ + UCCSD at 256M, above
+the 170M the estimator noise predicted, still reaches 0/8 chemical accuracy. The
+estimator side is right; what it omits is that a precise evaluation is only
+useful if the optimiser can exploit it.
 
-One clue in the 256M data: the *best* seed improves markedly (3.25e-2 → 1.77e-2)
-where the median does not. That is optimiser variance, not estimator noise.
+**Closed this session:**
 
-So the work is on the optimiser, in rough order:
+* ~~Multi-start~~ (Result 39). Significantly *worse* at small budgets
+  (2.44× at 3.2M, p = 0.004) and indistinguishable at the best audit setting
+  (0.827, p = 0.804). The optimiser variance is real, but selecting the good
+  run costs about as much as producing it, so diversification cannot capture it
+  at equal budget.
+* ~~Automatic `rhobeg`~~ (Result 40). Three principled heuristics, three
+  failures — the last one correctly matched to COBYLA's linear model and still
+  defeated by shot noise. The signal is smaller than σ at any affordable probe
+  cost. Now a documented table, `optimizers.TRUST_RADIUS`, with the measured
+  values and the physical reason they differ by 10×.
 
-1. **A noise-aware trust region.** `shot_ladder` restarts COBYLA, which throws
-   away its model each rung. A stochastic trust-region method (STORM-style)
-   that sizes its sample count from the model's own uncertainty should dominate
-   it and would remove the hand-set `growth`, `levels` and `rhobeg`.
-2. **`rhobeg` must be estimated, not hard-coded.** H₂'s hardware-efficient
-   ansatz wants 1.0 on restart and H₄'s UCCSD wants 0.1 (Results 26, 31) — a 10×
-   spread with no universal value. Estimate it from the spread of a few
-   random-direction energy differences.
-3. **Restarts and seed variance.** With a 40% failure rate on some
-   configurations, spending part of the budget on multiple starts and keeping
-   the best may beat one long run. Cheap to test, never tested.
+**Still open, and now the only optimiser item left:**
+
+**A noise-aware trust region.** `shot_ladder` restarts COBYLA, throwing away its
+model at every rung, and COBYLA assumes exact function values. A stochastic
+trust-region method (STORM-style) instead sizes its *sample count* from the
+model's own uncertainty: it re-samples until the model is trustworthy at the
+current radius, shrinks the radius when it is not, and accepts a step only when
+the predicted decrease is large against the noise.
+
+That is the one design that addresses Result 26 directly — near the optimum the
+differences a model interpolates shrink quadratically while noise stays flat, so
+the sample count *has* to be tied to the radius. It would also subsume
+`shot_ladder`'s hand-set `growth` and `levels`, and possibly `rhobeg` too, since
+the radius becomes adaptive rather than initial.
+
+Acceptance test: beat `shot_ladder`'s 1.691e-3 median and 7/16 chemical-accuracy
+rate on H₂ at 12.8M over ≥ 16 seeds, and do it without a per-ansatz constant.
 
 ---
 
