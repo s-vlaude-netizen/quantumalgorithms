@@ -118,11 +118,21 @@ def main() -> int:
     ap.add_argument("--size", choices=sorted(SIZES), default="small")
     ap.add_argument("--env", default="ideal", help="noise env spec, e.g. ideal / small / medium")
     ap.add_argument("--name", default=None)
+    ap.add_argument("--molecules", default=None,
+                    help="comma-separated override of the size preset's molecule list")
+    ap.add_argument("--seeds", type=int, default=None)
+    ap.add_argument("--budget", type=int, default=None)
     args = ap.parse_args()
 
-    cfg = SIZES[args.size]
-    cfg["seeds"] = list(cfg["seeds"])
-    name = args.name or f"exp001_{args.size}_{args.env.replace('@', '')}"
+    cfg = dict(SIZES[args.size])
+    cfg["seeds"] = list(range(args.seeds)) if args.seeds else list(cfg["seeds"])
+    if args.molecules:
+        cfg["molecules"] = args.molecules.split(",")
+    if args.budget:
+        cfg["budget"] = args.budget
+    name = args.name or (
+        f"exp001_{'-'.join(cfg['molecules'])}_{args.env.replace('@', '')}_{cfg['budget']}"
+    )
     study = Study(name=name, seeds=cfg["seeds"])
 
     print(f"=== experiment 001 [{args.size}] env={args.env} ===")
