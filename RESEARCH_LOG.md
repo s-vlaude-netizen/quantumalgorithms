@@ -1799,3 +1799,42 @@ algorithm, and the scaling argument that motivated this direction was about the
 wrong quantity. Whether the largest parameter reductions eventually pay for the
 search that finds them is exactly what the LiH number will say.
 
+### Result 47 — batched + lazy ADAPT: cost parity with UCCSD at half the circuit
+
+ADAPT's cost is *(number of growth steps)* × *(cost of one re-optimisation)*.
+The lazy schedule (Result 46) shrinks the second factor 3.1×; batching several
+operators per step shrinks the first. The trade for batching is a worse operator
+choice, since operators 2..b are picked from gradients measured before operator
+1 was added. Both together, on H₄ against fixed UCCSD's 134 evaluations:
+
+| batch | lazy | params | evaluations | total | error | vs UCCSD |
+|---|---|---|---|---|---|---|
+| 1 | no | 9 | 645 | 647 | 1.20e-3 | 0.21× *(standard ADAPT)* |
+| 1 | yes | 9 | 205 | 207 | 1.26e-3 | 0.65× |
+| 2 | no | 10 | 461 | 462 | **1.08e-4** | 0.29× |
+| 3 | yes | 9 | 145 | 146 | 1.55e-3 | 0.92× |
+| **5** | **yes** | **10** | **140** | **141** | 3.29e-4 | **0.95×** |
+
+**4.6× cheaper than standard ADAPT**, and essentially cost parity with fixed
+UCCSD (141 evaluations against 134) while using **10 parameters instead of 26**.
+
+The parameters are not the point on their own — the circuit is. Transpiled to
+`fake_torino`:
+
+| ansatz | params | two-qubit gates | depth | fidelity estimate |
+|---|---|---|---|---|
+| **batched ADAPT** | **10** | **665** | **1809** | **0.061** |
+| fixed UCCSD | 26 | 1350 | 3804 | 0.0034 |
+
+**2.0× fewer two-qubit gates, 2.1× shallower, and 18× more surviving signal**,
+at the same optimisation cost and reaching chemical accuracy (3.29e-4).
+
+That is a real improvement and it is worth being precise about its size: 0.061
+fidelity is still far from usable — Result 12 put the threshold at ~40
+two-qubit gates for fidelity above 0.5, and this is 665. Batched ADAPT closes
+about one order of magnitude of a gap that was 32×; it does not close the gap.
+
+The batch/accuracy trade is also visible and useful: `batch=2` without the lazy
+schedule reaches **1.08e-4** — an order of magnitude better than chemical
+accuracy — at 0.29×, so the knob buys accuracy as well as cost.
+

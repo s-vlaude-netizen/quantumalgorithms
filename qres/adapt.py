@@ -131,14 +131,33 @@ def adapt_vqe(
     gradient_tolerance: float = 1e-3,
     energy_tolerance: float | None = None,
     optimizer_maxiter: int = 2000,
+    batch: int = 5,
+    lazy: bool = True,
     verbose: bool = False,
 ) -> AdaptResult:
-    """Exact-arithmetic ADAPT-VQE, to measure how few parameters suffice.
+    """Exact-arithmetic ADAPT-VQE, in the cheapest schedule measured.
 
     Deliberately noiseless: the question this answers is *how many operators*
     are needed for a given accuracy, which is a property of the ansatz and the
     molecule, not of the estimator.  Mixing in shot noise would only obscure it,
     and Result 25 already established that the noise is a separate problem.
+
+    ``batch`` and ``lazy`` default to the best combination measured
+    (RESEARCH_LOG Result 47).  Standard ADAPT is ``batch=1, lazy=False``, and it
+    is **4.6x more expensive**: its cost is *(growth steps)* x *(cost of one
+    re-optimisation)*, and the defaults shrink both factors.
+
+    ``lazy`` optimises only the newly added parameters at each step, with one
+    full pass at the end -- 3.1x on its own.  ``batch`` adds several operators
+    per step, trading a worse choice for operators 2..b (they are picked from
+    gradients measured before operator 1 was added) against far fewer
+    re-optimisations.
+
+    Together on H4 they reach chemical accuracy in 141 evaluations against fixed
+    UCCSD's 134 -- cost parity -- using 10 parameters instead of 26, which is
+    2.0x fewer two-qubit gates and 18x more surviving signal on a Heron-class
+    device.  Set ``batch=2, lazy=False`` for an order of magnitude better
+    accuracy (1.08e-4) at 3x the cost.
     """
     from scipy.optimize import minimize
 
@@ -168,23 +187,36 @@ def adapt_vqe(
         t0 = time.perf_counter()
         state = build(parameters, chosen)
         gradients = operator_gradients(problem.hamiltonian, state, pool)
-        best = int(np.argmax(gradients))
-        largest = float(gradients[best])
+        picked = [int(i) for i in np.argsort(-gradients) if gradients[i] >= gradient_tolerance]
+        picked = picked[: max(1, batch)]
 
-        if largest < gradient_tolerance:
+        if not picked:
             converged = True
             break
 
-        chosen.append(best)
-        parameters = np.concatenate([parameters, [0.0]])
-        result = minimize(
-            energy_of,
-            parameters,
-            args=(chosen,),
-            method="BFGS",
-            options={"maxiter": optimizer_maxiter},
-        )
-        parameters = np.asarray(result.x)
+        best = picked[0]
+        largest = float(gradients[best])
+        added = len(picked)
+        chosen.extend(picked)
+        parameters = np.concatenate([parameters, np.zeros(added)])
+
+        if lazy:
+            fixed = parameters[:-added]
+
+            def partial(tail):
+                return energy_of(np.concatenate([fixed, tail]), chosen)
+
+            result = minimize(
+                partial, parameters[-added:], method="COBYLA",
+                options={"maxiter": optimizer_maxiter},
+            )
+            parameters = np.concatenate([fixed, np.asarray(result.x)])
+        else:
+            result = minimize(
+                energy_of, parameters, args=(chosen,), method="COBYLA",
+                options={"maxiter": optimizer_maxiter},
+            )
+            parameters = np.asarray(result.x)
         energy = float(result.fun)
 
         steps.append(
@@ -206,6 +238,14 @@ def adapt_vqe(
         if abs(energy - problem.fci_energy) < energy_tolerance:
             converged = True
             break
+
+    if lazy and chosen and abs(energy_of(parameters, chosen) - problem.fci_energy) >= energy_tolerance:
+        # the one full pass the lazy schedule defers to the end
+        result = minimize(
+            energy_of, parameters, args=(chosen,), method="COBYLA",
+            options={"maxiter": optimizer_maxiter * 5},
+        )
+        parameters = np.asarray(result.x)
 
     final = energy_of(parameters, chosen) if len(chosen) else float(
         np.real(reference.expectation_value(problem.hamiltonian))

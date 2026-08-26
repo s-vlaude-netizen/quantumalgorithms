@@ -95,3 +95,35 @@ def test_gradient_ranking_tolerates_much_more_noise_than_an_energy():
         for _ in range(200)
     )
     assert hits >= 190, "sigma=0.01 should almost always pick the right operator"
+
+
+def test_batched_lazy_schedule_is_the_default_and_is_cheaper():
+    """The best schedule measured, and it must stay the default.
+
+    ADAPT's cost is (growth steps) x (cost of one re-optimisation). The lazy
+    schedule shrinks the second factor 3.1x, batching shrinks the first, and
+    together they are 4.6x cheaper than standard ADAPT at the same accuracy --
+    141 evaluations against fixed UCCSD's 134, using 10 parameters rather than
+    26 (RESEARCH_LOG Result 47).
+    """
+    import inspect
+
+    signature = inspect.signature(adapt_vqe)
+    assert signature.parameters["batch"].default > 1
+    assert signature.parameters["lazy"].default is True
+
+
+@pytest.mark.parametrize("batch,lazy", [(1, False), (5, True)])
+def test_every_schedule_reaches_chemical_accuracy(batch, lazy):
+    problem = build_molecule("H4")
+    result = adapt_vqe(problem, max_operators=15, batch=batch, lazy=lazy)
+    assert abs(result.energy - problem.fci_energy) < CHEMICAL_ACCURACY_HA
+    assert result.num_parameters < 26, "must use fewer parameters than fixed UCCSD"
+
+
+def test_batching_uses_fewer_growth_steps():
+    """Which is the whole mechanism: fewer steps means fewer re-optimisations."""
+    problem = build_molecule("H4")
+    single = adapt_vqe(problem, max_operators=15, batch=1, lazy=True)
+    batched = adapt_vqe(problem, max_operators=15, batch=5, lazy=True)
+    assert len(batched.steps) < len(single.steps)

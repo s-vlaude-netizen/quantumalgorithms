@@ -54,34 +54,44 @@ measurement:
 So the remaining levers are neither estimator nor optimiser. In order of what
 the measurements point at:
 
-### 1. ADAPT-VQE: measured, and the answer is "it depends on the growth steps"
-Built and measured (Result 44). The parameter reduction is real — **H₂ needs 1
-operator, H₄ needs 9 against UCCSD's 26, LiH needs 5 against 92** — and it grows
-with system size. But the total cost does not follow it: on H₄, ADAPT costs 673
-optimiser evaluations against fixed UCCSD's **109**, six times worse, because it
-re-optimises after every growth step. LiH's five steps cost only 128 and should
-favour ADAPT; that comparison is unfinished.
+### 1. ADAPT-VQE: measured, improved 4.6×, and now at cost parity
+Built, measured, and made cheaper (Results 44–47).
 
-The rule the data supports: **cost is governed by the number of growth steps,
-not the final parameter count.** ADAPT wins where few operators suffice and
-loses where many are needed.
+**What holds.** The parameter reduction is real and grows with system size: 1 vs
+3 on H₂, 9 vs 26 on H₄, 5 vs 92 on LiH.
 
-Open, in order:
+**What did not.** A parameter count is not a cost. Standard ADAPT costs 647
+evaluations on H₄ against fixed UCCSD's 134 — 5× *worse* — because it
+re-optimises after every growth step. The scaling argument that motivated the
+direction (`n` is the untouched factor in `shots ~ (Σ|c|)² n / ε²`) was about
+the final parameter count, not the cost of finding it.
 
-1. **Finish the LiH comparison.** UCCSD there has 92 parameters and BFGS with
-   numerical gradients needs 93 evaluations per gradient, so it is slow — but it
-   is the case where ADAPT should win, and the claim is unsupported without it.
-2. ~~**Cut the re-optimisation cost.**~~ **Done (Result 46).** The lazy schedule
-   — optimise only the newly added parameter, one full pass at the end — is
-   **3.1× cheaper** than standard ADAPT at the same accuracy (645 → 205
-   evaluations on H₄). It still loses to fixed UCCSD by 1.5×. Batched ADAPT
-   (several operators per growth step) is the remaining untested variant, and
-   it attacks the same overhead from the other side.
-3. **Shrink the pool.** A sweep costs 28× an energy on LiH because the
+**What fixes it.** ADAPT's cost is *(growth steps)* × *(cost of one
+re-optimisation)*. The lazy schedule shrinks the second 3.1×, batching shrinks
+the first, and together they give **4.6×**:
+
+| variant | evaluations | vs fixed UCCSD |
+|---|---|---|
+| standard ADAPT | 647 | 0.21× |
+| lazy only | 207 | 0.65× |
+| **batch 5 + lazy** *(now the default)* | **141** | **0.95×** |
+
+At cost parity, that ansatz uses **10 parameters against 26**, which transpiles
+to **665 two-qubit gates against 1350** — 2.1× shallower and **18× more
+surviving signal** on `fake_torino`. It reaches 3.29e-4.
+
+**Open:**
+
+1. **Finish LiH.** The 18× parameter reduction is largest there and its UCCSD
+   arm is still running — COBYLA on 92 parameters with a deep circuit per
+   evaluation. It is the case that could show more than parity.
+2. **Shrink the pool.** A gradient sweep costs 28× an energy on LiH because the
    commutators barely share measurement groups with `H`. Qubit-ADAPT pools are
-   far smaller than the fermionic singles-and-doubles pool and would cut this
-   directly. The gradient-precision finding already helps here: σ = 0.01 ranks
-   correctly 100% of the time, worth ~39× against energy precision.
+   much smaller. The sweeps are only 1% of the cost at H₄'s size, but they scale
+   with the pool and the pool scales as `N⁴`.
+3. **Take it to shot noise.** Everything in Results 44–47 is exact arithmetic.
+   The batched+lazy schedule makes far fewer, larger optimisation calls, which
+   is a different noise profile from standard ADAPT — untested.
 
 ### 2. Smaller problems, honestly scored
 Everything here is H₂/H₄/LiH at STO-3G. Before any of these conclusions is
