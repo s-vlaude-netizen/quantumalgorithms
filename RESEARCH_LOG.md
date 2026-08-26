@@ -1656,3 +1656,70 @@ and `N` grows with basis size in real calculations; and FCI's own exponential
 scaling means it does lose eventually — the relevant competitor is CCSD(T) or
 DMRG, not FCI. The exponent is what this data says, not a settled number.
 
+### Result 44 — ADAPT-VQE needs far fewer parameters, and that is not the same as costing less
+
+The direction Result 43 argued for, built and measured. ADAPT-VQE grows the
+ansatz greedily: measure `∂E/∂θ_k = <ψ|i[H, A_k]|ψ>` for every operator in a
+pool, append the largest, re-optimise everything, repeat.
+
+**The parameter reduction is real and large.** Exact arithmetic, stopping at
+chemical accuracy:
+
+| molecule | ADAPT parameters | fixed UCCSD | reduction | ADAPT error |
+|---|---|---|---|---|
+| H₂ | **1** | 3 | 3× | 6.7e-16 |
+| H₄ | **9** | 26 | 2.9× | 1.20e-3 ✓ |
+| LiH | **5** | 92 | **18.4×** | 1.53e-3 ✓ |
+
+One operator suffices for H₂ to machine precision. LiH reaches chemical accuracy
+with five of a 92-operator pool.
+
+**But the parameter count is not the cost.** Each growth step measures the
+gradient of *every* pool operator, and those commutators do not share
+measurement groups with the Hamiltonian:
+
+| molecule | H terms / groups | union with all `[H, A_k]` | cost of one sweep |
+|---|---|---|---|
+| H₂ | 5 / 2 | 10 / 4 | 2.0× an energy |
+| H₄ | 165 / 10 | 1 415 / 101 | 10.1× |
+| LiH | 631 / 41 | 29 855 / 1 154 | **28.1×** |
+
+Two corrections make the accounting fair, and they pull in opposite directions.
+
+**Gradients need far less precision than energies** — they only have to *rank*
+operators. Adding noise to exact gradients and checking whether the argmax
+survives, over 400 trials:
+
+| σ | H₄ picks best | LiH picks best |
+|---|---|---|
+| 0.010 | **100%** | **100%** |
+| 0.030 | 90% | 100% |
+| 0.100 | 37% | 46% |
+
+σ = 0.01 is tolerable against chemical accuracy's 1.6e-3, and shots go as 1/σ²,
+so a gradient sweep costs ~**39× less** than the group count suggests.
+
+**And the optimiser cost has to be measured, not assumed.** Charging
+`10k` evaluations per step was wrong in both directions:
+
+| molecule | ADAPT optimiser evals (measured) | fixed UCCSD to chemical accuracy (measured) |
+|---|---|---|
+| H₄ | **670** | **109** |
+| LiH | 128 | *(pending — 92 parameters, BFGS needs 93 evaluations per gradient)* |
+
+**H₄: ADAPT costs 673 evaluations against fixed UCCSD's 109 — six times worse**,
+despite using 2.9× fewer parameters. The reason is structural: ADAPT
+re-optimises after every growth step, so nine steps means nine optimisations,
+while UCCSD's single optimisation converges quickly from Hartree-Fock (which,
+for a coupled-cluster ansatz, has non-zero gradient — Result 16).
+
+LiH's five steps cost only 128, so there the arithmetic should favour ADAPT; the
+UCCSD comparison is still running.
+
+**The honest statement:** ADAPT's parameter reduction is genuine and grows with
+system size, but total cost is governed by the *number of growth steps*, not the
+final parameter count. It wins where few operators suffice and loses where many
+are needed — and H₄, the harder correlation problem of the two, is where it
+loses. A parameter count is not a cost, and this is the third time in this
+project that a headline ratio has not survived being charged properly.
+

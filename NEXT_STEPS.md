@@ -54,16 +54,32 @@ measurement:
 So the remaining levers are neither estimator nor optimiser. In order of what
 the measurements point at:
 
-### 1. Fewer parameters, not better optimisation  ← **the live direction**
-Result 34's scaling is `shots ~ (Σ|c|)² · n / ε²`, and `n` is the one factor
-still untouched. ADAPT-VQE grows the ansatz operator by operator from a measured
-gradient pool, reaching a given accuracy with far fewer parameters than a fixed
-UCCSD — and every measurement here says parameter count is what the budget buys.
-The measurement machinery it needs (grouped estimation of an operator pool's
-gradients) already exists.
+### 1. ADAPT-VQE: measured, and the answer is "it depends on the growth steps"
+Built and measured (Result 44). The parameter reduction is real — **H₂ needs 1
+operator, H₄ needs 9 against UCCSD's 26, LiH needs 5 against 92** — and it grows
+with system size. But the total cost does not follow it: on H₄, ADAPT costs 673
+optimiser evaluations against fixed UCCSD's **109**, six times worse, because it
+re-optimises after every growth step. LiH's five steps cost only 128 and should
+favour ADAPT; that comparison is unfinished.
 
-Acceptance test: reach chemical accuracy on H₄ at a budget where fixed UCCSD
-does not (it fails at 256M, Result 37).
+The rule the data supports: **cost is governed by the number of growth steps,
+not the final parameter count.** ADAPT wins where few operators suffice and
+loses where many are needed.
+
+Open, in order:
+
+1. **Finish the LiH comparison.** UCCSD there has 92 parameters and BFGS with
+   numerical gradients needs 93 evaluations per gradient, so it is slow — but it
+   is the case where ADAPT should win, and the claim is unsupported without it.
+2. **Cut the re-optimisation cost.** Nine full re-optimisations is what sinks H₄.
+   Standard mitigations, untested here: optimise only the newly added parameter
+   for the first few iterations; or add several operators per step (batched
+   ADAPT), trading a slightly worse choice for far fewer optimisations.
+3. **Shrink the pool.** A sweep costs 28× an energy on LiH because the
+   commutators barely share measurement groups with `H`. Qubit-ADAPT pools are
+   far smaller than the fermionic singles-and-doubles pool and would cut this
+   directly. The gradient-precision finding already helps here: σ = 0.01 ranks
+   correctly 100% of the time, worth ~39× against energy precision.
 
 ### 2. Smaller problems, honestly scored
 Everything here is H₂/H₄/LiH at STO-3G. Before any of these conclusions is
