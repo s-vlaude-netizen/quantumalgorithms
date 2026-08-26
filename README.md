@@ -81,6 +81,20 @@ there equals the device bias to three digits and no shot allocation reaches
 bias. The interquartile range still falls as √n exactly as designed; the total
 error simply contains almost no statistics to improve.
 
+**And once the bias was decomposed, it turned out to be almost entirely
+readout.** Switching the noise channels off one at a time: 97% of the H₄ bias is
+readout error and thermal relaxation contributes nothing measurable. That
+predicts zero-noise extrapolation will fail here — folding amplifies state
+preparation, which for a Hartree-Fock reference is two X gates — and it does, at
+1.04–1.06× *worse* than doing nothing. Readout correction, charged the same
+total shots with calibration paid out of that budget, gives **9×**: 5.263e-2 →
+5.583e-3 Hartree, the first genuine reduction in device error in this project.
+
+Worth knowing separately: the transpiler is already doing 8× of readout
+mitigation for free. At optimisation level 2 it placed a six-qubit problem on
+physical qubits [66, 5, 87, 81, 60, 51], whose readout fidelity is 0.945–0.976
+against 0.684–0.747 on qubits 0–5.
+
 So the ranking above **inverts** under device noise. General-commuting grouping
 beats QWC by 1.7× on LiH in the ideal case (predicted 0.56 from the variance
 ratio, measured 0.59) and *loses* by 1.37× on `heron` — because its Clifford

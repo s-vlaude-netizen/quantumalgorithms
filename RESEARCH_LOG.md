@@ -2391,3 +2391,79 @@ the measurement scheme is not what stands between this and a useful answer.
 This is the fourth independent route to the same wall (Results 42, 50, 51 being
 the others), and the first one that arrives from inside the measurement work
 itself.
+
+### Result 56 — the first thing in this project to actually reduce device error: 9×, and it is not the method the literature emphasises
+
+Result 55 promoted error mitigation from a middling item to the top of the queue
+with a concrete target: on `heron`, the H₄ Hartree-Fock energy is measured at
+5.3e-2 Hartree against chemical accuracy of 1.6e-3, and shots cannot fix it
+because the error is bias.
+
+**Diagnose before treating.** Rather than reaching for zero-noise extrapolation
+because that is what the literature emphasises, the bias was decomposed first by
+switching the noise channels off one at a time (8 seeds, 50k shots):
+
+| readout | thermal | grouping | bias |
+|---|---|---|---|
+| on | on | QWC | 5.193e-2 |
+| **off** | on | QWC | **1.740e-3** |
+| on | off | QWC | 5.194e-2 |
+| on | on | commuting | 6.770e-2 |
+| **off** | on | commuting | **1.646e-2** |
+
+**97% of the bias is readout error.** Thermal relaxation contributes nothing
+measurable. LiH replicates: 3.977e-2 with readout, **9.879e-4** without — below
+chemical accuracy.
+
+That immediately predicts ZNE will fail here, and says why: global folding
+amplifies the *state-preparation* circuit, which for a Hartree-Fock reference is
+two X gates. There is nothing there to amplify.
+
+It also isolates Result 55's mechanism exactly. General-commuting grouping's
+readout-free bias is **1.646e-2** against QWC's **1.740e-3** — a 9.5× penalty
+that is precisely the cost of its Clifford diagonalisations.
+
+**The measurement**, every arm charged the same 200 000 total shots with
+mitigation overhead taken *out of* that budget rather than added to it, 12 seeds
+(`experiments/exp013_zero_noise_extrapolation.py`):
+
+| arm | median error | IQR | **vs unmitigated** |
+|---|---|---|---|
+| unmitigated | 5.263e-2 | 6.78e-3 | 1.00 |
+| ZNE linear (1,3) | 5.454e-2 | 8.14e-3 | **1.04** |
+| ZNE linear (1,3,5) | 5.598e-2 | 1.00e-2 | **1.06** |
+| ZNE richardson (1,3,5) | 5.565e-2 | 2.50e-2 | **1.06** |
+| readout, 10% calibration | 7.554e-3 | 8.39e-3 | **0.14** |
+| **readout, 25% calibration** | **5.583e-3** | 7.33e-3 | **0.11** |
+
+**ZNE is worse than doing nothing** — all three variants, 1.04–1.06×. Not a
+failure of the implementation: folding is verified to preserve the ideal state to
+1e-12 and the extrapolators are exact on linear and quadratic data. It is aimed
+at a bias that is not there.
+
+**Readout mitigation gives 9×**, from 5.263e-2 to 5.583e-3, and that is the
+first genuine reduction in device error this project has produced. Everything
+before it moved variance, which Result 55 showed is not the error.
+
+**The honest remaining gap.** 5.583e-3 is still 3.5× short of chemical accuracy,
+and the decomposition says why: a perfect readout correction would leave the
+1.740e-3 of gate bias, so the method is recovering most of the 97% but is
+limited by calibration statistics — which is exactly why the 25% arm beats the
+10% arm. The route to closing it is a cheaper calibration (tensored or M3-style)
+that buys more shots per calibration point, not a better estimator.
+
+**One thing found on the way that is worth as much as the mitigation.** The
+calibration must be measured on the qubits the estimator actually uses. At
+optimisation level 2 on a 133-qubit Heron target, the transpiler placed a
+six-qubit problem on physical qubits **[66, 5, 87, 81, 60, 51]**, whose readout
+fidelity is **0.945–0.976** — against **0.684–0.747** on qubits 0–5.
+
+So the transpiler's layout selection is already performing 8× of readout
+mitigation for free, silently, and an early version of this experiment that
+calibrated on qubits 0–5 measured a 35× improvement against a baseline that was
+8× too weak. Both numbers were real; only one was a fair comparison.
+
+**And 18× off the calibration cost.** `assignment_matrix` ran its 2ⁿ calibration
+circuits one at a time — 228 s for 64 trivial six-qubit circuits, essentially all
+of it per-run simulator setup. Batching them into one call: **12.7 s**, identical
+statistics.

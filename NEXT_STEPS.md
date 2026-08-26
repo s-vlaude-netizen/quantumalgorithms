@@ -70,22 +70,35 @@ measurement:
 So the remaining levers are neither estimator nor optimiser. In order of what
 the measurements point at:
 
-### 1. Error mitigation — the only item that attacks the error that exists
-Zero-noise extrapolation and readout mitigation both *buy* accuracy with *extra
-shots*. That trade used to look doubtful under budget parity. Result 55 changes
-the calculation completely: on a device model the extra shots were buying **4.3%
-for 16x** anyway, because the error is bias. Shots are nearly worthless there,
-which makes them cheap to spend on something that attacks bias instead.
+### 1. Error mitigation — measured, and readout is the whole story (Result 56)
+Done, and it is the first thing in this project to reduce device error rather
+than variance. On `heron`, H₄ from the Hartree-Fock reference, every arm charged
+the same 200k total shots with calibration paid out of that budget:
 
-Concretely: implement ZNE (gate folding) and M3-style readout correction, and
-measure error at matched *total* shots against the unmitigated baseline, on
-`heron`, from the Hartree-Fock reference where the exact answer is known. The
-number to beat is 6.9e-2 Hartree (H4, general commuting, 400k shots) and
-5.1e-2 (QWC). Anything that moves those toward 1.6e-3 is the first thing in this
-project to attack the error that actually exists on hardware.
+| arm | median error | vs unmitigated |
+|---|---|---|
+| unmitigated | 5.263e-2 | 1.00 |
+| ZNE (three variants) | 5.45–5.60e-2 | **1.04–1.06** |
+| **readout, 25% calibration** | **5.583e-3** | **0.11** |
 
-A negative result is still worth writing down — but unlike the earlier framing,
-the prior now favours trying.
+**ZNE is worse than nothing**, because 97% of the bias is readout error and
+folding amplifies state preparation — two X gates on an HF reference. Diagnosing
+the bias before choosing a method is what made this cheap.
+
+**Open, in order:**
+
+1. **Cheaper calibration.** 5.583e-3 is still 3.5× short of chemical accuracy,
+   and the decomposition says a perfect correction would reach 1.74e-3. The 25%
+   arm beating the 10% arm shows calibration statistics are the limiter. A
+   tensored or M3-style approximation buys more shots per calibration point and
+   also removes the 2ⁿ wall — exact calibration is hopeless past ~14 qubits.
+2. **Take it to a real ansatz.** Everything above is the HF reference, where
+   state preparation is trivial. With UCCSD the gate bias is no longer 3% of the
+   total and ZNE may earn its place — which would make the two methods
+   complementary rather than one dominant.
+3. **Then re-run Result 55's grouping comparison with readout correction on.**
+   Its verdict (QWC beats general commuting on a device) rests on a readout bias
+   that mitigation removes 9× of. The ranking may well invert back.
 
 ### 2. ADAPT-VQE: measured, improved 4.6×, and now at cost parity
 Built, measured, and made cheaper (Results 44–47).
