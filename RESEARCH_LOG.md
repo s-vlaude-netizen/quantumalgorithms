@@ -2467,3 +2467,49 @@ calibrated on qubits 0–5 measured a 35× improvement against a baseline that w
 circuits one at a time — 228 s for 64 trivial six-qubit circuits, essentially all
 of it per-run simulator setup. Batching them into one call: **12.7 s**, identical
 statistics.
+
+### Result 57 — the approximate calibration beats the exact one, and drives the total to 16×
+
+Result 56 left readout mitigation at 5.583e-3 Hartree, 3.5× short of chemical
+accuracy, with the diagnosis that **calibration statistics** were the limiter
+(the 25%-of-budget arm beat the 10% arm). The exact calibration needs 2ⁿ
+circuits, so at a fixed budget each one gets very few shots — 64 circuits on H₄,
+1 024 on a ten-qubit problem, and hopeless past ~14 qubits.
+
+The standard escape is to assume readout errors are independent per qubit, so
+the assignment matrix factorises: **two** calibration circuits (all zeros, all
+ones) give every qubit's 2×2 response and the full matrix is their Kronecker
+product. That trades a modelling error for a statistical one, and at a fixed
+budget the statistical saving is 2ⁿ⁻¹ times more shots per calibration point.
+
+**The trade is not close.** Same experiment, same 200 000 total shots per arm,
+12 seeds:
+
+| arm | median error | bias | **vs unmitigated** |
+|---|---|---|---|
+| unmitigated | 5.263e-2 | 5.232e-2 | 1.00 |
+| ZNE (best of three) | 5.454e-2 | 5.330e-2 | 1.04 |
+| readout **exact**, 25% calibration | 5.583e-3 | 5.894e-3 | 0.11 |
+| readout **tensored**, 10% calibration | 3.629e-3 | 2.204e-3 | **0.07** |
+| readout **tensored**, 25% calibration | **3.245e-3** | 2.489e-3 | **0.06** |
+| readout **tensored**, **2%** calibration | 3.342e-3 | 4.956e-3 | **0.06** |
+
+The approximation beats the exact method by **1.7×** — it is wrong about
+correlations and right about everything else, and on this noise model the
+correlations barely exist: the two matrices agree to 0.014 elementwise.
+
+**And calibration is now effectively free.** The 2%-of-budget arm is within 3%
+of the 25% arm. Calibration has gone from the limiting cost to a rounding error,
+which is what removes the 2ⁿ wall as well: two circuits scale to any qubit count.
+
+**Total: 5.263e-2 → 3.245e-3, a 16× reduction, within 2× of chemical accuracy.**
+
+**And it is at the floor.** Result 56 measured the readout-free bias at
+**1.740e-3**; tensored correction reaches a bias of 2.204e-3. So the correction
+has removed essentially all of the readout error — there is no more of it left
+to take. What remains is gate bias, and the next lever is a different one.
+
+That is worth stating plainly because it closes the item rather than merely
+advancing it: **readout mitigation on this system is done.** The 2× still
+separating it from chemical accuracy is not readout, and no amount of better
+calibration will touch it.

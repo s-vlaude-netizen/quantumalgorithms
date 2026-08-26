@@ -82,7 +82,8 @@ def mitigated(problem, environment, shots, seed, grouping, scales, method):
     return result.value
 
 
-def readout(problem, environment, shots, seed, grouping, fraction):
+def readout(problem, environment, shots, seed, grouping, argument):
+    fraction, calibration = argument
     ansatz = hartree_fock_state(problem.hf_bitstring)
     return readout_mitigated_energy(
         problem.hamiltonian,
@@ -91,6 +92,7 @@ def readout(problem, environment, shots, seed, grouping, fraction):
         params=[],
         total_shots=shots,
         calibration_fraction=fraction,
+        calibration=calibration,
         grouping=grouping,
         allocation="uniform",
     ).value
@@ -102,8 +104,11 @@ ARMS = (
     ("ZNE linear (1,3)", "zne", ((1, 3), "linear")),
     ("ZNE linear (1,3,5)", "zne", ((1, 3, 5), "linear")),
     ("ZNE richardson (1,3,5)", "zne", ((1, 3, 5), "richardson")),
-    ("readout (10% calib)", "readout", 0.10),
-    ("readout (25% calib)", "readout", 0.25),
+    ("readout exact (10%)", "readout", (0.10, "exact")),
+    ("readout exact (25%)", "readout", (0.25, "exact")),
+    ("readout tensored (10%)", "readout", (0.10, "tensored")),
+    ("readout tensored (25%)", "readout", (0.25, "tensored")),
+    ("readout tensored (2%)", "readout", (0.02, "tensored")),
 )
 
 

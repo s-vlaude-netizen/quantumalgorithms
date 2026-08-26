@@ -152,3 +152,60 @@ def test_calibration_follows_the_transpiler_layout():
     # the transpiler picks qubits that read out better; that gap is exactly why
     # calibrating on the wrong ones corrupts the correction
     assert np.diag(chosen).mean() > np.diag(trivial).mean()
+
+
+def test_tensored_calibration_uses_two_circuits_and_agrees_with_exact():
+    """The approximation must be close, and it must be cheap.
+
+    Independent per-qubit readout is an assumption, not a fact -- crosstalk and
+    shared readout lines break it.  On this noise model the two matrices agree
+    to ~0.01 elementwise, which is what makes the 2^n -> 2 circuit saving worth
+    taking (Result 57: the approximation beats the exact method 1.7x at a fixed
+    budget, because it gets 2^(n-1) times more shots per calibration point).
+    """
+    from qres.mitigation import tensored_assignment_matrix
+
+    environment = make_environment("heron", seed=1)
+    qubits = [66, 5, 87, 81, 60, 51]
+
+    exact = assignment_matrix_on(environment, qubits, shots=4096)
+    tensored = tensored_assignment_matrix(environment, qubits, shots=4096)
+
+    assert tensored.shape == exact.shape
+    assert np.allclose(tensored.sum(axis=0), 1.0)
+    assert np.abs(exact - tensored).max() < 0.05
+    assert np.diag(tensored).mean() == pytest.approx(np.diag(exact).mean(), abs=0.02)
+
+
+def test_tensored_matrix_factorises_in_the_right_qubit_order():
+    """It must be a Kronecker product, with qubit 0 as the *last* factor.
+
+    Qubit 0 is the least significant bit of the basis index.  Reversing the
+    factor order produces a matrix that still has unit columns and still looks
+    like a plausible assignment matrix, while attributing every qubit's readout
+    error to a different qubit -- so this checks the per-qubit error the
+    tensored matrix implies against the same quantity measured independently by
+    the exact calibration.
+    """
+    from qres.mitigation import tensored_assignment_matrix
+
+    environment = make_environment("heron", seed=1)
+    # deliberately mismatched qubits: 0 has poor readout, 66 good, so getting
+    # the order backwards moves a large error onto the wrong one
+    qubits = [0, 66]
+
+    tensored = tensored_assignment_matrix(environment, qubits, shots=8192)
+    exact = assignment_matrix_on(environment, qubits, shots=8192)
+
+    def implied_error_ratio(matrix, qubit_index):
+        """A_k[1,0] / A_k[0,0], read off the prepared-all-zeros column."""
+        return matrix[1 << qubit_index, 0] / matrix[0, 0]
+
+    for qubit_index in range(len(qubits)):
+        assert implied_error_ratio(tensored, qubit_index) == pytest.approx(
+            implied_error_ratio(exact, qubit_index), abs=0.03
+        ), f"qubit {qubit_index} error landed on the wrong factor"
+
+    # and the two qubits must genuinely differ, or the check above is vacuous
+    ratios = [implied_error_ratio(tensored, i) for i in range(len(qubits))]
+    assert max(ratios) > 3 * min(ratios), "qubits too similar to detect a swap"

@@ -240,6 +240,69 @@ def assignment_matrix_on(
     return matrix
 
 
+def tensored_assignment_matrix(
+    environment, physical_qubits: Sequence[int], shots: int = 4096
+) -> np.ndarray:
+    """Assignment matrix assuming readout errors are independent per qubit.
+
+    Two calibration circuits -- all zeros and all ones -- give every qubit's
+    2x2 response, and the full matrix is their tensor product.  That replaces
+    ``2^n`` circuits with 2, which is the difference between calibration being
+    a rounding error and being the entire budget: at 10 qubits it is 1 024
+    circuits against 2.
+
+    The assumption is that readout errors do not correlate across qubits.  It is
+    not exactly true on real devices (crosstalk, shared readout lines), so this
+    trades a modelling error for a statistical one -- and at a fixed budget the
+    statistical saving is enormous, which is what makes the trade worth
+    measuring rather than assuming.
+    """
+    physical = list(physical_qubits)
+    num_qubits = len(physical)
+    width = (
+        environment.backend.num_qubits
+        if environment.backend is not None
+        else max(physical) + 1
+    )
+
+    circuits = []
+    for prepared_bit in (0, 1):
+        circuit = QuantumCircuit(width, num_qubits)
+        if prepared_bit:
+            for qubit in physical:
+                circuit.x(qubit)
+        circuit.measure(physical, range(num_qubits))
+        circuits.append(circuit)
+
+    results = environment.run(circuits, shots)
+    if not isinstance(results, list):
+        results = [results]
+
+    # per qubit: P(read 1 | prepared 0) and P(read 0 | prepared 1)
+    singles = []
+    wrong = np.zeros((2, num_qubits))
+    totals = np.zeros(2)
+    for prepared_bit, counts in enumerate(results):
+        for bitstring, count in counts.items():
+            bits = bitstring.replace(" ", "")[::-1]  # index i is qubit i
+            for index in range(num_qubits):
+                if int(bits[index]) != prepared_bit:
+                    wrong[prepared_bit, index] += count
+        totals[prepared_bit] = sum(counts.values())
+
+    for index in range(num_qubits):
+        p01 = wrong[0, index] / totals[0] if totals[0] else 0.0  # read 1, prepared 0
+        p10 = wrong[1, index] / totals[1] if totals[1] else 0.0  # read 0, prepared 1
+        singles.append(np.array([[1 - p01, p10], [p01, 1 - p10]]))
+
+    matrix = np.array([[1.0]])
+    # qubit 0 is the least significant bit of the basis index, so it must be the
+    # last factor in the Kronecker product
+    for single in reversed(singles):
+        matrix = np.kron(matrix, single)
+    return matrix
+
+
 def correct_counts(counts: dict, matrix: np.ndarray, num_qubits: int) -> dict:
     """Undo readout error, then project back onto the probability simplex.
 
@@ -308,6 +371,7 @@ def readout_mitigated_energy(
     total_shots: int,
     calibration_fraction: float = 0.25,
     grouping: str = "qwc",
+    calibration: str = "exact",
     **estimator_kwargs,
 ) -> MitigationResult:
     """Readout-corrected energy, with calibration paid out of the same budget.
@@ -321,26 +385,38 @@ def readout_mitigated_energy(
 
     num_qubits = ansatz.num_qubits
     calibration_budget = int(total_shots * calibration_fraction)
-    per_state = max(1, calibration_budget // (1 << num_qubits))
 
     # build the estimator first, then calibrate the qubits it actually uses
     estimator = ShotEstimator(
         hamiltonian, ansatz, environment, grouping=grouping, **estimator_kwargs
     )
     physical = measured_physical_qubits(estimator)
-    matrix = assignment_matrix_on(environment, physical, shots=per_state)
+
+    # the same budget buys 2^(n-1) times more shots per calibration point when
+    # only two circuits are needed instead of 2^n
+    if calibration == "tensored":
+        circuits_needed = 2
+        per_state = max(1, calibration_budget // circuits_needed)
+        matrix = tensored_assignment_matrix(environment, physical, shots=per_state)
+    elif calibration == "exact":
+        circuits_needed = 1 << num_qubits
+        per_state = max(1, calibration_budget // circuits_needed)
+        matrix = assignment_matrix_on(environment, physical, shots=per_state)
+    else:
+        raise ValueError(f"unknown calibration {calibration!r}")
 
     attach_readout_correction(estimator, matrix)
     result = estimator.estimate(params, total_shots - calibration_budget)
 
     return MitigationResult(
         value=result.value,
-        shots_used=result.shots_used + per_state * (1 << num_qubits),
-        circuits_used=result.circuits_used + (1 << num_qubits),
-        method="readout",
+        shots_used=result.shots_used + per_state * circuits_needed,
+        circuits_used=result.circuits_used + circuits_needed,
+        method=f"readout/{calibration}",
         metadata={
-            "calibration_shots": per_state * (1 << num_qubits),
-            "calibration_circuits": 1 << num_qubits,
+            "calibration_shots": per_state * circuits_needed,
+            "calibration_circuits": circuits_needed,
+            "shots_per_calibration_point": per_state,
             "shots_on_observable": result.shots_used,
             "physical_qubits": physical,
         },

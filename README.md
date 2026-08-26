@@ -40,6 +40,7 @@ for the same things and the comparison between them means something.
 | `qres/classical_optimization.py` | greedy / local search / Goemans-Williamson / iterated local search |
 | `qres/classical.py` | HF, MP2, CCSD, CCSD(T), FCI reference energies |
 | `qres/lightcone.py` | exact QAOA energies on graphs too large to simulate |
+| `qres/mitigation.py` | zero-noise extrapolation and readout correction, budget-matched |
 | `qres/vqe.py`, `qres/qaoa.py` | end-to-end drivers |
 | `qres/bench.py` | multi-seed studies, paired comparisons, sign tests |
 
@@ -87,8 +88,16 @@ readout error and thermal relaxation contributes nothing measurable. That
 predicts zero-noise extrapolation will fail here — folding amplifies state
 preparation, which for a Hartree-Fock reference is two X gates — and it does, at
 1.04–1.06× *worse* than doing nothing. Readout correction, charged the same
-total shots with calibration paid out of that budget, gives **9×**: 5.263e-2 →
-5.583e-3 Hartree, the first genuine reduction in device error in this project.
+total shots with calibration paid out of that budget, gives **16×**: 5.263e-2 →
+3.245e-3 Hartree, the first genuine reduction in device error in this project.
+
+The cheap calibration beats the exact one. Assuming independent per-qubit
+readout replaces 2ⁿ calibration circuits with 2, and at a fixed budget those two
+get 2ⁿ⁻¹ times more shots each — worth 1.7× over exact calibration despite being
+an approximation, and it removes the 2ⁿ wall entirely. At 2% of the shot budget
+it is within 3% of its own best. The residual bias (2.2e-3) sits at the
+readout-free floor (1.7e-3), so readout mitigation on this system is finished:
+the 2× still separating it from chemical accuracy is gate error.
 
 Worth knowing separately: the transpiler is already doing 8× of readout
 mitigation for free. At optimisation level 2 it placed a six-qubit problem on
