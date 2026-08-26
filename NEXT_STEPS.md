@@ -105,9 +105,17 @@ That makes size the binding constraint on this whole project, not an item on a
 list. Both branches need the same thing — a reference that survives past brute
 force:
 
-* **Chemistry:** H₂O or active-space BeH₂, where FCI is still available but
-  strained, to see whether the Result 38/47 rankings are small-Hamiltonian
-  artefacts.
+* **Chemistry:** *partly answered — Result 53.* Going past LiH turned up
+  something before the rankings could even be re-tested: the `Σ|c| ~ N^2.78`
+  law the headline rests on was not identifiable from the five molecules it was
+  fitted on. Measured one direction at a time over thirteen, adding atoms at
+  fixed nuclear charge gives `N^-0.39` and adding basis functions to a fixed
+  molecule gives `N^2.86`. The headline survives (N^9.7), but **qubit count is
+  the wrong figure of merit** — Σ|c| spans 6.3× at fixed orbital count.
+
+  Still open: whether the Result 38 measurement-scheme ranking and the Result 47
+  ADAPT verdict hold on H₂O / NH₃ / CH₄, which now exist in the molecule set.
+  This is the next thing to run, and it is cheap: the Hamiltonians are built.
 * **Optimisation:** *answered — Result 51.* Certainty ends between **n = 40 and
   n = 60**: up to 40 the SDP and iterated local search agree on every instance
   (and are both exactly optimal wherever brute force can confirm it); at 60 they

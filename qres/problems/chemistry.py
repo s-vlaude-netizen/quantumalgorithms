@@ -76,6 +76,33 @@ GEOMETRIES = {
     "H4": lambda r=0.75: "; ".join(f"H 0 0 {i * r}" for i in range(4)),
     "H2O": lambda r=0.958: f"O 0 0 0; H 0 {0.757} {0.587}; H 0 {-0.757} {0.587}",
     "N2": lambda r=1.098: f"N 0 0 0; N 0 0 {r}",
+    # --- added to separate the two variables in the Sum|c| scaling law ---
+    # The five-molecule fit behind `Sum|c| ~ N^2.78` (RESEARCH_LOG Result 42)
+    # contained two systems at the *same* N whose coefficient sums differ 3.35x
+    # (BeH2 21.52, H2O 72.00).  A one-variable power law cannot see that, so the
+    # set below spans nuclear charge at fixed N and N at fixed charge.
+    "H6": lambda r=0.75: "; ".join(f"H 0 0 {i * r}" for i in range(6)),
+    "H8": lambda r=0.75: "; ".join(f"H 0 0 {i * r}" for i in range(8)),
+    "HF": lambda r=0.917: f"F 0 0 0; H 0 0 {r}",
+    "NH3": lambda r=1.012: (
+        "N 0 0 0; H 0 0.9377 0.3816; H 0.8121 -0.4689 0.3816; "
+        "H -0.8121 -0.4689 0.3816"
+    ),
+    "CH4": lambda r=1.087: (
+        "C 0 0 0; H 0.6276 0.6276 0.6276; H -0.6276 -0.6276 0.6276; "
+        "H -0.6276 0.6276 -0.6276; H 0.6276 -0.6276 -0.6276"
+    ),
+    "Li2": lambda r=2.673: f"Li 0 0 0; Li 0 0 {r}",
+    "LiF": lambda r=1.564: f"Li 0 0 0; F 0 0 {r}",
+    "BH3": lambda r=1.190: (
+        "B 0 0 0; H 0 1.19 0; H 1.0306 -0.595 0; H -1.0306 -0.595 0"
+    ),
+}
+
+#: total nuclear charge, the second variable the one-variable fit was missing
+NUCLEAR_CHARGE = {
+    "H2": 2, "H4": 4, "H6": 6, "H8": 8, "LiH": 4, "Li2": 6, "BeH2": 6,
+    "BH3": 8, "CH4": 10, "NH3": 10, "H2O": 10, "HF": 10, "LiF": 12, "N2": 14,
 }
 
 

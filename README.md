@@ -181,9 +181,25 @@ Everything in this repository buys a constant factor against that — grouping
 ~15×, covariance refinement ~1.6×, the shot ladder ~2×. None of them touches
 the exponent.
 
-Measuring `Σ|c|` across five molecules gives `Σ|c| ~ N^2.78` in the number of
-spatial orbitals, so `shots ~ N^5.55 · n / ε²`. With UCCSD's `n ~ N⁴` that is
-**N^9.6 in shots**, against CCSD(T)'s **N⁷ in operations** — and a shot is
+**What `Σ|c|` actually depends on** took two attempts to get right. A fit over
+five minimal-basis molecules gave `Σ|c| ~ N^2.78` in the orbital count — but two
+of those five sit at the *same* N with sums differing 3.35×, and their N and
+nuclear charge are 88% collinear, so the exponent was assigned by default rather
+than measured. Varying one thing at a time over thirteen molecules:
+
+| direction | measurement | result |
+|---|---|---|
+| more atoms, same nuclear charge | HF → H₂O → NH₃ → CH₄ (N = 6→9, Z = 10) | `N^-0.39` — **flat** |
+| more basis functions, same molecule | H₂ at STO-3G → 6-31G → cc-pVDZ | `N^2.86` |
+
+The two directions have opposite signs, so one exponent in N averages over
+whichever mix the molecule set happens to contain. **Qubit count is the wrong
+figure of merit**: at six orbitals, Σ|c| ranges 12.34 (LiH) to 78.32 (HF), a
+6.3× spread in a quantity the shot count depends on *squared*.
+
+For the direction that matters — approaching the basis limit, where the
+chemistry actually is — `shots ~ N^5.7 · n / ε²`, and with UCCSD's `n ~ N⁴` that
+is **N^9.7 in shots** against CCSD(T)'s **N⁷ in operations**. A shot is
 microseconds where an operation is nanoseconds, so the unit conversion moves it
 further the wrong way. On this evidence VQE as built here has no route to
 beating CCSD(T) on molecular ground states.

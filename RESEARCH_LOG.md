@@ -1631,6 +1631,16 @@ molecules at STO-3G:
 
 A power-law fit gives **Σ|c| ~ N^2.78**, so
 
+> **Corrected by Result 53.** This fit is not identifiable from these five
+> points: BeH₂ and H₂O sit at the *same* N = 7 with Σ|c| differing 3.35×, and
+> the predictors N and Z are 88% collinear (VIF 4.6). Measured one direction at
+> a time over thirteen molecules, adding atoms at fixed nuclear charge gives
+> `N^-0.39` while adding basis functions to a fixed molecule gives `N^2.87`.
+> The headline below survives — the basis-limit direction is the one that
+> matters, and it gives N^9.7 — but the exponent here was assigned by default to
+> the only variable in the model, not measured.
+
+
 ```
 shots  ~  N^5.55 · n / ε²
 ```
@@ -2170,3 +2180,92 @@ again. p=1 went 13.3 ms → **0.5 ms** on the same graph.
 
 Both are the same lesson in different clothes: the expensive thing was not the
 computation, it was the bookkeeping around it.
+
+### Result 53 — the Σ|c| scaling law was not identifiable from the data it was fitted on
+
+Result 42 measured `Σ|c| ~ N^2.78` across five molecules at STO-3G and built the
+project's headline on it: `shots ~ N^5.55 · n / ε²`, hence **N^9.6** against
+CCSD(T)'s N⁷. That headline is the answer to the question this project was
+asked, so it is worth checking whether the fit under it can carry it.
+
+It cannot, and the reason is visible inside the original table. Two of its five
+molecules sit at the **same N = 7**: BeH₂ at Σ|c| = 21.52 and H₂O at 72.00 — a
+**3.35× spread at identical orbital count**. A function of N alone cannot produce
+two values at one N. The fit passed a line through them and reported an exponent
+anyway, with residual std 0.477 (a typical factor of 1.6 off).
+
+**Why it could not be identified.** In a minimal basis the orbital count is
+decided by which atoms are present, so N and total nuclear charge move together:
+across the original five, `corr(log N, log Z) = 0.884`, variance inflation 4.6.
+A regression on collinear predictors cannot attribute the growth to either. The
+exponent was not measured; it was assigned by default to the only variable in
+the model.
+
+**Separating them** needed a wider set, so nine molecules were added spanning
+charge at fixed orbital count and back (`H6, H8, HF, NH3, CH4, Li2, LiF, BH3`
+alongside the existing ones). Across all thirteen:
+
+| model | fit | residual std |
+|---|---|---|
+| N only | `Σ|c| ~ N^2.63` | 0.535 |
+| **N and Z** | `Σ|c| ~ N^0.68 Z^1.89` | **0.167** (3.2× better) |
+
+Adding nuclear charge cuts the residual by a factor of three, so Σ|c| genuinely
+depends on more than orbital count. But N and Z are still 83% correlated here
+too, so those individual exponents are not trustworthy either. The identifiable
+measurements are the two directions taken **one at a time**:
+
+**Direction 1 — more atoms, same total charge.** Four systems at Z = 10, orbital
+count 6 → 9:
+
+| | HF | H₂O | NH₃ | CH₄ |
+|---|---|---|---|---|
+| orbitals | 6 | 7 | 8 | 9 |
+| Σ\|c\| | 78.32 | 72.00 | 66.09 | 68.03 |
+
+`Σ|c| ~ N^-0.39` — **flat, slightly decreasing.** Spreading the same electrons
+over more orbitals does not increase the coefficient sum at all.
+
+**Direction 2 — more basis functions, same molecule.** H₂ at STO-3G, 6-31G,
+cc-pVDZ (N = 2, 4, 10, nuclear charge fixed at 2):
+
+| basis | orbitals | terms | Σ\|c\| |
+|---|---|---|---|
+| STO-3G | 2 | 5 | 0.99 |
+| 6-31G | 4 | 159 | 10.26 |
+| cc-pVDZ | 10 | 2 951 | 103.76 |
+
+`Σ|c| ~ N^2.87`.
+
+**So the two directions have opposite signs**, and the original single exponent
+was averaging over them in whatever proportion the molecule set happened to
+contain. That it landed near 2.87 was luck, not measurement.
+
+**What this changes, and what it does not.** The headline survives *for the
+direction that matters*: approaching the complete-basis limit on a fixed
+molecule costs `N^2.87` in Σ|c|, so `shots ~ N^5.74 · n / ε²`, and with `n ~ N⁴`
+that is **N^9.7** — essentially the N^9.6 already recorded. The conclusion that
+VQE as built here has no route to beating CCSD(T) is unaffected.
+
+What changes is what the number is *about*, and this part is practically useful:
+
+* **Qubit count is the wrong figure of merit for VQE shot cost.** It is the
+  number everyone quotes, and at fixed chemistry it predicts almost nothing:
+  Σ|c| ranges 12.34 (LiH) to 78.32 (HF) at the same six orbitals, a 6.3× spread
+  in a quantity that enters the shot count *squared* — 40× in shots.
+* **The cheap direction in qubits is the useless direction in accuracy.** Adding
+  atoms buys qubits at no cost in Σ|c|, which is why minimal-basis benchmarks on
+  ever-larger molecules look encouraging. But a minimal-basis answer is not a
+  better answer; the chemistry is at the basis limit, and that is the direction
+  that costs N^2.87.
+* **Nuclear charge is the variable to report.** For drug-like systems — many
+  C/N/O atoms — it is the Z-dependence that sets the bill, not the qubit count
+  that gets quoted.
+
+**The pattern, since this is now the sixth of its kind.** Every earlier instance
+(Results 22, 32, 49, 50, 51) was a case where the *statistics* were wrong while
+the numbers looked plausible. This one is the same failure at the level of a
+model: a fit reported with two decimal places, from five points, with its
+predictors 88% collinear and a 3.35× contradiction sitting inside its own input
+table. Nothing about the output looked wrong. The check that found it was
+plotting the residuals against a variable that was not in the model.
