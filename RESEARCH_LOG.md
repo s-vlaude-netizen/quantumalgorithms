@@ -1587,3 +1587,72 @@ All three optimiser sub-items are now measured and all three close negatively:
 `shot_ladder` with a per-ansatz `rhobeg` remains the best optimiser found, at
 1.691e-3 median and 7/16 chemical accuracy on H₂ at 12.8M shots.
 
+---
+
+## Session 5 — 2026-08-26 (00:24 UTC)
+
+### Result 42 — the classical baseline, which nothing here had been measured against
+
+Four sessions of shot counts with no reference point for what they are worth.
+Same molecules, same Hamiltonians, standard quantum chemistry on one CPU core:
+
+| molecule | HF | MP2 | CCSD | CCSD(T) | **FCI** | best VQE here |
+|---|---|---|---|---|---|---|
+| H₂ | 2.03e-2 | 7.29e-3 | 1.58e-7 | 1.58e-7 | **2.7e-14 / 35 ms** | 1.69e-3 @ 12.8M shots |
+| H₄ | 4.18e-2 | 1.37e-2 | 4.39e-6 | 3.85e-6 | **3.6e-12 / 132 ms** | 3.66e-2 @ 256M shots |
+| LiH | 2.04e-2 | 7.51e-3 | 1.05e-5 | 2.11e-6 | **2.2e-12 / 141 ms** | — |
+
+**Exact diagonalisation solves all three to twelve decimal places in about a
+tenth of a second.** CCSD(T) — the method that actually scales — reaches chemical
+accuracy in 90–240 ms. The VQE in this repository reaches chemical accuracy on
+**none** of them, at any budget tested, with the best result on H₄ (3.66e-2
+after 256 million shots) still barely better than doing nothing and taking the
+Hartree-Fock energy (4.18e-2).
+
+This does not invalidate the work — these molecules are instruments, chosen
+*because* the exact answer is available to check against. But every claim about
+quantum resources in this log has to be read next to this table, and until now
+it was not there to read.
+
+### Result 43 — what the scaling law says about where a crossover could be
+
+The transferable result is not any particular shot count but the scaling
+(Result 34): `shots ~ (Σ|c|)² · n / ε²`. With the classical baseline in place it
+can be turned into a statement about system size. Measuring `Σ|c|` across five
+molecules at STO-3G:
+
+| molecule | spatial orbitals | qubits | Pauli terms | Σ\|c\| |
+|---|---|---|---|---|
+| H₂ | 2 | 2 | 5 | 0.99 |
+| H₄ | 4 | 6 | 165 | 8.47 |
+| LiH | 6 | 10 | 631 | 12.34 |
+| BeH₂ | 7 | 12 | 666 | 21.52 |
+| H₂O | 7 | 12 | 1086 | 72.00 |
+
+A power-law fit gives **Σ|c| ~ N^2.78**, so
+
+```
+shots  ~  N^5.55 · n / ε²
+```
+
+With UCCSD's parameter count `n ~ N⁴`, that is **N^9.6 in shots**. The classical
+competitor that scales is CCSD(T) at **N⁷ in operations** — and a shot is
+microseconds on hardware against nanoseconds for a floating-point operation, so
+the unit conversion moves the comparison further the wrong way, not closer.
+
+**Where that leaves the question the project was asked.** On this evidence VQE
+as built here does not have a route to beating CCSD(T) on molecular ground
+states: it scales worse *and* starts from a constant factor of ~10⁹.
+
+The one lever that changes the exponent rather than the constant is `n`. If an
+adaptive ansatz reached a given accuracy with `n ~ N²` instead of `N⁴`, the
+scaling would be `N^7.6` — the same order as CCSD(T), which is where a real
+comparison would begin. That is the quantitative case for the next item, and it
+is the only one the measurements support.
+
+**Limits of this extrapolation, stated because they are large:** five points
+over `N = 2..7` is a narrow range for a power-law fit; STO-3G is a minimal basis
+and `N` grows with basis size in real calculations; and FCI's own exponential
+scaling means it does lose eventually — the relevant competitor is CCSD(T) or
+DMRG, not FCI. The exponent is what this data says, not a settled number.
+

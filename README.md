@@ -89,6 +89,22 @@ fails three different ways because the signal sits below the shot noise, and a
 STORM-style stochastic trust region never gets closer than 3.3× (p ≤ 0.001)
 across four orders of magnitude in its accuracy constant.
 
+## The classical baseline
+
+Stated first, because without it none of the numbers below mean anything. Same
+molecules, same Hamiltonians, one CPU core:
+
+| molecule | CCSD(T) | **FCI (exact)** | best VQE here |
+|---|---|---|---|
+| H₂ | 1.6e-7 / 95 ms | **2.7e-14 / 35 ms** | 1.69e-3 @ 12.8M shots |
+| H₄ | 3.9e-6 / 242 ms | **3.6e-12 / 132 ms** | 3.66e-2 @ 256M shots |
+| LiH | 2.1e-6 / 217 ms | **2.2e-12 / 141 ms** | — |
+
+Exact diagonalisation solves all three to twelve decimals in about a tenth of a
+second. The VQE here reaches chemical accuracy on none of them at any budget
+tested. These molecules are *instruments* — chosen because the exact answer is
+available to check against — not targets.
+
 ## The wall
 
 Measured, not assumed: the shots to reach a target accuracy scale as
@@ -106,6 +122,19 @@ because a precise evaluation is only useful if the optimiser can exploit it.
 Everything in this repository buys a constant factor against that — grouping
 ~15×, covariance refinement ~1.6×, the shot ladder ~2×. None of them touches
 the exponent.
+
+Measuring `Σ|c|` across five molecules gives `Σ|c| ~ N^2.78` in the number of
+spatial orbitals, so `shots ~ N^5.55 · n / ε²`. With UCCSD's `n ~ N⁴` that is
+**N^9.6 in shots**, against CCSD(T)'s **N⁷ in operations** — and a shot is
+microseconds where an operation is nanoseconds, so the unit conversion moves it
+further the wrong way. On this evidence VQE as built here has no route to
+beating CCSD(T) on molecular ground states.
+
+The one lever that changes the exponent rather than the constant is `n`. An
+adaptive ansatz reaching a given accuracy with `n ~ N²` would give `N^7.6` —
+the same order as the classical competitor, which is where a real comparison
+would start. That is the only direction the measurements support, and it is the
+open item.
 
 **Sizing rule for any budget-matched comparison** — below this it measures the
 optimiser's simplex construction, not the algorithm:
