@@ -149,24 +149,46 @@ def random_regular_maxcut(n: int, degree: int = 3, seed: int = 0) -> IsingProble
     return p
 
 
-def _random_regular_edges(n: int, d: int, rng) -> list[tuple[int, int]]:
-    """Pairing-model construction, retried until simple."""
+def _random_regular_edges(n: int, d: int, rng, attempts: int = 5000) -> list[tuple[int, int]]:
+    """Pairing model with edge-swap repair.
+
+    Plain rejection sampling -- discard the whole draw on the first collision --
+    fails often as the degree rises: at ``d = 5, n = 12`` it produced a graph on
+    only 3 of 10 seeds, and a study that silently skipped the failures read that
+    back as "local search is optimal on 30% of instances" when it had simply
+    divided by the wrong denominator.
+
+    Repairing instead: on a collision, swap one endpoint with a random other
+    pair, which is the standard fix and succeeds where rejection does not.
+    """
     if n * d % 2 != 0:
-        raise ValueError("n*d must be even")
-    for _ in range(500):
+        raise ValueError(f"n*d must be even (got n={n}, d={d})")
+    if d >= n:
+        raise ValueError(f"degree {d} needs more than {n} vertices")
+
+    for _ in range(attempts):
         stubs = np.repeat(np.arange(n), d)
         rng.shuffle(stubs)
-        edges, seen, ok = [], set(), True
-        for a, b in stubs.reshape(-1, 2):
-            a, b = int(a), int(b)
-            if a == b or (min(a, b), max(a, b)) in seen:
-                ok = False
-                break
-            seen.add((min(a, b), max(a, b)))
-            edges.append((a, b))
-        if ok:
-            return edges
-    raise RuntimeError("failed to sample a simple regular graph")
+        pairs = [[int(a), int(b)] for a, b in stubs.reshape(-1, 2)]
+
+        for _ in range(200):
+            seen, bad = set(), []
+            for index, (a, b) in enumerate(pairs):
+                key = (min(a, b), max(a, b))
+                if a == b or key in seen:
+                    bad.append(index)
+                else:
+                    seen.add(key)
+            if not bad:
+                return [(a, b) for a, b in pairs]
+            # swap an endpoint of each offending pair with a random other pair
+            for index in bad:
+                other = int(rng.integers(len(pairs)))
+                if other == index:
+                    continue
+                pairs[index][1], pairs[other][1] = pairs[other][1], pairs[index][1]
+
+    raise RuntimeError(f"failed to sample a simple {d}-regular graph on {n} vertices")
 
 
 def erdos_renyi_maxcut(n: int, p_edge: float = 0.5, seed: int = 0) -> IsingProblem:

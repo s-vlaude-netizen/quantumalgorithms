@@ -1,0 +1,246 @@
+{
+  "head_to_head": [
+    {
+      "n": 10,
+      "method": "greedy",
+      "cut": 13.0,
+      "ratio": 1.0,
+      "seconds": 0.00019504800002323464
+    },
+    {
+      "n": 10,
+      "method": "local search",
+      "cut": 13.0,
+      "ratio": 1.0,
+      "seconds": 0.0008187760004148004
+    },
+    {
+      "n": 10,
+      "method": "Goemans-Williamson",
+      "cut": 13.0,
+      "ratio": 1.0,
+      "seconds": 0.09337271799995506
+    },
+    {
+      "n": 10,
+      "method": "qaoa_p1",
+      "cut": 13.0,
+      "ratio": 1.0,
+      "shots": 71680
+    },
+    {
+      "n": 10,
+      "method": "qaoa_p3",
+      "cut": 13.0,
+      "ratio": 1.0,
+      "shots": 178176
+    },
+    {
+      "n": 14,
+      "method": "greedy",
+      "cut": 16.0,
+      "ratio": 0.8421052631578947,
+      "seconds": 0.00025675000051705865
+    },
+    {
+      "n": 14,
+      "method": "local search",
+      "cut": 19.0,
+      "ratio": 1.0,
+      "seconds": 0.001285614999687823
+    },
+    {
+      "n": 14,
+      "method": "Goemans-Williamson",
+      "cut": 19.0,
+      "ratio": 1.0,
+      "seconds": 0.21006411999951524
+    },
+    {
+      "n": 14,
+      "method": "qaoa_p1",
+      "cut": 19.0,
+      "ratio": 1.0,
+      "shots": 75776
+    },
+    {
+      "n": 14,
+      "method": "qaoa_p3",
+      "cut": 19.0,
+      "ratio": 1.0,
+      "shots": 129024
+    },
+    {
+      "n": 18,
+      "method": "greedy",
+      "cut": 21.0,
+      "ratio": 0.84,
+      "seconds": 0.0002225520001957193
+    },
+    {
+      "n": 18,
+      "method": "local search",
+      "cut": 25.0,
+      "ratio": 1.0,
+      "seconds": 0.0008531470002708375
+    },
+    {
+      "n": 18,
+      "method": "Goemans-Williamson",
+      "cut": 25.0,
+      "ratio": 1.0,
+      "seconds": 0.1411351789993205
+    },
+    {
+      "n": 18,
+      "method": "qaoa_p1",
+      "cut": 24.0,
+      "ratio": 0.96,
+      "shots": 65536
+    },
+    {
+      "n": 18,
+      "method": "qaoa_p3",
+      "cut": 25.0,
+      "ratio": 1.0,
+      "shots": 126976
+    }
+  ],
+  "hardness": [
+    {
+      "family": "3-regular",
+      "n": 12,
+      "built": 20,
+      "worst_local": 1.0,
+      "greedy": 0.25,
+      "local": 1.0,
+      "gw": 1.0
+    },
+    {
+      "family": "3-regular",
+      "n": 16,
+      "built": 20,
+      "worst_local": 1.0,
+      "greedy": 0.25,
+      "local": 1.0,
+      "gw": 1.0
+    },
+    {
+      "family": "3-regular",
+      "n": 20,
+      "built": 20,
+      "worst_local": 0.9629629629629629,
+      "greedy": 0.25,
+      "local": 0.95,
+      "gw": 1.0
+    },
+    {
+      "family": "5-regular",
+      "n": 12,
+      "built": 20,
+      "worst_local": 1.0,
+      "greedy": 0.15,
+      "local": 1.0,
+      "gw": 1.0
+    },
+    {
+      "family": "5-regular",
+      "n": 16,
+      "built": 20,
+      "worst_local": 0.9666666666666667,
+      "greedy": 0.1,
+      "local": 0.95,
+      "gw": 1.0
+    },
+    {
+      "family": "5-regular",
+      "n": 20,
+      "built": 20,
+      "worst_local": 0.9743589743589743,
+      "greedy": 0.0,
+      "local": 0.9,
+      "gw": 1.0
+    },
+    {
+      "family": "9-regular",
+      "n": 12,
+      "built": 20,
+      "worst_local": 1.0,
+      "greedy": 0.35,
+      "local": 1.0,
+      "gw": 1.0
+    },
+    {
+      "family": "9-regular",
+      "n": 16,
+      "built": 20,
+      "worst_local": 1.0,
+      "greedy": 0.1,
+      "local": 1.0,
+      "gw": 1.0
+    },
+    {
+      "family": "9-regular",
+      "n": 20,
+      "built": 20,
+      "worst_local": 1.0,
+      "greedy": 0.15,
+      "local": 1.0,
+      "gw": 1.0
+    },
+    {
+      "family": "Erdos-Renyi p=.5",
+      "n": 12,
+      "built": 20,
+      "worst_local": 0.9583333333333334,
+      "greedy": 0.05,
+      "local": 0.95,
+      "gw": 1.0
+    },
+    {
+      "family": "Erdos-Renyi p=.5",
+      "n": 16,
+      "built": 20,
+      "worst_local": 1.0,
+      "greedy": 0.15,
+      "local": 1.0,
+      "gw": 1.0
+    },
+    {
+      "family": "Erdos-Renyi p=.5",
+      "n": 20,
+      "built": 20,
+      "worst_local": 0.9838709677419355,
+      "greedy": 0.0,
+      "local": 0.8,
+      "gw": 1.0
+    },
+    {
+      "family": "weighted p=.8",
+      "n": 12,
+      "built": 20,
+      "worst_local": 0.9372887372609102,
+      "greedy": 0.15,
+      "local": 0.95,
+      "gw": 1.0
+    },
+    {
+      "family": "weighted p=.8",
+      "n": 16,
+      "built": 20,
+      "worst_local": 0.9712767142457632,
+      "greedy": 0.05,
+      "local": 0.95,
+      "gw": 1.0
+    },
+    {
+      "family": "weighted p=.8",
+      "n": 20,
+      "built": 20,
+      "worst_local": 0.97336529333135,
+      "greedy": 0.05,
+      "local": 0.9,
+      "gw": 0.9
+    }
+  ]
+}

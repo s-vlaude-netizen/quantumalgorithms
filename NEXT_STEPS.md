@@ -93,17 +93,31 @@ surviving signal** on `fake_torino`. It reaches 3.29e-4.
    The batched+lazy schedule makes far fewer, larger optimisation calls, which
    is a different noise profile from standard ADAPT — untested.
 
-### 2. Smaller problems, honestly scored
-Everything here is H₂/H₄/LiH at STO-3G. Before any of these conclusions is
-generalised, one of them should be checked on a system where the answer is
-known and the size is larger — H₂O or an active-space BeH₂ — to see whether the
-rankings hold or are an artefact of very small Hamiltonians.
+### 2. The size wall, now confirmed from both sides — this is the top item
+Result 42 (chemistry) and Result 50 (optimisation) reach the same conclusion by
+completely different routes: **at the sizes this project can score honestly, the
+classical method already wins outright.** FCI solves H₂/H₄/LiH to 12 decimals in
+~100 ms; Goemans-Williamson finds the *exact* MaxCut optimum on 100% of
+instances up to n = 20 in 66–191 ms. Every ratio measured below those ceilings
+is measured on instances with no hard part left.
 
-### 3. A classical baseline on every result
-Nothing in this repository is compared against what a laptop does with the same
-problem. CCSD(T) reaches chemical accuracy on all of these in milliseconds. That
-comparison belongs in the README, not because it is flattering, but because
-without it none of the shot counts mean anything.
+That makes size the binding constraint on this whole project, not an item on a
+list. Both branches need the same thing — a reference that survives past brute
+force:
+
+* **Chemistry:** H₂O or active-space BeH₂, where FCI is still available but
+  strained, to see whether the Result 38/47 rankings are small-Hamiltonian
+  artefacts.
+* **Optimisation:** MaxCut past n = 26, scored against a strong classical solver
+  instead of exhaustive search, to find where GW stops being exact. This is a
+  classical question before it is a quantum one, and it must be answered first —
+  without it there is no instance on which a QAOA number could mean anything.
+
+### 3. A classical baseline on every result  *(done — Results 42 and 50)*
+Both areas the user named now have one: CCSD(T)/FCI for chemistry
+(`qres/classical.py`), and greedy / local search / Goemans-Williamson for
+MaxCut (`qres/classical_optimization.py`). The README states the classical
+answer first. Keep it that way for anything added.
 
 ---
 
@@ -127,13 +141,19 @@ parameters) and was aborted. If it is worth testing at scale, it needs the
 random-operator-sampling variant (Rosalin) that avoids the full parameter-shift
 sweep, not the plain version.
 
-### 6. QAOA parameter transfer  *(driver now built — `qres/qaoa.py`)*
-The driver exists and is tested; nothing has been measured with it yet. Test the
-fixed-angle / parameter-transfer literature (LINXFER and relatives, 2025):
-pre-trained angles claim to remove instance-specific optimisation entirely,
-which under a shot-budget metric would be a very large win. Transfer from small
-random-regular MaxCut instances to larger ones and measure approximation ratio
-vs. shots.
+### 6. QAOA parameter transfer  *(driver built and now baselined — Result 50)*
+The driver works and QAOA reaches the optimum on n = 10–18 3-regular MaxCut, at
+67k–135k shots against local search's 0.8 ms. Test the fixed-angle /
+parameter-transfer literature (LINXFER and relatives, 2025): pre-trained angles
+claim to remove instance-specific optimisation entirely, which under a
+shot-budget metric would be a very large win.
+
+**But not below n = 26.** Result 50 makes any approximation ratio at these sizes
+uninformative — GW is exact there, so "0.95 vs 1.00" says nothing about MaxCut's
+hard part. Parameter transfer is worth measuring precisely because it points
+*upward*: transfer from small instances to large ones is the one QAOA protocol
+that does not need the large instance to be optimised on. Pair it with item 2's
+strong classical solver so the large end can be scored at all.
 
 ### 7. Circuit duration as the lever
 The cost model charges `circuit_duration + reset_delay` per shot, and the reset
@@ -156,11 +176,10 @@ knowing whether that is the cost model's fault or a real fact.
 - **Protein folding / lattice models.** The user named this. HP-lattice folding
   maps to a QUBO and drops straight into the existing Ising path — cheap to add
   once the QAOA driver (item 6) exists.
-- **Beyond-classical honesty check.** Nothing here is a quantum advantage claim
-  and nothing should be presented as one. The useful comparison is against a
-  good *classical* baseline on the same problem (CCSD(T) for chemistry,
-  Goemans-Williamson for MaxCut). Add those baselines so every result is scored
-  against what a laptop can already do.
+- **Beyond-classical honesty check.** *(baselines now exist — Results 42, 50.)*
+  Nothing here is a quantum advantage claim and nothing should be presented as
+  one. Both baselines currently win outright at every size that can be scored,
+  which is the finding, not a gap in the comparison.
 
 ---
 
@@ -187,3 +206,12 @@ knowing whether that is the cost model's fault or a real fact.
    separate multi-hour detours this session were an ansatz sitting on an exact
    stationary point (Results 10, 19, 20). It costs `n` statevector evaluations
    to rule out.
+9. **Never skip a failed instance silently, and print the denominator.** A
+   `try/except: continue` around instance generation, with the rate still
+   divided by the number *attempted*, turned 3 successes out of 10 into "optimal
+   on 30% of instances" (Result 50). Report `built` beside every rate.
+10. **A rate and a mean that contradict each other mean the harness is wrong,
+    not the algorithm.** "Optimal on 30%" beside "mean ratio 1.0000" is
+    impossible; that inconsistency is what exposed the bug above. Print both
+    where they can be compared — five of this project's bugs produced entirely
+    plausible individual numbers, and not one was caught by reading the code.

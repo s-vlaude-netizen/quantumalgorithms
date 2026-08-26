@@ -105,6 +105,25 @@ second. The VQE here reaches chemical accuracy on none of them at any budget
 tested. These molecules are *instruments* — chosen because the exact answer is
 available to check against — not targets.
 
+**The same holds on the optimisation side, and it should not have.** MaxCut is
+NP-hard, so the classical competitor is only an *approximation* algorithm —
+Goemans-Williamson, proven ratio 0.878. That predicts an opening. There isn't
+one at any size that can be scored: across five instance families and 20 seeds
+each, GW returns the **exact** optimum on 100% of instances up to n = 20, in
+66–210 ms.
+
+| n | greedy | local search | Goemans-Williamson | QAOA p=3 |
+|---|---|---|---|---|
+| 10 | 1.000 | **1.000** (0.8 ms) | 1.000 (93 ms) | 1.000 (178k shots) |
+| 14 | 0.842 | **1.000** (1.3 ms) | 1.000 (210 ms) | 1.000 (129k shots) |
+| 18 | 0.840 | **1.000** (0.9 ms) | 1.000 (141 ms) | 1.000 (127k shots) |
+
+So any QAOA benchmark at n ≤ 20 reporting an approximation ratio below 1.0 is
+reporting it on instances a 100 ms classical algorithm solves exactly. Two areas,
+two routes, one conclusion: the sizes that can be verified have no hard part
+left, and finding where the classical methods actually break is the prerequisite
+for every other question here.
+
 ## The wall
 
 Measured, not assumed: the shots to reach a target accuracy scale as

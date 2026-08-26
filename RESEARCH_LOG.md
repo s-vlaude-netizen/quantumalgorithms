@@ -1896,3 +1896,95 @@ are cases where the *statistics* of the simulation were wrong in a way that
 produced entirely plausible numbers. That is now three, and they were found by
 three different downstream measurements rather than by inspection.
 
+
+### Result 50 — the optimisation side gets its classical anchor, and it is worse news than the chemistry one
+
+The user named optimisation first among the useful areas, and after five
+chemistry-heavy sessions this project had QAOA code but no honest yardstick for
+it — exactly the gap Result 42 closed on the chemistry side. Closing it here.
+
+The comparison has a different shape, which is why it was worth doing
+separately. Molecular ground states have CCSD(T): polynomial and very accurate,
+so VQE is racing a fast exact-ish method. MaxCut is NP-hard, so the classical
+competitor is an *approximation* algorithm and the question becomes whether QAOA
+beats a **guarantee** rather than an exact answer. That framing predicts a
+narrow but real opening for the quantum side.
+
+It does not survive measurement.
+
+**First, the head-to-head on 3-regular MaxCut**
+(`experiments/exp007_maxcut_classical_vs_qaoa.py`, QAOA best-sample over the
+shots charged):
+
+| n | greedy | local search | Goemans-Williamson | QAOA p=1 | QAOA p=3 |
+|---|---|---|---|---|---|
+| 10 | 1.000 | **1.000** (0.8 ms) | 1.000 (93 ms) | 1.000 (71.7k shots) | 1.000 (178k shots) |
+| 14 | 0.842 | **1.000** (1.3 ms) | 1.000 (210 ms) | 1.000 (75.8k shots) | 1.000 (129k shots) |
+| 18 | 0.840 | **1.000** (0.9 ms) | 1.000 (141 ms) | 0.960 (65.5k shots) | 1.000 (127k shots) |
+
+QAOA does reach the optimum as a sampler — at p=3, on all three. So does
+hill-climbing, in **about a millisecond**, against 10⁵ circuit executions.
+
+**Second, and this is the part that closes the question.** If local search wins
+only because these instances are easy, harder families should open a gap. Five
+families, 20 seeds each, denominator = instances actually built:
+
+| family | n | greedy optimal | local search | **Goemans-Williamson** |
+|---|---|---|---|---|
+| 3-regular | 12/16/20 | 25% | 100 / 100 / 95% | **100 / 100 / 100%** |
+| 5-regular | 12/16/20 | 0–15% | 100 / 95 / 90% | **100 / 100 / 100%** |
+| 9-regular | 12/16/20 | 10–35% | 100 / 100 / 100% | **100 / 100 / 100%** |
+| Erdős–Rényi p=0.5 | 12/16/20 | 0–15% | 95 / 100 / 80% | **100 / 100 / 100%** |
+| weighted dense p=0.8 | 12/16/20 | 5–15% | 95 / 95 / 90% | **100 / 100 / 90%** |
+
+**Goemans-Williamson finds the exact optimum on 14 of 15 rows — 100% of
+instances — in 66–191 ms.** Not 0.878-approximate: exact, on every instance
+where brute force can confirm it. Greedy is genuinely weak (0–35%), so the
+families do discriminate; they just do not discriminate against the SDP.
+
+The methodological consequence is the sharper finding, and it generalises past
+this repository: **any QAOA benchmark at n ≤ 20 reporting an approximation ratio
+below 1.0 is reporting it on instances a 100 ms classical algorithm solves
+exactly.** The ratio is not measuring the hard part of MaxCut, because at these
+sizes there is no hard part left. That is the same conclusion as Result 42 —
+these systems are instruments, not targets — reached by a completely different
+route, and it now covers both areas the user named.
+
+What this does *not* establish: that GW stays exact as n grows. It cannot, since
+MaxCut is NP-hard and GW is polynomial. The crossover is simply above 26
+variables, where brute force stops and I lose the ability to score anything
+honestly. Finding that crossover needs a strong classical solver as the
+reference instead of exhaustive search — that is the next question, and it is a
+classical one before it is a quantum one.
+
+**Two bugs found on the way here, both of the "plausible numbers" kind.**
+
+*The offset, double-subtracted.* Converting a sampled energy to a cut, I wrote
+`cut = -(best_sampled - offset)` while `cost_of_bitstring` already carries the
+offset. QAOA came out at ratios 0.39–0.45 — below random guessing — which is
+wrong in the direction that looks like a real negative result and would have
+been very easy to write up as one.
+
+*The graph generator, failing silently.* `_random_regular_edges` used plain
+rejection sampling: discard the whole draw on the first collision. At degree 5
+that succeeded on **3 of 10 seeds**. My sweep caught the exception, skipped the
+instance, and divided by 10 anyway — printing "local search optimal on 30% of
+5-regular instances", a dramatic-looking result that was entirely a wrong
+denominator. The giveaway was the mean ratio in the same row reading 1.0000: if
+the heuristic misses the optimum 70% of the time it cannot average exactly
+optimal. Fixed with edge-swap repair (now 20/20 at every degree tested through
+9-regular) and the denominator changed to instances actually built.
+
+That makes **five** bugs in this project where the statistics were wrong but the
+numbers looked reasonable, and the count is the point: not one was found by
+reading the code. Each was caught by a downstream measurement being internally
+inconsistent — here, a mean that contradicted the rate printed beside it.
+
+**One improvement to the baseline itself**, found by a test rather than a
+benchmark. Local search seeded restart 0 from the all-zeros assignment — cut
+zero, the worst possible start, and hill-climbing does not recover: on a
+14-vertex Erdős-Rényi instance it settled at 28 where plain greedy reached 31.
+Restart 0 now starts from the greedy solution, so the result is at least as good
+as greedy by construction. The classical baseline this project measures QAOA
+against should be the strongest cheap one available, and this is the direction
+that makes the quantum side's job harder, not easier.
