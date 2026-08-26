@@ -37,6 +37,9 @@ for the same things and the comparison between them means something.
 | `qres/ansatz.py` | hardware-efficient and coupled-cluster trial states |
 | `qres/fermionic.py` | excitation gates compiled directly as Givens rotations |
 | `qres/optimizers.py` | COBYLA/SPSA baselines plus shot-adaptive optimisers |
+| `qres/classical_optimization.py` | greedy / local search / Goemans-Williamson / iterated local search |
+| `qres/classical.py` | HF, MP2, CCSD, CCSD(T), FCI reference energies |
+| `qres/lightcone.py` | exact QAOA energies on graphs too large to simulate |
 | `qres/vqe.py`, `qres/qaoa.py` | end-to-end drivers |
 | `qres/bench.py` | multi-seed studies, paired comparisons, sign tests |
 
@@ -136,6 +139,25 @@ Classical certainty ends between **n = 40 and n = 60**, and Goemans-Williamson
 never wins once at a matched budget. So a QAOA result that means anything needs
 n ≥ 60 — and the target there is not the 0.878 guarantee, it is a fifty-line
 hill-climber finding a better cut in about a second.
+
+**So that is where QAOA was measured.** 2⁶⁰ amplitudes do not exist, but at depth
+`p` a QAOA edge expectation depends only on vertices within `p` hops, so a
+1 000-vertex energy is a sum of independent 14-qubit simulations — exact, and
+checked against full statevector simulation to 7e-15 and against Farhi's
+analytic 0.6924 for p=1 on 3-regular graphs:
+
+| n | QAOA p=1 | QAOA p=2 | **1 ms hill-climb** |
+|---|---|---|---|
+| 60 | 0.767 | 0.839 | **0.988** |
+| 200 | 0.758 | 0.826 | **0.949** |
+| 1 000 | 0.800 | 0.873 | **0.997** |
+
+QAOA loses at every size, and the accounting is as generous as it can be made:
+that is the *exact expected* cut, with optimal angles, no noise and infinite
+shots — none of which is free on hardware. Angles transfer across instance size
+essentially perfectly (0.018% loss), which confirms the fixed-angle literature
+has a real mechanism and simultaneously closes it: the instance-specific outer
+loop was never the bottleneck.
 
 Two areas, two routes, one conclusion: the sizes that can be verified have no
 hard part left. Knowing exactly where that ceases is the prerequisite for every

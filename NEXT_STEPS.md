@@ -144,20 +144,18 @@ parameters) and was aborted. If it is worth testing at scale, it needs the
 random-operator-sampling variant (Rosalin) that avoids the full parameter-shift
 sweep, not the plain version.
 
-### 6. QAOA parameter transfer  *(driver built and now baselined — Result 50)*
-The driver works and QAOA reaches the optimum on n = 10–18 3-regular MaxCut, at
-67k–135k shots against local search's 0.8 ms. Test the fixed-angle /
-parameter-transfer literature (LINXFER and relatives, 2025): pre-trained angles
-claim to remove instance-specific optimisation entirely, which under a
-shot-budget metric would be a very large win.
+### 6. QAOA parameter transfer  *(measured and closed — Result 52)*
+Transfer works perfectly and does not help. Angles trained on one 60-vertex
+instance, applied to 100 and 200 without re-optimisation, lose **0.000–0.018%**
+against re-optimising per instance. The light cone is `n`-independent on a
+regular graph, so the angles are too — the fixed-angle literature has a
+mechanism, and this repository can now say what it is.
 
-**But not below n = 60**, which Result 51 pins down. Below 40 both strong
-classical methods are still exactly optimal, so any approximation ratio there is
-measuring nothing. Parameter transfer is the right protocol for that constraint
-— transfer from small instances to large ones is the one QAOA variant that does
-not need the large instance to be optimised on, which is what makes n ≥ 60
-reachable at all. Score it against `iterated_local_search` at matched
-wall-clock, not against GW.
+But it closes the direction: QAOA's instance-specific outer loop was never the
+bottleneck, so removing it entirely buys 0.018%. At n = 60–1 000 the exact
+expected cut is **0.83–0.87 of the classical champion at p=2**, against a 1 ms
+hill-climb's 0.95–1.00 — with optimal angles, no noise, and infinite shots. What
+limits QAOA here is the depth-`p` ansatz, and no optimiser work touches that.
 
 ### 7. Circuit duration as the lever
 The cost model charges `circuit_duration + reset_delay` per shot, and the reset

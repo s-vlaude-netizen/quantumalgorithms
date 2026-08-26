@@ -2077,3 +2077,96 @@ cases the search was structurally unable to reach the answer, and in both cases
 the symptom was a number that stopped improving while looking entirely
 plausible. **A plateau is a hypothesis about the search, not about the problem.**
 The test for it is cheap — change the neighbourhood, not the runtime.
+
+### Result 52 — QAOA measured where it counts, at 60 to 1 000 vertices, and it loses to a millisecond of hill-climbing
+
+Results 50 and 51 established the constraint: a MaxCut number means nothing
+below n = 40, because two independent classical methods are still exactly
+optimal there. A real QAOA measurement has to happen at **n ≥ 60** — which is
+also where statevector simulation dies, since 2⁶⁰ amplitudes do not exist. That
+is why this project had never made one.
+
+**The way past it is QAOA's own structure.** At depth `p`, `⟨Z_u Z_v⟩` depends
+only on the vertices within `p` hops of the edge `(u,v)`; every gate outside
+that light cone commutes through or cancels. So the energy of a 1 000-vertex
+instance is a sum of independent 6- or 14-qubit simulations, and the cost does
+not grow with `n` at all. `qres/lightcone.py`.
+
+**It is exact, and verified twice over.** Against full statevector simulation on
+graphs small enough for both: largest disagreement **7.1e-15** across four graph
+families at p = 1, 2, 3. And independently against theory — the trained p=1
+angle came out γ = 0.6155 with an expected cut of 62.321 on 90 edges, which is
+**0.6924 of the edge count**, the analytic value Farhi et al. derived for QAOA
+p=1 on 3-regular graphs. Two unrelated checks, four digits.
+
+**The measurement** (`experiments/exp009_qaoa_where_it_counts.py`), scored
+against iterated local search, which Result 51 established as the classical
+champion in this regime:
+
+| n | QAOA p=1 | QAOA p=2 | **1 ms hill-climb** |
+|---|---|---|---|
+| 60 | 0.767 | 0.839 | **0.988** |
+| 100 | 0.756 | 0.827 | **0.964** |
+| 200 | 0.758 | 0.826 | **0.949** |
+| 500 | 0.772 | 0.843 | **0.960** |
+| 1 000 | 0.800 | 0.873 | **0.997** |
+
+**QAOA at p=2 loses to a millisecond of hill-climbing at every size, and it is
+not close** — 0.83–0.87 against 0.95–1.00.
+
+The accounting is as generous to QAOA as it can possibly be made. That column is
+the *exact expected* cut, with optimal angles, perfect noiseless execution,
+infinite shots, and no transpilation. Every one of those is free here and none
+of them is free on hardware. The classical column is fifty lines of numpy that
+finished before the QAOA circuit could be transpiled.
+
+**Parameter transfer works perfectly, and it does not help.** The light cone is
+`n`-independent on a regular graph, which *predicts* that optimal angles should
+be too. Measured: angles trained on one 60-vertex instance, applied to 100 and
+200 without re-optimisation, against angles re-optimised per instance:
+
+| n | p | transferred | re-optimised | gain |
+|---|---|---|---|---|
+| 100 | 1 | 103.534 | 103.537 | **0.002%** |
+| 100 | 2 | 113.228 | 113.238 | **0.009%** |
+| 200 | 1 | 207.568 | 207.569 | **0.000%** |
+| 200 | 2 | 226.427 | 226.467 | **0.018%** |
+
+So the fixed-angle literature has a real mechanism rather than a lucky
+empirical finding, and this repository can now say why. But it closes the
+direction rather than opening it: **QAOA's instance-specific outer loop was never
+the bottleneck.** Removing it entirely — the largest win that line of work could
+possibly deliver — buys 0.018%. What limits QAOA here is what the depth-`p`
+ansatz can express, and no amount of optimiser cleverness touches that.
+
+**What would be needed instead.** Closing the gap to 0.95 means much larger `p`.
+At p = 11 — roughly where the literature puts the crossover with
+Goemans-Williamson's 0.878 — the light cone on a 3-regular graph reaches ~2¹¹
+vertices, i.e. the entire graph, so this technique stops working and so does
+every other simulation. On hardware it is ~990 two-qubit gate layers across 60+
+qubits, at a fidelity where Result 50's 18-vertex runs already needed 10⁵ shots.
+That is the honest cost of the comparison, and it is the third independent route
+to the same conclusion this project keeps reaching.
+
+**On making it fast enough to be possible at all.** The first working version
+took 30.6 s per energy at n = 1 000, p = 2 — far too slow to optimise against.
+Three changes, each found by measuring rather than guessing:
+
+| change | n=1000, p=2 | speedup |
+|---|---|---|
+| first working version | 30 643 ms | — |
+| exact canonical form for tree cones | 1 952 ms | 15.7× |
+| colour refinement for cyclic cones | 1 431 ms | 1.4× |
+| direct numpy evolution, no Qiskit per call | **437 ms** | 3.3× |
+| | | **70× total** |
+
+The first came from noticing that 1 433 of 1 500 cones looked distinct when a
+random 3-regular graph is locally tree-like and they are almost all isomorphic —
+the degree-based key simply could not see it. The last came from noticing that a
+14-qubit cone is 16 384 amplitudes but took 21 ms: the runtime was
+`QuantumCircuit` construction and gate dispatch, not linear algebra. Hoisting the
+diagonal cost layer and applying the mixer by reshaping made the physics visible
+again. p=1 went 13.3 ms → **0.5 ms** on the same graph.
+
+Both are the same lesson in different clothes: the expensive thing was not the
+computation, it was the bookkeeping around it.
