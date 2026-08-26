@@ -1,0 +1,110 @@
+{
+  "shots": 200000,
+  "seeds": 24,
+  "rows": [
+    {
+      "molecule": "H4",
+      "environment": "ideal",
+      "ratio_vs_qwc": 0.9324042575925354,
+      "scheme": "commuting",
+      "groups": 10,
+      "max_depth": 24,
+      "max_two_qubit_gates": 17,
+      "median_error": 0.0014370112513208966,
+      "iqr": 0.0022978274347322802,
+      "median_seconds": 0.02832486750003227,
+      "exact": -5.160759152757001
+    },
+    {
+      "molecule": "H4",
+      "environment": "ideal",
+      "ratio_vs_qwc": 1.0,
+      "scheme": "qwc",
+      "groups": 37,
+      "max_depth": 2,
+      "max_two_qubit_gates": 0,
+      "median_error": 0.0015411890707484055,
+      "iqr": 0.002232713776748163,
+      "median_seconds": 0.030575490499813895,
+      "exact": -5.160759152757001
+    },
+    {
+      "molecule": "H4",
+      "environment": "heron",
+      "ratio_vs_qwc": 1.2859429612897544,
+      "scheme": "commuting",
+      "groups": 10,
+      "max_depth": 87,
+      "max_two_qubit_gates": 43,
+      "median_error": 0.06821012601173004,
+      "iqr": 0.005943661858774929,
+      "median_seconds": 5.7685642225001175,
+      "exact": -5.160759152757001
+    },
+    {
+      "molecule": "H4",
+      "environment": "heron",
+      "ratio_vs_qwc": 1.0,
+      "scheme": "qwc",
+      "groups": 37,
+      "max_depth": 4,
+      "max_two_qubit_gates": 0,
+      "median_error": 0.05304288608828944,
+      "iqr": 0.006591728159936583,
+      "median_seconds": 9.629037544999846,
+      "exact": -5.160759152757001
+    },
+    {
+      "molecule": "LiH",
+      "environment": "ideal",
+      "ratio_vs_qwc": 0.5914122282696835,
+      "scheme": "commuting",
+      "groups": 41,
+      "max_depth": 44,
+      "max_two_qubit_gates": 38,
+      "median_error": 0.0018349152458192464,
+      "iqr": 0.00364732138258006,
+      "median_seconds": 0.22568880200014974,
+      "exact": -8.857341498219002
+    },
+    {
+      "molecule": "LiH",
+      "environment": "ideal",
+      "ratio_vs_qwc": 1.0,
+      "scheme": "qwc",
+      "groups": 172,
+      "max_depth": 2,
+      "max_two_qubit_gates": 0,
+      "median_error": 0.0031025994359090703,
+      "iqr": 0.0033459491093648097,
+      "median_seconds": 0.2862337344995467,
+      "exact": -8.857341498219002
+    },
+    {
+      "molecule": "LiH",
+      "environment": "heron",
+      "ratio_vs_qwc": 1.3674566140655358,
+      "scheme": "commuting",
+      "groups": 41,
+      "max_depth": 234,
+      "max_two_qubit_gates": 125,
+      "median_error": 0.0861025149318797,
+      "iqr": 0.013852669915405347,
+      "median_seconds": 51.81084056399959,
+      "exact": -8.857341498219002
+    },
+    {
+      "molecule": "LiH",
+      "environment": "heron",
+      "ratio_vs_qwc": 1.0,
+      "scheme": "qwc",
+      "groups": 172,
+      "max_depth": 4,
+      "max_two_qubit_gates": 0,
+      "median_error": 0.06296544551851735,
+      "iqr": 0.017150219422266577,
+      "median_seconds": 18.10972637100076,
+      "exact": -8.857341498219002
+    }
+  ]
+}

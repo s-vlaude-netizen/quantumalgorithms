@@ -10,7 +10,23 @@ what is left, add what the results suggested.
 
 ## Now
 
-### The measurement side is settled; the optimiser side is not
+### The measurement side is settled — and Result 55 gave it a domain
+
+Everything below about measurement schemes optimises estimator **variance**, and
+that is the right target only where the error is shot noise. Measured
+(Result 55): on an ideal simulator 16x the shots buys 3.0x the accuracy; on a
+Heron-class noise model at the same depths it buys **4.3%**, because the error
+there equals the device bias to three digits. The IQR still falls as sqrt(n)
+exactly as designed — the total error simply contains almost no statistics.
+
+So the ranking below **inverts** under device noise: general-commuting grouping
+beats QWC 1.7x on LiH ideally and loses 1.37x on `heron`, because its Clifford
+basis changes cost 125 two-qubit gates against QWC's zero. Both land at 5-9e-2
+Hartree against chemical accuracy at 1.6e-3.
+
+**This is why error mitigation is now item 1 rather than item 4.**
+
+### The ranking itself, which holds where variance is the error
 Three sessions of measurement-scheme work end in a clean ranking (Result 38).
 Five schemes, one metric — total estimator variance under Neyman allocation at
 the Hartree-Fock reference — three molecules:
@@ -54,7 +70,24 @@ measurement:
 So the remaining levers are neither estimator nor optimiser. In order of what
 the measurements point at:
 
-### 1. ADAPT-VQE: measured, improved 4.6×, and now at cost parity
+### 1. Error mitigation — the only item that attacks the error that exists
+Zero-noise extrapolation and readout mitigation both *buy* accuracy with *extra
+shots*. That trade used to look doubtful under budget parity. Result 55 changes
+the calculation completely: on a device model the extra shots were buying **4.3%
+for 16x** anyway, because the error is bias. Shots are nearly worthless there,
+which makes them cheap to spend on something that attacks bias instead.
+
+Concretely: implement ZNE (gate folding) and M3-style readout correction, and
+measure error at matched *total* shots against the unmitigated baseline, on
+`heron`, from the Hartree-Fock reference where the exact answer is known. The
+number to beat is 6.9e-2 Hartree (H4, general commuting, 400k shots) and
+5.1e-2 (QWC). Anything that moves those toward 1.6e-3 is the first thing in this
+project to attack the error that actually exists on hardware.
+
+A negative result is still worth writing down — but unlike the earlier framing,
+the prior now favours trying.
+
+### 2. ADAPT-VQE: measured, improved 4.6×, and now at cost parity
 Built, measured, and made cheaper (Results 44–47).
 
 **What holds.** The parameter reduction is real and grows with system size: 1 vs
@@ -93,7 +126,7 @@ surviving signal** on `fake_torino`. It reaches 3.29e-4.
    The batched+lazy schedule makes far fewer, larger optimisation calls, which
    is a different noise profile from standard ADAPT — untested.
 
-### 2. The size wall, now confirmed from both sides — this is the top item
+### 3. The size wall, confirmed from both sides
 Result 42 (chemistry) and Result 50 (optimisation) reach the same conclusion by
 completely different routes: **at the sizes this project can score honestly, the
 classical method already wins outright.** FCI solves H₂/H₄/LiH to 12 decimals in
@@ -124,7 +157,7 @@ force:
   0.878 guarantee but a fifty-line hill-climber that finds a 2.55% better cut in
   one second. GW never wins once at a matched budget.
 
-### 3. A classical baseline on every result  *(done — Results 42 and 50)*
+### 4. A classical baseline on every result  *(done — Results 42 and 50)*
 Both areas the user named now have one: CCSD(T)/FCI for chemistry
 (`qres/classical.py`), and greedy / local search / Goemans-Williamson for
 MaxCut (`qres/classical_optimization.py`). The README states the classical
@@ -133,13 +166,6 @@ answer first. Keep it that way for anything added.
 ---
 
 ## Next
-
-### 4. Error mitigation, measured against its cost
-Zero-noise extrapolation and readout mitigation both *buy* accuracy with
-*extra shots*. Under budget parity that trade is not obviously favourable, and
-it is usually reported without it. Implement ZNE (gate folding) and M3-style
-readout correction, and measure error at matched total shots. A negative result
-here would be worth writing down.
 
 ### 5. Larger parameter counts, where the shot-frugal literature should win
 The adaptive-optimiser negative result was on 12 parameters (H₂). COBYLA

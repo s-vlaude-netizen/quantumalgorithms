@@ -2269,3 +2269,125 @@ model: a fit reported with two decimal places, from five points, with its
 predictors 88% collinear and a 3.35× contradiction sitting inside its own input
 table. Nothing about the output looked wrong. The check that found it was
 plotting the residuals against a variable that was not in the model.
+
+### Result 54 — the measurement-scheme ranking is not a small-Hamiltonian artefact; the advantage grows
+
+NEXT_STEPS carried one caveat on Result 38 from the moment it was written: the
+five-scheme ranking was established on H₂, H₄ and LiH, none of them past 631
+Pauli terms, and nothing in the repository could say whether the ordering was a
+property of measurement schemes or of very small Hamiltonians. Result 53 added
+nine molecules, so it can finally be tested
+(`experiments/exp011_scheme_ranking_at_scale.py`).
+
+Same metric as Result 38 — total estimator variance under Neyman allocation at
+the Hartree-Fock reference — ratios against general-commuting grouping:
+
+| molecule | terms | qubits | groups | QWC groups | **QWC ratio** | random shadows |
+|---|---|---|---|---|---|---|
+| H₂ | 5 | 2 | 2 | 2 | 1.00 | 38.1 |
+| H₄ | 165 | 6 | 10 | 37 | 1.67 | 44.5 |
+| LiH | 631 | 10 | 41 | 172 | 3.23 | 368.5 |
+| BeH₂ | 666 | 12 | 37 | 191 | **5.80** | 1501.2 |
+| HF | 631 | 10 | 39 | 175 | **6.96** | 512.2 |
+| H₂O | 1 086 | 12 | 51 | 283 | **9.08** | 547.8 |
+
+The original three reproduce exactly (1.00, 1.67, 3.23 against the logged 1.00,
+1.67, 3.24). And the answer to the caveat is the opposite of what it feared:
+**the default's advantage grows with system size**, from 1.67× on H₄ to 9.08× on
+H₂O. The small molecules were understating it.
+
+Note also that HF and LiH have *identical* term counts (631) and adjacent
+qubit counts, yet their ratios differ 2.2× — the same lesson as Result 53, that
+Hamiltonian size does not determine Hamiltonian structure.
+
+**A ceiling worth recording, because it bounds this whole line of work.** The
+metric needs the full covariance matrix over Pauli terms, and measured across
+these systems it costs `seconds ~ terms^2.9`:
+
+| molecule | terms | covariance |
+|---|---|---|
+| LiH | 631 | 13 s |
+| H₂O | 1 086 | 57 s |
+| NH₃ | 2 949 | 1 175 s |
+| CH₄ | 6 892 | ~4 h (not run) |
+
+So the quantity Result 38 ranks schemes on **cannot be evaluated at all for a
+molecule of practical interest.** Grouping itself is cheap (2.7 s at 1 086
+terms); it is the scoring that does not scale. Any claim about measurement
+schemes above ~3 000 terms is extrapolation, and this log should say so wherever
+it makes one.
+
+### Result 55 — under a real device model the measurement-scheme ranking inverts, because the error is bias and shots cannot buy bias down
+
+Result 54 confirmed the Result 38 ranking structurally and found the default's
+advantage *growing* with size — 9.08× on H₂O. That metric is total estimator
+variance, and it is blind to the one thing that decides the question on
+hardware.
+
+Qubit-wise commuting groups reach their measurement basis with single-qubit
+rotations. General-commuting groups need a **Clifford diagonalisation**:
+entangling gates, on a device where entangling gates are the error source. The
+variance formula counts none of them. So both schemes were run through
+`fake_torino`-class noise (`heron`) at matched shots, 24 seeds, against the
+exact value of the same state (`experiments/exp012_grouping_under_noise.py`):
+
+| molecule | device | scheme | depth | 2-qubit gates | median error | **vs QWC** |
+|---|---|---|---|---|---|---|
+| H₄ | ideal | commuting | 24 | 17 | 1.437e-3 | **0.93** |
+| H₄ | ideal | QWC | 2 | 0 | 1.541e-3 | 1.00 |
+| H₄ | **heron** | commuting | 87 | **43** | 6.821e-2 | **1.29** |
+| H₄ | **heron** | QWC | 4 | **0** | 5.304e-2 | 1.00 |
+| LiH | ideal | commuting | 44 | 38 | 1.835e-3 | **0.59** |
+| LiH | ideal | QWC | 2 | 0 | 3.103e-3 | 1.00 |
+| LiH | **heron** | commuting | 234 | **125** | 8.610e-2 | **1.37** |
+| LiH | **heron** | QWC | 4 | **0** | 6.297e-2 | 1.00 |
+
+**In the ideal case the variance metric is accurate.** LiH's variance ratio of
+3.23 predicts an error ratio of 1/√3.23 = 0.56; measured, 0.59. The formula
+works.
+
+**Under device noise the ranking inverts on both molecules** — 0.93 → 1.29 and
+0.59 → 1.37. The mechanism is in the table: on LiH the diagonalisation costs
+**125 two-qubit gates against zero**.
+
+**Why, precisely — and this is the part that generalises.** A shot sweep on
+H₄ at 12 seeds, comparing median error against the mean bias:
+
+| device | scheme | 25k shots | 100k | 400k | IQR at 25k → 400k |
+|---|---|---|---|---|---|
+| ideal | commuting | 3.227e-3 | 2.407e-3 | **1.059e-3** | 5.26e-3 → 2.00e-3 |
+| ideal | QWC | 9.573e-3 | 2.979e-3 | **1.225e-3** | 1.31e-2 → 1.70e-3 |
+| heron | commuting | 7.185e-2 | 7.051e-2 | **6.875e-2** | 7.24e-3 → 1.62e-3 |
+| heron | QWC | 5.242e-2 | 5.095e-2 | — | 1.46e-2 → 9.14e-3 |
+
+Ideal: 16× the shots buys 3.0× the accuracy — textbook `1/√n`. Heron: 16× the
+shots buys **4.3%**. And the measured bias at heron equals the median error to
+three digits (7.132e-2 against 7.185e-2 at 25k shots).
+
+The IQR falls exactly as designed in both cases — √4 per 4× shots. The
+statistical machinery is working perfectly. **The total error simply does not
+contain enough statistics to care.**
+
+**What this bounds.** A large part of this repository optimises estimator
+*variance*: Neyman allocation, covariance-aware grouping with local refinement,
+the shot ladder, the whole Result 38 ranking. Every one of those improvements is
+real, and this does not retract any of them. But they are improvements to a
+quantity that is **not the error** once the circuits reach Heron-class depth:
+there the error is bias, and no shot allocation reaches it.
+
+So the measurement-scheme results have a domain, and it should be stated
+wherever they are: they hold in the shot-noise-limited regime, which is the
+ideal simulator and low-depth circuits, and they invert on a device noise model
+at these depths. Result 54's 9.08× advantage on H₂O is a real fact about
+variance and probably a *disadvantage* on hardware, since H₂O's diagonalisations
+are deeper than LiH's.
+
+**And the honest scale.** Both schemes land at 5–9e-2 Hartree under heron,
+against chemical accuracy at 1.6e-3 — 30–55× too large, from the Hartree-Fock
+reference state alone, before any ansatz or optimisation. The 1.37× between
+schemes is a rounding error on a number that is already out of range. Choosing
+the measurement scheme is not what stands between this and a useful answer.
+
+This is the fourth independent route to the same wall (Results 42, 50, 51 being
+the others), and the first one that arrives from inside the measurement work
+itself.

@@ -74,6 +74,21 @@ gates; surviving a Heron-class device at fidelity > 0.5 allows ~40.
   — halves SPSA's error (p = 0.006) and is the first thing here to reach
   chemical accuracy with any reliability: 7/16 seeds on H₂ at 12.8M shots
 
+**That qualifier is load-bearing, and it was measured rather than assumed.** On
+an ideal simulator, 16× the shots buys 3.0× the accuracy — textbook `1/√n`. On a
+Heron-class noise model at the same depths it buys **4.3%**, because the error
+there equals the device bias to three digits and no shot allocation reaches
+bias. The interquartile range still falls as √n exactly as designed; the total
+error simply contains almost no statistics to improve.
+
+So the ranking above **inverts** under device noise. General-commuting grouping
+beats QWC by 1.7× on LiH in the ideal case (predicted 0.56 from the variance
+ratio, measured 0.59) and *loses* by 1.37× on `heron` — because its Clifford
+basis changes cost 125 two-qubit gates against QWC's zero. Both then land at
+5–9e-2 Hartree against chemical accuracy at 1.6e-3, from the Hartree-Fock state
+alone, so the difference between them is a rounding error on a number already
+30–55× out of range.
+
 ## What was measured and closed
 
 Two whole lines are closed by measurement rather than by opinion. Both are kept
