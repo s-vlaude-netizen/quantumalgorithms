@@ -99,15 +99,29 @@ def _brute_force(hamiltonian: SparsePauliOp, offset: float):
     return float(best), strings, float(energies.mean())
 
 
+#: largest instance still worth enumerating; above this ``maxcut`` returns a
+#: problem with no exact optimum rather than refusing to build one at all.
+BRUTE_FORCE_LIMIT = 24
+
+
 def maxcut(
     edges: list[tuple[int, int]] | list[tuple[int, int, float]],
     num_nodes: int | None = None,
     name: str = "maxcut",
+    exact: bool | None = None,
 ) -> IsingProblem:
     """MaxCut on a weighted graph.
 
     cut(x) = sum_{(i,j)} w_ij (1 - z_i z_j)/2, maximised.  We minimise
     H = sum w_ij z_i z_j / 2 and carry the constant separately.
+
+    ``exact`` controls whether the optimum is enumerated.  It defaults to
+    ``n <= BRUTE_FORCE_LIMIT``, because the interesting region for MaxCut starts
+    exactly where enumeration stops (RESEARCH_LOG Result 50: Goemans-Williamson
+    is *exactly* optimal on every instance small enough to check).  When it is
+    off, ``max_cut`` is ``None`` and ``optimal_value`` is ``nan`` -- a caller
+    that wants a score above the limit has to supply its own reference, and gets
+    a loud failure rather than a silent zero if it forgets.
     """
     weighted = [(e[0], e[1], e[2] if len(e) > 2 else 1.0) for e in edges]
     n = num_nodes if num_nodes is not None else 1 + max(max(i, j) for i, j, _ in weighted)
@@ -122,7 +136,20 @@ def maxcut(
         total_w += w
     ham = SparsePauliOp(terms, np.array(coeffs, dtype=complex)).simplify()
     offset = -total_w / 2
-    best, strings, mean = _brute_force(ham, offset)
+
+    if exact is None:
+        exact = n <= BRUTE_FORCE_LIMIT
+
+    if exact:
+        best, strings, mean = _brute_force(ham, offset)
+        max_cut = -(best + offset)
+        random_expectation = mean + offset
+    else:
+        best, strings = float("nan"), []
+        max_cut = None
+        # a uniformly random assignment cuts each edge with probability 1/2
+        random_expectation = -total_w / 2
+
     return IsingProblem(
         name=f"{name}/n{n}/m{len(weighted)}",
         hamiltonian=ham,
@@ -133,17 +160,20 @@ def maxcut(
         metadata={
             "problem": "maxcut",
             "edges": weighted,
-            "max_cut": -(best + offset),
-            "random_expectation": mean + offset,
+            "max_cut": max_cut,
+            "random_expectation": random_expectation,
+            "exact": bool(exact),
         },
     )
 
 
-def random_regular_maxcut(n: int, degree: int = 3, seed: int = 0) -> IsingProblem:
+def random_regular_maxcut(
+    n: int, degree: int = 3, seed: int = 0, exact: bool | None = None
+) -> IsingProblem:
     """MaxCut on a random d-regular graph -- the canonical QAOA benchmark."""
     rng = np.random.default_rng(seed)
     edges = _random_regular_edges(n, degree, rng)
-    p = maxcut(edges, num_nodes=n, name=f"reg{degree}")
+    p = maxcut(edges, num_nodes=n, name=f"reg{degree}", exact=exact)
     p.metadata["seed"] = seed
     p.metadata["degree"] = degree
     return p
@@ -191,10 +221,12 @@ def _random_regular_edges(n: int, d: int, rng, attempts: int = 5000) -> list[tup
     raise RuntimeError(f"failed to sample a simple {d}-regular graph on {n} vertices")
 
 
-def erdos_renyi_maxcut(n: int, p_edge: float = 0.5, seed: int = 0) -> IsingProblem:
+def erdos_renyi_maxcut(
+    n: int, p_edge: float = 0.5, seed: int = 0, exact: bool | None = None
+) -> IsingProblem:
     rng = np.random.default_rng(seed)
     edges = [(i, j) for i in range(n) for j in range(i + 1, n) if rng.random() < p_edge]
-    prob = maxcut(edges, num_nodes=n, name=f"er{p_edge:g}")
+    prob = maxcut(edges, num_nodes=n, name=f"er{p_edge:g}", exact=exact)
     prob.metadata["seed"] = seed
     return prob
 

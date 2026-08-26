@@ -27,6 +27,7 @@ from qres.classical_optimization import (
     classical_maxcut_baselines,
     goemans_williamson,
     greedy_maxcut,
+    iterated_local_search,
     local_search_maxcut,
 )
 from qres.problems.optimization import (
@@ -123,7 +124,7 @@ def test_no_heuristic_ever_beats_the_exact_optimum(factory):
 
 
 def test_local_search_never_worse_than_greedy_start():
-    """Restart 0 is the greedy all-zeros start, so flips can only improve it."""
+    """Restart 0 now starts from the greedy solution, so flips only improve it."""
     for seed in range(5):
         problem = erdos_renyi_maxcut(14, 0.5, seed=seed)
         assert (
@@ -156,3 +157,70 @@ def test_reported_bitstring_reproduces_the_reported_cut():
     for result in [greedy_maxcut(problem), local_search_maxcut(problem), goemans_williamson(problem)]:
         assignment = np.array([int(c) for c in reversed(result.bitstring)])
         assert _cut_value(weights, assignment) == pytest.approx(result.cut_value, abs=1e-9)
+
+
+def test_iterated_local_search_reproduces_the_exact_optimum():
+    """The strong reference must be exact wherever brute force can confirm it.
+
+    Nothing it reports above the enumeration limit is admissible otherwise, and
+    everything in Result 51 lives above that limit.
+    """
+    for n in (14, 16, 18):
+        for seed in range(6):
+            problem = random_regular_maxcut(n, 3, seed=seed)
+            result = iterated_local_search(problem, iterations=2000, seed=seed)
+            assert result.cut_value == pytest.approx(
+                problem.metadata["max_cut"], abs=1e-9
+            ), f"n={n} seed={seed}"
+
+
+def test_adaptive_perturbation_escapes_a_fixed_neighbourhood():
+    """A fixed perturbation size defines a reachable set no runtime escapes.
+
+    On this instance a 2-flip perturbation sat at cut 20 against an optimum of
+    21 through 20 000 iterations, while 4 flips found 21 within 2 000.  The
+    escalation-on-stagnation schedule is what closes that, so the property to
+    hold is that the default now reaches the optimum here at all.
+    """
+    problem = random_regular_maxcut(16, 3, seed=2)
+    optimum = problem.metadata["max_cut"]
+
+    stuck = iterated_local_search(problem, iterations=400, strength=0.15, seed=2)
+    assert stuck.metadata["max_flips"] >= 8, "escalation range collapsed"
+
+    found = iterated_local_search(problem, iterations=4000, strength=0.15, seed=2)
+    assert found.cut_value == pytest.approx(optimum, abs=1e-9)
+
+
+def test_time_budget_is_respected_and_beats_a_fixed_count():
+    """``time_budget`` must stop on the clock, not on an iteration count."""
+    problem = random_regular_maxcut(40, 3, seed=0, exact=False)
+    result = iterated_local_search(problem, seed=0, time_budget=0.25)
+    assert 0.2 <= result.seconds <= 1.0
+    assert result.metadata["iterations"] > 0
+
+
+def test_large_instances_build_without_an_optimum():
+    """Above the enumeration limit the optimum must be absent, not silently zero.
+
+    A caller that forgets it has no ground truth should get a `None` it has to
+    handle, not a ratio computed against nothing.
+    """
+    problem = random_regular_maxcut(40, 3, seed=0)
+    assert problem.metadata["exact"] is False
+    assert problem.metadata["max_cut"] is None
+    assert np.isnan(problem.optimal_value)
+    assert np.isnan(iterated_local_search(problem, iterations=50).approximation_ratio)
+
+    small = random_regular_maxcut(12, 3, seed=0)
+    assert small.metadata["exact"] is True
+    assert small.metadata["max_cut"] is not None
+
+
+def test_exact_can_be_forced_off_below_the_limit():
+    forced = random_regular_maxcut(12, 3, seed=0, exact=False)
+    assert forced.metadata["max_cut"] is None
+    # the Hamiltonian itself must be identical either way
+    exact = random_regular_maxcut(12, 3, seed=0, exact=True)
+    assert forced.hamiltonian == exact.hamiltonian
+    assert forced.offset == pytest.approx(exact.offset)

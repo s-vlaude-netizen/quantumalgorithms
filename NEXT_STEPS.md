@@ -108,10 +108,13 @@ force:
 * **Chemistry:** H₂O or active-space BeH₂, where FCI is still available but
   strained, to see whether the Result 38/47 rankings are small-Hamiltonian
   artefacts.
-* **Optimisation:** MaxCut past n = 26, scored against a strong classical solver
-  instead of exhaustive search, to find where GW stops being exact. This is a
-  classical question before it is a quantum one, and it must be answered first —
-  without it there is no instance on which a QAOA number could mean anything.
+* **Optimisation:** *answered — Result 51.* Certainty ends between **n = 40 and
+  n = 60**: up to 40 the SDP and iterated local search agree on every instance
+  (and are both exactly optimal wherever brute force can confirm it); at 60 they
+  first diverge; by 100 they disagree on all twelve. So a QAOA number means
+  something only at **n ≥ 60** — and the target there is not Goemans-Williamson's
+  0.878 guarantee but a fifty-line hill-climber that finds a 2.55% better cut in
+  one second. GW never wins once at a matched budget.
 
 ### 3. A classical baseline on every result  *(done — Results 42 and 50)*
 Both areas the user named now have one: CCSD(T)/FCI for chemistry
@@ -148,12 +151,13 @@ parameter-transfer literature (LINXFER and relatives, 2025): pre-trained angles
 claim to remove instance-specific optimisation entirely, which under a
 shot-budget metric would be a very large win.
 
-**But not below n = 26.** Result 50 makes any approximation ratio at these sizes
-uninformative — GW is exact there, so "0.95 vs 1.00" says nothing about MaxCut's
-hard part. Parameter transfer is worth measuring precisely because it points
-*upward*: transfer from small instances to large ones is the one QAOA protocol
-that does not need the large instance to be optimised on. Pair it with item 2's
-strong classical solver so the large end can be scored at all.
+**But not below n = 60**, which Result 51 pins down. Below 40 both strong
+classical methods are still exactly optimal, so any approximation ratio there is
+measuring nothing. Parameter transfer is the right protocol for that constraint
+— transfer from small instances to large ones is the one QAOA variant that does
+not need the large instance to be optimised on, which is what makes n ≥ 60
+reachable at all. Score it against `iterated_local_search` at matched
+wall-clock, not against GW.
 
 ### 7. Circuit duration as the lever
 The cost model charges `circuit_duration + reset_delay` per shot, and the reset

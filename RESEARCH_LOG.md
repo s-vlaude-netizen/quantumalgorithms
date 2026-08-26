@@ -1988,3 +1988,92 @@ Restart 0 now starts from the greedy solution, so the result is at least as good
 as greedy by construction. The classical baseline this project measures QAOA
 against should be the strongest cheap one available, and this is the direction
 that makes the quantum side's job harder, not easier.
+
+### Result 51 — where classical certainty on MaxCut actually ends, and what it costs to get there
+
+Result 50 left one question, and it is the prerequisite for every quantum
+comparison this project could still run: Goemans-Williamson is *exactly* optimal
+on 100% of instances up to n = 20, so where does that stop? MaxCut is NP-hard;
+it cannot hold forever.
+
+The difficulty is that "exact" stops being checkable at the same place it stops
+being obvious — brute force ends around 24 variables. So the method is
+**agreement between two strong, independent classical methods**: GW's SDP
+relaxation, and iterated local search given exactly the wall-clock GW spent on
+the same instance. While they agree, that is strong evidence the optimum is
+found. Where they diverge, neither is known to be optimal and nothing can be
+scored. 3-regular MaxCut, 12 instances per size
+(`experiments/exp008_where_classical_certainty_ends.py`):
+
+| n | agree | GW wins | **ILS wins** | mean gap | brute force says |
+|---|---|---|---|---|---|
+| 16 | 12/12 | 0 | 0 | 0 | both exact, 12/12 |
+| 20 | 12/12 | 0 | 0 | 0 | both exact, 12/12 |
+| 24 | 12/12 | 0 | 0 | 0 | both exact, 12/12 |
+| 30 | 12/12 | 0 | 0 | 0 | — |
+| 40 | 12/12 | 0 | 0 | 0 | — |
+| **60** | 10/12 | 0 | **2** | 0.21% | — |
+| **80** | 5/12 | 0 | **7** | 0.53% | — |
+| **100** | 0/12 | 0 | **12** | 2.55% | — |
+
+**Certainty ends between n = 40 and n = 60.** Up to 40 the two methods agree on
+every single instance, and wherever brute force can check them they are both
+exactly optimal. At 60 they first diverge; by 100 they disagree on all twelve.
+
+**Goemans-Williamson never wins once at a matched budget** — not at any size, on
+any instance. That reverses what an unmatched comparison said: at n = 60 with a
+fixed 300-iteration ILS, GW won 82 to 81, and it would have been easy to write
+that down. GW had 2.3 s against ILS's 36 ms. Given the same 2.3 s, ILS takes it.
+The reference has to be given at least the compute of the method it is judging,
+or the comparison measures the budget.
+
+**The cheap method degrades much earlier**, which sets the other boundary:
+
+| n | 1 ms local search matches best | mean ratio |
+|---|---|---|
+| 16–20 | 12/12 | 1.0000 |
+| 24 | 11/12 | 0.9973 |
+| 30 | 8/12 | 0.9898 |
+| 40 | 4/12 | 0.9847 |
+| 60–100 | 0–1/12 | 0.9624–0.9847 |
+
+So there are three regimes, and only the third is a place where a quantum method
+could say anything:
+
+* **n ≤ 20** — a millisecond of hill-climbing is exactly optimal. This is where
+  essentially every QAOA benchmark in the literature lives, including this
+  project's own Result 50. Nothing measurable happens here.
+* **n ≈ 24–40** — the cheap method starts failing (12/12 → 4/12), but the two
+  strong methods still agree everywhere. The optimum is effectively known; it
+  just costs ~1 s instead of ~1 ms.
+* **n ≥ 60** — the strong methods disagree, nobody knows the optimum, and the
+  standing classical champion is *iterated local search*, not the SDP.
+
+**What this means for the quantum side of this project, concretely.** A QAOA
+result that means anything needs n ≥ 60 — 60+ qubits, and at p = 3 that is
+several thousand two-qubit gates on a device where Result 50's n = 18 runs
+already cost 10⁵ shots. And the thing it would have to beat is not
+Goemans-Williamson's 0.878 guarantee. It is a fifty-line hill-climber that finds
+a 2.55% better cut in about one second. That is a much harder target than the
+framing "QAOA versus a 0.878-approximation" suggests, and the framing is the
+part that was wrong.
+
+**One bug found, and it is the interesting kind — more compute made it worse.**
+The first run of this experiment reported ILS missing the optimum on one n = 16
+instance *despite 11 705 iterations*, while an earlier validation had it exact
+20/20 at only 500. More compute cannot lose. The cause: the perturbation was a
+fixed `round(0.15 n)` vertices — 2 flips at n = 16 — and a fixed perturbation
+size defines a reachable set that no amount of time escapes. On that instance
+ILS sat at cut 20 against an optimum of 21 through **20 000 iterations**, while
+4 flips found 21 within 2 000.
+
+Fixed by escalating the perturbation on stagnation and resetting it on
+improvement. The reference is now 320/320 exactly optimal across four instance
+families at n = 14–20, including the instance that was previously unreachable.
+
+Worth recording as a pattern rather than an incident: this is the same shape as
+the ansatz sitting on an exact stationary point (Results 10, 19, 20). In both
+cases the search was structurally unable to reach the answer, and in both cases
+the symptom was a number that stopped improving while looking entirely
+plausible. **A plateau is a hypothesis about the search, not about the problem.**
+The test for it is cheap — change the neighbourhood, not the runtime.

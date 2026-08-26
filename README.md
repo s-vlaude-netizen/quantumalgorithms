@@ -119,10 +119,27 @@ each, GW returns the **exact** optimum on 100% of instances up to n = 20, in
 | 18 | 0.840 | **1.000** (0.9 ms) | 1.000 (141 ms) | 1.000 (127k shots) |
 
 So any QAOA benchmark at n ≤ 20 reporting an approximation ratio below 1.0 is
-reporting it on instances a 100 ms classical algorithm solves exactly. Two areas,
-two routes, one conclusion: the sizes that can be verified have no hard part
-left, and finding where the classical methods actually break is the prerequisite
-for every other question here.
+reporting it on instances a 100 ms classical algorithm solves exactly.
+
+**Where that stops** was then measured directly, by agreement between the SDP and
+an iterated local search at *matched wall-clock* — because past n ≈ 24 there is
+no brute force left to check against:
+
+| n | 1 ms hill-climb is optimal | strong methods agree | who wins when they differ |
+|---|---|---|---|
+| ≤ 20 | 12/12 | 12/12 | — |
+| 24–40 | 11/12 → 4/12 | 12/12 | — |
+| 60 | 0/12 | 10/12 | local search |
+| 100 | 0/12 | **0/12** | local search, by 2.55% |
+
+Classical certainty ends between **n = 40 and n = 60**, and Goemans-Williamson
+never wins once at a matched budget. So a QAOA result that means anything needs
+n ≥ 60 — and the target there is not the 0.878 guarantee, it is a fifty-line
+hill-climber finding a better cut in about a second.
+
+Two areas, two routes, one conclusion: the sizes that can be verified have no
+hard part left. Knowing exactly where that ceases is the prerequisite for every
+other question here, and on the optimisation side it is now known.
 
 ## The wall
 

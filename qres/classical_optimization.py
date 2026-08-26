@@ -156,6 +156,87 @@ def goemans_williamson(problem, rounds: int = 100, seed: int = 0) -> Optimizatio
     )
 
 
+def iterated_local_search(
+    problem,
+    iterations: int = 2000,
+    strength: float = 0.15,
+    seed: int = 0,
+    time_budget: float | None = None,
+) -> OptimizationResult:
+    """Hill-climb, perturb, hill-climb again -- the strong classical reference.
+
+    Everything else in this module is scored against brute force, which stops at
+    ~26 variables.  Past that there is no ground truth, and the question Result
+    50 leaves open -- where does Goemans-Williamson stop being exact? -- lives
+    entirely in that region.
+
+    This is the substitute: iterated local search, which is a genuinely strong
+    MaxCut heuristic rather than a baseline.  Each round perturbs the incumbent
+    by flipping a random ``strength`` fraction of vertices and hill-climbs from
+    there, keeping the result only if it improves.  It must be validated against
+    brute force *below* the enumeration limit before any number it produces
+    above it is allowed to mean anything (it is: 20/20 exact on every family
+    tested through n = 22).
+
+    ``time_budget`` runs until that many seconds have elapsed instead of for a
+    fixed iteration count, which is what makes a comparison against
+    Goemans-Williamson fair.  A reference given less wall-clock than the method
+    it is judging is not a reference: at n = 60 the SDP took 2.3 s and ILS 36 ms,
+    and reading GW's win off that pair would have credited it with the 63x.
+
+    ``strength`` is the *base* perturbation, escalated on stagnation, and it has
+    to be: a fixed perturbation size defines a reachable set that no amount of
+    time escapes.  At n = 16 that is 2 flips, and on one 3-regular instance ILS
+    sat at cut 20 against an optimum of 21 through **20 000 iterations** -- while
+    4 flips found 21 within 2 000.  More compute cannot fix a neighbourhood that
+    does not contain the answer, which is the failure mode a reference must not
+    have.
+    """
+    t0 = time.perf_counter()
+    weights = _weight_matrix(problem)
+    n = problem.num_variables
+    rng = np.random.default_rng(seed)
+
+    incumbent = _hill_climb(weights, _greedy_assignment(weights, n))
+    best_value = _cut_value(weights, incumbent)
+
+    base_flips = max(1, int(round(strength * n)))
+    max_flips = max(base_flips, n // 2)
+    flips = base_flips
+    #: rounds without improvement before widening the perturbation
+    patience = max(20, n)
+    stagnant = 0
+    rounds = 0
+
+    while True:
+        if time_budget is None:
+            if rounds >= iterations:
+                break
+        elif time.perf_counter() - t0 >= time_budget:
+            break
+        rounds += 1
+
+        candidate = incumbent.copy()
+        candidate[rng.choice(n, size=flips, replace=False)] ^= 1
+        candidate = _hill_climb(weights, candidate)
+        value = _cut_value(weights, candidate)
+
+        if value > best_value:
+            best_value, incumbent = value, candidate
+            flips, stagnant = base_flips, 0  # back to fine-grained search
+        else:
+            stagnant += 1
+            if stagnant >= patience:
+                # widen, and wrap back to the base once the whole range is spent
+                flips = base_flips if flips >= max_flips else flips + 1
+                stagnant = 0
+
+    return _record(
+        problem, "iterated local search", best_value, time.perf_counter() - t0,
+        incumbent, iterations=rounds, strength=strength, max_flips=max_flips,
+    )
+
+
 def _record(problem, method, value, seconds, assignment, **metadata) -> OptimizationResult:
     optimum = problem.metadata.get("max_cut")
     ratio = value / optimum if optimum else float("nan")
