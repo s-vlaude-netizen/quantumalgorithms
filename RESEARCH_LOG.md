@@ -1723,3 +1723,37 @@ are needed — and H₄, the harder correlation problem of the two, is where it
 loses. A parameter count is not a cost, and this is the third time in this
 project that a headline ratio has not survived being charged properly.
 
+### Result 45 — charged gradient-free, ADAPT loses on H₂ and H₄ too
+
+Result 44's comparison used BFGS, which needs `n+1` evaluations per gradient and
+so penalises the many-parameter side unfairly. Redone gradient-free (COBYLA),
+which is the setting that matters — under shot noise there are no cheap analytic
+gradients — counting evaluations until chemical accuracy is first reached, with
+gradient sweeps charged at the 39×-discounted rate the ranking-precision
+measurement justifies:
+
+| molecule | method | params | evaluations | sweeps | total | ratio |
+|---|---|---|---|---|---|---|
+| H₂ | UCCSD | 3 | 18 | — | 18 | — |
+| H₂ | ADAPT | **1** | 23 | 1 | 23 | **0.78× — worse** |
+| H₄ | UCCSD | 26 | 134 | — | 134 | — |
+| H₄ | ADAPT | **9** | 645 | 9 | 647 | **0.21× — 5× worse** |
+
+**Even on H₂, where ADAPT needs one parameter against UCCSD's three, it costs
+more.** The growth-step overhead is not amortised at any size tested so far.
+
+The mechanism is the same one Result 44 identified and is now visible at both
+sizes: ADAPT pays a full re-optimisation per growth step. Nine steps on H₄ cost
+645 evaluations where UCCSD's single optimisation needs 134. The gradient sweeps
+are *not* the problem — after the precision discount they contribute 2 of 647.
+
+LiH, where the parameter reduction is largest (5 against 92), is still running;
+it is the case that could still favour ADAPT and the claim is incomplete without
+it.
+
+What this changes about Result 43's argument: the case for ADAPT was that `n` is
+the only factor in `shots ~ (Σ|c|)² n / ε²` that nothing else touches. That
+remains true of the *final* parameter count, but the cost of *finding* those
+parameters is not captured by `n` at all, and on these molecules it dominates.
+The scaling argument was about the wrong quantity.
+
