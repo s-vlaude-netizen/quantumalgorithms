@@ -1838,3 +1838,61 @@ The batch/accuracy trade is also visible and useful: `batch=2` without the lazy
 schedule reaches **1.08e-4** — an order of magnitude better than chemical
 accuracy — at 0.29×, so the knob buys accuracy as well as cost.
 
+---
+
+## Session 6 — 2026-08-26 (05:25 UTC)
+
+### Result 48 — ADAPT's gradient sweep under real shot noise: 2.6× my estimate, still negligible
+
+Everything in Results 44–47 was exact arithmetic, which is the wrong setting for
+a project whose premise is realistic noise. The gradient sweep is where that
+mattered most: its cost was estimated from group counts and a 39× precision
+discount, both of which are assumptions.
+
+Measured instead. Each pool gradient is the expectation of the ordinary
+observable ``i[H, A_k]``, so it goes through the same grouped estimator as an
+energy and is charged to the same ledger. H₄, 12 trials per point:
+
+| shots per operator | picks the best operator | σ | shots per sweep |
+|---|---|---|---|
+| 1 024 | 33% | 0.0722 | 26 624 |
+| 4 096 | 33% | 0.0398 | 106 496 |
+| **16 384** | **100%** | 0.0206 | **425 984** |
+| 65 536 | 100% | 0.0109 | 1 703 936 |
+| 262 144 | 100% | 0.0051 | 6 815 744 |
+
+Reliable ranking needs **16 384 shots per operator, 426k per sweep**. The
+threshold sits between σ = 0.04 (33%) and σ = 0.02 (100%), which matches the
+noise-injection estimate of Result 44 (σ = 0.03 → 90%) — that part held up.
+
+**The accounting survives.** An H₄ energy at chemical-accuracy precision needs
+~631k shots (Result 34), so one sweep is **0.67 energy evaluations**, against the
+0.26 assumed. A 2.6× correction on a term that contributes 2 of 141 evaluations:
+batched ADAPT's total goes from 141 to 141.3 and its ratio against fixed UCCSD
+stays at **0.90×**.
+
+So the conclusion of Result 47 is unchanged by putting the gradients on real
+shots — which is worth having checked rather than assumed, because the estimate
+that turned out to be right was built from two guesses.
+
+### Result 49 — a correlated-noise bug in the estimator, found by ranking 26 observables
+
+Caught while measuring the above. `ShotEstimator` seeded its sampling RNG from
+``environment.seed`` alone, so every estimator built against the same
+environment drew the **same noise realisation**.
+
+For a single energy that is invisible. It is not invisible when a pool of 26
+observables is measured against each other and ranked: their errors move
+together, and the ranking is distorted in a way no single-estimator test would
+show. Fixed by seeding each instance from ``(environment.seed, instance_count)``.
+
+The measured effect on H₄ gradient ranking at 1 024 shots per operator:
+picking the best operator was unchanged at 33%, but **top-3 accuracy went from
+42% to 58%** — the correlation was suppressing the near-misses specifically.
+
+Worth noting what kind of bug this is: the same class as Result 22 (shot noise
+never resampled) and Result 32 (covariances flipping on ulp noise). All three
+are cases where the *statistics* of the simulation were wrong in a way that
+produced entirely plausible numbers. That is now three, and they were found by
+three different downstream measurements rather than by inspection.
+

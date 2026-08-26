@@ -50,6 +50,9 @@ class EstimationResult:
 class ShotEstimator:
     """Estimate <psi(theta)|H|psi(theta)> under a noise environment."""
 
+    #: counts estimators built, so each gets an independent noise stream
+    _instances = 0
+
     def __init__(
         self,
         hamiltonian: SparsePauliOp,
@@ -80,7 +83,14 @@ class ShotEstimator:
         self._durations: list[float] = []
         self._build_circuits(optimization_level)
 
-        self._rng = np.random.default_rng(environment.seed)
+        # Each estimator gets its own stream.  Seeding every instance from
+        # environment.seed alone makes estimators built against the same
+        # environment share a noise realisation -- which is invisible for a
+        # single energy, and silently correlates the noise across a pool of
+        # observables measured for comparison (ADAPT's gradient sweep ranks 26
+        # of them against each other).
+        ShotEstimator._instances += 1
+        self._rng = np.random.default_rng((environment.seed, ShotEstimator._instances))
         # A noiseless environment gets an exact fast path: every group circuit
         # shares the same ansatz prefix, so the expensive work is done once and
         # only the shallow basis changes differ.

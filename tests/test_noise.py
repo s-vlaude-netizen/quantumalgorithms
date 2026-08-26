@@ -141,3 +141,31 @@ def test_noisy_environments_do_not_take_the_fast_path():
     ansatz = build_ansatz("hea:2", problem, env)
     estimator = ShotEstimator(problem.hamiltonian, ansatz, env, ledger=ResourceLedger())
     assert not estimator._ideal_fast_path
+
+
+def test_estimators_do_not_share_a_noise_realisation():
+    """Two estimators on the same environment must draw independent noise.
+
+    Seeding every instance from environment.seed alone is invisible for a single
+    energy and wrong the moment a pool of observables is measured against each
+    other and ranked -- their errors move together and the ranking is distorted.
+    Measured effect on ADAPT's gradient sweep: top-3 accuracy 42% -> 58% once
+    the streams were separated (RESEARCH_LOG Result 49).
+    """
+    from qres.ansatz import build_ansatz
+    from qres.estimator import ShotEstimator
+    from qres.problems.chemistry import build_molecule
+    from qres.resources import ResourceLedger
+
+    problem = build_molecule("H2")
+    env = make_environment("ideal", seed=11)
+    ansatz = build_ansatz("hea:2", problem, env)
+    rng = np.random.default_rng(0)
+    params = rng.normal(0, 0.4, ansatz.num_parameters)
+
+    first = ShotEstimator(problem.hamiltonian, ansatz, env, ledger=ResourceLedger())
+    second = ShotEstimator(problem.hamiltonian, ansatz, env, ledger=ResourceLedger())
+
+    a = [first.estimate(params, 2048).value for _ in range(12)]
+    b = [second.estimate(params, 2048).value for _ in range(12)]
+    assert a != b, "two estimators returned an identical sequence of draws"

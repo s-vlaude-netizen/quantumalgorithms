@@ -258,3 +258,60 @@ def adapt_vqe(
         converged=converged,
         metadata={"pool_size": len(pool), "pool_kind": pool_kind},
     )
+
+
+def adapt_circuit(problem, pool, operators, parameters=None):
+    """The ADAPT ansatz as a parameterised circuit the estimator can run.
+
+    Hartree-Fock preparation followed by one ``exp(-i theta_k A_k)`` per chosen
+    operator, in the order they were chosen.  Left parameterised so the shot
+    estimator can transpile once and re-bind, which is what makes a shot-based
+    run affordable at all (RESEARCH_LOG Result 28).
+    """
+    from qiskit import QuantumCircuit
+    from qiskit.circuit import ParameterVector
+
+    from .ansatz import hartree_fock_state
+
+    circuit = QuantumCircuit(problem.num_qubits, name=f"adapt{len(operators)}")
+    circuit.compose(hartree_fock_state(problem.hf_bitstring), inplace=True)
+    if not operators:
+        return circuit
+
+    theta = ParameterVector("t", len(operators))
+    for k, index in enumerate(operators):
+        angle = theta[k] if parameters is None else float(parameters[k])
+        circuit.append(_evolution(pool[index], angle), range(problem.num_qubits))
+    return circuit
+
+
+def sampled_operator_gradients(
+    problem, pool, operators, parameters, environment, shots_per_operator: int, ledger
+) -> np.ndarray:
+    """Pool gradients estimated from shots rather than from a statevector.
+
+    Each gradient is the expectation of ``i[H, A_k]``, which is an ordinary
+    observable -- so it goes through the same grouped estimator as an energy and
+    is charged to the same ledger.
+
+    Gradients are measured at ``shots_per_operator``, which is deliberately far
+    below what an energy needs: they only have to *rank* operators, and ranking
+    survives sigma = 0.01 where chemical accuracy needs 1.6e-3 (Result 44).
+    """
+    from .estimator import ShotEstimator
+
+    circuit = adapt_circuit(problem, pool, operators)
+    gradients = np.zeros(len(pool))
+    for k, operator in enumerate(pool):
+        commutator = (problem.hamiltonian @ operator - operator @ problem.hamiltonian)
+        commutator = (1j * commutator).simplify(atol=1e-12)
+        if len(commutator) == 0:
+            continue
+        estimator = ShotEstimator(
+            commutator, circuit, environment, grouping="commuting",
+            allocation="adaptive", ledger=ledger,
+        )
+        bound = np.asarray(parameters, dtype=float) if len(operators) else np.zeros(0)
+        gradients[k] = abs(estimator.estimate(bound, shots_per_operator).value)
+    return gradients
+

@@ -37,6 +37,8 @@ import numpy as np
 from qiskit.quantum_info import Statevector
 from scipy.optimize import minimize
 
+from qiskit_aer import AerSimulator
+
 from qres.adapt import _evolution, excitation_pool, operator_gradients
 from qres.ansatz import build_ansatz, hartree_fock_state
 from qres.bench import RESULTS_DIR
@@ -48,14 +50,22 @@ SWEEP_COST = {"H2": 2.0 / 39, "H4": 10.1 / 39, "LiH": 28.1 / 39}
 
 
 def uccsd_cost(problem, maxiter: int = 20_000) -> tuple[int, int, float]:
-    """Evaluations for a fixed UCCSD to first reach chemical accuracy."""
+    """Evaluations for a fixed UCCSD to first reach chemical accuracy.
+
+    Uses Aer's C++ statevector rather than ``Statevector(circuit)``, which walks
+    the circuit gate by gate in Python.  On LiH's 92-parameter UCCSD that
+    difference is the whole experiment: the Python path ran for four hours
+    without finishing (the same bottleneck as RESEARCH_LOG Result 28).
+    """
     ansatz = build_ansatz("uccsd", problem)
+    simulator = AerSimulator(method="statevector")
     seen: list[float] = []
 
     def energy(x):
-        value = float(
-            np.real(Statevector(ansatz.assign_parameters(x)).expectation_value(problem.hamiltonian))
-        )
+        bound = ansatz.assign_parameters(x)
+        bound.save_statevector()
+        state = Statevector(simulator.run(bound).result().get_statevector(bound))
+        value = float(np.real(state.expectation_value(problem.hamiltonian)))
         seen.append(value)
         return value
 
@@ -68,8 +78,20 @@ def uccsd_cost(problem, maxiter: int = 20_000) -> tuple[int, int, float]:
     return ansatz.num_parameters, reached, best
 
 
-def adapt_cost(problem, max_steps: int = 15, gradient_tolerance: float = 1e-3):
-    """Evaluations and sweeps for ADAPT to first reach chemical accuracy."""
+def adapt_cost(
+    problem,
+    max_steps: int = 15,
+    gradient_tolerance: float = 1e-3,
+    batch: int = 5,
+    lazy: bool = True,
+):
+    """Evaluations and sweeps for ADAPT to first reach chemical accuracy.
+
+    Defaults to the batched + lazy schedule (Result 47), which is 4.6x cheaper
+    than standard ADAPT (``batch=1, lazy=False``) at the same accuracy.  ADAPT's
+    cost is *(growth steps)* x *(cost of one re-optimisation)*; ``lazy`` shrinks
+    the second factor and ``batch`` the first.
+    """
     pool = excitation_pool(problem, "sd")
     reference = Statevector(hartree_fock_state(problem.hf_bitstring))
 
@@ -91,24 +113,50 @@ def adapt_cost(problem, max_steps: int = 15, gradient_tolerance: float = 1e-3):
     for _ in range(max_steps):
         gradients = operator_gradients(problem.hamiltonian, build(params, chosen), pool)
         sweeps += 1
-        top = int(np.argmax(gradients))
-        if gradients[top] < gradient_tolerance:
+        picked = [int(i) for i in np.argsort(-gradients) if gradients[i] >= gradient_tolerance]
+        picked = picked[: max(1, batch)]
+        if not picked:
             break
 
-        chosen.append(top)
-        params = np.concatenate([params, [0.0]])
+        added = len(picked)
+        chosen.extend(picked)
+        params = np.concatenate([params, np.zeros(added)])
         counter = [0]
 
-        def wrapped(x):
-            counter[0] += 1
-            return energy(x, chosen)
+        if lazy:
+            fixed = params[:-added]
 
-        result = minimize(wrapped, params, method="COBYLA", options={"maxiter": 20_000})
-        params = np.asarray(result.x)
+            def wrapped(tail):
+                counter[0] += 1
+                return energy(np.concatenate([fixed, tail]), chosen)
+
+            result = minimize(wrapped, params[-added:], method="COBYLA",
+                              options={"maxiter": 20_000})
+            params = np.concatenate([fixed, np.asarray(result.x)])
+        else:
+            def wrapped(x):
+                counter[0] += 1
+                return energy(x, chosen)
+
+            result = minimize(wrapped, params, method="COBYLA", options={"maxiter": 20_000})
+            params = np.asarray(result.x)
+
         evaluations += counter[0]
         best = abs(float(result.fun) - problem.fci_energy)
         if best < CHEMICAL_ACCURACY_HA:
             break
+
+    if lazy and best >= CHEMICAL_ACCURACY_HA and chosen:
+        counter = [0]
+
+        def full(x):
+            counter[0] += 1
+            return energy(x, chosen)
+
+        result = minimize(full, params, method="COBYLA", options={"maxiter": 20_000})
+        params = np.asarray(result.x)
+        evaluations += counter[0]
+        best = abs(float(result.fun) - problem.fci_energy)
 
     return len(chosen), evaluations, sweeps, best, len(pool)
 
