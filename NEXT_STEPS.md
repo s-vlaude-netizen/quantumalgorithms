@@ -71,10 +71,12 @@ Open, in order:
 1. **Finish the LiH comparison.** UCCSD there has 92 parameters and BFGS with
    numerical gradients needs 93 evaluations per gradient, so it is slow — but it
    is the case where ADAPT should win, and the claim is unsupported without it.
-2. **Cut the re-optimisation cost.** Nine full re-optimisations is what sinks H₄.
-   Standard mitigations, untested here: optimise only the newly added parameter
-   for the first few iterations; or add several operators per step (batched
-   ADAPT), trading a slightly worse choice for far fewer optimisations.
+2. ~~**Cut the re-optimisation cost.**~~ **Done (Result 46).** The lazy schedule
+   — optimise only the newly added parameter, one full pass at the end — is
+   **3.1× cheaper** than standard ADAPT at the same accuracy (645 → 205
+   evaluations on H₄). It still loses to fixed UCCSD by 1.5×. Batched ADAPT
+   (several operators per growth step) is the remaining untested variant, and
+   it attacks the same overhead from the other side.
 3. **Shrink the pool.** A sweep costs 28× an energy on LiH because the
    commutators barely share measurement groups with `H`. Qubit-ADAPT pools are
    far smaller than the fermionic singles-and-doubles pool and would cut this

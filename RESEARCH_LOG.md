@@ -1757,3 +1757,45 @@ remains true of the *final* parameter count, but the cost of *finding* those
 parameters is not captured by `n` at all, and on these molecules it dominates.
 The scaling argument was about the wrong quantity.
 
+### Result 46 — the obvious fix works and is not enough
+
+Result 45 localised ADAPT's cost precisely: 645 of 647 evaluations on H₄ are
+re-optimisation, not gradient sweeps. So the fix is to stop re-optimising
+everything at every growth step. Three schedules, gradient-free, exact energies:
+
+| molecule | schedule | evaluations | error | vs fixed UCCSD |
+|---|---|---|---|---|
+| H₄ | full (standard ADAPT) | 645 | 1.20e-3 | 0.21× |
+| H₄ | every 3rd step full | 413 | 1.20e-3 | 0.32× |
+| H₄ | **lazy** (new parameter only, one full pass at the end) | **205** | 1.26e-3 | **0.65×** |
+
+**The lazy schedule is 3.1× cheaper than standard ADAPT at the same accuracy**,
+which is a real improvement to the method. It still loses to fixed UCCSD by 1.5×.
+
+H₂ is unaffected — one growth step means there is no schedule to choose.
+
+So the sequence on H₄ is: ADAPT starts 5× worse than UCCSD, the best available
+re-optimisation schedule recovers 3.1× of that, and it ends 1.5× worse. Closing
+the remaining gap would need the growth-step overhead to disappear entirely,
+which is not a schedule question.
+
+### Where the ADAPT direction stands
+
+The premise (Result 43) was that `n` is the only factor in
+`shots ~ (Σ|c|)² n / ε²` that nothing else here touches, so an ansatz with
+smaller `n` is the one lever on the exponent. Measured:
+
+* **The parameter reduction is real and large** — 1 vs 3 on H₂, 9 vs 26 on H₄,
+  5 vs 92 on LiH, growing with system size.
+* **It does not transfer to cost.** On H₂ and H₄, ADAPT is 1.3× and 1.5× more
+  expensive than fixed UCCSD even with the best schedule, because the cost of
+  *finding* the parameters is not measured by `n`.
+* **LiH is unfinished** and is the case where the 18× parameter reduction could
+  still win. Its UCCSD arm needs COBYLA on 92 parameters with a deep circuit per
+  evaluation and has run for over half an hour.
+
+The honest position: a smaller final ansatz is not the same as a cheaper
+algorithm, and the scaling argument that motivated this direction was about the
+wrong quantity. Whether the largest parameter reductions eventually pay for the
+search that finds them is exactly what the LiH number will say.
+
