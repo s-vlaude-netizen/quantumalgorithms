@@ -2651,3 +2651,69 @@ the first version of this experiment re-simulated all three scale factors for
 each of them — three times the work, and an unpaired comparison as well.
 Sampling once per seed and extrapolating three ways is 3× faster *and*
 statistically stronger.
+
+### Result 60 — the two-qubit gate budget, measured: about 4.5 mHa per gate, and chemical accuracy is worth less than one
+
+Result 59 established that the gate budget binds — 317 two-qubit gates carried
+1.4 Hartree of bias — but not how large the budget is. The README has carried a
+"~32× gap" since early on, estimated by comparing a needed gate count against a
+surviving one. This measures the thing directly.
+
+**The knob has to change gate count and nothing else.** Ansatz depth does not
+qualify: a deeper ansatz prepares a different state, so the exact reference moves
+with the circuit and the comparison confounds two things. Instead: the
+Hartree-Fock reference padded with cancelling `CX CX = I` pairs, barriers between
+them so the transpiler cannot remove them. The ideal state is *exactly*
+Hartree-Fock at every gate count (verified to 1e-12), every added gate is real,
+and one exact reference serves the whole sweep
+(`experiments/exp014_gate_budget.py`, H₄ on `heron`, 100k shots, 8 seeds, best
+mitigation recipe from Result 58).
+
+| two-qubit gates | unmitigated | **mitigated** | × chemical accuracy | error per gate |
+|---|---|---|---|---|
+| 0 | 4.519e-2 | **4.031e-3** | 2.5× | — |
+| 4 | 7.381e-2 | 1.981e-2 | 12.4× | 4.95e-3 |
+| 8 | 1.627e-1 | 3.624e-2 | 22.6× | 4.53e-3 |
+| 16 | 2.000e-1 | 7.428e-2 | 46.4× | 4.64e-3 |
+| 32 | 2.644e-1 | 1.449e-1 | 90.5× | 4.53e-3 |
+| 64 | 4.295e-1 | 2.618e-1 | 163.6× | 4.09e-3 |
+| 128 | 6.525e-1 | 4.951e-1 | 309.4× | 3.87e-3 |
+| 256 | 1.077 | 9.608e-1 | 600.5× | 3.75e-3 |
+
+**A two-qubit gate costs about 4.5 mHa of bias**, near-constant across a factor
+of 64 in gate count (drifting down only as the state saturates towards
+maximally mixed). Chemical accuracy is 1.6 mHa.
+
+**So the budget is less than one two-qubit gate.** Not "small" — under one. And
+the zero-gate row says the same thing from the other side: with no entangling
+gates at all, the best mitigation this package has still lands at 4.031e-3,
+2.5× outside chemical accuracy, on a state that requires no computation.
+
+For scale, from Result 47: UCCSD on H₄ needs **~1300** two-qubit gates to reach
+chemical accuracy, and the batched ADAPT ansatz needs **665**. The measured
+budget is under 1. That is the ~32× gap the README estimated, re-measured as a
+factor of roughly a thousand.
+
+**Mitigation's value decays with depth, exactly as Result 59 predicts.** It is
+worth 11.2× at zero gates, 3.7× at 4, 1.6× at 64, and **1.12× at 256** — because
+it removes readout bias, whose share of the total falls as gate bias grows.
+Mitigation is a fixed-size subtraction from a growing number.
+
+**What this changes about the project's direction.** Every remaining item in
+NEXT_STEPS that improves a constant factor — shot allocation, grouping,
+optimisers, even mitigation — is working inside a budget of less than one gate.
+None of them can matter until the per-gate cost falls by three orders of
+magnitude, which is a hardware fact, not an algorithmic one.
+
+The two directions that are *not* constant factors, and the only ones worth
+pursuing on this evidence:
+
+* **Fewer gates for the same accuracy.** Result 47's ADAPT work (665 against
+  1300) is the right kind of result and still two-and-a-half orders of magnitude
+  short. Givens compilation (2.43×) likewise.
+* **Problems that need fewer gates in the first place.** Nothing in molecular
+  ground states qualifies; the correlation energy is in the doubles and the
+  doubles cost entangling gates.
+
+This is the fifth independent route to the same wall (Results 42, 50, 51, 55),
+and the first one to price it per gate.

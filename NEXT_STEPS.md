@@ -10,6 +10,45 @@ what is left, add what the results suggested.
 
 ## Now
 
+### Result 60 reprioritises everything below: the budget is under one gate
+
+Measured directly, by padding the Hartree-Fock reference with cancelling `CX CX`
+pairs so the ideal state never moves and only the gate count does: **a two-qubit
+gate costs about 4.5 mHa of bias** on H₄ under `heron`, near-constant across a
+factor of 64 in gate count. Chemical accuracy is 1.6 mHa.
+
+| two-qubit gates | mitigated error | × chemical accuracy |
+|---|---|---|
+| 0 | 4.031e-3 | 2.5× |
+| 4 | 1.981e-2 | 12.4× |
+| 16 | 7.428e-2 | 46.4× |
+| 64 | 2.618e-1 | 163.6× |
+| 256 | 9.608e-1 | 600.5× |
+
+UCCSD on H₄ needs ~1300 two-qubit gates; batched ADAPT needs 665. **The budget
+is under 1.** Even at *zero* entangling gates the best mitigation here is 2.5×
+outside chemical accuracy.
+
+**What that means for this queue.** Every item below that buys a constant factor
+— shot allocation, grouping, optimisers, mitigation — is working inside a budget
+of less than one gate, and none of them can matter until the per-gate cost falls
+by three orders of magnitude. That is a hardware fact, not an algorithmic one.
+
+Only two directions are not constant factors, and they are the only ones worth
+pursuing on this evidence:
+
+1. **Fewer gates for the same accuracy.** Result 47 (ADAPT: 665 against 1300)
+   and the Givens compilation (2.43×) are the right *kind* of result, and still
+   two and a half orders of magnitude short. Qubit-ADAPT pools are the next
+   concrete step (item 2 below).
+2. **Problems that need fewer gates in the first place.** Molecular ground
+   states do not qualify — the correlation energy is in the doubles and the
+   doubles cost entangling gates. This is the honest place to look for a
+   different application, and nothing in this repository has looked yet.
+
+Everything from here down is kept for the record and for the domain caveats it
+carries, not because it is the next thing to do.
+
 ### The measurement side is settled — and Result 55 gave it a domain
 
 Everything below about measurement schemes optimises estimator **variance**, and

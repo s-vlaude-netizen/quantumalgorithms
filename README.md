@@ -55,8 +55,17 @@ only single excitations and Brillouin's theorem decouples those. Correlation
 energy is in the doubles. So it sits at Hartree-Fock at any depth and any
 budget, and every measurement-side improvement has nothing to act on.
 
-**The gap is ~32×.** Reaching chemical accuracy on H₄ needs ~1300 two-qubit
-gates; surviving a Heron-class device at fidelity > 0.5 allows ~40.
+**The gap is ~1000×, and it is now priced per gate.** A two-qubit gate costs
+about **4.5 mHa of bias** on H₄ under a Heron-class model — measured directly by
+padding the Hartree-Fock reference with cancelling `CX CX` pairs, so the ideal
+state is unchanged and only the gate count moves. Chemical accuracy is 1.6 mHa,
+so **the budget is less than one two-qubit gate**. Reaching chemical accuracy on
+H₄ needs ~1300 with UCCSD, or 665 with the batched ADAPT ansatz.
+
+Even at *zero* entangling gates, the best mitigation here lands at 4.0e-3 — 2.5×
+outside chemical accuracy, on a state that requires no computation. And
+mitigation's value decays with depth: 11.2× at 0 gates, 1.6× at 64, 1.12× at
+256, because it subtracts a fixed readout bias from a growing gate bias.
 
 **What does work, where a run is actually shot-noise-limited:**
 

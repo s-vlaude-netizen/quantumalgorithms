@@ -1,0 +1,72 @@
+{
+  "molecule": "H4",
+  "environment": "heron",
+  "shots": 100000,
+  "seeds": 8,
+  "rows": [
+    {
+      "pairs": 0,
+      "two_qubit_gates": 0,
+      "unmitigated_error": 0.04519315322566264,
+      "mitigated_error": 0.004031147111998479,
+      "mitigated_bias": 0.0002644723574141139,
+      "vs_chemical_accuracy": 2.519466944999049
+    },
+    {
+      "pairs": 2,
+      "two_qubit_gates": 4,
+      "unmitigated_error": 0.07380639992580429,
+      "mitigated_error": 0.019806372975740505,
+      "mitigated_bias": 0.017084550140336496,
+      "vs_chemical_accuracy": 12.378983109837815
+    },
+    {
+      "pairs": 4,
+      "two_qubit_gates": 8,
+      "unmitigated_error": 0.16271673356123184,
+      "mitigated_error": 0.03623719931404379,
+      "mitigated_bias": 0.03516304919828794,
+      "vs_chemical_accuracy": 22.64824957127737
+    },
+    {
+      "pairs": 8,
+      "two_qubit_gates": 16,
+      "unmitigated_error": 0.19995133747448213,
+      "mitigated_error": 0.07428473093765753,
+      "mitigated_bias": 0.0730515274844521,
+      "vs_chemical_accuracy": 46.42795683603595
+    },
+    {
+      "pairs": 16,
+      "two_qubit_gates": 32,
+      "unmitigated_error": 0.26440490633942426,
+      "mitigated_error": 0.14486060603164708,
+      "mitigated_bias": 0.14352731832914056,
+      "vs_chemical_accuracy": 90.53787876977943
+    },
+    {
+      "pairs": 32,
+      "two_qubit_gates": 64,
+      "unmitigated_error": 0.4294695933500301,
+      "mitigated_error": 0.26182661826758435,
+      "mitigated_bias": 0.26523918707180005,
+      "vs_chemical_accuracy": 163.64163641724022
+    },
+    {
+      "pairs": 64,
+      "two_qubit_gates": 128,
+      "unmitigated_error": 0.6524614487436291,
+      "mitigated_error": 0.49508709782117233,
+      "mitigated_bias": 0.49416793237207557,
+      "vs_chemical_accuracy": 309.4294361382327
+    },
+    {
+      "pairs": 128,
+      "two_qubit_gates": 256,
+      "unmitigated_error": 1.0773277796701937,
+      "mitigated_error": 0.9608030299618879,
+      "mitigated_bias": 0.9514822286262259,
+      "vs_chemical_accuracy": 600.5018937261799
+    }
+  ]
+}

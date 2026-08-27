@@ -119,3 +119,37 @@ def test_noisy_error_is_bias_and_shots_barely_help():
     assert abs(small_bias) == pytest.approx(small_error, rel=0.2)
     # and 16x the shots does not rescue it
     assert large_error > 0.7 * small_error
+
+
+def test_identity_padding_leaves_the_state_exactly_unchanged():
+    """Result 60's gate-count knob must move gates and nothing else.
+
+    `CX CX = I`, so the padded circuit prepares exactly the Hartree-Fock state
+    at any padding depth -- which is what lets one exact reference serve the
+    whole sweep.  The barriers are load-bearing: without them the transpiler
+    cancels the pairs and the sweep measures nothing.
+    """
+    from experiments.exp014_gate_budget import (
+        padded_reference,
+        two_qubit_count as transpiled_two_qubit_count,
+    )
+
+    problem = build_molecule("H4")
+    reference = Statevector(hartree_fock_state(problem.hf_bitstring))
+
+    previous = -1
+    for pairs in (0, 2, 8, 16):
+        circuit = padded_reference(problem, pairs)
+        assert abs(reference.inner(Statevector(circuit))) == pytest.approx(1.0, abs=1e-12)
+
+        estimator = ShotEstimator(
+            problem.hamiltonian,
+            circuit,
+            make_environment("heron", seed=0),
+            grouping="qwc",
+            allocation="uniform",
+        )
+        gates = transpiled_two_qubit_count(estimator)
+        assert gates == 2 * pairs, "transpiler cancelled the padding"
+        assert gates > previous
+        previous = gates
