@@ -10,44 +10,38 @@ what is left, add what the results suggested.
 
 ## Now
 
-### Result 60 reprioritises everything below: the budget is under one gate
+### Where this stands after Results 60-63: three classes measured, three failures
 
-Measured directly, by padding the Hartree-Fock reference with cancelling `CX CX`
-pairs so the ideal state never moves and only the gate count does: **a two-qubit
-gate costs about 4.5 mHa of bias** on H₄ under `heron`, near-constant across a
-factor of 64 in gate count. Chemical accuracy is 1.6 mHa.
+The question was narrowed to one shape (Result 61): a problem whose **required
+relative accuracy** is loose enough to fit the device's gate budget, and whose
+**classical baseline** is genuinely hard. The budget itself is measured — a
+two-qubit gate costs ~0.1% of the observable's scale on a Heron-class device,
+constant across two problem classes, so `max gates ~ required accuracy / 0.001`.
 
-| two-qubit gates | mitigated error | × chemical accuracy |
-|---|---|---|
-| 0 | 4.031e-3 | 2.5× |
-| 4 | 1.981e-2 | 12.4× |
-| 16 | 7.428e-2 | 46.4× |
-| 64 | 2.618e-1 | 163.6× |
-| 256 | 9.608e-1 | 600.5× |
+| | accuracy requirement | classical baseline | encoding cost |
+|---|---|---|---|
+| **chemistry** | **fails** — 0.019% needs a 0.2-gate budget; an ansatz needs 665–1300 | fails — FCI exact in 100 ms | — |
+| **MaxCut** | passes — 5%, budget 50, QAOA p=1 uses 48 | **fails** — 1 ms hill-climb beats it (Result 51) | passes |
+| **HP folding** | passes — 7%, budget ~70 | plausibly passes at N ≥ 36 | **fails** — 1 538 gates at N = 6 |
 
-UCCSD on H₄ needs ~1300 two-qubit gates; batched ADAPT needs 665. **The budget
-is under 1.** Even at *zero* entangling gates the best mitigation here is 2.5×
-outside chemical accuracy.
+Three classes, three different failure points, all measured rather than argued.
 
-**What that means for this queue.** Every item below that buys a constant factor
-— shot allocation, grouping, optimisers, mitigation — is working inside a budget
-of less than one gate, and none of them can matter until the per-gate cost falls
-by three orders of magnitude. That is a hardware fact, not an algorithmic one.
+**The one thing that could still move this**, and the only concrete item left:
 
-Only two directions are not constant factors, and they are the only ones worth
-pursuing on this evidence:
+1. **The low-locality folding encoding.** Result 63 measured the *naive* turn
+   encoding, which is dense (2ⁿ terms at full weight) because self-avoidance has
+   no locality. Published constructions (Robert et al. and relatives) spend
+   ancilla qubits to bound interaction weight. Build one, measure its gate count
+   the same way, and check it against the ~70-gate budget. This is the only
+   candidate that passes the accuracy test and might pass the classical test,
+   so it is the only place a positive result could come from.
 
-1. **Fewer gates for the same accuracy.** Result 47 (ADAPT: 665 against 1300)
-   and the Givens compilation (2.43×) are the right *kind* of result, and still
-   two and a half orders of magnitude short. Qubit-ADAPT pools are the next
-   concrete step (item 2 below).
-2. **Problems that need fewer gates in the first place.** Molecular ground
-   states do not qualify — the correlation energy is in the doubles and the
-   doubles cost entangling gates. This is the honest place to look for a
-   different application, and nothing in this repository has looked yet.
+2. **Fewer gates for the same accuracy**, if item 1 fails. Result 47 (ADAPT: 665
+   against 1300) and Givens compilation (2.43×) are the right kind of result and
+   still orders of magnitude short. Qubit-ADAPT pools are the next concrete step.
 
-Everything from here down is kept for the record and for the domain caveats it
-carries, not because it is the next thing to do.
+Everything below is kept for the record and for the domain caveats it carries,
+not because it is the next thing to do.
 
 ### The measurement side is settled — and Result 55 gave it a domain
 

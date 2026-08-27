@@ -31,6 +31,7 @@ for the same things and the comparison between them means something.
 | `qres/noise.py` | noise environments from IBM device calibration snapshots |
 | `qres/problems/chemistry.py` | molecular Hamiltonians (PySCF → qubit operators) with exact references |
 | `qres/problems/optimization.py` | MaxCut, portfolio selection as Ising Hamiltonians |
+| `qres/problems/folding.py` | HP-lattice protein folding, exact and heuristic solvers |
 | `qres/measurement.py` | Pauli grouping (QWC / general commuting) and shot allocation |
 | `qres/covariance.py` | covariance-aware grouping and local partition refinement |
 | `qres/estimator.py` | shot-based expectation values with resource accounting |
@@ -119,6 +120,28 @@ then pick the method; both times, choosing by prominence picked the wrong one.
 The sobering number: that best mitigated result is still 0.408 Hartree, 255×
 chemical accuracy. Those 317 gates cost 26× more error than all the mitigation
 recovers, which is the ~32× depth gap above, measured from the other direction.
+
+## Which problems fit the device at all
+
+The per-gate cost turns out to be a **device constant**: ~0.1% of the
+observable's scale per two-qubit gate, measured at 0.089–0.113% across chemistry
+and MaxCut, two problem classes with different circuits, Hamiltonians and units.
+So `max two-qubit gates ≈ required relative accuracy / 0.001`, and that decides
+which problems are even candidates:
+
+| | accuracy requirement | classical baseline | encoding cost |
+|---|---|---|---|
+| **chemistry** | **fails** — 0.019% gives a 0.2-gate budget; an ansatz needs 665–1300 | fails — FCI exact in 100 ms | — |
+| **MaxCut** | passes — 5%, budget 50, QAOA p=1 uses 48 | **fails** — a 1 ms hill-climb beats it | passes |
+| **HP folding** | passes — 7%, budget ~70 | plausibly passes at N ≥ 36 | **fails** — 1 538 gates at N = 6 |
+
+Three classes, three different failure points, each measured rather than argued.
+Folding fails on the encoding: self-avoidance is a global constraint on the turn
+variables, so the natural Hamiltonian is fully dense — 2ⁿ Pauli terms at maximum
+weight — and six residues already costs 1 538 two-qubit gates per QAOA layer, at
+a size exact enumeration solves in microseconds. Published low-locality
+encodings spend ancilla qubits to avoid this and have not been measured here;
+that is the one open candidate.
 
 Worth knowing separately: the transpiler is already doing 8× of readout
 mitigation for free. At optimisation level 2 it placed a six-qubit problem on
