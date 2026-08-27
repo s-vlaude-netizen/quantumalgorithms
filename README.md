@@ -4,6 +4,44 @@ An experimental workbench for finding quantum algorithms that are actually
 cheaper to run, measured under **real device noise** rather than in the
 noiseless idealisation where most published speedups live.
 
+## The answer, since 66 results is a lot to read
+
+The task was: find quantum algorithms that are useful for real problems, with a
+measurable reduction in runtime or resources at equal or better quality.
+
+**The measurements say the constant factors are not the problem.** This
+repository produced real reductions — 15–20× from Pauli grouping, 2.43× from
+Givens compilation, 4.6× from batched ADAPT, 16× from readout mitigation, 3.2×
+from matching an extrapolation to the physics — and every one sits in front of a
+requirement between 10³ and 10⁸ away.
+
+The binding quantity is the **median two-qubit gate error**, and the cost of a
+gate simply *is* that number (measured across seven device generations, ratio
+0.64–1.09). So the threshold for any molecule is `chemical accuracy / gates`,
+and gates scale as `N^5.12` in spatial orbitals:
+
+| molecule | 2-qubit gates | needed 2q error | **factor from the best device today** |
+|---|---|---|---|
+| H₂ | 4 | 4.0e-4 | **3×** |
+| H₄ | 1 471 | 1.1e-6 | 1 168× |
+| LiH | 9 103 | 1.8e-7 | 7 226× |
+| a 20-orbital fragment | 5.2M | 3.1e-10 | 4 157 332× |
+| a 50-orbital drug molecule | 572M | 2.8e-12 | **453 677 973×** |
+
+H₂ needs 3× — genuinely reachable. H₂ at STO-3G is also a 2×2 diagonalisation
+that exact classical methods solve to twelve decimals in 35 ms. **The molecules
+that fit the hardware are exactly the ones with no reason to be computed this
+way**, and the gap opens at N^5.12 the moment they stop being trivial.
+
+The same shape holds on the optimisation side, for a different reason: MaxCut
+*fits* the gate budget and still loses to a fifty-line hill-climber running for
+one second. Protein folding fails on both the classical baseline and the
+encoding. Three problem classes, three different failure points, all measured.
+
+Everything below is how that was established, and it is worth reading mainly for
+the method: every claim here is a measurement, several of them corrections to
+earlier claims in this same repository.
+
 ## The premise
 
 For near-term quantum algorithms, the thing that costs money and time is

@@ -10,46 +10,50 @@ what is left, add what the results suggested.
 
 ## Now
 
-### Where this stands after Results 60-63: three classes measured, three failures
+### The question is answered (Result 66); what remains is narrow
 
-The question was narrowed to one shape (Result 61): a problem whose **required
-relative accuracy** is loose enough to fit the device's gate budget, and whose
-**classical baseline** is genuinely hard. The budget itself is measured — a
-two-qubit gate costs ~0.1% of the observable's scale on a Heron-class device,
-constant across two problem classes, so `max gates ~ required accuracy / 0.001`.
+The binding quantity is the **median two-qubit gate error**, because the cost of
+a gate *is* that number (Result 65, seven devices, ratio 0.64–1.09). Gates scale
+as `N^5.12` in spatial orbitals, so the threshold for a molecule is
+`1.6e-3 / gates`:
 
-| | accuracy requirement | classical baseline | encoding cost |
+| molecule | 2q gates | needed 2q error | factor from the best device |
 |---|---|---|---|
-| **chemistry** | **fails** — 0.019% needs a 0.2-gate budget; an ansatz needs 665–1300 | fails — FCI exact in 100 ms | — |
-| **MaxCut** | passes — 5%, budget 50, QAOA p=1 uses 48 | **fails** — 1 ms hill-climb beats it (Result 51) | passes |
-| **HP folding** | passes — 7%, budget ~70 | **fails** — 3 of 4 literature optima in under a minute (Result 64) | **fails** — 1 538 gates at N = 6 |
+| H₂ | 4 | 4.0e-4 | **3×** |
+| H₄ | 1 471 | 1.1e-6 | 1 168× |
+| LiH | 9 103 | 1.8e-7 | 7 226× |
+| 20-orbital fragment | 5.2M | 3.1e-10 | 4.2M× |
+| 50-orbital drug molecule | 572M | 2.8e-12 | **4.5e8×** |
 
-Three classes, three different failure points, all measured rather than argued.
+Recent generations delivered 6×. Stacking every gate-reduction result in this
+repository gives perhaps 5×.
 
-**And the wall is sized (Result 65).** Measured across seven device generations,
-the cost per gate *is* the device's two-qubit error rate (ratio 0.64–1.09,
-`(2q error)^0.93`, log-log correlation 0.952). Batched ADAPT's 665 gates need an
-error rate of **~1.6e-6**; the best snapshot available is 0.00127, **a factor of
-~800**, against 6× delivered by recent generations. Nothing algorithmic in this
-repository closes an 800× hardware gap, and every constant-factor result here is
-on the wrong side of it.
+**So the useful things left to do are not algorithmic**, and pretending otherwise
+would waste whoever picks this up:
 
-**The one thing that could still move this**, and the only concrete item left:
+1. **Watch one number.** The median two-qubit gate error of the best available
+   device, against the thresholds above. `experiments/exp015_device_generations.py`
+   re-measures the relationship on any new calibration snapshot in ~4 minutes per
+   device; the threshold table is `/tmp`-free and recomputable from
+   `qres/ansatz.py` gate counts.
 
-1. **The low-locality folding encoding.** Result 63 measured the *naive* turn
-   encoding, which is dense (2ⁿ terms at full weight) because self-avoidance has
-   no locality. Published constructions (Robert et al. and relatives) spend
-   ancilla qubits to bound interaction weight. Build one, measure its gate count
-   the same way, and check it against the ~70-gate budget. This is the only
-   candidate that passes the accuracy test and might pass the classical test,
-   so it is the only place a positive result could come from.
+2. **Fault tolerance is the unmeasured question.** Everything here is bare-metal
+   arithmetic. Error correction changes the question entirely, at a qubit
+   overhead this project never tried to estimate. That is the honest place to
+   look next, and it is a different project.
 
-2. **Fewer gates for the same accuracy**, if item 1 fails. Result 47 (ADAPT: 665
-   against 1300) and Givens compilation (2.43×) are the right kind of result and
-   still orders of magnitude short. Qubit-ADAPT pools are the next concrete step.
+3. **The low-locality folding encoding**, if someone wants to close the one
+   remaining loose end. Result 63 measured the *naive* turn encoding (dense, 2ⁿ
+   terms, 1 538 gates at six residues). Published constructions bound the
+   interaction weight with ancillas. It would fix the encoding column — but
+   Result 64 measured folding's classical baseline failing too (3 of 4 literature
+   optima in under a minute), so it no longer produces a candidate.
 
-Everything below is kept for the record and for the domain caveats it carries,
-not because it is the next thing to do.
+**What would reopen this.** A problem class with a required relative accuracy
+above ~1% *and* a classical baseline that genuinely fails at a size needing under
+a hundred two-qubit gates. Three classes have been checked against those two
+criteria and none has both. Nothing in this repository has looked beyond
+chemistry, MaxCut and folding.
 
 ### The measurement side is settled — and Result 55 gave it a domain
 
