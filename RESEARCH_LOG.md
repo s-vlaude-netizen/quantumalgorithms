@@ -3016,3 +3016,70 @@ whether any of this becomes useful is the **median two-qubit gate error**, and
 the threshold for H₄ with a 665-gate ansatz is **~1.6e-6**. Every other quantity
 this project has optimised moves the answer by a constant factor; that one moves
 it linearly and is the only thing between here and a working calculation.
+
+### Result 66 — the hardware threshold per molecule size, and what that means for the question actually asked
+
+Result 65 gave the threshold for H₄: a two-qubit error rate of ~1.6e-6 against
+the 0.00127 of the best calibration snapshot available, a factor of ~800. H₄ is
+not a drug. The question this project was set — useful quantum algorithms for
+real problems, drug simulation named explicitly — needs that threshold as a
+function of molecule size, and every ingredient is now measured rather than
+assumed:
+
+* **gate counts**: measured by transpiling UCCSD for each molecule
+* **cost per gate = the device's two-qubit error rate**: measured across seven
+  devices (Result 65), ratio 0.64–1.09
+* **best available error rate**: 0.00127, from real calibration data
+
+| molecule | orbitals | qubits | parameters | **2-qubit gates** | needed 2q error | **factor from best device** |
+|---|---|---|---|---|---|---|
+| H₂ | 2 | 2 | 3 | 4 | 4.0e-4 | **3×** |
+| H₄ | 4 | 6 | 26 | 1 471 | 1.1e-6 | 1 168× |
+| LiH | 6 | 10 | 92 | 9 103 | 1.8e-7 | 7 226× |
+| H₂O | 7 | 12 | 140 | 24 156 | 6.6e-8 | 19 174× |
+| BeH₂ | 7 | 12 | 204 | 26 111 | 6.1e-8 | 20 726× |
+| NH₃ | 8 | 14 | 315 | 50 570 | 3.2e-8 | 40 140× |
+
+**Transpiled two-qubit gates scale as N^5.12** in spatial orbitals, log-log
+correlation **0.9968** over the five non-degenerate points. (H₂'s UCCSD is three
+parameters and four gates — a degenerate point that drags the fit to N^6.71 if
+included, so it is excluded and reported.)
+
+Since the required error rate is `chemical accuracy / gates`, it falls as
+**N^-5.12**:
+
+| orbitals | gates | needed 2q error | **factor from the best device** |
+|---|---|---|---|
+| 8 | 47 995 | 3.3e-8 | 38 096× |
+| 12 | 382 823 | 4.2e-9 | 303 866× |
+| **20** — a small drug-like fragment | 5 237 584 | 3.1e-10 | **4 157 332×** |
+| 30 | 41 776 369 | 3.8e-11 | 33 159 993× |
+| **50** — a modest drug molecule | 571 562 801 | 2.8e-12 | **453 677 973×** |
+
+**A drug-sized molecule needs a 4.5 × 10⁸ improvement in two-qubit gate error.**
+Recent hardware generations delivered 6×.
+
+**The H₂ row is the one to sit with.** It needs only a **3×** improvement — genuinely
+within reach of the next generation. And H₂ at STO-3G is a 2×2 matrix
+diagonalisation; FCI solves it to twelve decimals in 35 milliseconds (Result 42).
+The molecules that fit the hardware are exactly the ones with no reason to be
+computed this way, and the gap opens at N^5.12 the moment they stop being
+trivial. That is the whole finding of this project in one row of a table.
+
+**What bounds this.** It is UCCSD; the batched ADAPT ansatz is ~2× cheaper
+(Result 47) and Givens compilation another 2.43× (Result 30). Stack every
+gate-reduction result in this repository and it is perhaps 5×, against 10⁸. It
+also assumes the ansatz reaches chemical accuracy at all, which Result 47
+established only on small systems. And it is 2D-lattice-free, error-corrected-free
+arithmetic: fault tolerance changes the question entirely, at a qubit overhead
+this project has not tried to measure.
+
+**What it settles.** The user asked for useful quantum algorithms with a
+measurable reduction in runtime or resources at equal or better quality. Across
+three problem classes and 66 results, this repository has produced real
+reductions — 15–20× from grouping, 2.43× from Givens compilation, 4.6× from
+batched ADAPT, 16× from readout mitigation, 3.2× from matching an extrapolation
+to the physics, 70× and 21× in its own simulation machinery — and every one of
+them is a constant factor sitting in front of a requirement that is between 10³
+and 10⁸ away. The measurements say the constant factors are not the problem, and
+nothing in this repository was ever going to be.
