@@ -172,6 +172,9 @@ def best_classical_accuracy(dataset: Dataset, ridges=(1e-4, 1e-3, 1e-2, 1e-1)) -
     candidates: list[tuple[str, Callable]] = [("linear", linear_kernel)]
     candidates += [(f"rbf/{g:g}", rbf_kernel(g)) for g in (0.05, 0.1, 0.5, 1.0, 2.0, 5.0)]
     candidates += [(f"poly/{d}", polynomial_kernel(d)) for d in (2, 3, 4)]
+    # a classical kernel that also knows about periodicity, so periodic data
+    # does not hand the quantum side a win an RBF simply cannot express
+    candidates += [(f"periodic/{g:g}", periodic_kernel(g)) for g in (0.5, 1.0, 2.0, 5.0)]
 
     best = {"accuracy": 0.0, "kernel": None}
     for name, kernel in candidates:
@@ -275,3 +278,59 @@ def quantum_kernel_accuracy(dataset: Dataset, reps: int = 2, environment=None,
         "kernel_entries": len(dataset.train_x) ** 2 + len(dataset.test_x) * len(dataset.train_x),
         "seconds": time.perf_counter() - started,
     }
+
+
+# --------------------------------------------------------------------------
+# structured datasets the feature map did NOT generate
+# --------------------------------------------------------------------------
+
+def periodic_dataset(samples: int = 200, features: int = 2, frequency: float = 1.0,
+                     seed: int = 0) -> Dataset:
+    """Label is ``sign(cos(sum of features))`` -- periodic, but not from the map.
+
+    Result 67 left one question: is the quantum kernel's win on ``ad_hoc`` pure
+    circularity, or does it match a *structural family*?  The ZZ feature map is
+    periodic in every feature with period 2*pi, so periodic data is where it
+    should have an edge if it has one anywhere.
+    """
+    rng = np.random.default_rng(seed)
+    x = rng.uniform(0, 2 * np.pi, size=(samples, features))
+    y = np.sign(np.cos(frequency * x.sum(axis=1)))
+    y[y == 0] = 1.0
+    return Dataset(f"periodic/f{frequency:g}", *_split(x, y, 0.7, rng))
+
+
+def interaction_dataset(samples: int = 200, seed: int = 0) -> Dataset:
+    """``sign(cos(x0 - x1))`` -- matches the ZZ *interaction* structure directly.
+
+    The feature map's entangling layer encodes pairwise differences, so this is
+    the shape it should represent most naturally, without the labels having been
+    produced by it.
+    """
+    rng = np.random.default_rng(seed)
+    x = rng.uniform(0, 2 * np.pi, size=(samples, 2))
+    y = np.sign(np.cos(x[:, 0] - x[:, 1]))
+    y[y == 0] = 1.0
+    return Dataset("interaction", *_split(x, y, 0.7, rng))
+
+
+def parity_dataset(samples: int = 200, features: int = 4, seed: int = 0) -> Dataset:
+    """Label is the parity of thresholded features -- the classic hard case."""
+    rng = np.random.default_rng(seed)
+    x = rng.uniform(0, 2 * np.pi, size=(samples, features))
+    y = np.prod(np.sign(np.cos(x)), axis=1)
+    y[y == 0] = 1.0
+    return Dataset("parity", *_split(x, y, 0.7, rng))
+
+
+def periodic_kernel(gamma: float, period: float = 2 * np.pi) -> Callable:
+    """Classical periodic (exp-sine-squared) kernel.
+
+    Included so the comparison is honest: if the quantum kernel wins on periodic
+    data, the question is whether it beats a classical kernel that *also* knows
+    about periodicity, not just an RBF that does not.
+    """
+    def kernel(a, b):
+        difference = a[:, None, :] - b[None, :, :]
+        return np.exp(-gamma * np.sum(np.sin(np.pi * difference / period) ** 2, axis=2))
+    return kernel

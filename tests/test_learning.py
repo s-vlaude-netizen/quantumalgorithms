@@ -132,3 +132,35 @@ def test_quantum_kernel_circuits_are_shallow_enough_to_survive_noise():
 
     exact, _ = quantum_kernel_matrix(dataset.train_x, dataset.train_x)
     assert np.abs(noisy - exact).mean() < 0.15, "noise should barely move this kernel"
+
+
+def test_quantum_kernel_is_at_chance_on_structures_it_should_match():
+    """Result 68: it matches no structural family, only its own output.
+
+    The ZZ feature map is periodic and encodes pairwise differences, so periodic
+    and difference-structured data is where it should have an edge if it has one
+    anywhere.  It does not.  If that ever changes, the QML line reopens.
+    """
+    from qres.problems.learning import interaction_dataset, periodic_dataset
+
+    for build in (periodic_dataset, interaction_dataset):
+        dataset = build(samples=160, seed=0)
+        quantum = quantum_kernel_accuracy(dataset)["accuracy"]
+        classical = best_classical_accuracy(dataset)["accuracy"]
+        assert quantum < 0.7, f"{dataset.name}: quantum at {quantum:.3f}, expected chance"
+        assert classical > 0.85, f"{dataset.name}: classical at {classical:.3f}"
+
+
+def test_the_classical_grid_includes_a_periodic_kernel():
+    """Otherwise periodic data hands the quantum side a win RBF cannot express.
+
+    Checked by construction: on data that is periodic and nothing else, the
+    grid must find something well above an RBF's reach.
+    """
+    from qres.problems.learning import periodic_dataset, periodic_kernel
+
+    dataset = periodic_dataset(samples=160, seed=0)
+    matrix = periodic_kernel(1.0)(dataset.train_x, dataset.train_x)
+    assert np.allclose(matrix, matrix.T, atol=1e-10)
+    assert np.allclose(np.diag(matrix), 1.0, atol=1e-10)
+    assert best_classical_accuracy(dataset)["accuracy"] > 0.85

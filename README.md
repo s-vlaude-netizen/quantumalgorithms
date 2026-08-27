@@ -172,7 +172,7 @@ which problems are even candidates:
 | **chemistry** | **fails** — 0.019% gives a 0.2-gate budget; an ansatz needs 665–1300 | fails — FCI exact in 100 ms | — |
 | **MaxCut** | passes — 5%, budget 50, QAOA p=1 uses 48 | **fails** — a 1 ms hill-climb beats it | passes |
 | **HP folding** | passes — 7%, budget ~70 | **fails** — 3 of 4 literature optima in under a minute | **fails** — 1 538 gates at N = 6 |
-| **quantum ML** | passes — percent-level | **passes, on its own data only** — 0.911 vs 0.829 on data the feature map generated, 0.528 on separable data | **passes** — 6 gates per kernel entry |
+| **quantum ML** | passes — percent-level | **fails** — at chance (0.51–0.55) on periodic, interaction and parity data; wins only on data its own feature map generated | **passes** — 6 gates per kernel entry |
 
 Three classes, three different failure points, each measured rather than argued.
 
