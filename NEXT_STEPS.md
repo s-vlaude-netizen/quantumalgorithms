@@ -26,6 +26,14 @@ constant across two problem classes, so `max gates ~ required accuracy / 0.001`.
 
 Three classes, three different failure points, all measured rather than argued.
 
+**And the wall is sized (Result 65).** Measured across seven device generations,
+the cost per gate *is* the device's two-qubit error rate (ratio 0.64–1.09,
+`(2q error)^0.93`, log-log correlation 0.952). Batched ADAPT's 665 gates need an
+error rate of **~1.6e-6**; the best snapshot available is 0.00127, **a factor of
+~800**, against 6× delivered by recent generations. Nothing algorithmic in this
+repository closes an 800× hardware gap, and every constant-factor result here is
+on the wrong side of it.
+
 **The one thing that could still move this**, and the only concrete item left:
 
 1. **The low-locality folding encoding.** Result 63 measured the *naive* turn

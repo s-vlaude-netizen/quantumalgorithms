@@ -153,3 +153,40 @@ def test_identity_padding_leaves_the_state_exactly_unchanged():
         assert gates == 2 * pairs, "transpiler cancelled the padding"
         assert gates > previous
         previous = gates
+
+
+def test_per_gate_cost_tracks_the_device_error_rate():
+    """Result 65's relationship, on two devices a factor of 6 apart.
+
+    The cost of a two-qubit gate *is* the device's own two-qubit error rate
+    (ratio 0.64-1.09 across seven devices), which is what turns the wall into a
+    hardware number rather than an algorithmic one.  Checked loosely here -- the
+    property that must hold is the ordering and rough scale, not the fit.
+    """
+    from experiments.exp014_gate_budget import padded_reference
+    from experiments.exp015_device_generations import device_error_rates
+    from qres.mitigation import readout_mitigated_energy
+    from qres.noise import device_environment
+
+    problem = build_molecule("H4")
+    exact = exact_energy(problem)
+    circuit = padded_reference(problem, 16)  # 32 two-qubit gates
+
+    measured = {}
+    for device in ("fake_boston", "fake_brisbane"):
+        values = [
+            readout_mitigated_energy(
+                problem.hamiltonian, circuit,
+                device_environment(device, seed=18000 + seed),
+                params=[], total_shots=60_000, calibration_fraction=0.05,
+                calibration="tensored", grouping="qwc", allocation="uniform",
+            ).value
+            for seed in range(4)
+        ]
+        measured[device] = float(np.median(np.abs(np.array(values) - exact)))
+
+    better, worse = device_error_rates("fake_boston")[0], device_error_rates("fake_brisbane")[0]
+    assert better < worse, "fake_boston should be the better-calibrated device"
+    assert measured["fake_boston"] < measured["fake_brisbane"], (
+        "the better device must give the smaller error at the same gate count"
+    )

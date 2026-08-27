@@ -136,6 +136,26 @@ which problems are even candidates:
 | **HP folding** | passes — 7%, budget ~70 | **fails** — 3 of 4 literature optima in under a minute | **fails** — 1 538 gates at N = 6 |
 
 Three classes, three different failure points, each measured rather than argued.
+
+**And the wall is this hardware generation, sized.** Every noise result above is
+on one device model, so the per-gate cost was re-measured across seven
+calibration snapshots spanning generations (median two-qubit error 0.0013 to
+0.0077). The cost per gate simply **is** the device's own two-qubit error rate —
+ratio 0.64–1.09, fitted as `(2q error)^0.93` with log-log correlation 0.952.
+
+| device | median 2q error | cost per gate | budget in gates |
+|---|---|---|---|
+| fake_boston | 0.00127 | 1.219e-3 | **1.31** |
+| fake_torino | 0.00419 | 4.473e-3 | 0.36 |
+| fake_brisbane | 0.00772 | 8.391e-3 | 0.19 |
+
+Batched ADAPT on H₄ needs 665 gates, which requires a two-qubit error rate of
+**~1.6e-6**. The best device here is 0.00127 — **a factor of ~800**. Recent
+generations delivered 6×.
+
+So the single number that decides whether any of this becomes useful is the
+median two-qubit gate error. Everything else in this repository moves the answer
+by a constant factor; that one moves it linearly.
 Folding fails on the encoding: self-avoidance is a global constraint on the turn
 variables, so the natural Hamiltonian is fully dense — 2ⁿ Pauli terms at maximum
 weight — and six residues already costs 1 538 two-qubit gates per QAOA layer, at

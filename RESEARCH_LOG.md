@@ -2956,3 +2956,63 @@ column — but folding's classical column is now measured as failing too, so
 fixing the encoding alone no longer produces a candidate. Finding a problem with
 *both* properties remains open, and this project has now ruled out three classes
 with measurements rather than arguments.
+
+### Result 65 — the wall is this hardware generation, and it needs to improve ~800×
+
+Every noise result in this log was measured on one device model, `fake_torino`.
+That leaves the question the whole project has been circling without asking
+directly: **is the wall a fact about quantum computing, or about this
+generation of hardware?**
+
+The fake provider ships calibration snapshots from real devices spanning several
+generations — median two-qubit error rates from 0.0013 to 0.044. Result 60's
+method applies unchanged to each: pad the Hartree-Fock reference with cancelling
+`CX CX` pairs so the ideal state never moves, and fit error against gate count
+(`experiments/exp015_device_generations.py`, H₄, 60k shots, 6 seeds,
+readout-mitigated).
+
+| device | median 2q error | **cost per gate** | ratio | **budget in gates** |
+|---|---|---|---|---|
+| fake_boston | 0.00127 | 1.219e-3 | 0.96 | **1.31** |
+| fake_aachen | 0.00154 | 1.526e-3 | 0.99 | 1.05 |
+| fake_marrakesh | 0.00329 | 2.201e-3 | 0.67 | 0.73 |
+| fake_fez | 0.00390 | 3.623e-3 | 0.93 | 0.44 |
+| **fake_torino** | 0.00419 | **4.473e-3** | 1.07 | 0.36 |
+| fake_kolkata | 0.00754 | 4.832e-3 | 0.64 | 0.33 |
+| fake_brisbane | 0.00772 | 8.391e-3 | 1.09 | 0.19 |
+
+**The cost per gate simply *is* the device's own two-qubit error rate**, in
+Hartree on H₄ — the ratio sits between 0.64 and 1.09 across a six-fold range of
+error rates. Fitted, `per-gate cost ~ (2q error)^0.93` with a log-log
+correlation of 0.952.
+
+Two things worth noting inside that. `fake_torino` measures 4.473e-3, against
+the 4.5e-3 Result 60 obtained by a different route on the same device — an
+independent confirmation of the headline number. And the gate-free floor is
+~6e-3 on *every* device including the best: at 60k shots that is shot noise, not
+the hardware, which is why Result 57 reached 3.2e-3 at 200k.
+
+**So the answer is: this generation.** And the size of what is needed is now a
+number rather than an intuition. Batched ADAPT on H₄ needs 665 two-qubit gates
+(Result 47). Fitting those inside chemical accuracy needs a per-gate cost of
+**2.4e-6**, which this fit places at a two-qubit error rate of **1.6e-6**. The
+best device measured here is 0.00127.
+
+**That is a factor of ~800.**
+
+For scale on the trend: across the generations available here the error rate
+improved 6× (Eagle's 0.0077 to the best 156-qubit machines' 0.0013), which moved
+the budget from 0.19 gates to 1.31. Another 800× would move it to ~1000, which is
+where the ansatz this project already has would finally fit.
+
+**What this settles, and what it does not.** It settles the character of the
+wall: nothing algorithmic in this repository closes an 800× hardware gap, and
+the constant-factor work — grouping, allocation, optimisers, mitigation — is
+firmly on the wrong side of it. It does not settle whether 800× is reachable;
+that is a hardware roadmap question and this project cannot measure it.
+
+What it does say precisely is what to watch. The single number that decides
+whether any of this becomes useful is the **median two-qubit gate error**, and
+the threshold for H₄ with a 665-gate ansatz is **~1.6e-6**. Every other quantity
+this project has optimised moves the answer by a constant factor; that one moves
+it linearly and is the only thing between here and a working calculation.
