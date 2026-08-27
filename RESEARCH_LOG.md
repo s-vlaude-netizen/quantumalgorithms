@@ -3227,3 +3227,79 @@ Four classes, four failures, four different reasons — cost, a strong competito
 an intractable encoding, and a method whose only success is on data it wrote
 itself. None of them is repaired by anything on the measurement, optimiser or
 mitigation side, which is where sixty-eight results of effort went.
+
+### Result 69 — the fidelity gap is logarithmic in qubits, and that changes the conclusion
+
+NEXT_STEPS called error correction "the unmeasured question" and "a different
+project". It is a different project to *build*, but not to size, and the sizing
+turns out to reverse the shape of everything above.
+
+**This is an estimate, not a measurement, and the log should be read
+accordingly.** Two measured inputs — the physical two-qubit error rate from
+calibration data (Result 65) and gate counts from transpiling real ansätze
+(Result 66) — combined with the standard surface-code model
+`p_L ≈ 0.1 (p/p_th)^((d+1)/2)` at `p_th = 1e-2`, and `2d²` physical qubits per
+logical qubit (`experiments/exp016_error_correction_overhead.py`).
+
+| molecule | logical qubits | gates | needed p_L | distance | **physical qubits** |
+|---|---|---|---|---|---|
+| H₂ | 2 | 4 | 4.0e-4 | 5 | 100 |
+| H₄ | 6 | 1 471 | 1.1e-6 | 11 | **1 452** |
+| LiH | 10 | 9 103 | 1.8e-7 | 13 | 3 380 |
+| H₂O | 12 | 24 156 | 6.6e-8 | 13 | 4 056 |
+| NH₃ | 14 | 50 570 | 3.2e-8 | 15 | 6 300 |
+| 20 orbitals — a fragment | 38 | 5.6M | — | 19 | **27 436** |
+| 50 orbitals — a drug molecule | 98 | 608M | — | 23 | **103 684** |
+
+**A drug-sized molecule needs ~10⁵ physical qubits, not 4.5 × 10⁸ better
+gates.** Those are the same requirement expressed two ways, and the second is an
+engineering target while the first is not.
+
+**The reason is that the code distance grows only logarithmically** in the
+required error rate. Going from H₄'s requirement (1.1e-6) to the drug molecule's
+(2.6e-12) is a factor of **4 × 10⁵** in logical error, and it costs distance 11 →
+23 — **4.4× the qubits per logical qubit**. Measured across the model directly:
+
+| target logical error | distance | qubits per logical qubit |
+|---|---|---|
+| 1e-4 | 7 | 98 |
+| 1e-6 | 11 | 242 |
+| 1e-8 | 15 | 450 |
+| 1e-12 | 25 | 1 250 |
+
+Eight orders of magnitude in the target cost 3.6× the distance and 13× the
+qubits. That is the whole reversal: in the bare-metal regime those eight orders
+of magnitude were simply unavailable at any price.
+
+The same insensitivity shows in the physical error rate, which is worth stating
+because Results 65 and 66 made it the headline:
+
+| H₄ at physical error | distance | physical qubits |
+|---|---|---|
+| 0.00127 (best available) | 11 | 1 452 |
+| 0.00050 | 7 | 588 |
+| 0.00010 | 5 | 300 |
+
+An 13× better gate buys 4.8× fewer qubits. Better hardware helps and is not the
+binding constraint it appeared to be when the arithmetic was bare-metal.
+
+**So the honest revision to this project's conclusion.** Everything from Result
+55 onward measured the NISQ regime — no error correction, bare physical gates —
+and in that regime the verdict stands exactly as measured: the gap is 800× to
+4.5 × 10⁸ in gate fidelity against 6× per hardware generation, and no algorithmic
+work in this repository closes it. But **"NISQ chemistry is hopeless" and "quantum
+chemistry is hopeless" are different claims**, and only the first was measured
+here. This project spent sixty-eight results establishing the first and reading
+it as the second.
+
+**What bounds this estimate, and the bound is large.** It counts only the
+surface-code data qubits. Real resource estimates are dominated by **magic-state
+distillation** for the non-Clifford gates, which the model above does not include
+at all and which routinely multiplies the qubit count by an order of magnitude or
+more. It also ignores the *time* cost — every logical gate is many syndrome
+rounds — and it uses UCCSD gate counts, where an error-corrected algorithm would
+use qubitization or phase estimation with a different, generally larger, count.
+**Treat 10⁵ as a lower bound that establishes the shape, not the number.**
+
+The shape is what matters and it is the opposite of the NISQ shape: polynomial in
+the thing being bought, logarithmic in the thing that is scarce.

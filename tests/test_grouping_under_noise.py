@@ -190,3 +190,41 @@ def test_per_gate_cost_tracks_the_device_error_rate():
     assert measured["fake_boston"] < measured["fake_brisbane"], (
         "the better device must give the smaller error at the same gate count"
     )
+
+
+def test_code_distance_grows_only_logarithmically_in_the_target():
+    """Result 69's load-bearing property, and the reason it reverses the picture.
+
+    Eight orders of magnitude in required logical error must cost only a small
+    factor in code distance -- that is what turns a 4.5e8 fidelity gap into a
+    4x qubit factor.  If this ever stopped holding, the conclusion that
+    error-corrected chemistry is an engineering target rather than an
+    impossibility would have to be re-derived.
+    """
+    from experiments.exp016_error_correction_overhead import (
+        logical_error,
+        required_distance,
+    )
+
+    physical = 0.00127
+    loose = required_distance(1e-4, physical)
+    tight = required_distance(1e-12, physical)
+
+    assert loose is not None and tight is not None
+    # eight orders of magnitude in target error buys at most a 4x distance
+    # (measured: 7 -> 25) and hence ~13x the qubits, against 1e8 in fidelity
+    assert tight < 4 * loose, f"distance {loose} -> {tight} for 1e-4 -> 1e-12"
+    assert (tight / loose) ** 2 < 20, "qubit overhead must stay polynomial"
+
+    # and the model must actually be decreasing in distance, or the search above
+    # would return the first value it tried for any target
+    assert logical_error(21, physical) < logical_error(11, physical)
+    assert logical_error(11, physical) < logical_error(5, physical)
+
+
+def test_required_distance_reports_failure_rather_than_guessing():
+    """A physical error above threshold has no valid distance; say so."""
+    from experiments.exp016_error_correction_overhead import required_distance
+
+    assert required_distance(1e-9, 0.02) is None, "above threshold must not converge"
+    assert required_distance(1e-9, 0.001) is not None

@@ -37,10 +37,19 @@ would waste whoever picks this up:
    device; the threshold table is `/tmp`-free and recomputable from
    `qres/ansatz.py` gate counts.
 
-2. **Fault tolerance is the unmeasured question.** Everything here is bare-metal
-   arithmetic. Error correction changes the question entirely, at a qubit
-   overhead this project never tried to estimate. That is the honest place to
-   look next, and it is a different project.
+2. **Fault tolerance — sized, and it reverses the picture (Result 69).** This
+   item used to read "a different project". It is a different project to build
+   but not to size, and sizing it with the same measured inputs gives **1 452
+   physical qubits for H₄ and ~10⁵ for a drug-sized molecule**, because code
+   distance grows only logarithmically in the required fidelity. Eight orders of
+   magnitude in target error cost 3.6× the distance.
+
+   So the bare-metal conclusion above is correct and *narrower than it reads*:
+   NISQ chemistry is hopeless; error-corrected chemistry is a 10⁵-qubit
+   engineering problem. Treat the number as a lower bound — it excludes
+   magic-state distillation, which usually dominates real estimates, and the
+   time cost of syndrome rounds. **Adding distillation to the model is the
+   single most useful thing left to do here**, and it is a few hundred lines.
 
 3. **The low-locality folding encoding**, if someone wants to close the one
    remaining loose end. Result 63 measured the *naive* turn encoding (dense, 2ⁿ

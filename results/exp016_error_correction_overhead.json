@@ -1,0 +1,79 @@
+{
+  "physical_error": 0.00127,
+  "threshold": 0.01,
+  "prefactor": 0.1,
+  "rows": [
+    {
+      "molecule": "H2",
+      "orbitals": 2,
+      "logical_qubits": 2,
+      "gates": 4,
+      "target_logical_error": 0.0004,
+      "code_distance": 5,
+      "physical_qubits": 100
+    },
+    {
+      "molecule": "H4",
+      "orbitals": 4,
+      "logical_qubits": 6,
+      "gates": 1471,
+      "target_logical_error": 1.087695445275323e-06,
+      "code_distance": 11,
+      "physical_qubits": 1452
+    },
+    {
+      "molecule": "LiH",
+      "orbitals": 6,
+      "logical_qubits": 10,
+      "gates": 9103,
+      "target_logical_error": 1.7576623091288587e-07,
+      "code_distance": 13,
+      "physical_qubits": 3380
+    },
+    {
+      "molecule": "H2O",
+      "orbitals": 7,
+      "logical_qubits": 12,
+      "gates": 24156,
+      "target_logical_error": 6.62361318099023e-08,
+      "code_distance": 13,
+      "physical_qubits": 4056
+    },
+    {
+      "molecule": "BeH2",
+      "orbitals": 7,
+      "logical_qubits": 12,
+      "gates": 26111,
+      "target_logical_error": 6.12768564972617e-08,
+      "code_distance": 13,
+      "physical_qubits": 4056
+    },
+    {
+      "molecule": "NH3",
+      "orbitals": 8,
+      "logical_qubits": 14,
+      "gates": 50570,
+      "target_logical_error": 3.163931184496737e-08,
+      "code_distance": 15,
+      "physical_qubits": 6300
+    },
+    {
+      "molecule": "extrapolated/20",
+      "orbitals": 20,
+      "logical_qubits": 38,
+      "gates": 5576209.666234186,
+      "target_logical_error": 2.869332567762893e-10,
+      "code_distance": 19,
+      "physical_qubits": 27436
+    },
+    {
+      "molecule": "extrapolated/50",
+      "orbitals": 50,
+      "logical_qubits": 98,
+      "gates": 607843727.3204176,
+      "target_logical_error": 2.632255509246341e-12,
+      "code_distance": 23,
+      "physical_qubits": 103684
+    }
+  ]
+}

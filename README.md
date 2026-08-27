@@ -46,6 +46,17 @@ wins only on labels its own circuit produced.
 strong competitor, an intractable encoding, and a method whose only success is
 on data it wrote itself.
 
+**One important bound on all of the above.** Every measurement here is
+*bare-metal* — physical gates, no error correction — and in that regime the
+verdict is exactly as measured. But sizing the error-corrected case with the
+same measured inputs changes the shape: the code distance grows only
+logarithmically in the required fidelity, so 4.5 × 10⁸ in gate error becomes
+**~10⁵ physical qubits** for a drug-sized molecule, and 1 452 for H₄. That is an
+engineering target where the bare-metal number is not one. *"NISQ chemistry is
+hopeless" and "quantum chemistry is hopeless" are different claims, and this
+repository measured the first.* (Estimate, not measurement, and a lower bound —
+it excludes magic-state distillation, which usually dominates.)
+
 Everything below is how that was established, and it is worth reading mainly for
 the method: every claim here is a measurement, several of them corrections to
 earlier claims in this same repository.
