@@ -2717,3 +2717,69 @@ pursuing on this evidence:
 
 This is the fifth independent route to the same wall (Results 42, 50, 51, 55),
 and the first one to price it per gate.
+
+### Result 61 — the gate budget is a device constant, ~0.1% of scale per gate, and it says which problems fit
+
+Result 60 priced a two-qubit gate at 4.5 mHa on H₄. That is in Hartree and only
+means something against a scale, so it cannot be quoted at another problem. The
+natural scale is the Hamiltonian's coefficient sum — the size of the quantity
+being estimated — and expressed that way the chemistry number is **0.053% of
+scale per gate**.
+
+Whether that transfers is a real question: MaxCut under QAOA has different
+circuits (RZZ layers rather than a state preparation plus QWC measurement),
+different Hamiltonians, different units, and a different observable. Measured on
+the same device model with the transferred angles from Result 52, 8 seeds:
+
+| problem | n | p | 2-qubit gates | ideal ⟨cut⟩ | noisy ⟨cut⟩ | **loss per gate** |
+|---|---|---|---|---|---|---|
+| H₄ chemistry | — | — | — | — | — | **0.053%** |
+| MaxCut | 8 | 1 | 48 | 7.9761 | 7.6640 | **0.108%** |
+| MaxCut | 8 | 2 | 106 | 8.7341 | 8.0179 | **0.113%** |
+| MaxCut | 10 | 1 | 62 | 10.0534 | 9.6458 | **0.088%** |
+| MaxCut | 10 | 2 | 126 | 11.0215 | 10.0587 | **0.102%** |
+| MaxCut | 12 | 1 | 67 | 12.2974 | 11.7269 | **0.095%** |
+| MaxCut | 12 | 2 | 159 | 13.5755 | 12.2982 | **0.089%** |
+
+**0.089% to 0.113% across six configurations**, two problem classes, three sizes
+and two depths. It is a property of the device, not of the problem, which makes
+it quotable as a budget:
+
+```
+max two-qubit gates  ~  (required relative accuracy) / 0.001
+```
+
+**And that immediately says which problems fit.**
+
+| problem | required relative accuracy | **budget** | what it costs |
+|---|---|---|---|
+| H₄ chemical accuracy | 1.6e-3 / 8.47 = **0.019%** | **0.2 gates** | 665 (ADAPT) – 1300 (UCCSD) |
+| MaxCut, 1% | **1%** | **10 gates** | 67 at n=12, p=1 |
+| MaxCut, 5% | **5%** | **50 gates** | 48 at n=8, p=1 |
+
+Chemistry misses its budget by a factor of **~3 000**. MaxCut at
+approximation-ratio precision misses by **1.3×**, and at n=8, p=1 actually fits.
+
+That is the quantitative version of something this project kept running into
+qualitatively: QAOA demonstrations look plausible on hardware and VQE chemistry
+does not, and the reason is not that QAOA is a better algorithm. It is that
+MaxCut tolerates a percent of relative error where chemistry tolerates 0.019%.
+The device is the same; the requirement differs by five hundred times.
+
+**The synthesis this completes, across Results 42, 50, 51, 52, 55 and 60.**
+
+* Chemistry: **does not fit the device budget** by ~3 000×, and even if it did,
+  FCI solves these molecules exactly in 100 ms (Result 42).
+* MaxCut: **fits the device budget** at approximation-ratio precision — and
+  still loses to a fifty-line hill-climber that finds a better cut in one second
+  (Results 51, 52).
+
+So the two areas fail for opposite reasons, and neither failure is fixed by
+anything on the measurement or optimiser side. That is the honest state of it,
+and it is worth having reached by measurement rather than by argument.
+
+**What that leaves worth doing**, and it is genuinely narrower than when this
+started: find a problem whose *required relative accuracy* is loose enough to fit
+a hundred-gate budget **and** whose classical baseline is genuinely hard. MaxCut
+has the first and fails the second; chemistry has the second and fails the first.
+Nothing in this repository has looked for something with both.
