@@ -8,72 +8,112 @@
       "orbitals": 2,
       "logical_qubits": 2,
       "gates": 4,
+      "rotations": 4,
       "target_logical_error": 0.0004,
       "code_distance": 5,
-      "physical_qubits": 100
+      "data_qubits": 100,
+      "t_count": 148,
+      "distillation_rounds": 1,
+      "factory_qubits": 600,
+      "physical_qubits": 700
     },
     {
       "molecule": "H4",
       "orbitals": 4,
       "logical_qubits": 6,
       "gates": 1471,
+      "rotations": 152,
       "target_logical_error": 1.087695445275323e-06,
       "code_distance": 11,
-      "physical_qubits": 1452
+      "data_qubits": 1452,
+      "t_count": 7997,
+      "distillation_rounds": 1,
+      "factory_qubits": 2904,
+      "physical_qubits": 4356
     },
     {
       "molecule": "LiH",
       "orbitals": 6,
       "logical_qubits": 10,
       "gates": 9103,
+      "rotations": 640,
       "target_logical_error": 1.7576623091288587e-07,
       "code_distance": 13,
-      "physical_qubits": 3380
+      "data_qubits": 3380,
+      "t_count": 37651,
+      "distillation_rounds": 2,
+      "factory_qubits": 8112,
+      "physical_qubits": 11492
     },
     {
       "molecule": "H2O",
       "orbitals": 7,
       "logical_qubits": 12,
       "gates": 24156,
+      "rotations": 1000,
       "target_logical_error": 6.62361318099023e-08,
       "code_distance": 13,
-      "physical_qubits": 4056
+      "data_qubits": 4056,
+      "t_count": 60761,
+      "distillation_rounds": 2,
+      "factory_qubits": 8112,
+      "physical_qubits": 12168
     },
     {
       "molecule": "BeH2",
       "orbitals": 7,
       "logical_qubits": 12,
       "gates": 26111,
+      "rotations": 1000,
       "target_logical_error": 6.12768564972617e-08,
       "code_distance": 13,
-      "physical_qubits": 4056
+      "data_qubits": 4056,
+      "t_count": 60761,
+      "distillation_rounds": 2,
+      "factory_qubits": 8112,
+      "physical_qubits": 12168
     },
     {
       "molecule": "NH3",
       "orbitals": 8,
       "logical_qubits": 14,
       "gates": 50570,
+      "rotations": 2340,
       "target_logical_error": 3.163931184496737e-08,
       "code_distance": 15,
-      "physical_qubits": 6300
+      "data_qubits": 6300,
+      "t_count": 150790,
+      "distillation_rounds": 2,
+      "factory_qubits": 10800,
+      "physical_qubits": 17100
     },
     {
       "molecule": "extrapolated/20",
       "orbitals": 20,
       "logical_qubits": 38,
       "gates": 5576209.666234186,
+      "rotations": 55873,
       "target_logical_error": 2.869332567762893e-10,
       "code_distance": 19,
-      "physical_qubits": 27436
+      "data_qubits": 27436,
+      "t_count": 4367745,
+      "distillation_rounds": 2,
+      "factory_qubits": 17328,
+      "physical_qubits": 44764
     },
     {
       "molecule": "extrapolated/50",
       "orbitals": 50,
       "logical_qubits": 98,
       "gates": 607843727.3204176,
+      "rotations": 1665043,
       "target_logical_error": 2.632255509246341e-12,
       "code_distance": 23,
-      "physical_qubits": 103684
+      "data_qubits": 103684,
+      "t_count": 154623421,
+      "distillation_rounds": 2,
+      "factory_qubits": 25392,
+      "physical_qubits": 129076
     }
   ]
 }

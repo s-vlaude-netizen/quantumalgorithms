@@ -46,10 +46,18 @@ would waste whoever picks this up:
 
    So the bare-metal conclusion above is correct and *narrower than it reads*:
    NISQ chemistry is hopeless; error-corrected chemistry is a 10⁵-qubit
-   engineering problem. Treat the number as a lower bound — it excludes
-   magic-state distillation, which usually dominates real estimates, and the
-   time cost of syndrome rounds. **Adding distillation to the model is the
-   single most useful thing left to do here**, and it is a few hundred lines.
+   engineering problem.
+
+   **Distillation is now included (Result 70)** and the earlier caveat was too
+   pessimistic: it costs 3× on H₄ and only **1.25×** on a drug-sized molecule,
+   because the factory is a fixed 12-logical-qubit footprint while the data
+   register grows. Final figure **~1.3 × 10⁵ physical qubits**.
+
+   **What is still unmeasured is time.** A drug-sized molecule needs 1.5 × 10⁸ T
+   gates, and one distillation factory emits states at a finite rate — months of
+   wall-clock, sequentially. Parallel factories trade time back into qubits at
+   roughly linear cost, and modelling that trade is now the single most useful
+   thing left here. It is the dimension every number above ignores.
 
 3. **The low-locality folding encoding**, if someone wants to close the one
    remaining loose end. Result 63 measured the *naive* turn encoding (dense, 2ⁿ

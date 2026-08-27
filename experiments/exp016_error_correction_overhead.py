@@ -46,15 +46,48 @@ PREFACTOR = 0.1
 #: measured in Result 65: the best median two-qubit error in the fake provider
 BEST_PHYSICAL_ERROR = 0.00127
 
-#: measured in Result 66 by transpiling UCCSD: (orbitals, qubits, two-qubit gates)
+#: measured by transpiling UCCSD: (orbitals, qubits, two-qubit gates, non-Clifford rotations)
+#: The rotation count is what drives magic-state cost, and it is far smaller than
+#: the gate count -- UCCSD carries one rotation per excitation wrapped in Clifford
+#: basis changes, so NH3's 32 318 two-qubit gates need only 2 340 rotations.
 MOLECULES = (
-    ("H2", 2, 2, 4),
-    ("H4", 4, 6, 1_471),
-    ("LiH", 6, 10, 9_103),
-    ("H2O", 7, 12, 24_156),
-    ("BeH2", 7, 12, 26_111),
-    ("NH3", 8, 14, 50_570),
+    ("H2", 2, 2, 4, 4),
+    ("H4", 4, 6, 1_471, 152),
+    ("LiH", 6, 10, 9_103, 640),
+    ("H2O", 7, 12, 24_156, 1_000),
+    ("BeH2", 7, 12, 26_111, 1_000),
+    ("NH3", 8, 14, 50_570, 2_340),
 )
+
+#: Ross-Selinger synthesis: a rotation to precision eps costs ~3 log2(1/eps) T gates
+SYNTHESIS_CONSTANT = 3.0
+
+#: 15-to-1 distillation maps input error p to ~35 p^3, consuming 15 states
+DISTILLATION_INPUTS = 15
+DISTILLATION_CONSTANT = 35.0
+
+#: a 15-to-1 factory occupies roughly this many logical qubits' worth of area
+FACTORY_LOGICAL_QUBITS = 12
+
+
+def t_count(rotations: int, total_budget: float) -> tuple[int, float]:
+    """T gates needed, and the per-rotation synthesis precision they buy."""
+    if rotations == 0:
+        return 0, 0.0
+    # synthesis error is shared across rotations, so each gets budget/rotations
+    epsilon = total_budget / (2 * rotations)
+    per_rotation = SYNTHESIS_CONSTANT * np.log2(1 / epsilon)
+    return int(np.ceil(rotations * per_rotation)), epsilon
+
+
+def distillation_rounds(physical: float, target: float, limit: int = 6) -> int | None:
+    """Rounds of 15-to-1 needed to bring magic-state error below ``target``."""
+    error = physical
+    for rounds in range(1, limit + 1):
+        error = DISTILLATION_CONSTANT * error**3
+        if error < target:
+            return rounds
+    return None
 
 CHEMICAL_ACCURACY = 1.6e-3
 
@@ -91,13 +124,14 @@ def main() -> int:
 
     header = (
         f"{'molecule':<8}{'logical qubits':>15}{'gates':>10}{'needed p_L':>13}"
-        f"{'distance':>10}{'physical qubits':>17}"
+        f"{'distance':>10}{'data qubits':>17}{'T count':>11}{'rounds':>8}"
+        f"{'total':>13}"
     )
     print(header)
     print("-" * len(header))
 
     rows = []
-    for name, orbitals, qubits, gates in MOLECULES:
+    for name, orbitals, qubits, gates, rotations in MOLECULES:
         # the whole calculation must land inside chemical accuracy, so each
         # logical gate may contribute at most accuracy/gates of error
         target = CHEMICAL_ACCURACY / gates
@@ -107,38 +141,72 @@ def main() -> int:
                   f"{'--':>10}{'beyond the model':>17}", flush=True)
             continue
 
-        physical_qubits = qubits * 2 * distance**2
+        data_qubits = qubits * 2 * distance**2
+
+        # magic states: every non-Clifford rotation synthesises into T gates, and
+        # every T gate consumes a distilled state good enough not to spend the
+        # whole error budget on its own
+        gates_needed, _ = t_count(rotations, CHEMICAL_ACCURACY)
+        magic_target = CHEMICAL_ACCURACY / max(gates_needed, 1)
+        rounds = distillation_rounds(physical, magic_target)
+        factory_qubits = (
+            FACTORY_LOGICAL_QUBITS * 2 * distance**2 * (rounds or 0)
+        )
+
         print(
             f"{name:<8}{qubits:>15}{gates:>10,d}{target:>13.1e}"
-            f"{distance:>10}{physical_qubits:>17,d}",
+            f"{distance:>10}{data_qubits:>17,d}{gates_needed:>11,d}"
+            f"{rounds if rounds else '--':>8}{data_qubits + factory_qubits:>13,d}",
             flush=True,
         )
         rows.append({
             "molecule": name, "orbitals": orbitals, "logical_qubits": qubits,
-            "gates": gates, "target_logical_error": target,
-            "code_distance": distance, "physical_qubits": physical_qubits,
+            "gates": gates, "rotations": rotations, "target_logical_error": target,
+            "code_distance": distance, "data_qubits": data_qubits,
+            "t_count": gates_needed, "distillation_rounds": rounds,
+            "factory_qubits": factory_qubits,
+            "physical_qubits": data_qubits + factory_qubits,
         })
 
     # and the extrapolated drug-sized case, using Result 66's N^5.12 gate scaling
+    # plus the measured rotation scaling from the table above
     print()
+    measured_orbitals = np.array([m[1] for m in MOLECULES[1:]], dtype=float)
+    measured_rotations = np.array([m[4] for m in MOLECULES[1:]], dtype=float)
+    rotation_fit = np.polyfit(np.log(measured_orbitals), np.log(measured_rotations), 1)
+    print(f"non-Clifford rotations scale as N^{rotation_fit[0]:.2f} (measured, 5 molecules)")
+
     reference_orbitals, reference_gates = 4, 1_471
     for orbitals in (20, 50):
         gates = reference_gates * (orbitals / reference_orbitals) ** 5.12
+        rotations = int(np.exp(np.polyval(rotation_fit, np.log(orbitals))))
         logical_qubits = 2 * orbitals - 2  # parity mapping with two-qubit reduction
         target = CHEMICAL_ACCURACY / gates
         distance = required_distance(target, physical, threshold)
         if distance is None:
             print(f"{orbitals} orbitals: beyond the model at this physical error")
             continue
-        physical_qubits = logical_qubits * 2 * distance**2
+
+        data_qubits = logical_qubits * 2 * distance**2
+        gates_needed, _ = t_count(rotations, CHEMICAL_ACCURACY)
+        magic_target = CHEMICAL_ACCURACY / max(gates_needed, 1)
+        rounds = distillation_rounds(physical, magic_target)
+        factory_qubits = FACTORY_LOGICAL_QUBITS * 2 * distance**2 * (rounds or 0)
+        total = data_qubits + factory_qubits
+
         label = "a small fragment" if orbitals == 20 else "a modest drug molecule"
         print(f"{orbitals} orbitals ({label}): {gates:,.0f} gates, "
-              f"distance {distance}, **{physical_qubits:,.0f} physical qubits**")
+              f"{rotations:,} rotations, {gates_needed:,} T gates, distance "
+              f"{distance}, {rounds} distillation rounds")
+        print(f"     data {data_qubits:,} + factory {factory_qubits:,} = "
+              f"**{total:,} physical qubits**")
         rows.append({
             "molecule": f"extrapolated/{orbitals}", "orbitals": orbitals,
             "logical_qubits": logical_qubits, "gates": float(gates),
-            "target_logical_error": target, "code_distance": distance,
-            "physical_qubits": int(physical_qubits),
+            "rotations": rotations, "target_logical_error": target,
+            "code_distance": distance, "data_qubits": data_qubits,
+            "t_count": gates_needed, "distillation_rounds": rounds,
+            "factory_qubits": factory_qubits, "physical_qubits": int(total),
         })
 
     print(f"\nFor scale: the largest device in the fake provider is 156 qubits.")

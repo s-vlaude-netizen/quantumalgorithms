@@ -51,11 +51,19 @@ on data it wrote itself.
 verdict is exactly as measured. But sizing the error-corrected case with the
 same measured inputs changes the shape: the code distance grows only
 logarithmically in the required fidelity, so 4.5 × 10⁸ in gate error becomes
-**~10⁵ physical qubits** for a drug-sized molecule, and 1 452 for H₄. That is an
+**~1.3 × 10⁵ physical qubits** for a drug-sized molecule, and 4 356 for H₄ —
+magic-state distillation included, which costs only 1.25× at that size because
+the factory is a fixed footprint while the data register grows. That is an
 engineering target where the bare-metal number is not one. *"NISQ chemistry is
 hopeless" and "quantum chemistry is hopeless" are different claims, and this
-repository measured the first.* (Estimate, not measurement, and a lower bound —
-it excludes magic-state distillation, which usually dominates.)
+repository measured the first.*
+
+**The unmeasured dimension is time, not qubits.** That drug molecule needs
+**1.5 × 10⁸ T gates**, and a distillation factory emits magic states at a finite
+rate — one factory feeding them sequentially is months of wall-clock. Parallel
+factories trade that back into qubits at roughly linear cost, and this model does
+not attempt it. The qubit figure is the one to stand behind; the time figure is
+the one to ask about next.
 
 Everything below is how that was established, and it is worth reading mainly for
 the method: every claim here is a measurement, several of them corrections to

@@ -3303,3 +3303,69 @@ use qubitization or phase estimation with a different, generally larger, count.
 
 The shape is what matters and it is the opposite of the NISQ shape: polynomial in
 the thing being bought, logarithmic in the thing that is scarce.
+
+### Result 70 — magic-state distillation costed: the lower bound was tight to 1.25×, and the real problem is time, not qubits
+
+Result 69 gave ~10⁵ physical qubits for a drug-sized molecule and flagged it as a
+lower bound, because it counted only surface-code data qubits and omitted
+**magic-state distillation** — which "routinely multiplies the qubit count by an
+order of magnitude or more". NEXT_STEPS named adding it as the single most useful
+remaining item. It is now added, and the caveat was too conservative about itself.
+
+**The measurable input is the non-Clifford rotation count**, and it is far smaller
+than the gate count. UCCSD carries one rotation per excitation wrapped in Clifford
+basis changes, so most of the circuit needs no magic states at all. Measured by
+transpiling to a Clifford+rotation basis with generic bound parameters:
+
+| molecule | 2-qubit gates | rotations | **non-Clifford rotations** |
+|---|---|---|---|
+| H₂ | 4 | 13 | 4 |
+| H₄ | 1 072 | 812 | **152** |
+| LiH | 6 700 | 3 618 | 640 |
+| H₂O | 12 178 | 5 384 | 1 000 |
+| NH₃ | 32 318 | 13 134 | **2 340** |
+
+**Rotations scale as N^3.70**, well below the N^5.12 of two-qubit gates.
+
+Adding Ross-Selinger synthesis (`3 log₂(1/ε)` T gates per rotation) and 15-to-1
+distillation (`p → 35p³`, 15 states in, ~12 logical qubits of factory):
+
+| molecule | data qubits | T count | rounds | **total** | distillation factor |
+|---|---|---|---|---|---|
+| H₂ | 100 | 148 | 1 | 700 | 7.0× |
+| H₄ | 1 452 | 7 997 | 1 | **4 356** | 3.0× |
+| LiH | 3 380 | 37 651 | 2 | 11 492 | 3.4× |
+| NH₃ | 6 300 | 150 790 | 2 | 17 100 | 2.7× |
+| 20 orbitals | 27 436 | 4 367 745 | 2 | **44 764** | 1.6× |
+| 50 orbitals — a drug | 103 684 | 154 623 421 | 2 | **129 076** | **1.25×** |
+
+**One or two distillation rounds suffice, and the overhead *shrinks* with molecule
+size.** Two reasons, both worth stating because they are why the pessimistic
+caveat was wrong. The physical error rate (1.27e-3) is already far enough below
+threshold that a single 15-to-1 round takes it to 7e-8; and the factory is a
+*fixed* footprint — 12 logical qubits — while the data register grows, so it goes
+from 7× of the total on H₂ to 25% on a drug molecule.
+
+So Result 69's ~10⁵ becomes **~1.3 × 10⁵** with distillation included. The bound
+was tight to 1.25× at the size that matters, not loose by an order of magnitude.
+
+**But the number that should worry a reader is not in the qubit column.** It is
+**154 623 421 T gates**. Distillation factories produce magic states at a finite
+rate — one state per several code cycles — and every T gate consumes one. A single
+factory feeding 1.5 × 10⁸ T gates sequentially, at microsecond-scale code cycles,
+is **months of wall-clock**. The fix is parallel factories, which trades the time
+back into qubits at roughly linear cost, and that trade is where real resource
+estimates spend most of their budget.
+
+**So the honest final shape of the error-corrected estimate:**
+
+* **Qubits: ~1.3 × 10⁵** for a drug-sized molecule. An engineering target.
+* **Time: months on one factory**, reducible by parallelising at a qubit cost this
+  model does not attempt.
+* Still UCCSD, where an error-corrected algorithm would use qubitization or phase
+  estimation with different — generally better — T counts.
+
+The qubit figure is the one this project can stand behind; the time figure is the
+one it has just learned to ask about. **That is the honest end of this line: not
+"quantum chemistry is impossible" but "here is the machine it needs, and here is
+which of its two dimensions is still unmeasured".**

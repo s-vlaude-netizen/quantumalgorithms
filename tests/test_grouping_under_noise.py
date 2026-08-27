@@ -228,3 +228,48 @@ def test_required_distance_reports_failure_rather_than_guessing():
 
     assert required_distance(1e-9, 0.02) is None, "above threshold must not converge"
     assert required_distance(1e-9, 0.001) is not None
+
+
+def test_distillation_overhead_shrinks_with_problem_size():
+    """Result 70's counterintuitive property, and why the Result 69 caveat was wrong.
+
+    The factory is a fixed footprint while the data register grows, so magic-state
+    overhead falls from a large multiple on tiny problems to ~25% on a drug-sized
+    one.  If it ever grew instead, the ~1.3e5 estimate would need re-deriving.
+    """
+    from experiments.exp016_error_correction_overhead import (
+        FACTORY_LOGICAL_QUBITS,
+        distillation_rounds,
+        t_count,
+    )
+
+    physical = 0.00127
+
+    # a small problem and a large one, at their respective code distances
+    small = (6, 11, 152)     # H4: logical qubits, distance, rotations
+    large = (98, 23, 1_665_043)  # 50 orbitals
+
+    fractions = []
+    for logical_qubits, distance, rotations in (small, large):
+        gates, _ = t_count(rotations, 1.6e-3)
+        rounds = distillation_rounds(physical, 1.6e-3 / gates)
+        assert rounds is not None and rounds <= 3, f"expected few rounds, got {rounds}"
+
+        data = logical_qubits * 2 * distance**2
+        factory = FACTORY_LOGICAL_QUBITS * 2 * distance**2 * rounds
+        fractions.append(factory / (data + factory))
+
+    assert fractions[1] < fractions[0], "overhead should shrink with size"
+    assert fractions[1] < 0.4, f"drug-sized factory share {fractions[1]:.2f}"
+
+
+def test_t_count_is_far_below_the_two_qubit_gate_count():
+    """Most of a UCCSD circuit is Clifford, which is why distillation is cheap.
+
+    NH3 has 32,318 two-qubit gates but only 2,340 non-Clifford rotations.  If a
+    future ansatz inverted that, the distillation term would dominate instead.
+    """
+    from experiments.exp016_error_correction_overhead import MOLECULES
+
+    for name, _orbitals, _qubits, gates, rotations in MOLECULES[1:]:
+        assert rotations < gates / 5, f"{name}: {rotations} rotations vs {gates} gates"
