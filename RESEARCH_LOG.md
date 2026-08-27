@@ -2905,3 +2905,54 @@ Three problem classes, three different failure points, all measured. The one tha
 passes the accuracy test and might pass the classical test fails on the encoding
 instead — and it fails at a size where the classical answer is instantaneous, so
 the failure is not marginal.
+
+### Result 64 — with the standard move set, folding fails the classical test too: 3 of 4 benchmark optima in under a minute
+
+Result 62 recorded my annealer landing 1–4 contacts short of the literature
+optima and said plainly that this was a fact about the search, not the problem —
+the move set was corner flips, crankshafts and end moves, which is not ergodic
+on HP lattices. The table there marked folding's classical baseline as
+"plausibly passes at N ≥ 36". That was an estimate, and Result 51's own rule
+says an under-powered reference invalidates any comparison drawn against it.
+
+**So the reference was brought up to standard.** Pull moves (Lesh, Mitzenmacher
+& Whitesides) added to the move set: pick a free site adjacent to residue `i+1`
+and diagonal to residue `i`, move `i` there, and pull the prefix along until the
+walk is connected again. Verified over 300 random conformations: **2 884 moves
+generated, 0 invalid.**
+
+| sequence | residues | literature optimum | before pull moves | **with pull moves** | time |
+|---|---|---|---|---|---|
+| hp20 | 20 | −9 | −8 | **−9 optimal** | 33.9 s |
+| hp24 | 24 | −9 | −7 | **−9 optimal** | 42.3 s |
+| hp25 | 25 | −8 | −6 | **−8 optimal** | 43.6 s |
+| hp36 | 36 | −14 | −10 | −13 | 77.6 s |
+
+**Three of four literature optima, in under a minute each, from ~150 lines of
+simulated annealing.** The fourth is one contact short at 78 seconds.
+
+**So folding's classical baseline is not hard at these sizes** — criterion 2
+fails, exactly as it does for MaxCut. That corrects the "plausibly passes" in
+Result 62's table, and it corrects it in the direction the project has now seen
+five times: the thing that looked hard was a weak reference.
+
+**The complete picture, all three criteria measured:**
+
+| | accuracy requirement | classical baseline | encoding cost |
+|---|---|---|---|
+| chemistry | **fails** (0.019% → 0.2-gate budget, needs 665–1300) | **fails** (FCI, 100 ms) | — |
+| MaxCut | passes (5% → 50 gates, QAOA p=1 uses 48) | **fails** (1 ms hill-climb) | passes |
+| HP folding | passes (7% → ~70 gates) | **fails** (3/4 optima in <1 min) | **fails** (1 538 gates at N=6) |
+
+Every cell that could have been favourable has now been measured, and none is.
+The pattern across all three is the same one Result 51 named: **the instances
+that can be checked have no hard part left, and the ones that might are out of
+reach of the device by orders of magnitude.**
+
+**What is honestly left.** One candidate: the published low-locality folding
+encodings, which spend ancilla qubits to bound interaction weight and would be
+far cheaper than the dense expansion in Result 63. That would fix the encoding
+column — but folding's classical column is now measured as failing too, so
+fixing the encoding alone no longer produces a candidate. Finding a problem with
+*both* properties remains open, and this project has now ruled out three classes
+with measurements rather than arguments.

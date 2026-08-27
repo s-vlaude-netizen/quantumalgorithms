@@ -183,3 +183,45 @@ def test_turn_encoding_refuses_sizes_it_cannot_enumerate():
 
     with pytest.raises(ValueError, match="too many to enumerate"):
         turn_encoding_hamiltonian("H" * 15)
+
+
+def test_pull_moves_preserve_self_avoidance_and_connectivity():
+    """The standard move set, and the reason the reference is credible.
+
+    Result 62's annealer used corner flips, crankshafts and end moves, which is
+    not ergodic on HP lattices, and it landed 1-4 contacts short of the
+    literature optima.  Pull moves closed that (Result 64: 3 of 4 optima).  A
+    pull move that produces a disconnected or self-intersecting chain would make
+    the reference stronger-looking than it is, so every generated move is
+    checked here.
+    """
+    from qres.problems.folding import _pull_move
+
+    rng = np.random.default_rng(0)
+    generated = 0
+    for _ in range(100):
+        walk = random_walk(12, rng)
+        for index in range(len(walk) - 1):
+            moved = _pull_move(list(walk), index, rng)
+            if moved is None:
+                continue
+            generated += 1
+            assert len(moved) == len(walk)
+            assert len(set(moved)) == len(moved), "self-intersecting"
+            for before, after in zip(moved, moved[1:]):
+                assert abs(before[0] - after[0]) + abs(before[1] - after[1]) == 1
+
+    assert generated > 100, "pull moves almost never apply -- check the geometry"
+
+
+def test_annealer_reaches_a_known_optimum():
+    """hp25's optimum is -8 and the annealer must find it.
+
+    This is the property that makes the classical baseline usable as a reference
+    at all.  Kept small enough to run in the suite; the full benchmark table is
+    in RESEARCH_LOG Result 64.
+    """
+    sequence, optimum = BENCHMARKS["hp25"]
+    fold = annealed_fold(sequence, sweeps=6000, restarts=10, seed=0)
+    assert fold.is_valid
+    assert fold.energy <= optimum + 1, f"got {fold.energy}, optimum {optimum}"

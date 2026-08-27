@@ -192,6 +192,68 @@ def _end_move(positions: list, at_start: bool) -> list | None:
     return moved
 
 
+def _pull_move(positions: list, index: int, rng) -> list | None:
+    """The standard HP-lattice pull move (Lesh, Mitzenmacher & Whitesides).
+
+    The move set used before this -- corner flips, crankshafts and end moves --
+    is not ergodic on HP lattices, and Result 62 recorded my annealer landing 1
+    to 4 contacts short of the literature optima because of it.  An
+    under-powered reference invalidates every comparison drawn against it
+    (Result 51), so the reference has to be the standard one.
+
+    The construction: pick a free lattice site ``L`` that is adjacent to residue
+    ``index + 1`` and diagonal to residue ``index``.  Move ``index`` there.  The
+    corner site ``C`` between them then either already holds residue
+    ``index - 1`` (nothing more to do) or is free, in which case ``index - 1``
+    moves into it and the rest of the chain is *pulled* along one step at a time
+    until it is self-avoiding again.
+    """
+    n = len(positions)
+    if index >= n - 1:
+        return None
+
+    here, ahead = positions[index], positions[index + 1]
+    occupied = set(positions)
+
+    candidates = []
+    for site in _neighbours(ahead):
+        if site in occupied:
+            continue
+        # L must be diagonal to `here`, i.e. two steps away on the lattice
+        if abs(site[0] - here[0]) + abs(site[1] - here[1]) != 2:
+            continue
+        corner = (site[0] + here[0] - ahead[0], site[1] + here[1] - ahead[1])
+        if corner in occupied and (index == 0 or corner != positions[index - 1]):
+            continue
+        candidates.append((site, corner))
+
+    if not candidates:
+        return None
+    site, corner = candidates[int(rng.integers(len(candidates)))]
+
+    moved = list(positions)
+    moved[index] = site
+    if index == 0:
+        return moved
+    if corner == positions[index - 1]:
+        return moved  # the chain already reaches; nothing to pull
+
+    moved[index - 1] = corner
+    # pull the remaining prefix along until the walk is connected again
+    for j in range(index - 2, -1, -1):
+        gap = abs(moved[j][0] - moved[j + 1][0]) + abs(moved[j][1] - moved[j + 1][1])
+        if gap == 1:
+            break
+        moved[j] = positions[j + 2]
+
+    if len(set(moved)) != len(moved):
+        return None
+    for before, after in zip(moved, moved[1:]):
+        if abs(before[0] - after[0]) + abs(before[1] - after[1]) != 1:
+            return None
+    return moved
+
+
 def _straight_walk(length: int) -> list:
     """The fully extended chain -- valid, and a trap to start from.
 
@@ -261,10 +323,12 @@ def annealed_fold(
             temperature = start_temperature * (1 - sweep / sweeps) + 1e-3
             for _ in range(n):
                 kind = rng.random()
-                if kind < 0.6:
+                if kind < 0.5:
+                    candidate = _pull_move(positions, int(rng.integers(0, n - 1)), rng)
+                elif kind < 0.8:
                     index = int(rng.integers(1, n - 1))
                     candidate = _corner_flip(positions, index)
-                elif kind < 0.85:
+                elif kind < 0.93:
                     candidate = _crankshaft(positions, int(rng.integers(0, max(1, n - 3))))
                 else:
                     candidate = _end_move(positions, bool(rng.integers(2)))

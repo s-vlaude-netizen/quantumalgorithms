@@ -22,7 +22,7 @@ constant across two problem classes, so `max gates ~ required accuracy / 0.001`.
 |---|---|---|---|
 | **chemistry** | **fails** — 0.019% needs a 0.2-gate budget; an ansatz needs 665–1300 | fails — FCI exact in 100 ms | — |
 | **MaxCut** | passes — 5%, budget 50, QAOA p=1 uses 48 | **fails** — 1 ms hill-climb beats it (Result 51) | passes |
-| **HP folding** | passes — 7%, budget ~70 | plausibly passes at N ≥ 36 | **fails** — 1 538 gates at N = 6 |
+| **HP folding** | passes — 7%, budget ~70 | **fails** — 3 of 4 literature optima in under a minute (Result 64) | **fails** — 1 538 gates at N = 6 |
 
 Three classes, three different failure points, all measured rather than argued.
 

@@ -133,7 +133,7 @@ which problems are even candidates:
 |---|---|---|---|
 | **chemistry** | **fails** — 0.019% gives a 0.2-gate budget; an ansatz needs 665–1300 | fails — FCI exact in 100 ms | — |
 | **MaxCut** | passes — 5%, budget 50, QAOA p=1 uses 48 | **fails** — a 1 ms hill-climb beats it | passes |
-| **HP folding** | passes — 7%, budget ~70 | plausibly passes at N ≥ 36 | **fails** — 1 538 gates at N = 6 |
+| **HP folding** | passes — 7%, budget ~70 | **fails** — 3 of 4 literature optima in under a minute | **fails** — 1 538 gates at N = 6 |
 
 Three classes, three different failure points, each measured rather than argued.
 Folding fails on the encoding: self-avoidance is a global constraint on the turn
