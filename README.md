@@ -33,10 +33,18 @@ that exact classical methods solve to twelve decimals in 35 ms. **The molecules
 that fit the hardware are exactly the ones with no reason to be computed this
 way**, and the gap opens at N^5.12 the moment they stop being trivial.
 
-The same shape holds on the optimisation side, for a different reason: MaxCut
-*fits* the gate budget and still loses to a fifty-line hill-climber running for
-one second. Protein folding fails on both the classical baseline and the
-encoding. Three problem classes, three different failure points, all measured.
+The same shape holds elsewhere, for different reasons. MaxCut *fits* the gate
+budget and still loses to a fifty-line hill-climber running for one second.
+Protein folding fails on both the classical baseline and the encoding. And a
+quantum kernel — the only thing here that fits the hardware comfortably, six
+gates per entry, unaffected by device noise — is at chance on periodic data, on
+data built from exactly the pairwise-difference structure its entangling layer
+encodes, and on parity, the one dataset where classical methods are weak. It
+wins only on labels its own circuit produced.
+
+**Four problem classes, four different failure points, all measured**: cost, a
+strong competitor, an intractable encoding, and a method whose only success is
+on data it wrote itself.
 
 Everything below is how that was established, and it is worth reading mainly for
 the method: every claim here is a measurement, several of them corrections to
