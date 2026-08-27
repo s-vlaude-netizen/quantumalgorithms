@@ -2513,3 +2513,60 @@ That is worth stating plainly because it closes the item rather than merely
 advancing it: **readout mitigation on this system is done.** The 2× still
 separating it from chemical accuracy is not readout, and no amount of better
 calibration will touch it.
+
+### Result 58 — mitigation does not rescue general-commuting grouping; it exposes it. And the combination is a 19× recipe
+
+NEXT_STEPS carried a guess after Result 55: its verdict that QWC beats
+general-commuting grouping on a device rests on a readout bias that mitigation
+removes 9× of, so "the ranking may well invert back". That guess was wrong, and
+the bias decomposition in Result 56 already contained the refutation.
+
+Readout bias is roughly the same large number for **both** schemes — it is a
+property of the qubits, not of the measurement circuit. What differs is gate
+bias: **1.646e-2 for commuting against 1.740e-3 for QWC**, the cost of the
+Clifford diagonalisations. So the readout bias was *masking* the gap, and
+removing it should widen the ratio rather than close it.
+
+Measured, 200 000 total shots per arm, 12 seeds, tensored calibration at 5% of
+budget:
+
+| molecule | scheme | unmitigated | **mitigated** |
+|---|---|---|---|
+| H₄ | QWC | 5.323e-2 | **3.486e-3** |
+| H₄ | commuting | 6.770e-2 | **1.511e-2** |
+| | *ratio* | *1.27* | ***4.33*** |
+| LiH | QWC | 5.906e-2 | **5.627e-3** |
+| LiH | commuting | 9.227e-2 | **3.300e-2** |
+| | *ratio* | *1.56* | ***5.86*** |
+
+Mitigation makes general-commuting grouping **3.4× (H₄) and 3.8× (LiH) worse
+relative to QWC**, not better. Both molecules, same direction, and the
+prediction was made from independent data before the measurement.
+
+**The practical recipe, which is what this sequence was for.** Against the
+configuration this repository defaulted to before Result 55 — general-commuting
+grouping, unmitigated — QWC grouping plus tensored readout mitigation at the
+same total shots gives:
+
+| molecule | default (commuting, unmitigated) | **QWC + tensored readout** | gain |
+|---|---|---|---|
+| H₄ | 6.770e-2 | **3.486e-3** | **19×** |
+| LiH | 9.227e-2 | **5.627e-3** | **16×** |
+
+Both are within 2–4× of chemical accuracy on a Heron-class noise model, from a
+configuration that was 40–58× away. Two changes, both free: use the cheaper
+grouping, and spend 5% of the shot budget on two calibration circuits.
+
+**Why this is worth stating as a recipe rather than two results.** They are the
+same mistake seen twice. General-commuting grouping was adopted because it wins
+on estimator variance by up to 9.08× (Result 54) — a metric that does not know
+gates exist. Mitigation was going to be evaluated with ZNE because that is the
+prominent method — which folds a circuit that carries 3% of the error. In both
+cases the right move came from measuring where the error actually was, and in
+both cases it was the less sophisticated option.
+
+**A note on my own reasoning.** The "may well invert back" line was written into
+NEXT_STEPS without checking it against the decomposition table three sections
+above it in this same log. The data to rule it out was already recorded. That is
+a cheaper failure than a wrong measurement, but it is the same kind: a plausible
+statement that nothing had been checked against.

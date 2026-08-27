@@ -96,9 +96,13 @@ the bias before choosing a method is what made this cheap.
    state preparation is trivial. With UCCSD the gate bias is no longer 3% of the
    total and ZNE may earn its place — which would make the two methods
    complementary rather than one dominant.
-3. **Then re-run Result 55's grouping comparison with readout correction on.**
-   Its verdict (QWC beats general commuting on a device) rests on a readout bias
-   that mitigation removes 9× of. The ranking may well invert back.
+3. **Re-run Result 55's grouping comparison with readout correction on.**
+   *Done — Result 58, and the guess written here was wrong.* Readout bias is a
+   property of the qubits, the same for both schemes, and was *masking* the gate
+   gap rather than creating it. Mitigation widens the ratio from 1.27 to 4.33
+   (H₄) and 1.56 to 5.86 (LiH). **The standing recipe is QWC grouping plus
+   tensored readout mitigation at 5% of budget: 19× better than the old default
+   on H₄, 16× on LiH.**
 
 ### 2. ADAPT-VQE: measured, improved 4.6×, and now at cost parity
 Built, measured, and made cheaper (Results 44–47).
