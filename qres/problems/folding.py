@@ -292,3 +292,88 @@ def annealed_fold(
 def random_sequence(length: int, hydrophobic_fraction: float = 0.5, seed: int = 0) -> str:
     rng = np.random.default_rng(seed)
     return "".join("H" if rng.random() < hydrophobic_fraction else "P" for _ in range(length))
+
+
+def turn_encoding_hamiltonian(sequence: str, penalty: float | None = None, threshold: float = 1e-9):
+    """The exact Ising Hamiltonian for the turn encoding of ``sequence``.
+
+    Two qubits per bond give the four lattice directions; the first bond is
+    fixed to remove the rotational symmetry, so the register is ``2(N-2)``
+    qubits.  Self-intersecting conformations are charged ``penalty``.
+
+    Rather than hand-deriving the multi-body self-avoidance terms -- which is
+    where published encodings differ from each other and where an error would be
+    invisible -- the energy is enumerated over every bitstring and expanded in
+    the Pauli-Z basis by a Walsh-Hadamard transform.  That is exact by
+    construction: a diagonal function of ``n`` bits has exactly ``2^n``
+    Z-coefficients and the transform computes all of them.
+
+    Feasible to about 12 residues (20 qubits, 10^6 states), which is enough to
+    measure what the encoding *costs* -- the question Result 62 left open.
+    """
+    from qiskit.quantum_info import SparsePauliOp
+
+    bonds = len(sequence) - 1
+    free_bonds = bonds - 1  # first bond fixed
+    n = 2 * free_bonds
+    if n > 22:
+        raise ValueError(f"{len(sequence)} residues needs {n} qubits; too many to enumerate")
+
+    if penalty is None:
+        penalty = float(len(sequence))  # never worth an overlap
+
+    energies = np.empty(1 << n)
+    for state in range(1 << n):
+        moves = [0]
+        for bond in range(free_bonds):
+            moves.append((state >> (2 * bond)) & 3)
+        value = energy_of(sequence, positions_from_moves(moves))
+        energies[state] = penalty if not np.isfinite(value) else value
+
+    # Walsh-Hadamard: coefficients of the Z-basis expansion
+    coefficients = energies.copy()
+    step = 1
+    while step < len(coefficients):
+        for start in range(0, len(coefficients), 2 * step):
+            for offset in range(start, start + step):
+                a, b = coefficients[offset], coefficients[offset + step]
+                coefficients[offset], coefficients[offset + step] = a + b, a - b
+        step *= 2
+    coefficients /= 1 << n
+
+    labels, values = [], []
+    for mask in range(1 << n):
+        if abs(coefficients[mask]) <= threshold:
+            continue
+        label = "".join("Z" if (mask >> q) & 1 else "I" for q in reversed(range(n)))
+        labels.append(label)
+        values.append(coefficients[mask])
+
+    return SparsePauliOp(labels, np.array(values, dtype=complex)), n
+
+
+def encoding_cost(sequence: str) -> dict:
+    """Qubits, Pauli terms by locality, and the QAOA cost-layer gate count.
+
+    A weight-``k`` Z term needs ``2(k-1)`` CX gates per QAOA layer, so locality
+    is what decides whether an encoding fits inside a gate budget -- and the
+    self-avoidance penalties are exactly the high-weight terms.
+    """
+    hamiltonian, qubits = turn_encoding_hamiltonian(sequence)
+
+    by_weight: dict[int, int] = {}
+    gates = 0
+    for pauli in hamiltonian.paulis:
+        weight = int(np.count_nonzero(pauli.z))
+        by_weight[weight] = by_weight.get(weight, 0) + 1
+        if weight >= 2:
+            gates += 2 * (weight - 1)
+
+    return {
+        "residues": len(sequence),
+        "qubits": qubits,
+        "terms": len(hamiltonian),
+        "terms_by_weight": dict(sorted(by_weight.items())),
+        "max_weight": max(by_weight) if by_weight else 0,
+        "two_qubit_gates_per_layer": gates,
+    }

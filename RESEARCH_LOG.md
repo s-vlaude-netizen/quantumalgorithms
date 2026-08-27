@@ -2851,3 +2851,57 @@ chemistry fails, and the encoding cost looks likely to fail the budget test
 anyway — but "looks likely" is not a measurement, and this log does not record
 those. The encoding and its gate count are the open item, and they are the only
 thing that would settle it.
+
+### Result 63 — the folding encoding measured: dense, full-weight, and 22× over budget at six residues
+
+Result 62 left one thing open and called it an estimate rather than a
+measurement: what the turn encoding actually costs in gates. Estimating it would
+have meant hand-deriving the self-avoidance penalty terms, which is exactly where
+published encodings differ from each other and where an error is invisible — the
+Hamiltonian still looks like a Hamiltonian.
+
+**So it was derived by construction instead.** The energy is a diagonal function
+of the turn bits, and a diagonal function of `n` bits has exactly `2ⁿ`
+Pauli-Z coefficients which a Walsh-Hadamard transform computes all of. Enumerate,
+transform, done — exact by construction, no hand-derived penalties. Verified
+against the enumerated energy at **every** basis state, not a sample: 0
+mismatches over all 256 states for a six-residue sequence.
+
+| residues | qubits | Pauli terms | max weight | **2-qubit gates per QAOA layer** |
+|---|---|---|---|---|
+| 6 | 8 | 256 | 8 | **1 538** |
+| 7 | 10 | 1 024 | 10 | 8 194 |
+| 8 | 12 | 4 046 | 12 | 40 458 |
+| 9 | 14 | 16 384 | 14 | 196 610 |
+| 10 | 16 | 65 226 | 16 | **912 944** |
+
+**The Hamiltonian is fully dense: 2ⁿ terms at maximum weight `n`.** Every
+possible Z-string carries a coefficient. Self-avoidance is a global constraint on
+the turn variables, and nothing about it is local.
+
+Against Result 61's budget of ~70 two-qubit gates at 7% relative accuracy:
+**six residues already costs 1 538 gates — 22× over.** By ten residues it is
+912 944, thirteen thousand times over, and ten residues is a sequence exact
+enumeration solves in microseconds.
+
+**The honest bound on this result.** This measures *the naive turn encoding*, not
+the best known one. Published constructions (Robert et al. and relatives) spend
+ancilla qubits to keep the interaction terms low-weight, and would be far
+cheaper than the dense expansion here. What this establishes is narrower and
+still useful: **any viable folding encoding has to control locality explicitly,
+because the natural formulation of the constraint has none.** The 2ⁿ density is
+not an artefact of the expansion method — it is what the energy function is.
+
+**Which closes the arc that started at Result 61.** The search was for a problem
+with a loose accuracy requirement *and* a hard classical baseline:
+
+| | accuracy requirement | classical baseline | encoding cost |
+|---|---|---|---|
+| chemistry | **fails** (0.019%, needs 665–1300 gates against a budget of 0.2) | fails (FCI, 100 ms) | — |
+| MaxCut | passes (5%, budget 50, QAOA p=1 uses 48) | **fails** (1 ms hill-climb, Result 51) | passes |
+| HP folding | passes (7%, budget ~70) | plausibly passes at N ≥ 36 | **fails** (1 538 gates at N = 6) |
+
+Three problem classes, three different failure points, all measured. The one that
+passes the accuracy test and might pass the classical test fails on the encoding
+instead — and it fails at a size where the classical answer is instantaneous, so
+the failure is not marginal.

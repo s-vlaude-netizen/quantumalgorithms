@@ -130,3 +130,56 @@ def test_annealer_beats_a_random_valid_conformation():
 
     fold = annealed_fold(sequence, sweeps=1500, restarts=4, seed=0)
     assert fold.energy < best_random
+
+
+def test_turn_encoding_reproduces_every_energy_exactly():
+    """The encoding is only worth measuring if it is the same function.
+
+    A hand-derived self-avoidance penalty is where published encodings differ
+    from each other and where an error is invisible -- the Hamiltonian still
+    looks like a Hamiltonian.  Checked here against the enumerated energy at
+    *every* basis state, not a sample.
+    """
+    from qres.problems.folding import turn_encoding_hamiltonian
+
+    sequence = "HPHPHH"
+    hamiltonian, qubits = turn_encoding_hamiltonian(sequence)
+    penalty = float(len(sequence))
+
+    for state in range(1 << qubits):
+        moves = [0] + [(state >> (2 * bond)) & 3 for bond in range(len(sequence) - 2)]
+        expected = energy_of(sequence, positions_from_moves(moves))
+        if not np.isfinite(expected):
+            expected = penalty
+
+        value = 0.0
+        for pauli, coeff in zip(hamiltonian.paulis, hamiltonian.coeffs):
+            sign = 1
+            for qubit in range(qubits):
+                if pauli.z[qubit] and (state >> qubit) & 1:
+                    sign = -sign
+            value += sign * coeff.real
+
+        assert value == pytest.approx(expected, abs=1e-9), f"state {state}"
+
+
+def test_turn_encoding_is_dense_and_high_weight():
+    """The measured obstruction: 2^n terms at full weight, not a sparse Ising.
+
+    This is what puts folding outside the gate budget (Result 63), so if the
+    encoding ever becomes sparse the conclusion has to be re-derived.
+    """
+    from qres.problems.folding import encoding_cost
+
+    cost = encoding_cost("HPHPHH")
+    assert cost["qubits"] == 8
+    assert cost["max_weight"] == cost["qubits"], "expected full-weight terms"
+    assert cost["terms"] > 0.9 * 2 ** cost["qubits"], "expected a dense Hamiltonian"
+    assert cost["two_qubit_gates_per_layer"] > 1000
+
+
+def test_turn_encoding_refuses_sizes_it_cannot_enumerate():
+    from qres.problems.folding import turn_encoding_hamiltonian
+
+    with pytest.raises(ValueError, match="too many to enumerate"):
+        turn_encoding_hamiltonian("H" * 15)
