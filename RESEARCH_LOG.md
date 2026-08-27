@@ -2783,3 +2783,71 @@ started: find a problem whose *required relative accuracy* is loose enough to fi
 a hundred-gate budget **and** whose classical baseline is genuinely hard. MaxCut
 has the first and fails the second; chemistry has the second and fails the first.
 Nothing in this repository has looked for something with both.
+
+### Result 62 — protein folding: the classical side, built first on purpose, and what it does and does not establish
+
+Result 61 narrowed the search to one shape: a problem with a *loose* required
+relative accuracy and a *hard* classical baseline. MaxCut has the first and fails
+the second; chemistry has the second and fails the first. Protein folding is the
+candidate the user named that might have both, and it is the standard
+quantum-optimisation showcase.
+
+**Built classical-first, deliberately.** Results 42 and 50 both discovered — after
+building the quantum machinery — that the benchmark instances were solved
+instantly by a laptop. So `qres/problems/folding.py` contains the HP model, an
+exact solver, and a heuristic, and no qubit encoding at all yet.
+
+**Where exact enumeration reaches.** Self-avoiding walks grow as ~2.64ⁿ:
+
+| residues | walks | time |
+|---|---|---|
+| 10 | 4 067 | 0.03 s |
+| 12 | 30 073 | 0.24 s |
+| 14 | 220 375 | 1.93 s |
+| 16 | 1 604 149 | 15.1 s |
+
+so exact is usable to about 18–20 residues.
+
+**The heuristic, and an honest limit on what it shows.** Simulated annealing
+with corner flips, crankshaft rotations and end moves, from random self-avoiding
+starts:
+
+| sequence | residues | literature optimum | this annealer | time |
+|---|---|---|---|---|
+| hp20 | 20 | −9 | −8 | 3.2 s |
+| hp24 | 24 | −9 | −7 | 4.0 s |
+| hp25 | 25 | −8 | −6 | 3.9 s |
+| hp36 | 36 | −14 | −10 | 7.7 s |
+
+It comes within 1–4 contacts in seconds and does not reach the optima. **That is
+a fact about this search, not about the problem**, and the distinction is the
+whole point: the move set used here is known to be non-ergodic for HP lattice
+models, where the standard is the pull-move set. The literature optima in that
+table were obtained *classically*. Reading my shortfall as evidence that folding
+is classically hard would be Result 51's error run backwards — under-powering
+the reference and reporting the gap as a finding.
+
+**Two bugs, one of them the interesting kind.** The energy function refuses
+self-intersecting walks with `+inf`, which matters more than it looks: an energy
+that accepts overlaps reports *better* scores, because collapsed residues create
+spurious contacts. And the annealer originally started from the fully extended
+chain — which has no corners and no U-turns, so two of its three moves return
+`None` on every residue and it can only wiggle the two ends. Measured, it found
+**zero** H-H contacts on two of four benchmarks. Random self-avoiding starts fixed
+it. A search that cannot move looks exactly like a search on a hard problem.
+
+**What the budget analysis already says.** HP energies are integer contact
+counts, so distinguishing −14 from −13 at hp36 needs about **7%** relative
+accuracy — the loose end, like MaxCut, not chemistry's 0.019%. By Result 61 that
+is a budget of roughly **70 two-qubit gates**.
+
+Against that: the standard turn encoding needs `2(N-1)` qubits — **38** at
+N = 20 and **70** at N = 36 — and its self-avoidance constraints are four-body
+and higher penalty terms, which a QAOA cost layer pays for in entangling gates.
+Seventy qubits with four-body penalties in a seventy-gate budget is not close.
+
+**So the honest status:** folding passes the accuracy-requirement test that
+chemistry fails, and the encoding cost looks likely to fail the budget test
+anyway — but "looks likely" is not a measurement, and this log does not record
+those. The encoding and its gate count are the open item, and they are the only
+thing that would settle it.
