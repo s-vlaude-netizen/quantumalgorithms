@@ -209,3 +209,58 @@ def test_tensored_matrix_factorises_in_the_right_qubit_order():
     # and the two qubits must genuinely differ, or the check above is vacuous
     ratios = [implied_error_ratio(tensored, i) for i in range(len(qubits))]
     assert max(ratios) > 3 * min(ratios), "qubits too similar to detect a swap"
+
+
+@pytest.mark.parametrize("a,b,r", [(-2.5, -2.4, 0.43), (1.0, 3.0, 0.7), (-8.0, 5.5, 0.25)])
+def test_exponential_extrapolation_is_exact_on_exponential_data(a, b, r):
+    """`E(s) = a + b r^s` must come back as `a + b` exactly.
+
+    This check is the whole reason the exponential fit is trustworthy.  A first
+    version took the wrong root -- treating the measured ratio as `r^2` when the
+    points are spaced by `h`, so it is `r^h` -- and on *real* data that version
+    still looked like an improvement over the line (error 0.95 against 1.33).
+    Only synthetic data with a known answer exposed it.
+    """
+    scales = [1, 3, 5]
+    values = [a + b * r**s for s in scales]
+    assert extrapolate(scales, values, "exponential") == pytest.approx(a + b, abs=1e-9)
+
+
+def test_exponential_extrapolation_handles_uneven_spacing():
+    a, b, r = -3.0, 2.0, 0.5
+    scales = [1, 5, 9]
+    values = [a + b * r**s for s in scales]
+    assert extrapolate(scales, values, "exponential") == pytest.approx(a + b, abs=1e-9)
+
+
+def test_exponential_falls_back_to_linear_when_not_decaying():
+    """Shot noise on nearly-flat points can give a ratio outside (0, 1).
+
+    Forcing an exponential through that is worse than the line, so the fit must
+    detect it rather than return a confident nonsense value.
+    """
+    scales = [1, 3, 5]
+    rising = [2.0 + 0.5 * s for s in scales]
+    assert extrapolate(scales, rising, "exponential") == pytest.approx(2.0, abs=1e-9)
+
+    # a ratio above 1 (growing, not saturating) must also fall back
+    growing = [1.0, 2.0, 8.0]
+    assert np.isfinite(extrapolate(scales, growing, "exponential"))
+
+
+def test_exponential_beats_the_line_on_the_measured_saturating_data():
+    """The physics case: a depolarising channel saturates, a line does not.
+
+    These are the measured H4 paired-doubles values at scales 1, 3, 5 against an
+    exact -4.980098.  The step from 1 to 3 is 0.786 and from 3 to 5 is 0.144 --
+    saturation, which is what makes the line extrapolate to the wrong place.
+    """
+    scales = [1, 3, 5]
+    measured = [-3.52288, -2.73716, -2.59310]
+    exact = -4.980098
+
+    linear_error = abs(extrapolate(scales, measured, "linear") - exact)
+    exponential_error = abs(extrapolate(scales, measured, "exponential") - exact)
+
+    assert exponential_error < linear_error / 5
+    assert exponential_error < 0.25

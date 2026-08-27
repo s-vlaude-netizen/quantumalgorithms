@@ -99,6 +99,18 @@ it is within 3% of its own best. The residual bias (2.2e-3) sits at the
 readout-free floor (1.7e-3), so readout mitigation on this system is finished:
 the 2× still separating it from chemical accuracy is gate error.
 
+**With a real ansatz the verdict inverts.** Swapping the HF reference for a
+four-parameter paired-doubles ansatz (317 two-qubit gates) moves the gate share
+of the bias from 4.7% to 95.4%. Readout mitigation then buys 4%; ZNE buys 3.4×,
+but only with the right extrapolation — a depolarising channel *saturates*, so
+`E(s) = a + b r^s` is the correct form and beats a straight line by **3.2× on
+identical measured data**. The usable rule is to decompose the bias first and
+then pick the method; both times, choosing by prominence picked the wrong one.
+
+The sobering number: that best mitigated result is still 0.408 Hartree, 255×
+chemical accuracy. Those 317 gates cost 26× more error than all the mitigation
+recovers, which is the ~32× depth gap above, measured from the other direction.
+
 Worth knowing separately: the transpiler is already doing 8× of readout
 mitigation for free. At optimisation level 2 it placed a six-qubit problem on
 physical qubits [66, 5, 87, 81, 60, 51], whose readout fidelity is 0.945–0.976

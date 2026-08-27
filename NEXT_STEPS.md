@@ -92,10 +92,21 @@ the bias before choosing a method is what made this cheap.
    arm beating the 10% arm shows calibration statistics are the limiter. A
    tensored or M3-style approximation buys more shots per calibration point and
    also removes the 2ⁿ wall — exact calibration is hopeless past ~14 qubits.
-2. **Take it to a real ansatz.** Everything above is the HF reference, where
-   state preparation is trivial. With UCCSD the gate bias is no longer 3% of the
-   total and ZNE may earn its place — which would make the two methods
-   complementary rather than one dominant.
+2. **Take it to a real ansatz.** *Done — Result 59, and the verdict inverts.*
+   With `puccd` (317 two-qubit gates) the gate share of the bias goes from 4.7%
+   to **95.4%**, readout mitigation drops to 4%, and ZNE becomes worth 3.4× —
+   but only once the extrapolation matches the physics. A depolarising channel
+   *saturates*, so `E(s) = a + b r^s` is the right form; against the line it is
+   worth **3.2× on identical data**, pure post-processing.
+
+   **The rule this gives: decompose the bias first, then pick the method.** Both
+   times, choosing by what the literature emphasises picked the wrong one.
+
+   **And the sobering number:** the best mitigated result with a real ansatz is
+   0.408 Hartree, 255× chemical accuracy. Adding 317 two-qubit gates costs 26×
+   more error than all of Result 56's mitigation recovered. The gate budget is
+   the binding constraint — the same conclusion the README's ~32× depth gap
+   reached by counting circuits, now confirmed by measuring error directly.
 3. **Re-run Result 55's grouping comparison with readout correction on.**
    *Done — Result 58, and the guess written here was wrong.* Readout bias is a
    property of the qubits, the same for both schemes, and was *masking* the gate

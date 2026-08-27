@@ -87,6 +87,8 @@ def extrapolate(scales: Sequence[float], values: Sequence[float], method: str = 
     if method == "linear":
         slope, intercept = np.polyfit(scales, values, 1)
         return float(intercept)
+    if method == "exponential":
+        return _exponential_extrapolation(scales, values)
     if method == "richardson":
         # Lagrange interpolation evaluated at 0
         total = 0.0
@@ -98,6 +100,55 @@ def extrapolate(scales: Sequence[float], values: Sequence[float], method: str = 
             total += weight * y_i
         return float(total)
     raise ValueError(f"unknown extrapolation {method!r}")
+
+
+def _exponential_extrapolation(scales: np.ndarray, values: np.ndarray) -> float:
+    """Fit ``E(s) = a + b r^s`` and return ``E(0) = a + b``.
+
+    This is the functional form the physics actually produces.  Under a
+    depolarising channel the measured value decays towards the maximally mixed
+    expectation as ``(1 - p)^s``, so it **saturates** -- and a line fitted
+    through saturated points extrapolates to the wrong place.
+
+    Measured on H4 with a paired-doubles ansatz at scales 1, 3, 5: the values
+    were -3.523, -2.737, -2.593.  The step from 1 to 3 is 0.786 and from 3 to 5
+    only 0.144, which is saturation, not a slope.  Against an exact -4.980 the
+    line gives -3.648 (error 1.33, barely better than not extrapolating at all)
+    while this form gives -4.808 (error 0.17).
+
+    Falls back to the linear fit when the points are not monotonically
+    saturating -- with shot noise on nearly-flat data the ratio can come out
+    negative or above one, and forcing an exponential through that is worse than
+    the line.
+    """
+    if len(scales) < 3:
+        slope, intercept = np.polyfit(scales, values, 1)
+        return float(intercept)
+
+    order = np.argsort(scales)
+    x, y = scales[order], values[order]
+    # three equally spaced points determine (a, b, r) in closed form
+    lo, mid, hi = y[0], y[len(y) // 2], y[-1]
+    first, second = lo - mid, mid - hi
+    if abs(first) < 1e-12:
+        return float(np.polyfit(x, y, 1)[1])
+
+    # with points at x0, x0+h, x0+2h this ratio is r^h -- NOT r^2.  Taking the
+    # wrong root returns a confidently wrong intercept that still looks better
+    # than the line on real data, which is why this is checked against
+    # synthetic a + b r^s data in the tests rather than against a measurement.
+    ratio_to_the_h = second / first
+    if not (0 < ratio_to_the_h < 1):
+        # not a decaying exponential in this window; the line is the safer read
+        slope, intercept = np.polyfit(x, y, 1)
+        return float(intercept)
+
+    spacing = (x[-1] - x[0]) / 2 or 1.0
+    ratio = ratio_to_the_h ** (1 / spacing)
+    b_r = first / (1 - ratio_to_the_h)
+    a = lo - b_r
+    b = b_r / (ratio ** x[0]) if ratio > 0 else 0.0
+    return float(a + b)
 
 
 def zne_energy(

@@ -2570,3 +2570,84 @@ NEXT_STEPS without checking it against the decomposition table three sections
 above it in this same log. The data to rule it out was already recorded. That is
 a cheaper failure than a wrong measurement, but it is the same kind: a plausible
 statement that nothing had been checked against.
+
+### Result 59 — with a real ansatz the mitigation verdict inverts, and matching the extrapolation to the physics is worth 3.2×
+
+Result 56 concluded that ZNE is useless and readout mitigation is worth 19×. That
+conclusion was measured on the Hartree-Fock reference, whose state preparation is
+**two X gates**. NEXT_STEPS carried the obvious caveat: with a real ansatz the
+gate bias is no longer 3% of the total, and ZNE may earn its place.
+
+**The bias decomposition, redone with an ansatz** (H₄, 8 seeds, 50k shots,
+switching readout error off to separate the two):
+
+| ansatz | 2-qubit gates | total bias | readout-free bias | **gate share** |
+|---|---|---|---|---|
+| Hartree-Fock | 0 | 5.329e-2 | −2.499e-3 | **4.7%** |
+| paired doubles (`puccd`) | 317 | **1.408** | **1.342** | **95.4%** |
+
+The picture does not shift, it inverts. And note the magnitude: adding 317
+two-qubit gates moves the bias from 5.3e-2 to **1.4 Hartree** — 26× more error
+than all of Result 56's mitigation recovered.
+
+**Then the extrapolation itself turned out to be the wrong shape.** The measured
+values at scale factors 1, 3, 5 are −3.523, −2.737, −2.593. The step from 1 to 3
+is 0.786 and from 3 to 5 is 0.144: that is **saturation**, not a slope. Under a
+depolarising channel the expectation decays towards the maximally mixed value as
+`(1-p)^s`, so the correct model is `E(s) = a + b r^s` — and a line fitted through
+saturated points extrapolates to the wrong place.
+
+Implemented as a third extrapolator (closed form for three points), and measured
+with the scale factors sampled **once per seed** and all three extrapolators
+applied to the same data, so the comparison is paired (H₄/`puccd`, 150k total
+shots per arm, 12 seeds):
+
+| arm | median error | IQR | **vs unmitigated** | wins |
+|---|---|---|---|---|
+| unmitigated | 1.423 | 3.98e-2 | 1.00 | — |
+| ZNE linear | 1.288 | 6.13e-2 | 0.90 | 12/12 |
+| ZNE richardson | 7.618e-1 | 1.18e-1 | 0.54 | 12/12 |
+| **ZNE exponential** | **4.079e-1** | 2.63e-1 | **0.29** | **12/12** |
+| readout tensored (5%) | 1.370 | 2.98e-2 | 0.96 | 11/12 |
+
+**Matching the functional form to the physics is worth 3.2× over the line** and
+1.9× over Richardson, on identical measured data — pure post-processing, no
+extra shots. And readout mitigation, worth 19× on the HF reference, is worth
+**4%** here.
+
+**So each method works exactly where its target error dominates, and the
+decomposition predicts which before any of it is run:**
+
+| regime | gate share | what works | what does not |
+|---|---|---|---|
+| HF reference, 0 two-qubit gates | 4.7% | readout, **19×** | ZNE, 1.04× |
+| `puccd`, 317 two-qubit gates | 95.4% | ZNE exponential, **3.4×** | readout, 1.04× |
+
+That is a usable rule rather than two isolated results: **decompose the bias
+first, then pick the method.** Both times, choosing by what the literature
+emphasises would have picked the wrong one.
+
+**And the honest scale, which no amount of this fixes.** The best mitigated
+result with a real ansatz is 0.408 Hartree — **255× chemical accuracy**. Result
+56's 3.5e-3 on the HF reference was within 2×, but the HF reference is not a
+calculation. Three hundred and seventeen two-qubit gates is what a *four
+parameter* ansatz costs on H₄, and it is already far past what a Heron-class
+device supports. The binding constraint is the gate budget, which is the same
+conclusion the README's ~32× depth gap reached from circuit counting alone —
+now confirmed by measuring the error directly.
+
+**One bug, caught by synthetic data rather than by the measurement.** The first
+exponential fit took the wrong root: with points spaced by `h`, the measured
+ratio is `r^h`, not `r²`. On the *real* data that version still looked like an
+improvement over the line (error 0.95 against 1.33) and would have been recorded
+as one. Only fitting it to data generated as `a + b r^s` with a known answer
+exposed it — the corrected version returns `a + b` to 9e-16, the broken one was
+off by 0.8. Checking an estimator against synthetic ground truth costs nothing
+and catches what plausible-looking real results cannot.
+
+**One efficiency, since the same lesson keeps recurring.** The three
+extrapolators differ only in post-processing of the same measured values, but
+the first version of this experiment re-simulated all three scale factors for
+each of them — three times the work, and an unpaired comparison as well.
+Sampling once per seed and extrapolating three ways is 3× faster *and*
+statistically stronger.
