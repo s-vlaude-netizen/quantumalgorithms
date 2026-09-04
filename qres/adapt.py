@@ -131,21 +131,52 @@ def commutator_cache(
     return cache
 
 
-def prepared_pool(pool: list[SparsePauliOp]) -> list[list[tuple[float, Any]]]:
-    """Each generator as ``[(coefficient, sparse Pauli), ...]``, built once.
+def prepare_operator(operator: SparsePauliOp) -> list[tuple[float, Any]]:
+    """One generator as ``[(coefficient, sparse Pauli), ...]``."""
+    return [
+        (float(np.real(coefficient)), pauli.to_matrix(sparse=True).tocsr())
+        for coefficient, pauli in zip(operator.coeffs, operator.paulis)
+    ]
 
-    Feeds the closed-form evolution below.  The Pauli matrices are the part worth
-    caching: they are fixed for the run and were previously being rebuilt inside
-    every energy evaluation via circuit synthesis.
+
+class LazyPool:
+    """Prepared generators, built on first use and memoised.
+
+    Preparing the *whole* pool eagerly is the same O(pool x 2^n) mistake the
+    commutator cache made, and it is worse here because a Pauli matrix is dense
+    in its nonzero count: at 14 qubits, ~4 000 operators x ~8 terms x 16 384
+    entries is several gigabytes, which is what an H8 run was climbing towards.
+
+    ADAPT only ever evolves with the operators it has **chosen** -- at most
+    ``max_operators``, so ~150 rather than ~4 000. Preparing on demand makes the
+    memory scale with the answer instead of with the search space.
     """
-    prepared = []
-    for operator in pool:
-        terms = [
-            (float(np.real(coefficient)), pauli.to_matrix(sparse=True).tocsr())
-            for coefficient, pauli in zip(operator.coeffs, operator.paulis)
-        ]
-        prepared.append(terms)
-    return prepared
+
+    __slots__ = ("_pool", "_prepared")
+
+    def __init__(self, pool: list[SparsePauliOp]) -> None:
+        self._pool = pool
+        self._prepared: dict[int, list[tuple[float, Any]]] = {}
+
+    def __getitem__(self, index: int) -> list[tuple[float, Any]]:
+        terms = self._prepared.get(index)
+        if terms is None:
+            terms = prepare_operator(self._pool[index])
+            self._prepared[index] = terms
+        return terms
+
+    def __len__(self) -> int:
+        return len(self._pool)
+
+    @property
+    def prepared_count(self) -> int:
+        """How many were actually built -- the point of the class."""
+        return len(self._prepared)
+
+
+def prepared_pool(pool: list[SparsePauliOp]) -> LazyPool:
+    """Lazy prepared generators for ``pool``. See :class:`LazyPool`."""
+    return LazyPool(pool)
 
 
 def apply_evolution(vector: np.ndarray, terms: list[tuple[float, Any]], theta: float) -> np.ndarray:

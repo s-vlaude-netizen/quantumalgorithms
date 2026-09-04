@@ -259,3 +259,52 @@ def test_both_cache_modes_agree_and_the_memory_guard_engages():
         adapt_module.operator_gradients(problem.hamiltonian, state, pool, cache=symbolic),
         atol=1e-12,
     )
+
+
+def test_the_pool_is_prepared_lazily_not_wholesale():
+    """Memory must scale with the answer, not with the search space.
+
+    Preparing every generator's Pauli matrices eagerly is O(pool x 2^n) and dense
+    in nonzero count -- at 14 qubits that is several GB for a pool ADAPT will
+    only ever touch ~150 entries of. An H8 run was climbing past 1.5 GB on
+    exactly this before the pool was made lazy.
+    """
+    from qres.adapt import prepared_pool
+
+    problem = build_molecule("H4")
+    pool = excitation_pool(problem, "sd")
+    lazy = prepared_pool(pool)
+
+    assert len(lazy) == len(pool)
+    assert lazy.prepared_count == 0, "construction must build nothing"
+
+    first = lazy[3]
+    assert lazy.prepared_count == 1
+    assert lazy[3] is first, "second access must be memoised, not rebuilt"
+    lazy[7]
+    assert lazy.prepared_count == 2
+
+    # and what it hands back is what the eager version would have
+    from qres.adapt import apply_evolution, prepare_operator
+
+    rng = np.random.default_rng(1)
+    dimension = 1 << pool[3].num_qubits
+    vector = rng.normal(size=dimension) + 1j * rng.normal(size=dimension)
+    np.testing.assert_allclose(
+        apply_evolution(vector, lazy[3], 0.61),
+        apply_evolution(vector, prepare_operator(pool[3]), 0.61),
+        atol=1e-14,
+    )
+
+
+def test_adapt_touches_far_fewer_operators_than_the_pool_holds():
+    """The claim the laziness rests on, measured rather than assumed."""
+    from qres.adapt import excitation_pool
+
+    problem = build_molecule("H4")
+    result = adapt_vqe(problem, energy_tolerance=CHEMICAL_ACCURACY_HA, max_operators=40)
+    pool_size = len(excitation_pool(problem, "sd"))
+
+    assert len(set(result.operators)) < pool_size / 2, (
+        f"chose {len(set(result.operators))} distinct of {pool_size}"
+    )
