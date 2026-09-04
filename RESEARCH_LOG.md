@@ -3567,3 +3567,69 @@ computation on 1 024 amplitudes takes two hours, the answer is never the
 amplitudes.**
 
 `qres/adapt.py`, `tests/test_adapt.py` (5 new equivalence tests).
+
+---
+
+### Result 74 — the adaptive ansatz does not move the exponent, and the last promising direction closes
+
+For several sessions the README and NEXT_STEPS have carried the same sentence:
+`n`, the parameter count, is *the one lever in this project that changes an
+exponent rather than a constant*, and an adaptive ansatz reaching a given
+accuracy with `n ~ N²` would put VQE at `N^7.6` against CCSD(T)'s `N⁷` — "the
+only direction the measurements support". It was never measured. The evidence
+was three anecdotes across three different molecules: 1 parameter against 3 on
+H₂, 9 against 26 on H₄, 5 against 92 on LiH — which looks like an advantage that
+grows.
+
+Measured on a **homologous series** instead — H₂/H₄/H₆/H₈ at fixed bond length,
+where only N varies — with both ansätze held to the same criterion (energy within
+chemical accuracy of FCI):
+
+| N | UCCSD `n` | ADAPT `n` | ratio | ADAPT error | seconds |
+|---|---|---|---|---|---|
+| 2 | 3 | 1 | 3.00 | 1.62e-09 | 0.1 |
+| 4 | 26 | 10 | 2.60 | 3.29e-04 | 0.4 |
+| 6 | 117 | 45 | 2.60 | 1.42e-03 | 4.2 |
+| 8 | 360 | 145 | **2.48** | 1.46e-03 | 383 |
+
+**Exponents: ADAPT 3.569 ± 0.111, UCCSD 3.439 ± 0.133.**
+
+The difference is 0.13 against a combined standard error of 0.17 — **0.75 standard
+errors, indistinguishable** — and its sign is the wrong way round: ADAPT's
+exponent is *higher*. The ratio does not grow with N, it **declines** monotonically
+from 3.00 to 2.48.
+
+Carried into `shots ~ (Σ|c|)² · n / ε²` with the measured `(Σ|c|)² ~ N^5.7`:
+
+| | shots exponent |
+|---|---|
+| UCCSD | `N^9.1` |
+| ADAPT | `N^9.3` |
+| CCSD(T), classically, in operations | `N^7` |
+
+**So ADAPT is a constant factor of ~2.5, and a shrinking one.** The "only
+direction the measurements support" does not support it. This closes the last
+open line in the project that could have changed a complexity class.
+
+**The anecdote was wrong in the way anecdotes usually are.** LiH's 5-against-92
+was a comparison across molecules rather than along a series, and the 18× it
+implied does not survive holding the accuracy criterion fixed and varying one
+thing. Result 53 recorded exactly this failure for `Σ|c|`; it recurred here
+because three convenient numbers were sitting in the log looking like a trend.
+
+**Two honest caveats, neither of which rescues the result.**
+
+1. **The control says the fit is pre-asymptotic.** UCCSD's parameter count is
+   textbook `N⁴`; measured here it is 3.44. At N = 2–8 the asymptotic form has
+   not set in. But this biases *both* ansätze the same way, so the comparison —
+   which is what the conclusion rests on — survives even though neither absolute
+   exponent should be quoted.
+2. **Four points.** The standard errors above are computed on one degree of
+   freedom each and are reported precisely so the slope is not read alone. What
+   the data supports is "no distinguishable difference", not "identical".
+
+**What would reopen it:** an ansatz family whose parameter count is *provably*
+sub-quartic, tested the same way. Nothing in this repository is a candidate.
+
+`experiments/exp018_adapt_parameter_scaling.py`,
+`results/exp018_adapt_parameter_scaling.json`.

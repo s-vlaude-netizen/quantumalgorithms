@@ -10,6 +10,33 @@ what is left, add what the results suggested.
 
 ## Now
 
+### The scaling question is answered, negatively (Result 74)
+
+This file said for several sessions that `n`, the parameter count, was the one
+lever that could change an exponent, and that an adaptive ansatz reaching
+`n ~ N²` would put VQE at `N^7.6` against CCSD(T)'s `N⁷`. **Measured on a
+homologous series H₂/H₄/H₆/H₈: it does not.**
+
+| N | UCCSD `n` | ADAPT `n` | ratio |
+|---|---|---|---|
+| 2 | 3 | 1 | 3.00 |
+| 4 | 26 | 10 | 2.60 |
+| 6 | 117 | 45 | 2.60 |
+| 8 | 360 | 145 | 2.48 |
+
+ADAPT 3.569 ± 0.111 against UCCSD 3.439 ± 0.133 — 0.75 standard errors apart,
+indistinguishable, ADAPT's the *higher* of the two. The ratio declines with N.
+In shots: `N^9.3` against `N^9.1`, both against a classical `N⁷`.
+
+The three-molecule anecdote that motivated this (1 vs 3, 9 vs 26, 5 vs 92) was a
+comparison across molecules rather than along a series — the same failure Result
+53 recorded for `Σ|c|`.
+
+**So no open direction in this repository changes a complexity class.** What
+would reopen it is an ansatz family with a *provably* sub-quartic parameter
+count, tested the same way; nothing here is a candidate. Everything else below
+is a constant factor, and the README now says so at the top.
+
 ### The question is answered (Result 66); what remains is narrow
 
 The binding quantity is the **median two-qubit gate error**, because the cost of

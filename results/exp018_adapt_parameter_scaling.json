@@ -45,11 +45,26 @@
       "reached_chemical_accuracy": true,
       "adapt_seconds": 4.2345216760004405,
       "hit_operator_cap": false
+    },
+    {
+      "molecule": "H8",
+      "orbitals": 8,
+      "qubits": 14,
+      "fci_energy": -13.863956464553508,
+      "correlation_energy": -0.08583287464651868,
+      "build_seconds": 13.286055483999007,
+      "uccsd_parameters": 360,
+      "adapt_parameters": 145,
+      "adapt_error": 0.0014587297464299098,
+      "adapt_converged": true,
+      "reached_chemical_accuracy": true,
+      "adapt_seconds": 383.02577858599943,
+      "hit_operator_cap": false
     }
   ],
-  "points_in_fit": 3,
-  "adapt_exponent": 3.449570098015462,
-  "adapt_exponent_stderr": 0.10188482756352778,
-  "uccsd_exponent": 3.311109277361394,
-  "uccsd_exponent_stderr": 0.15615501327591683
+  "points_in_fit": 4,
+  "adapt_exponent": 3.5688123812500527,
+  "adapt_exponent_stderr": 0.1111446358847946,
+  "uccsd_exponent": 3.4387625504491695,
+  "uccsd_exponent_stderr": 0.13308687080278586
 }

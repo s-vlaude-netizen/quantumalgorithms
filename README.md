@@ -18,10 +18,12 @@ Two things are in here, and they point in opposite directions:
 
 Read the second list before quoting anything from the first: every constant
 factor here sits in front of a requirement 10³–10⁸ away, and **no result in this
-repository changes a complexity exponent.** Whether an adaptive ansatz could is
-the one open question, being measured now.
+repository changes a complexity exponent.** The one candidate that might have —
+an adaptive ansatz with a smaller parameter count — was measured and does not
+(Result 74): ADAPT's exponent is 3.57 ± 0.11 against UCCSD's 3.44 ± 0.13, which
+is indistinguishable and, if anything, the wrong way round.
 
-## The answer, since 71 results is a lot to read
+## The answer, since 74 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -463,11 +465,31 @@ microseconds where an operation is nanoseconds, so the unit conversion moves it
 further the wrong way. On this evidence VQE as built here has no route to
 beating CCSD(T) on molecular ground states.
 
-The one lever that changes the exponent rather than the constant is `n`. An
-adaptive ansatz reaching a given accuracy with `n ~ N²` would give `N^7.6` —
-the same order as the classical competitor, which is where a real comparison
-would start. That is the only direction the measurements support, and it is the
-open item.
+The one lever that could change the exponent rather than the constant is `n`, and
+this README claimed for several sessions that an adaptive ansatz reaching `n ~ N²`
+would give `N^7.6` — "the only direction the measurements support". **It has now
+been measured, and it does not (Result 74).**
+
+On a homologous series H₂/H₄/H₆/H₈, both ansätze held to the same accuracy
+criterion:
+
+| N | UCCSD `n` | ADAPT `n` | ratio |
+|---|---|---|---|
+| 2 | 3 | 1 | 3.00 |
+| 4 | 26 | 10 | 2.60 |
+| 6 | 117 | 45 | 2.60 |
+| 8 | 360 | 145 | **2.48** |
+
+**ADAPT 3.569 ± 0.111 against UCCSD 3.439 ± 0.133** — a difference of 0.75
+standard errors, indistinguishable, with ADAPT's exponent if anything the
+*higher* of the two. In shots that is `N^9.3` against UCCSD's `N^9.1` and
+CCSD(T)'s `N⁷`. The ratio does not grow with N; it declines.
+
+The three-molecule anecdote that motivated the direction (1 vs 3, 9 vs 26, 5 vs
+92) was a comparison *across* molecules rather than along a series — the same
+failure Result 53 recorded for `Σ|c|`. **So there is no open direction here that
+changes a complexity class**, and the honest summary of this repository is that
+every result in it is a constant factor.
 
 **Sizing rule for any budget-matched comparison** — below this it measures the
 optimiser's simplex construction, not the algorithm:
