@@ -3456,3 +3456,59 @@ hour, and the number nobody here has bounded is how many times you must run it.*
 
 `experiments/exp017_magic_state_time.py`, `tests/test_magic_state_time.py`,
 `results/exp017_magic_state_time.json`.
+
+---
+
+### Result 72 — the literature check, and every Tier-1 "speedup" is a published method
+
+The README's optimisation section was written to answer a reader's question:
+*if you genuinely made VQE or QAOA faster than what is otherwise available, say
+so prominently.* The honest form of that question is the one they asked next —
+**is there already a quantum algorithm that is just as efficient?** — and it had
+never been asked here. It is asked now, and the answer costs this repository its
+strongest-sounding claims.
+
+| claim as it stood | what the literature says |
+|---|---|
+| Givens compilation, 2.43× fewer 2q gates | **standard practice.** Quantum-number-preserving ansatz constructions use exactly this, and PennyLane ships a tutorial on it. Published depth reductions against naive UCCSD reach ~13× (6 600 → 507 at 12 qubits) — **five times what is reproduced here** |
+| exponential ZNE, 3.2× over the line | **Endo et al.'s extrapolation.** That a global depolarising channel decays exponentially, so `E(s)=a+b·rˢ` is the right form and Richardson is not, is textbook. The README called this "the result I would defend hardest as a *finding*". It is a reproduction |
+| tensored readout calibration, 1.7× at equal budget | **Nation et al.'s construction** — the N × 2×2 factorisation of the assignment matrix, from the same paper that introduced M3, which supersedes it past ~14 qubits and is not implemented here |
+| general-commuting grouping, 15–20× | long-standing standard practice |
+
+**So the correct statement is: this repository contains no new quantum
+algorithm.** The batched+lazy ADAPT schedule is the only item not found in print,
+and "not found" is not "not there" — it was not searched exhaustively and is
+recorded as unverified rather than novel.
+
+**What survives as a contribution is empirical.** Three things, all of which
+needed measuring rather than reading:
+
+1. **A published ranking inverts under device noise.** General-commuting grouping
+   beats QWC by 1.7× on an ideal simulator and *loses* by 1.37× on a Heron-class
+   model, because its Clifford basis changes cost 125 two-qubit gates against
+   QWC's zero (Result 55). Variance-based papers report the ideal ranking.
+2. **The per-gate cost is the device's own two-qubit error rate**, ratio 0.64–1.09
+   across seven calibration snapshots (Result 65) — which converts every
+   algorithmic question here into one hardware number.
+3. **Budget-matched negative results with denominators**, including four classical
+   baselines strong enough to close their own problem classes.
+
+**Why this is worth a result number rather than a quiet edit.** The overclaim was
+not a lie, it was a *framing*: each multiplier was real and measured, the baseline
+was named, and the tier heading said "measured against a standard method". A
+reader would still have concluded these were contributions. The rule this gives:
+**a measured number against a named baseline is not yet a contribution — the
+missing question is whether someone published the same thing first, and it costs
+one search per claim to find out.** Eleven results in this project were caught by
+tests; this one was caught by a reader asking the obvious question, which is a
+cheaper instrument than any test here and was never applied.
+
+README updated: the Tier-1 table now carries citations instead of implied
+novelty, and the top of the file says outright that no result here changes a
+complexity exponent.
+
+Sources consulted: PennyLane's Givens-rotation tutorial and the
+quantum-number-preserving ansatz literature (New J. Phys. 23 113010); Endo,
+Benjamin & Li on exponential extrapolation against Li & Benjamin's Richardson
+form; Nation, Kang, Sundaresan & Gambetta, *Scalable Mitigation of Measurement
+Errors on Quantum Computers* (PRX Quantum 2, 040326).

@@ -84,8 +84,16 @@ def fit_exponent(sizes, counts) -> tuple[float, float]:
     return float(slope), float(np.sqrt(variance / spread)) if spread > 0 else float("nan")
 
 
-def measure(name: str, budget_seconds: float, max_operators: int) -> dict:
-    """One molecule: ADAPT to chemical accuracy, and UCCSD's fixed count."""
+def measure(name: str, max_operators: int) -> dict:
+    """One molecule: ADAPT to chemical accuracy, and UCCSD's fixed count.
+
+    Deliberately **not** time-bounded. ``adapt_vqe`` has no interruption hook, so
+    a per-molecule budget could only be enforced by killing the process and
+    losing the row. ``max_operators`` is the real cap, and a run that hits it is
+    flagged so its parameter count is read as a floor. The series-level budget in
+    ``main`` is checked between molecules, which is the only place it can honestly
+    be checked.
+    """
     started = time.perf_counter()
     problem = build_molecule(name)
     orbitals = problem.num_spatial_orbitals
@@ -127,8 +135,10 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--molecules", nargs="+", default=list(DEFAULT_MOLECULES))
     ap.add_argument("--max-operators", type=int, default=60)
-    ap.add_argument("--budget", type=float, default=5400.0,
-                    help="seconds per molecule before giving up on the series")
+    ap.add_argument("--budget", type=float, default=float("inf"),
+                    help="total seconds; checked BETWEEN molecules only, since "
+                         "a running ADAPT cannot be interrupted without losing "
+                         "the row it is computing")
     args = ap.parse_args()
 
     print("=== experiment 018 :: does the adaptive ansatz move an exponent? ===")
@@ -163,9 +173,18 @@ def main() -> int:
                 "uccsd_exponent": uccsd_fit[0], "uccsd_exponent_stderr": uccsd_fit[1],
             }, fh, indent=2)
 
+    series_started = time.perf_counter()
     for name in args.molecules:
+        elapsed = time.perf_counter() - series_started
+        if elapsed > args.budget:
+            print(f"{name:<9}{'SKIPPED':>20}  series budget spent "
+                  f"({elapsed:.0f}s > {args.budget:.0f}s)", flush=True)
+            rows.append({"molecule": name, "skipped": "series budget spent",
+                         "reached_chemical_accuracy": False})
+            save()
+            continue
         try:
-            row = measure(name, args.budget, args.max_operators)
+            row = measure(name, args.max_operators)
         except Exception as exc:  # noqa: BLE001 -- report, never skip silently
             print(f"{name:<9}{'FAILED':>20}  {type(exc).__name__}: {exc}", flush=True)
             rows.append({"molecule": name, "failed": f"{type(exc).__name__}: {exc}",

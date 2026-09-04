@@ -7,13 +7,13 @@
       "qubits": 2,
       "fci_energy": -1.8572750302023535,
       "correlation_energy": -0.020307038999353377,
-      "build_seconds": 1.3724834130002819,
+      "build_seconds": 1.4239713949996258,
       "uccsd_parameters": 3,
       "adapt_parameters": 1,
       "adapt_error": 1.6198022922964128e-09,
       "adapt_converged": true,
       "reached_chemical_accuracy": true,
-      "adapt_seconds": 0.13687505699999747,
+      "adapt_seconds": 0.1540551640000558,
       "hit_operator_cap": false
     },
     {
@@ -22,14 +22,19 @@
       "qubits": 6,
       "fci_energy": -5.20257897694265,
       "correlation_energy": -0.04181982418564889,
-      "build_seconds": 0.41785956800003987,
+      "build_seconds": 1.0156199100001686,
       "uccsd_parameters": 26,
       "adapt_parameters": 10,
       "adapt_error": 0.0003289826145671526,
       "adapt_converged": true,
       "reached_chemical_accuracy": true,
-      "adapt_seconds": 16.50836230999994,
+      "adapt_seconds": 31.263292316999923,
       "hit_operator_cap": false
+    },
+    {
+      "molecule": "H6",
+      "skipped": "series budget spent",
+      "reached_chemical_accuracy": false
     }
   ],
   "points_in_fit": 2,

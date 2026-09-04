@@ -7,13 +7,19 @@ noiseless idealisation where most published speedups live.
 Two things are in here, and they point in opposite directions:
 
 1. **[Quantum algorithm optimisation](#quantum-algorithm-optimisation--what-actually-got-faster)** —
-   concrete, reusable speedups with named baselines: 2.43× on excitation-gate
-   compilation against a library implementation, 3.2× from matching a ZNE
-   extrapolation to the physics, 15–20× from Pauli grouping, 70× and 80× in the
-   simulation machinery. **These worked.**
+   measured speedups with named baselines. **These worked**, and a literature
+   check (Result 72) established that essentially all of them are published
+   methods correctly implemented rather than new ones. What is contributed is the
+   budget-matched measurement, including one *reversal* of a published ranking
+   under device noise.
 2. **The search for a quantum advantage** — four problem classes measured against
    honest classical baselines. **This did not**, and the sections below say
    precisely why, per class.
+
+Read the second list before quoting anything from the first: every constant
+factor here sits in front of a requirement 10³–10⁸ away, and **no result in this
+repository changes a complexity exponent.** Whether an adaptive ansatz could is
+the one open question, being measured now.
 
 ## The answer, since 71 results is a lot to read
 
@@ -97,23 +103,32 @@ measurement with the baseline named, split by what the baseline actually is —
 because "2.4× faster than a published construction" and "70× faster than my own
 first draft" are very different claims and should never be added together.
 
-**Tier 1 — measured against a standard method, not against my own first draft.**
-These are the ones that would still matter in someone else's codebase.
+**Tier 1 — published methods, correctly implemented, measured against the naive
+alternative in a budget-matched harness.**
 
-| result | gain | baseline it beats | where |
+**None of these is a new algorithm, and an earlier version of this README implied
+otherwise.** A literature check (Result 72) found every one of them already in
+print, in some cases achieving more than is reproduced here. The column that
+matters is therefore the citation, not the multiplier: what this repository adds
+is the *measurement* — same shot budget, same seeds, paired sign test — not the
+method.
+
+| result | gain here | this is | where |
 |---|---|---|---|
-| Givens compilation of double excitations | **2.43×** fewer 2-qubit gates (1.31× after routing) | the Trotterised construction; output verified **identical to `qiskit_nature`'s operator to 8e-13** | `qres/fermionic.py` |
-| batched + lazy ADAPT schedule | **4.6×** fewer evaluations (647 → 141) | standard ADAPT-VQE, which re-optimises after every growth step | `qres/adapt.py` |
-| general-commuting Pauli grouping | **15–20×** fewer circuits | ungrouped term-by-term measurement | `qres/measurement.py` |
-| tensored readout calibration | **1.7×** lower error *at equal total shots*, and removes the 2ⁿ circuit wall | exact 2ⁿ-circuit assignment matrix | `qres/mitigation.py` |
-| exponential ZNE extrapolation | **3.2×** lower error on **identical measured data** | linear/Richardson extrapolation | `qres/mitigation.py` |
-| SPSA over COBYLA | **2×** lower error, 15 wins of 16, p = 0.001 | COBYLA at matched shot budget | `qres/optimizers.py` |
-| readout correction, budget-matched | **16×** (5.263e-2 → 3.245e-3 Ha) | no mitigation, same total shots | `qres/mitigation.py` |
+| Givens compilation of double excitations | **2.43×** fewer 2q gates (1.31× after routing) | **standard practice.** Established in the quantum-number-preserving ansatz literature and shipped in PennyLane; published depth reductions reach ~13× against naive UCCSD, well beyond this. Output verified identical to `qiskit_nature`'s operator to 8e-13 | `qres/fermionic.py` |
+| exponential ZNE extrapolation | **3.2×** lower error on **identical measured data** | **Endo et al.'s method.** That a global depolarising channel decays exponentially, so `E(s)=a+b·rˢ` beats a line, is textbook. Reproduced, not discovered | `qres/mitigation.py` |
+| tensored readout calibration | **1.7×** lower error *at equal total shots*, removes the 2ⁿ wall | **Nation et al.'s construction** (the N × 2×2 factorisation). M3 supersedes it past ~14 qubits and is not implemented here | `qres/mitigation.py` |
+| general-commuting Pauli grouping | **15–20×** fewer circuits | long-standing standard practice | `qres/measurement.py` |
+| batched + lazy ADAPT schedule | **4.6×** fewer evaluations (647 → 141) | a scheduling change on Grimsley et al.'s ADAPT-VQE; the closest thing here to something I have not found in print, and **not** verified absent from it | `qres/adapt.py` |
+| SPSA over COBYLA | **2×** lower error, 15 wins of 16, p = 0.001 | a configuration choice, measured | `qres/optimizers.py` |
+| readout correction, budget-matched | **16×** (5.263e-2 → 3.245e-3 Ha) | standard mitigation, honestly charged | `qres/mitigation.py` |
 
-The ZNE one is the result I would defend hardest as a *finding* rather than an
-optimisation: a depolarising channel saturates, so `E(s) = a + b·rˢ` is the
-physically correct form and a straight line is not. Same data, same shots, 3.2×.
-Choosing the extrapolation by prominence rather than by physics picked wrong.
+**So what is actually contributed here is empirical, not algorithmic** — and the
+clearest example is a *reversal*: general-commuting grouping beats QWC by 1.7× on
+an ideal simulator and **loses by 1.37× under device noise**, because its Clifford
+basis changes cost 125 two-qubit gates against QWC's zero. The ranking every
+variance-based paper reports inverts on hardware. That is worth knowing and it
+required measuring rather than reading.
 
 **Tier 2 — engineering against my own first working version.** Honest framing:
 this is me removing my own bookkeeping overhead, not beating anyone. It is listed
