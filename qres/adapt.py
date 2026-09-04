@@ -28,14 +28,6 @@ import numpy as np
 from qiskit.quantum_info import SparsePauliOp, Statevector
 
 
-#: Above this state-space dimension the per-operator commutators are kept
-#: symbolically instead of as sparse matrices.  Materialising them is faster per
-#: gradient but costs O(pool x 2^n) memory, which is fine at 10 qubits (H6: ~1300
-#: operators x 1024) and ruinous at 14 (H8: ~4000 x 16384, hundreds of MB each).
-#: The expensive part being cached is the symbolic Pauli algebra either way.
-MAX_MATERIALISED_DIMENSION = 1 << 13
-
-
 @dataclass
 class AdaptStep:
     """One growth step: which operator was added and what it bought."""
@@ -91,52 +83,53 @@ def excitation_pool(problem, kind: str = "sd") -> list[SparsePauliOp]:
     return operators
 
 
-def commutator_cache(
-    hamiltonian: SparsePauliOp, pool: list[SparsePauliOp]
-) -> list[Any]:
-    """Sparse ``i[H, A_k]`` for the whole pool, built once.
+def pauli_action(pauli) -> tuple[int, int, complex]:
+    """A Pauli string as ``(z_mask, x_mask, phase)`` -- three integers, no matrix.
 
-    The commutators do not depend on the state, but ``adapt_vqe`` was rebuilding
-    and re-``simplify``-ing all of them on **every growth step** -- pool-size
-    symbolic Pauli algebra repeated once per step, for an answer that never
-    changes.  On H6 that is ~1 300 commutators per step.
+    Applying ``P`` to a statevector is an index permutation with signs, not a
+    matrix product::
 
-    Returning them as sparse matrices also replaces
-    ``Statevector.expectation_value(SparsePauliOp)`` with one matvec.
-    ``None`` marks an operator that commutes with ``H`` and can never have a
-    gradient.
+        (P psi)[k] = phase * (-1)^popcount(z & k) * psi[k XOR x]
+
+    Storing sparse matrices instead costs 2^n entries *per Pauli term*, which is
+    what drove the H8 memory blow-ups; this costs three integers.
+
+    The phase convention is Qiskit's and was determined **empirically** rather
+    than recalled: ``(-i)^(pauli.phase + |z AND x|)``, the second term because
+    ``Z X = iY`` on every qubit carrying both.  A first version omitted it and
+    was wrong by ``-i`` on every operator containing a Y.  Verified against
+    ``to_matrix`` on 200 random Paulis with group phases, to exactly zero.
     """
-    # Materialising every commutator as a sparse matrix is O(pool x 2^n) in
-    # memory, and that is not a small constant: at 16 qubits a commutator with a
-    # few hundred Pauli terms is hundreds of MB, and the pool has thousands of
-    # them.  A first version did exactly this and drove an H8 run past a gigabyte
-    # and climbing before it was killed.
-    #
-    # The expensive part was never the matrix -- it is the symbolic Pauli algebra
-    # and `simplify`.  So the commutators are always cached (cheap: a few hundred
-    # terms each), and only *materialised* while the dimension stays small enough
-    # for the matvec to be the faster path.
-    dimension = 1 << hamiltonian.num_qubits
-    materialise = dimension <= MAX_MATERIALISED_DIMENSION
-
-    cache: list[Any] = []
-    for operator in pool:
-        commutator = (hamiltonian @ operator - operator @ hamiltonian).simplify(atol=1e-12)
-        if len(commutator) == 0:
-            cache.append(None)
-        elif materialise:
-            cache.append(commutator.to_matrix(sparse=True).tocsr())
-        else:
-            cache.append(commutator)
-    return cache
+    z_mask = int(sum(int(bit) << i for i, bit in enumerate(pauli.z)))
+    x_mask = int(sum(int(bit) << i for i, bit in enumerate(pauli.x)))
+    both = int(np.sum(pauli.z & pauli.x))
+    phase = (-1j) ** (int(pauli.phase) + both)
+    return z_mask, x_mask, phase
 
 
-def prepare_operator(operator: SparsePauliOp) -> list[tuple[float, Any]]:
-    """One generator as ``[(coefficient, sparse Pauli), ...]``."""
+def apply_pauli(vector: np.ndarray, action: tuple[int, int, complex]) -> np.ndarray:
+    """``P |psi>`` from a prepared :func:`pauli_action`."""
+    z_mask, x_mask, phase = action
+    indices = np.arange(vector.shape[0])
+    signs = np.where(np.bitwise_count(indices & z_mask) & 1, -1.0, 1.0)
+    permuted = vector[indices ^ x_mask] if x_mask else vector
+    return phase * signs * permuted
+
+
+def prepare_operator(operator: SparsePauliOp) -> list[tuple[float, tuple[int, int, complex]]]:
+    """One generator as ``[(coefficient, pauli action), ...]``."""
     return [
-        (float(np.real(coefficient)), pauli.to_matrix(sparse=True).tocsr())
+        (float(np.real(coefficient)), pauli_action(pauli))
         for coefficient, pauli in zip(operator.coeffs, operator.paulis)
     ]
+
+
+def apply_operator(vector: np.ndarray, terms) -> np.ndarray:
+    """``A |psi>`` for ``A = sum_j c_j P_j``."""
+    out = np.zeros_like(vector)
+    for coefficient, action in terms:
+        out += coefficient * apply_pauli(vector, action)
+    return out
 
 
 class LazyPool:
@@ -192,9 +185,9 @@ def apply_evolution(vector: np.ndarray, terms: list[tuple[float, Any]], theta: f
     sparse matvec.  Verified against the gate path to 3e-17.
     """
     out = vector
-    for coefficient, matrix in terms:
+    for coefficient, action in terms:
         angle = coefficient * theta
-        out = np.cos(angle) * out - 1j * np.sin(angle) * (matrix @ out)
+        out = np.cos(angle) * out - 1j * np.sin(angle) * apply_pauli(out, action)
     return out
 
 
@@ -203,7 +196,8 @@ def operator_gradients(
     state: Statevector,
     pool: list[SparsePauliOp],
     *,
-    cache: list[Any] | None = None,
+    prepared: Any | None = None,
+    hamiltonian_matrix: Any | None = None,
 ) -> np.ndarray:
     """``|<psi| i[H, A_k] |psi>|`` for every operator in the pool.
 
@@ -218,24 +212,50 @@ def operator_gradients(
     grouped estimator exists for, but the parameter-count question this module
     was written to answer does not need it -- and answering it exactly first is
     much cheaper than answering it approximately.
+
+    **No commutator is ever built.**  For Hermitian ``H`` and ``A``, with
+    ``phi = H|psi>``::
+
+        <[H, A]> = <phi|A|psi> - conj(<phi|A|psi>) = 2i Im <phi|A|psi>
+
+    so the whole pool needs *one* shared matvec plus one cheap ``A|psi>`` each.
+    The explicit route -- ``H@A - A@H`` then ``simplify`` -- is quadratic in the
+    Hamiltonian's term count and was the reason H8 never finished: 2 913 terms
+    against a 360-operator pool gives commutators of ~23 000 Pauli terms, rebuilt
+    every growth step.  :func:`operator_gradients_reference` keeps that version,
+    and the tests hold the two against each other.
+    """
+    vector = np.asarray(state.data if isinstance(state, Statevector) else state)
+
+    # phi = H|psi>, one matvec shared by the whole pool
+    if hamiltonian_matrix is None:
+        hamiltonian_matrix = hamiltonian.to_matrix(sparse=True).tocsr()
+    phi = hamiltonian_matrix @ vector
+
+    if prepared is None:
+        prepared = prepared_pool(list(pool))
+
+    gradients = np.zeros(len(pool))
+    for k in range(len(pool)):
+        gradients[k] = abs(2.0 * float(np.imag(np.vdot(phi, apply_operator(vector, prepared[k])))))
+    return gradients
+
+
+def operator_gradients_reference(
+    hamiltonian: SparsePauliOp, state: Statevector, pool: list[SparsePauliOp]
+) -> np.ndarray:
+    """The explicit-commutator version, kept as the thing to check against.
+
+    Slow and obviously correct: it builds ``[H, A_k]`` symbolically and takes an
+    expectation. That is what :func:`operator_gradients` used to do on every
+    growth step, and on H8 -- 2 913 Hamiltonian terms against a 360-operator pool
+    -- each commutator carries up to ~23 000 Pauli terms, which is why it never
+    finished.
+
+    Retained because a fast path needs something to be verified against, and the
+    identity that replaced it is not obvious enough to trust untested.
     """
     gradients = np.zeros(len(pool))
-
-    if cache is not None:
-        vector = np.asarray(state.data if isinstance(state, Statevector) else state)
-        wrapped = None  # built lazily, only if the cache holds symbolic entries
-        for k, entry in enumerate(cache):
-            if entry is None:
-                continue
-            if isinstance(entry, SparsePauliOp):
-                if wrapped is None:
-                    wrapped = Statevector(vector)
-                value = complex(wrapped.expectation_value(entry))
-            else:
-                value = np.vdot(vector, entry @ vector)
-            gradients[k] = abs(float(np.imag(value)))
-        return gradients
-
     for k, operator in enumerate(pool):
         commutator = (hamiltonian @ operator - operator @ hamiltonian).simplify(atol=1e-12)
         if len(commutator) == 0:
@@ -311,7 +331,6 @@ def adapt_vqe(
     # Built once for the whole run.  Both were previously rebuilt inside the
     # inner loops -- the commutators once per growth step, the Pauli matrices
     # once per parameter per energy evaluation.  See Result 73.
-    gradient_cache = commutator_cache(problem.hamiltonian, pool)
     evolution_terms = prepared_pool(pool)
     hamiltonian_matrix = problem.hamiltonian.to_matrix(sparse=True).tocsr()
     reference_vector = np.asarray(reference.data)
@@ -331,7 +350,8 @@ def adapt_vqe(
         t0 = time.perf_counter()
         state = build(parameters, chosen)
         gradients = operator_gradients(
-            problem.hamiltonian, state, pool, cache=gradient_cache
+            problem.hamiltonian, state, pool,
+            prepared=evolution_terms, hamiltonian_matrix=hamiltonian_matrix,
         )
         picked = [int(i) for i in np.argsort(-gradients) if gradients[i] >= gradient_tolerance]
         picked = picked[: max(1, batch)]

@@ -177,36 +177,6 @@ def test_every_pool_generator_has_internally_commuting_terms():
             assert left.commutes(right), f"{left} and {right} do not commute"
 
 
-def test_cached_gradients_match_the_uncached_ones():
-    """The commutator cache is a memoisation, not a different calculation."""
-    from qres.adapt import commutator_cache
-
-    problem = build_molecule("H4")
-    pool = excitation_pool(problem, "sd")
-    state = Statevector(hartree_fock_state(problem.hf_bitstring))
-
-    slow = operator_gradients(problem.hamiltonian, state, pool)
-    cache = commutator_cache(problem.hamiltonian, pool)
-    fast = operator_gradients(problem.hamiltonian, state, pool, cache=cache)
-
-    np.testing.assert_allclose(fast, slow, atol=1e-10)
-    assert slow.max() > 0, "a pool with no gradient anywhere would pass vacuously"
-
-
-def test_cached_none_entries_are_exactly_the_commuting_operators():
-    """`None` must mean "cannot have a gradient", not "was skipped"."""
-    from qres.adapt import commutator_cache
-
-    problem = build_molecule("H4")
-    pool = excitation_pool(problem, "sd")
-    cache = commutator_cache(problem.hamiltonian, pool)
-
-    for operator, entry in zip(pool, cache):
-        commutator = (problem.hamiltonian @ operator
-                      - operator @ problem.hamiltonian).simplify(atol=1e-12)
-        assert (entry is None) == (len(commutator) == 0)
-
-
 def test_the_optimisation_did_not_move_the_answer():
     """Regression against the values measured before the rewrite.
 
@@ -220,45 +190,6 @@ def test_the_optimisation_did_not_move_the_answer():
     assert result.num_parameters == 10
     assert abs(result.energy - problem.fci_energy) == pytest.approx(3.29e-4, rel=0.02)
     assert result.converged
-
-
-def test_both_cache_modes_agree_and_the_memory_guard_engages():
-    """The commutator cache has two representations; they must not disagree.
-
-    Materialising every commutator as a sparse matrix is O(pool x 2^n) memory. A
-    first version did that unconditionally and drove an H8 run past a gigabyte
-    and climbing before it was killed. Above `MAX_MATERIALISED_DIMENSION` the
-    commutators stay symbolic -- still cached, since the symbolic Pauli algebra
-    is the expensive part either way.
-
-    Both paths must give the same gradients, or the guard silently changes which
-    operator ADAPT picks.
-    """
-    import qres.adapt as adapt_module
-
-    problem = build_molecule("H4")
-    pool = excitation_pool(problem, "sd")
-    state = Statevector(hartree_fock_state(problem.hf_bitstring))
-
-    materialised = adapt_module.commutator_cache(problem.hamiltonian, pool)
-
-    original = adapt_module.MAX_MATERIALISED_DIMENSION
-    try:
-        adapt_module.MAX_MATERIALISED_DIMENSION = 1  # force the symbolic path
-        symbolic = adapt_module.commutator_cache(problem.hamiltonian, pool)
-    finally:
-        adapt_module.MAX_MATERIALISED_DIMENSION = original
-
-    # the guard actually changed the representation, or this test is vacuous
-    assert any(hasattr(e, "nnz") for e in materialised if e is not None)
-    assert not any(hasattr(e, "nnz") for e in symbolic if e is not None)
-    assert sum(e is None for e in materialised) == sum(e is None for e in symbolic)
-
-    np.testing.assert_allclose(
-        adapt_module.operator_gradients(problem.hamiltonian, state, pool, cache=materialised),
-        adapt_module.operator_gradients(problem.hamiltonian, state, pool, cache=symbolic),
-        atol=1e-12,
-    )
 
 
 def test_the_pool_is_prepared_lazily_not_wholesale():
@@ -308,3 +239,78 @@ def test_adapt_touches_far_fewer_operators_than_the_pool_holds():
     assert len(set(result.operators)) < pool_size / 2, (
         f"chose {len(set(result.operators))} distinct of {pool_size}"
     )
+
+
+def test_fast_gradients_match_the_explicit_commutator():
+    """The identity the whole gradient sweep now rests on.
+
+    `<[H,A]> = 2i Im <H psi|A|psi>` for Hermitian H and A. That removes the
+    commutator entirely -- which matters because building it is quadratic in the
+    Hamiltonian's term count and is what stopped H8 from ever finishing.
+
+    Checked against the explicit construction, which is slow and obviously
+    correct. If these ever disagree, the fast path is picking different
+    operators and every parameter count in Result 74 is wrong.
+    """
+    from qres.adapt import operator_gradients_reference
+
+    for molecule in ("H2", "H4"):
+        problem = build_molecule(molecule)
+        pool = excitation_pool(problem, "sd")
+        state = Statevector(hartree_fock_state(problem.hf_bitstring))
+
+        fast = operator_gradients(problem.hamiltonian, state, pool)
+        slow = operator_gradients_reference(problem.hamiltonian, state, pool)
+
+        np.testing.assert_allclose(fast, slow, atol=1e-10)
+        assert slow.max() > 1e-3, "a pool with no gradient would pass vacuously"
+        # and the ranking, which is what ADAPT actually consumes
+        assert int(np.argmax(fast)) == int(np.argmax(slow))
+
+
+def test_fast_gradients_agree_away_from_the_reference_state():
+    """Hartree-Fock is a special point; the identity must hold generally."""
+    from qres.adapt import (
+        apply_evolution,
+        operator_gradients_reference,
+        prepared_pool,
+    )
+
+    problem = build_molecule("H4")
+    pool = excitation_pool(problem, "sd")
+    prepared = prepared_pool(pool)
+
+    vector = np.asarray(Statevector(hartree_fock_state(problem.hf_bitstring)).data)
+    for index, theta in ((2, 0.41), (5, -0.77), (9, 1.13)):
+        vector = apply_evolution(vector, prepared[index], theta)
+    vector /= np.linalg.norm(vector)
+    state = Statevector(vector)
+
+    np.testing.assert_allclose(
+        operator_gradients(problem.hamiltonian, state, pool),
+        operator_gradients_reference(problem.hamiltonian, state, pool),
+        atol=1e-10,
+    )
+
+
+def test_pauli_action_matches_to_matrix_including_group_phases():
+    """The phase convention was determined empirically, so it is pinned here.
+
+    `(-i)^(phase + |z AND x|)` -- the second term because `Z X = iY` on every
+    qubit carrying both. A first version omitted it and was wrong by a factor of
+    -i on any operator containing a Y.
+    """
+    from qiskit.quantum_info import random_pauli
+
+    from qres.adapt import apply_pauli, pauli_action
+
+    rng = np.random.default_rng(7)
+    for _ in range(50):
+        qubits = int(rng.integers(1, 6))
+        pauli = random_pauli(qubits, group_phase=True, seed=int(rng.integers(1_000_000)))
+        vector = rng.normal(size=1 << qubits) + 1j * rng.normal(size=1 << qubits)
+        np.testing.assert_allclose(
+            apply_pauli(vector, pauli_action(pauli)),
+            pauli.to_matrix() @ vector,
+            atol=1e-12,
+        )
