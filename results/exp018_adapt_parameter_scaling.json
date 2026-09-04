@@ -30,11 +30,26 @@
       "reached_chemical_accuracy": true,
       "adapt_seconds": 0.40031692899992777,
       "hit_operator_cap": false
+    },
+    {
+      "molecule": "H6",
+      "orbitals": 6,
+      "qubits": 10,
+      "fci_energy": -9.293760447147855,
+      "correlation_energy": -0.06360753643685335,
+      "build_seconds": 26.362760900000467,
+      "uccsd_parameters": 117,
+      "adapt_parameters": 45,
+      "adapt_error": 0.0014185866456255525,
+      "adapt_converged": true,
+      "reached_chemical_accuracy": true,
+      "adapt_seconds": 6.93271583600017,
+      "hit_operator_cap": false
     }
   ],
-  "points_in_fit": 2,
-  "adapt_exponent": NaN,
-  "adapt_exponent_stderr": NaN,
-  "uccsd_exponent": NaN,
-  "uccsd_exponent_stderr": NaN
+  "points_in_fit": 3,
+  "adapt_exponent": 3.449570098015462,
+  "adapt_exponent_stderr": 0.10188482756352778,
+  "uccsd_exponent": 3.311109277361394,
+  "uccsd_exponent_stderr": 0.15615501327591683
 }
