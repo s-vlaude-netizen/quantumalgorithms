@@ -10,6 +10,39 @@ what is left, add what the results suggested.
 
 ## Now
 
+### The one direction with real leverage: the block encoding (Result 75)
+
+**This is now the top item, and it displaces everything below it.**
+
+Result 75 closed Result 71's repetition question — repetitions are a VQE
+artefact, qubitized phase estimation needs 3 — and in doing so found where the
+leverage actually is. The naive LCU block encoding in `exp019` gives 1.1e15 T
+gates for a drug-sized molecule, which is **roughly where the published field
+stood in 2017**:
+
+| construction | T gates, FeMoco-scale | runtime |
+|---|---|---|
+| Reiher et al. 2017, Trotter | ~1e14 | years |
+| Berry/Gidney 2019, sparse qubitization | ~1e10 | — |
+| Lee et al. 2021, tensor hypercontraction | 2.1e10 | ~4 days |
+| this repo's naive LCU | 1.1e15 | 804 years |
+
+**~10⁵ of algorithmic progress, in the Hamiltonian's *representation* rather than
+its measurement.** That is more than every constant factor in this repository
+combined, by two orders of magnitude.
+
+So the useful work is:
+
+1. **Implement double factorisation as a block encoding and measure its T count**
+   against the naive LCU on the molecules here. `qres/factorization.py` already
+   exists and was used for a *measurement scheme* (Result 38, where it ranked
+   4th) — the same factorisation is worth far more on the encoding side than it
+   ever was on the measurement side, which is itself the lesson.
+2. **Then tensor hypercontraction**, if (1) reproduces the expected gain.
+
+This is the first item in a long time where the measured evidence says a large
+factor is available and nothing in the repository has tried for it.
+
 ### The scaling question is answered, negatively (Result 74)
 
 This file said for several sessions that `n`, the parameter count, was the one

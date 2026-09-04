@@ -3633,3 +3633,75 @@ sub-quartic, tested the same way. Nothing in this repository is a candidate.
 
 `experiments/exp018_adapt_parameter_scaling.py`,
 `results/exp018_adapt_parameter_scaling.json`.
+
+---
+
+### Result 75 — the repetition count was a VQE artefact, and the real lever is the block encoding
+
+Result 71 computed the wall-clock of *one* error-corrected circuit execution — 59
+minutes at the parallel floor for a drug-sized molecule — and closed on the
+quantity it could not bound: **how many executions are needed.** At 10³ that is
+41 days and at 10⁶ it is 113 years, and this project had measured H₄ consuming
+~10⁸ shots without reaching chemical accuracy. So the open question was whether
+repetitions destroy the qubit estimate.
+
+**They do, for VQE — and VQE is the wrong algorithm to error-correct.**
+
+The two families put precision in different places:
+
+* **VQE** is shot-noise-limited. This repository *measured* `shots ~ (Σ|c|)²·n/ε²`
+  (Result 42), so precision costs **repetitions**, quadratically.
+* **Qubitization + phase estimation** is Heisenberg-limited: ~`πλ/(2ε)` walk
+  applications and **O(1) repetitions**. Precision costs **depth**.
+
+Error correction is exactly the technology that makes depth affordable and does
+nothing whatsoever about shot count.
+
+With this repository's own measured λ = Σ|c| and Pauli term counts:
+
+| molecule | λ | QPE reps | QPE T gates | VQE reps | VQE T gates | ratio |
+|---|---|---|---|---|---|---|
+| H₄ | 8.47 | 3 | 3.3e7 | 7.3e8 | 5.8e12 | **1.8e5** |
+| LiH | 12.34 | 3 | 1.8e8 | 5.5e9 | 2.1e14 | 1.1e6 |
+| H₂O | 72.00 | 3 | 1.8e9 | 2.0e11 | 1.2e16 | 6.7e6 |
+| NH₃ | 66.09 | 3 | 4.6e9 | 3.4e11 | 5.2e16 | 1.1e7 |
+
+At Result 71's floor that is **12.6 minutes against 4.25 years** for H₄, and 29
+hours against 37 500 years for NH₃.
+
+**And it is a scaling difference, not a constant.** The ratio grows as λ/ε:
+tightening the target tenfold costs VQE 100× and QPE 10×. Measured on H₄: ratio
+1.8e5 → 1.8e6 → 1.8e7 across three decades of ε.
+
+### The part that matters more, and it is not flattering
+
+The drug-sized case with the naive LCU block encoding used here comes out at
+**1.1 × 10¹⁵ T gates, 804 years.** That number is not physics — it is my choice
+of encoding, and checking it against the literature (the Result 72 discipline,
+this time applied *before* publishing rather than after) places it precisely:
+
+| construction | T gates, FeMoco-scale | reported runtime |
+|---|---|---|
+| Reiher et al. 2017, Trotter | ~1e14 | years |
+| Berry/Gidney 2019, sparse qubitization | ~1e10 | — |
+| Lee et al. 2021, tensor hypercontraction | 2.1e10 (5.3e9 Toffoli) | **~4 days** |
+| **this experiment, naive LCU** | **1.1e15** | **804 years** |
+
+**So this model reproduces roughly where the field stood in 2017, and is ~5×10⁴
+behind the current state of the art.** The gap is neither hardware nor
+measurement — it is the Hamiltonian representation inside the block encoding.
+
+That single line of algorithmic work — Trotter → sparse qubitization → tensor
+hypercontraction → symmetry-compressed double factorisation — is worth about
+**10⁵**, which is *more than every constant factor in this repository combined*,
+by two orders of magnitude. None of it was invented here, and this project spent
+seventy-four results on the wrong end of the problem: it optimised the
+measurement of a Hamiltonian rather than its representation.
+
+**The honest closing of Result 71's question:** repetitions do not destroy the
+qubit estimate, because the right algorithm needs three of them. What is left is
+depth, and depth is dominated by a factorisation choice this repository never
+touched.
+
+`experiments/exp019_repetitions.py`, `tests/test_repetitions.py`,
+`results/exp019_repetitions.json`.

@@ -23,7 +23,7 @@ an adaptive ansatz with a smaller parameter count — was measured and does not
 (Result 74): ADAPT's exponent is 3.57 ± 0.11 against UCCSD's 3.44 ± 0.13, which
 is indistinguishable and, if anything, the wrong way round.
 
-## The answer, since 74 results is a lot to read
+## The answer, since 75 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -86,12 +86,23 @@ sit on the algorithm's critical path and are consumed one at a time however many
 are waiting. The qubit/time trade is bounded and cheap: 2.8× the qubits buys 10×
 the time, then stops.
 
-**The one quantity still unbounded is repetitions.** All of the above is *one
-circuit execution*. At the floor, 10³ executions is 41 days and 10⁶ is 113 years
-— and a variational loop needs one per energy evaluation, where this project
-measured H₄ consuming ~10⁸ shots without reaching chemical accuracy. So the open
-question is not the distillation rate; it is how many times the circuit must run.
-(Result 71.)
+**Repetitions turned out to be a VQE artefact (Result 75).** VQE is
+shot-noise-limited — this repo *measured* `shots ~ (Σ|c|)²·n/ε²`, so precision
+costs repetitions quadratically. Qubitization plus phase estimation is
+Heisenberg-limited: precision costs *depth*, and repetitions are **3**. Error
+correction is exactly what makes depth affordable and does nothing for shots. On
+measured λ values that is 12.6 minutes against 4.25 years for H₄, and the gap
+grows as λ/ε rather than being a constant.
+
+**But the number that should change how you read this whole repository** is what
+the same experiment says about the block encoding. Its naive LCU gives 1.1×10¹⁵
+T gates for a drug-sized molecule — which is roughly where the published field
+stood in **2017**. Sparse qubitization (2019) and tensor hypercontraction (2021)
+bring FeMoco-scale problems to ~2×10¹⁰ T gates and about **four days**. That one
+line of algorithmic work is worth ~10⁵ — *more than every constant factor in this
+repository combined, by two orders of magnitude* — and none of it was invented
+here. Seventy-five results went into optimising how a Hamiltonian is **measured**;
+the leverage was in how it is **represented**.
 
 Everything below is how that was established, and it is worth reading mainly for
 the method: every claim here is a measurement, several of them corrections to
