@@ -28,6 +28,14 @@ import numpy as np
 from qiskit.quantum_info import SparsePauliOp, Statevector
 
 
+#: Above this state-space dimension the per-operator commutators are kept
+#: symbolically instead of as sparse matrices.  Materialising them is faster per
+#: gradient but costs O(pool x 2^n) memory, which is fine at 10 qubits (H6: ~1300
+#: operators x 1024) and ruinous at 14 (H8: ~4000 x 16384, hundreds of MB each).
+#: The expensive part being cached is the symbolic Pauli algebra either way.
+MAX_MATERIALISED_DIMENSION = 1 << 13
+
+
 @dataclass
 class AdaptStep:
     """One growth step: which operator was added and what it bought."""
@@ -98,13 +106,28 @@ def commutator_cache(
     ``None`` marks an operator that commutes with ``H`` and can never have a
     gradient.
     """
+    # Materialising every commutator as a sparse matrix is O(pool x 2^n) in
+    # memory, and that is not a small constant: at 16 qubits a commutator with a
+    # few hundred Pauli terms is hundreds of MB, and the pool has thousands of
+    # them.  A first version did exactly this and drove an H8 run past a gigabyte
+    # and climbing before it was killed.
+    #
+    # The expensive part was never the matrix -- it is the symbolic Pauli algebra
+    # and `simplify`.  So the commutators are always cached (cheap: a few hundred
+    # terms each), and only *materialised* while the dimension stays small enough
+    # for the matvec to be the faster path.
+    dimension = 1 << hamiltonian.num_qubits
+    materialise = dimension <= MAX_MATERIALISED_DIMENSION
+
     cache: list[Any] = []
     for operator in pool:
         commutator = (hamiltonian @ operator - operator @ hamiltonian).simplify(atol=1e-12)
         if len(commutator) == 0:
             cache.append(None)
-        else:
+        elif materialise:
             cache.append(commutator.to_matrix(sparse=True).tocsr())
+        else:
+            cache.append(commutator)
     return cache
 
 
@@ -169,10 +192,17 @@ def operator_gradients(
 
     if cache is not None:
         vector = np.asarray(state.data if isinstance(state, Statevector) else state)
-        for k, matrix in enumerate(cache):
-            if matrix is None:
+        wrapped = None  # built lazily, only if the cache holds symbolic entries
+        for k, entry in enumerate(cache):
+            if entry is None:
                 continue
-            gradients[k] = abs(float(np.imag(np.vdot(vector, matrix @ vector))))
+            if isinstance(entry, SparsePauliOp):
+                if wrapped is None:
+                    wrapped = Statevector(vector)
+                value = complex(wrapped.expectation_value(entry))
+            else:
+                value = np.vdot(vector, entry @ vector)
+            gradients[k] = abs(float(np.imag(value)))
         return gradients
 
     for k, operator in enumerate(pool):

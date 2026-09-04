@@ -220,3 +220,42 @@ def test_the_optimisation_did_not_move_the_answer():
     assert result.num_parameters == 10
     assert abs(result.energy - problem.fci_energy) == pytest.approx(3.29e-4, rel=0.02)
     assert result.converged
+
+
+def test_both_cache_modes_agree_and_the_memory_guard_engages():
+    """The commutator cache has two representations; they must not disagree.
+
+    Materialising every commutator as a sparse matrix is O(pool x 2^n) memory. A
+    first version did that unconditionally and drove an H8 run past a gigabyte
+    and climbing before it was killed. Above `MAX_MATERIALISED_DIMENSION` the
+    commutators stay symbolic -- still cached, since the symbolic Pauli algebra
+    is the expensive part either way.
+
+    Both paths must give the same gradients, or the guard silently changes which
+    operator ADAPT picks.
+    """
+    import qres.adapt as adapt_module
+
+    problem = build_molecule("H4")
+    pool = excitation_pool(problem, "sd")
+    state = Statevector(hartree_fock_state(problem.hf_bitstring))
+
+    materialised = adapt_module.commutator_cache(problem.hamiltonian, pool)
+
+    original = adapt_module.MAX_MATERIALISED_DIMENSION
+    try:
+        adapt_module.MAX_MATERIALISED_DIMENSION = 1  # force the symbolic path
+        symbolic = adapt_module.commutator_cache(problem.hamiltonian, pool)
+    finally:
+        adapt_module.MAX_MATERIALISED_DIMENSION = original
+
+    # the guard actually changed the representation, or this test is vacuous
+    assert any(hasattr(e, "nnz") for e in materialised if e is not None)
+    assert not any(hasattr(e, "nnz") for e in symbolic if e is not None)
+    assert sum(e is None for e in materialised) == sum(e is None for e in symbolic)
+
+    np.testing.assert_allclose(
+        adapt_module.operator_gradients(problem.hamiltonian, state, pool, cache=materialised),
+        adapt_module.operator_gradients(problem.hamiltonian, state, pool, cache=symbolic),
+        atol=1e-12,
+    )
