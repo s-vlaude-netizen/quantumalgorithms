@@ -1,0 +1,157 @@
+{
+  "cycle_time": 1e-06,
+  "factory_period_in_distances": 10.0,
+  "consumption_in_distances": 1.0,
+  "rows": [
+    {
+      "case": "H2",
+      "logical_qubits": 2,
+      "t_gates": 148,
+      "code_distance": 5,
+      "one_factory_seconds": 0.0073999999999999995,
+      "floor_seconds": 0.00074,
+      "saturating_factories": 10,
+      "binding_limit": "data block",
+      "data_qubits": 100,
+      "qubits_one_factory": 700,
+      "qubits_saturated": 6100
+    },
+    {
+      "case": "H4",
+      "logical_qubits": 6,
+      "t_gates": 7997,
+      "code_distance": 11,
+      "one_factory_seconds": 0.87967,
+      "floor_seconds": 0.08796699999999999,
+      "saturating_factories": 10,
+      "binding_limit": "data block",
+      "data_qubits": 1452,
+      "qubits_one_factory": 4356,
+      "qubits_saturated": 30492
+    },
+    {
+      "case": "LiH",
+      "logical_qubits": 10,
+      "t_gates": 37651,
+      "code_distance": 13,
+      "one_factory_seconds": 4.894629999999999,
+      "floor_seconds": 0.489463,
+      "saturating_factories": 10,
+      "binding_limit": "data block",
+      "data_qubits": 3380,
+      "qubits_one_factory": 11492,
+      "qubits_saturated": 84500
+    },
+    {
+      "case": "H2O",
+      "logical_qubits": 12,
+      "t_gates": 60761,
+      "code_distance": 13,
+      "one_factory_seconds": 7.89893,
+      "floor_seconds": 0.789893,
+      "saturating_factories": 10,
+      "binding_limit": "data block",
+      "data_qubits": 4056,
+      "qubits_one_factory": 12168,
+      "qubits_saturated": 85176
+    },
+    {
+      "case": "BeH2",
+      "logical_qubits": 12,
+      "t_gates": 60761,
+      "code_distance": 13,
+      "one_factory_seconds": 7.89893,
+      "floor_seconds": 0.789893,
+      "saturating_factories": 10,
+      "binding_limit": "data block",
+      "data_qubits": 4056,
+      "qubits_one_factory": 12168,
+      "qubits_saturated": 85176
+    },
+    {
+      "case": "NH3",
+      "logical_qubits": 14,
+      "t_gates": 150790,
+      "code_distance": 15,
+      "one_factory_seconds": 22.618499999999997,
+      "floor_seconds": 2.26185,
+      "saturating_factories": 10,
+      "binding_limit": "data block",
+      "data_qubits": 6300,
+      "qubits_one_factory": 17100,
+      "qubits_saturated": 114300
+    },
+    {
+      "case": "drug/50",
+      "logical_qubits": 98,
+      "t_gates": 154623421,
+      "code_distance": 23,
+      "one_factory_seconds": 35563.386829999996,
+      "floor_seconds": 3556.338683,
+      "saturating_factories": 10,
+      "binding_limit": "data block",
+      "data_qubits": 103684,
+      "qubits_one_factory": 129076,
+      "qubits_saturated": 357604
+    }
+  ],
+  "drug_trade": [
+    {
+      "factories": 1,
+      "seconds": 35563.386829999996,
+      "physical_qubits": 129076,
+      "binding": "factory"
+    },
+    {
+      "factories": 2,
+      "seconds": 17781.693414999998,
+      "physical_qubits": 154468,
+      "binding": "factory"
+    },
+    {
+      "factories": 5,
+      "seconds": 7112.677365999999,
+      "physical_qubits": 230644,
+      "binding": "factory"
+    },
+    {
+      "factories": 10,
+      "seconds": 3556.338683,
+      "physical_qubits": 357604,
+      "binding": "data block"
+    },
+    {
+      "factories": 20,
+      "seconds": 3556.338683,
+      "physical_qubits": 611524,
+      "binding": "data block"
+    },
+    {
+      "factories": 50,
+      "seconds": 3556.338683,
+      "physical_qubits": 1373284,
+      "binding": "data block"
+    }
+  ],
+  "sensitivity": [
+    {
+      "factory_period": 6.0,
+      "seconds_by_period": 21338.032098,
+      "cycle_time": 1e-07,
+      "seconds_by_cycle": 3556.338683
+    },
+    {
+      "factory_period": 10.0,
+      "seconds_by_period": 35563.386829999996,
+      "cycle_time": 1e-06,
+      "seconds_by_cycle": 35563.386829999996
+    },
+    {
+      "factory_period": 20.0,
+      "seconds_by_period": 71126.77365999999,
+      "cycle_time": 1e-05,
+      "seconds_by_cycle": 355633.86830000003
+    }
+  ],
+  "drug_floor_seconds": 3556.338683
+}

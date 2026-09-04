@@ -53,11 +53,24 @@ would waste whoever picks this up:
    because the factory is a fixed 12-logical-qubit footprint while the data
    register grows. Final figure **~1.3 × 10⁵ physical qubits**.
 
-   **What is still unmeasured is time.** A drug-sized molecule needs 1.5 × 10⁸ T
-   gates, and one distillation factory emits states at a finite rate — months of
-   wall-clock, sequentially. Parallel factories trade time back into qubits at
-   roughly linear cost, and modelling that trade is now the single most useful
-   thing left here. It is the dimension every number above ignores.
+   **Time is now measured too, and it retracted the claim that used to sit here
+   (Result 71).** This item said "months of wall-clock, sequentially" and called
+   modelling the trade "the single most useful thing left". The arithmetic had
+   never been done and was wrong by two orders of magnitude: **one factory is
+   9.9 h, ten factories reach a floor of 59 min**, and past saturation
+   parallelism buys nothing because T gates sit on the algorithm's critical
+   path. The trade is bounded and cheap — 2.8× the qubits for 10× the time.
+
+   **The open quantity is now repetitions, and it dominates everything.** All of
+   the above is *one circuit execution*: 10³ executions is 41 days, 10⁶ is 113
+   years. A variational loop needs one per energy evaluation, and this project
+   measured H₄ consuming ~10⁸ shots *without* reaching chemical accuracy. So the
+   next useful thing is to bound the execution count for an error-corrected
+   method that is not VQE — qubitization or phase estimation, whose whole point
+   is replacing a sampling loop with coherent evolution. That is the last
+   dimension of the error-corrected estimate still open, and unlike the previous
+   two it could plausibly move the answer by many orders of magnitude in either
+   direction.
 
 3. **The low-locality folding encoding**, if someone wants to close the one
    remaining loose end. Result 63 measured the *naive* turn encoding (dense, 2ⁿ

@@ -3357,6 +3357,13 @@ is **months of wall-clock**. The fix is parallel factories, which trades the tim
 back into qubits at roughly linear cost, and that trade is where real resource
 estimates spend most of their budget.
 
+> ⚠️ **RETRACTED by Result 71 — "months" is wrong by about two orders of
+> magnitude.** The arithmetic was never done; the word was chosen because it
+> sounded like the right size for 10⁸ of anything. One factory is **9.9 hours**
+> and the parallel floor is **59 minutes**. This was the only quantity in the
+> repository asserted rather than computed, and it is the one that turned out
+> wrong — which is the argument for the rule, not against it. See Result 71.
+
 **So the honest final shape of the error-corrected estimate:**
 
 * **Qubits: ~1.3 × 10⁵** for a drug-sized molecule. An engineering target.
@@ -3369,3 +3376,83 @@ The qubit figure is the one this project can stand behind; the time figure is th
 one it has just learned to ask about. **That is the honest end of this line: not
 "quantum chemistry is impossible" but "here is the machine it needs, and here is
 which of its two dimensions is still unmeasured".**
+
+---
+
+### Result 71 — the time dimension, and a retraction of this project's own closing claim
+
+Result 70 ended on a sentence that was never computed: that 1.5 × 10⁸ T gates on
+one distillation factory is **"months of wall-clock"**. It was written as a
+plausible caveat. Every other number in this repository is a measurement or an
+explicitly-labelled estimate built from measurements; that one was neither, and
+it is the one that turned out to be wrong.
+
+**It is hours, not months** — wrong by roughly two orders of magnitude, in the
+direction that makes the conclusion *less* pessimistic.
+
+The model (an estimate, in exactly exp016's sense — measured T counts and code
+distances, standard surface-code timing): 1 µs code cycle, a 15-to-1 factory
+emitting one state per ~10 d cycles, one T gate teleported into the data block
+per ~d cycles.
+
+| case | T gates | distance | one factory | parallel floor |
+|---|---|---|---|---|
+| H₄ | 7 997 | 11 | 0.9 s | 0.1 s |
+| NH₃ | 150 790 | 15 | 22.6 s | 2.3 s |
+| **drug/50 orbitals** | **154 623 421** | 23 | **9.9 h** | **59.3 min** |
+
+**Two limits, and which one binds is the finding.** Magic-state *production*
+scales down with parallel factories; magic-state *consumption* does not, because
+the T gates sit on a sequential algorithm's critical path and are consumed one at
+a time however many are waiting. So the floor is real:
+
+| factories | wall-clock | physical qubits | binding |
+|---|---|---|---|
+| 1 | 9.9 h | 129 076 | factory |
+| 5 | 2.0 h | 230 644 | factory |
+| **10** | **59.3 min** | 357 604 | **data block** |
+| 50 | 59.3 min | 1 373 284 | data block |
+
+Past saturation, factories cost qubits and buy nothing. The qubit/time trade
+Result 70 said "real resource estimates spend most of their budget on" turns out
+to be **bounded and cheap**: 2.8× the qubits buys 10× the time, and then stops.
+
+**A model artefact that looks like a result, flagged deliberately.** The
+saturating factory count is 10 on *every* row. That is not a fact about
+chemistry — it is `ceil(period / consumption)` = `ceil(10d / 1d)`, a ratio of two
+of my own constants, with the T count and code distance cancelling exactly. It
+varies with nothing because it cannot. `tests/test_magic_state_time.py` pins this
+explicitly so the column is never quoted as a finding.
+
+**Sensitivity.** Across the plausible range of both constants the answer stays
+inside hours: factory period 6 d → 5.9 h, 20 d → 19.8 h; cycle time 1e-7 →
+59 min, 1e-6 → 9.9 h. The one assumption that would change the verdict is a
+trapped-ion cycle time of 1e-5 s, which gives 4.1 days.
+
+**A boundary bug the test found.** The two limits meet at an exact equality, and
+both sides are the same product computed in a different order — so on the
+boundary a strict `>` was decided by the last bit of the mantissa.
+`saturating_factories` returned 11 instead of 10 for some (T count, distance)
+pairs, and the `binding` label could flip arbitrarily. Replaced with the closed
+form plus a relative tolerance. This is the eleventh bug in this project that
+produced an entirely plausible number.
+
+**What this does not settle, and it is now the only open quantity.** Everything
+above is **one circuit execution**. What multiplies it is the algorithm's
+repetition count, and that dominates everything else:
+
+| repetitions | wall-clock at the floor |
+|---|---|
+| 1 | 59.3 min |
+| 10³ | 41.2 days |
+| 10⁶ | 112.7 years |
+
+A variational loop needs one execution per energy evaluation, and this project
+measured H₄ needing ~10⁸ shots without reaching chemical accuracy. So the
+repetition count, not the distillation rate, is where the error-corrected
+estimate actually lives. Result 70 pointed at the wrong dimension; the honest
+statement is that **qubits are an engineering target, single-shot time is an
+hour, and the number nobody here has bounded is how many times you must run it.**
+
+`experiments/exp017_magic_state_time.py`, `tests/test_magic_state_time.py`,
+`results/exp017_magic_state_time.json`.

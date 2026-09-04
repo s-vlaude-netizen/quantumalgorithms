@@ -1,10 +1,21 @@
-# qres — Quantum Algorithm Research
+# qres — Quantum Algorithm Research & Optimisation
 
 An experimental workbench for finding quantum algorithms that are actually
 cheaper to run, measured under **real device noise** rather than in the
 noiseless idealisation where most published speedups live.
 
-## The answer, since 66 results is a lot to read
+Two things are in here, and they point in opposite directions:
+
+1. **[Quantum algorithm optimisation](#quantum-algorithm-optimisation--what-actually-got-faster)** —
+   concrete, reusable speedups with named baselines: 2.43× on excitation-gate
+   compilation against a library implementation, 3.2× from matching a ZNE
+   extrapolation to the physics, 15–20× from Pauli grouping, 70× and 80× in the
+   simulation machinery. **These worked.**
+2. **The search for a quantum advantage** — four problem classes measured against
+   honest classical baselines. **This did not**, and the sections below say
+   precisely why, per class.
+
+## The answer, since 71 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -58,16 +69,72 @@ engineering target where the bare-metal number is not one. *"NISQ chemistry is
 hopeless" and "quantum chemistry is hopeless" are different claims, and this
 repository measured the first.*
 
-**The unmeasured dimension is time, not qubits.** That drug molecule needs
-**1.5 × 10⁸ T gates**, and a distillation factory emits magic states at a finite
-rate — one factory feeding them sequentially is months of wall-clock. Parallel
-factories trade that back into qubits at roughly linear cost, and this model does
-not attempt it. The qubit figure is the one to stand behind; the time figure is
-the one to ask about next.
+**And the time dimension is now computed too — it retracts a claim this README
+used to make.** An earlier version said 1.5 × 10⁸ T gates on one factory was
+"months of wall-clock". That arithmetic had never been done, and it was wrong by
+two orders of magnitude: **one factory is 9.9 hours, and about ten factories
+reach a floor of 59 minutes.** Beyond that, parallelism buys nothing — T gates
+sit on the algorithm's critical path and are consumed one at a time however many
+are waiting. The qubit/time trade is bounded and cheap: 2.8× the qubits buys 10×
+the time, then stops.
+
+**The one quantity still unbounded is repetitions.** All of the above is *one
+circuit execution*. At the floor, 10³ executions is 41 days and 10⁶ is 113 years
+— and a variational loop needs one per energy evaluation, where this project
+measured H₄ consuming ~10⁸ shots without reaching chemical accuracy. So the open
+question is not the distillation rate; it is how many times the circuit must run.
+(Result 71.)
 
 Everything below is how that was established, and it is worth reading mainly for
 the method: every claim here is a measurement, several of them corrections to
 earlier claims in this same repository.
+
+## Quantum algorithm optimisation — what actually got faster
+
+The conclusion above is negative, but the *engineering* underneath it is not, and
+these are the reusable results. Everything here is a wall-clock or gate-count
+measurement with the baseline named, split by what the baseline actually is —
+because "2.4× faster than a published construction" and "70× faster than my own
+first draft" are very different claims and should never be added together.
+
+**Tier 1 — measured against a standard method, not against my own first draft.**
+These are the ones that would still matter in someone else's codebase.
+
+| result | gain | baseline it beats | where |
+|---|---|---|---|
+| Givens compilation of double excitations | **2.43×** fewer 2-qubit gates (1.31× after routing) | the Trotterised construction; output verified **identical to `qiskit_nature`'s operator to 8e-13** | `qres/fermionic.py` |
+| batched + lazy ADAPT schedule | **4.6×** fewer evaluations (647 → 141) | standard ADAPT-VQE, which re-optimises after every growth step | `qres/adapt.py` |
+| general-commuting Pauli grouping | **15–20×** fewer circuits | ungrouped term-by-term measurement | `qres/measurement.py` |
+| tensored readout calibration | **1.7×** lower error *at equal total shots*, and removes the 2ⁿ circuit wall | exact 2ⁿ-circuit assignment matrix | `qres/mitigation.py` |
+| exponential ZNE extrapolation | **3.2×** lower error on **identical measured data** | linear/Richardson extrapolation | `qres/mitigation.py` |
+| SPSA over COBYLA | **2×** lower error, 15 wins of 16, p = 0.001 | COBYLA at matched shot budget | `qres/optimizers.py` |
+| readout correction, budget-matched | **16×** (5.263e-2 → 3.245e-3 Ha) | no mitigation, same total shots | `qres/mitigation.py` |
+
+The ZNE one is the result I would defend hardest as a *finding* rather than an
+optimisation: a depolarising channel saturates, so `E(s) = a + b·rˢ` is the
+physically correct form and a straight line is not. Same data, same shots, 3.2×.
+Choosing the extrapolation by prominence rather than by physics picked wrong.
+
+**Tier 2 — engineering against my own first working version.** Honest framing:
+this is me removing my own bookkeeping overhead, not beating anyone. It is listed
+because the *lesson* replicated four separate times and is worth stealing.
+
+| result | gain | what the time was actually going into | where |
+|---|---|---|---|
+| light-cone QAOA energies | **70×** (30 643 ms → 437 ms at n=1000, p=2) | cone canonicalisation + `QuantumCircuit` construction per call | `qres/lightcone.py` |
+| quantum kernel matrices | **≥80×** (>25 min → 18 s) | re-transpiling one identical circuit template 1 120 times | `qres/problems/learning.py` |
+| readout calibration | **18×** | rebuilding the 2ⁿ calibration per estimate | `qres/mitigation.py` |
+
+Four times in this project the expensive thing turned out to be transpilation and
+gate dispatch rather than linear algebra. A 14-qubit cone is 16 384 amplitudes
+and took 21 ms; hoisting the diagonal layer and applying the mixer by array
+reshape took p=1 from 13.3 ms to **0.5 ms**. If you are profiling a Qiskit
+workload and it feels too slow, look there first.
+
+**What this does *not* claim.** None of these change any exponent. Stacked, they
+are a constant factor of order 10³ against a requirement of 10³–10⁸, which is
+exactly why the headline conclusion stays negative. The scaling analysis is in
+[The wall](#the-wall); the speedups are real and they are not enough.
 
 ## The premise
 
@@ -194,14 +261,23 @@ and MaxCut, two problem classes with different circuits, Hamiltonians and units.
 So `max two-qubit gates ≈ required relative accuracy / 0.001`, and that decides
 which problems are even candidates:
 
-| | accuracy requirement | classical baseline | encoding cost |
-|---|---|---|---|
-| **chemistry** | **fails** — 0.019% gives a 0.2-gate budget; an ansatz needs 665–1300 | fails — FCI exact in 100 ms | — |
-| **MaxCut** | passes — 5%, budget 50, QAOA p=1 uses 48 | **fails** — a 1 ms hill-climb beats it | passes |
-| **HP folding** | passes — 7%, budget ~70 | **fails** — 3 of 4 literature optima in under a minute | **fails** — 1 538 gates at N = 6 |
-| **quantum ML** | passes — percent-level | **fails** — at chance (0.51–0.55) on periodic, interaction and parity data; wins only on data its own feature map generated | **passes** — 6 gates per kernel entry |
+Each column is a **question about whether quantum has an opening**, and "no" is
+the answer that closes the door. Read the middle column carefully: **"no" there
+means the classical algorithm is too *good*, not that it is broken.** Every
+classical baseline in this repository runs correctly and is verified against an
+exact reference; a fast, correct competitor is precisely what removes the
+opportunity.
 
-Three classes, three different failure points, each measured rather than argued.
+| | can the accuracy be reached? | is there a classical gap to fill? | is the encoding affordable? |
+|---|---|---|---|
+| **chemistry** | **no** — 0.019% gives a 0.2-gate budget; an ansatz needs 665–1300 | **no** — FCI is *exact* in 100 ms | — |
+| **MaxCut** | yes — 5%, budget 50, QAOA p=1 uses 48 | **no** — a 1 ms hill-climb finds a *better* cut | yes |
+| **HP folding** | yes — 7%, budget ~70 | **no** — a 1-minute solver hits 3 of 4 literature optima | **no** — 1 538 gates at N = 6 |
+| **quantum ML** | yes — percent-level | **no** — the *quantum* kernel is at chance (0.51–0.55) on periodic, interaction and parity data; it wins only on data its own feature map generated | yes — 6 gates per kernel entry |
+
+Four classes, four different failure points, each measured rather than argued.
+In no case did a classical program crash, hang, or return a wrong answer — the
+"no" is always a competitor that is fast and right.
 
 **And the wall is this hardware generation, sized.** Every noise result above is
 on one device model, so the per-gate cost was re-measured across seven
