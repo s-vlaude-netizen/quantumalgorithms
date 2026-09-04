@@ -83,8 +83,73 @@ def excitation_pool(problem, kind: str = "sd") -> list[SparsePauliOp]:
     return operators
 
 
+def commutator_cache(
+    hamiltonian: SparsePauliOp, pool: list[SparsePauliOp]
+) -> list[Any]:
+    """Sparse ``i[H, A_k]`` for the whole pool, built once.
+
+    The commutators do not depend on the state, but ``adapt_vqe`` was rebuilding
+    and re-``simplify``-ing all of them on **every growth step** -- pool-size
+    symbolic Pauli algebra repeated once per step, for an answer that never
+    changes.  On H6 that is ~1 300 commutators per step.
+
+    Returning them as sparse matrices also replaces
+    ``Statevector.expectation_value(SparsePauliOp)`` with one matvec.
+    ``None`` marks an operator that commutes with ``H`` and can never have a
+    gradient.
+    """
+    cache: list[Any] = []
+    for operator in pool:
+        commutator = (hamiltonian @ operator - operator @ hamiltonian).simplify(atol=1e-12)
+        if len(commutator) == 0:
+            cache.append(None)
+        else:
+            cache.append(commutator.to_matrix(sparse=True).tocsr())
+    return cache
+
+
+def prepared_pool(pool: list[SparsePauliOp]) -> list[list[tuple[float, Any]]]:
+    """Each generator as ``[(coefficient, sparse Pauli), ...]``, built once.
+
+    Feeds the closed-form evolution below.  The Pauli matrices are the part worth
+    caching: they are fixed for the run and were previously being rebuilt inside
+    every energy evaluation via circuit synthesis.
+    """
+    prepared = []
+    for operator in pool:
+        terms = [
+            (float(np.real(coefficient)), pauli.to_matrix(sparse=True).tocsr())
+            for coefficient, pauli in zip(operator.coeffs, operator.paulis)
+        ]
+        prepared.append(terms)
+    return prepared
+
+
+def apply_evolution(vector: np.ndarray, terms: list[tuple[float, Any]], theta: float) -> np.ndarray:
+    """``exp(-i theta A) |psi>`` in closed form, for commuting-Pauli ``A``.
+
+    The Pauli strings inside one fermionic excitation generator all commute, so
+    the exponential factorises, and each factor is exact because ``P^2 = I``:
+
+        exp(-i a P) = cos(a) I - i sin(a) P
+
+    That replaces a ``PauliEvolutionGate`` synthesis and a ``Statevector.evolve``
+    per parameter per energy evaluation with two scalar multiplies and one
+    sparse matvec.  Verified against the gate path to 3e-17.
+    """
+    out = vector
+    for coefficient, matrix in terms:
+        angle = coefficient * theta
+        out = np.cos(angle) * out - 1j * np.sin(angle) * (matrix @ out)
+    return out
+
+
 def operator_gradients(
-    hamiltonian: SparsePauliOp, state: Statevector, pool: list[SparsePauliOp]
+    hamiltonian: SparsePauliOp,
+    state: Statevector,
+    pool: list[SparsePauliOp],
+    *,
+    cache: list[Any] | None = None,
 ) -> np.ndarray:
     """``|<psi| i[H, A_k] |psi>|`` for every operator in the pool.
 
@@ -101,6 +166,15 @@ def operator_gradients(
     much cheaper than answering it approximately.
     """
     gradients = np.zeros(len(pool))
+
+    if cache is not None:
+        vector = np.asarray(state.data if isinstance(state, Statevector) else state)
+        for k, matrix in enumerate(cache):
+            if matrix is None:
+                continue
+            gradients[k] = abs(float(np.imag(np.vdot(vector, matrix @ vector))))
+        return gradients
+
     for k, operator in enumerate(pool):
         commutator = (hamiltonian @ operator - operator @ hamiltonian).simplify(atol=1e-12)
         if len(commutator) == 0:
@@ -173,20 +247,31 @@ def adapt_vqe(
     steps: list[AdaptStep] = []
     converged = False
 
-    def build(params, operators) -> Statevector:
+    # Built once for the whole run.  Both were previously rebuilt inside the
+    # inner loops -- the commutators once per growth step, the Pauli matrices
+    # once per parameter per energy evaluation.  See Result 73.
+    gradient_cache = commutator_cache(problem.hamiltonian, pool)
+    evolution_terms = prepared_pool(pool)
+    hamiltonian_matrix = problem.hamiltonian.to_matrix(sparse=True).tocsr()
+    reference_vector = np.asarray(reference.data)
+
+    def build(params, operators) -> np.ndarray:
         """Apply exp(theta_k A_k) in the order the operators were chosen."""
-        state = reference
+        vector = reference_vector
         for theta, index in zip(params, operators):
-            state = state.evolve(_evolution(pool[index], theta))
-        return state
+            vector = apply_evolution(vector, evolution_terms[index], theta)
+        return vector
 
     def energy_of(params, operators) -> float:
-        return float(np.real(build(params, operators).expectation_value(problem.hamiltonian)))
+        vector = build(params, operators)
+        return float(np.real(np.vdot(vector, hamiltonian_matrix @ vector)))
 
     for step in range(max_operators):
         t0 = time.perf_counter()
         state = build(parameters, chosen)
-        gradients = operator_gradients(problem.hamiltonian, state, pool)
+        gradients = operator_gradients(
+            problem.hamiltonian, state, pool, cache=gradient_cache
+        )
         picked = [int(i) for i in np.argsort(-gradients) if gradients[i] >= gradient_tolerance]
         picked = picked[: max(1, batch)]
 
@@ -248,7 +333,7 @@ def adapt_vqe(
         parameters = np.asarray(result.x)
 
     final = energy_of(parameters, chosen) if len(chosen) else float(
-        np.real(reference.expectation_value(problem.hamiltonian))
+        np.real(np.vdot(reference_vector, hamiltonian_matrix @ reference_vector))
     )
     return AdaptResult(
         energy=final,

@@ -3512,3 +3512,58 @@ quantum-number-preserving ansatz literature (New J. Phys. 23 113010); Endo,
 Benjamin & Li on exponential extrapolation against Li & Benjamin's Richardson
 form; Nation, Kang, Sundaresan & Gambetta, *Scalable Mitigation of Measurement
 Errors on Quantum Computers* (PRX Quantum 2, 040326).
+
+---
+
+### Result 73 — the fifth time the expensive thing was the bookkeeping, and this time it blocked a measurement
+
+Experiment 018 set out to measure the one quantity in this project that could
+move a complexity *exponent* rather than a constant. It ran for **132 CPU-minutes
+without finishing a single H6 point** and was killed. That is not a hardware
+limit — H6 is 10 qubits, 1 024 amplitudes.
+
+Two causes, both the same shape as Results 28, 52, 56 and 67:
+
+1. **`build()` synthesised a `PauliEvolutionGate` per parameter per energy
+   evaluation.** With ~45 parameters and COBYLA at 2 000 evaluations that is
+   ~90 000 gate synthesises and `Statevector.evolve` round-trips per growth step,
+   for an operation that is closed-form.
+2. **`operator_gradients` rebuilt every commutator `H@A − A@H` and re-`simplify`d
+   it on every growth step** — ~1 300 symbolic Pauli-algebra products per step on
+   H6, recomputing an answer that does not depend on the state and never changes.
+
+**The fix for (1) is exact, not an approximation.** The Pauli strings inside one
+fermionic excitation generator commute — the same fact that lets UCC Trotterise a
+single excitation without error — so the exponential factorises, and each factor
+is closed-form because `P² = I`:
+
+    exp(-i θ A) = Π_j [cos(θ c_j) I − i sin(θ c_j) P_j]
+
+Verified against the gate path to **3e-17**, and `test_adapt.py` now asserts both
+the identity and its precondition (that every generator's terms commute), because
+the closed form silently degrades to a first-order approximation if that ever
+stops holding — it would produce plausible energies, not an error.
+
+The fix for (2) is to build the commutators once as sparse matrices, which also
+replaces `expectation_value(SparsePauliOp)` with one matvec.
+
+| | before | after | |
+|---|---|---|---|
+| H4, ADAPT to chemical accuracy | 16.4 s | **0.39 s** | **42×** |
+| H6, ADAPT to chemical accuracy | > 132 min, killed | **7.2 s** | **> 1 100×** |
+
+Same answers: H4 still reaches chemical accuracy with 10 parameters at 3.29e-4,
+pinned as a regression test. **A speedup that changes an answer is a bug**, so
+each new path is tested against the slow path it replaced rather than against
+itself.
+
+**What makes this worth a result rather than a commit note.** The same mistake
+has now appeared five times in this repository, and this is the first time it
+did more than waste time: it made a measurement look *impossible*. The prior
+conclusion would have been "the scaling question cannot be answered with this
+harness", and that conclusion would have been wrong — the harness was fine, the
+gate dispatch was not. The lesson is now sharper than "profile first": **when a
+computation on 1 024 amplitudes takes two hours, the answer is never the
+amplitudes.**
+
+`qres/adapt.py`, `tests/test_adapt.py` (5 new equivalence tests).

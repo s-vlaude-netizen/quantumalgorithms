@@ -127,3 +127,96 @@ def test_batching_uses_fewer_growth_steps():
     single = adapt_vqe(problem, max_operators=15, batch=1, lazy=True)
     batched = adapt_vqe(problem, max_operators=15, batch=5, lazy=True)
     assert len(batched.steps) < len(single.steps)
+
+
+# ---------------------------------------------------------------------------
+# The fast paths (Result 73).  A speedup that changes an answer is a bug, so
+# each of these pins equivalence to the slow path it replaced rather than
+# merely checking the fast path is self-consistent.
+# ---------------------------------------------------------------------------
+
+
+def test_closed_form_evolution_matches_the_gate_path():
+    """`exp(-i a P) = cos(a) I - i sin(a) P`, against the construction it replaced.
+
+    This is the identity the 42x depends on. It holds only because the Pauli
+    strings inside one excitation generator commute -- which the test above
+    establishes separately. If a pool ever contains a non-commuting generator,
+    this equivalence breaks and every energy in the module silently shifts.
+    """
+    from qres.adapt import apply_evolution, prepared_pool
+
+    problem = build_molecule("H4")
+    pool = excitation_pool(problem, "sd")
+    prepared = prepared_pool(pool)
+
+    rng = np.random.default_rng(0)
+    dimension = 1 << pool[0].num_qubits
+    vector = rng.normal(size=dimension) + 1j * rng.normal(size=dimension)
+    vector /= np.linalg.norm(vector)
+
+    for index in (0, 3, 7):
+        for theta in (-1.3, 0.0, 0.37, 2.9):
+            fast = apply_evolution(vector, prepared[index], theta)
+            slow = Statevector(vector).evolve(_evolution(pool[index], theta)).data
+            np.testing.assert_allclose(fast, slow, atol=1e-12)
+
+
+def test_every_pool_generator_has_internally_commuting_terms():
+    """The precondition for the identity above, checked over the whole pool.
+
+    Asserted rather than assumed: the closed form is exact for commuting terms
+    and merely a first-order approximation otherwise, and the difference would
+    show up as a plausible-looking energy rather than an error.
+    """
+    import itertools
+
+    problem = build_molecule("H4")
+    for operator in excitation_pool(problem, "sd"):
+        for left, right in itertools.combinations(operator.paulis, 2):
+            assert left.commutes(right), f"{left} and {right} do not commute"
+
+
+def test_cached_gradients_match_the_uncached_ones():
+    """The commutator cache is a memoisation, not a different calculation."""
+    from qres.adapt import commutator_cache
+
+    problem = build_molecule("H4")
+    pool = excitation_pool(problem, "sd")
+    state = Statevector(hartree_fock_state(problem.hf_bitstring))
+
+    slow = operator_gradients(problem.hamiltonian, state, pool)
+    cache = commutator_cache(problem.hamiltonian, pool)
+    fast = operator_gradients(problem.hamiltonian, state, pool, cache=cache)
+
+    np.testing.assert_allclose(fast, slow, atol=1e-10)
+    assert slow.max() > 0, "a pool with no gradient anywhere would pass vacuously"
+
+
+def test_cached_none_entries_are_exactly_the_commuting_operators():
+    """`None` must mean "cannot have a gradient", not "was skipped"."""
+    from qres.adapt import commutator_cache
+
+    problem = build_molecule("H4")
+    pool = excitation_pool(problem, "sd")
+    cache = commutator_cache(problem.hamiltonian, pool)
+
+    for operator, entry in zip(pool, cache):
+        commutator = (problem.hamiltonian @ operator
+                      - operator @ problem.hamiltonian).simplify(atol=1e-12)
+        assert (entry is None) == (len(commutator) == 0)
+
+
+def test_the_optimisation_did_not_move_the_answer():
+    """Regression against the values measured before the rewrite.
+
+    H4 reached chemical accuracy with 10 parameters at 3.29e-4 error when
+    `build` still went through `PauliEvolutionGate`. Same numbers now, 42x
+    faster. If these drift, the speedup changed the physics.
+    """
+    problem = build_molecule("H4")
+    result = adapt_vqe(problem, energy_tolerance=CHEMICAL_ACCURACY_HA, max_operators=40)
+
+    assert result.num_parameters == 10
+    assert abs(result.energy - problem.fci_energy) == pytest.approx(3.29e-4, rel=0.02)
+    assert result.converged
