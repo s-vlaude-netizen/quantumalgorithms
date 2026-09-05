@@ -83,6 +83,9 @@ GEOMETRIES = {
     # set below spans nuclear charge at fixed N and N at fixed charge.
     "H6": lambda r=0.75: "; ".join(f"H 0 0 {i * r}" for i in range(6)),
     "H8": lambda r=0.75: "; ".join(f"H 0 0 {i * r}" for i in range(8)),
+    # H10 exists to test Result 76's crossover prediction (N = 9) by
+    # measurement rather than extrapolation; it is the smallest chain past it.
+    "H10": lambda r=0.75: "; ".join(f"H 0 0 {i * r}" for i in range(10)),
     "HF": lambda r=0.917: f"F 0 0 0; H 0 0 {r}",
     "NH3": lambda r=1.012: (
         "N 0 0 0; H 0 0.9377 0.3816; H 0.8121 -0.4689 0.3816; "
@@ -101,7 +104,7 @@ GEOMETRIES = {
 
 #: total nuclear charge, the second variable the one-variable fit was missing
 NUCLEAR_CHARGE = {
-    "H2": 2, "H4": 4, "H6": 6, "H8": 8, "LiH": 4, "Li2": 6, "BeH2": 6,
+    "H2": 2, "H4": 4, "H6": 6, "H8": 8, "H10": 10, "LiH": 4, "Li2": 6, "BeH2": 6,
     "BH3": 8, "CH4": 10, "NH3": 10, "H2O": 10, "HF": 10, "LiF": 12, "N2": 14,
 }
 
