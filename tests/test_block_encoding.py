@@ -1,14 +1,19 @@
-"""The block-encoding trade (Result 76), and the claim that is still extrapolated.
+"""The block-encoding trade (Result 76), and the crossover that was measured.
 
-The load-bearing facts are uncomfortable ones and each is pinned here, because
-the experiment's headline number (135x at 50 orbitals) is an extrapolation while
-every *measured* point says the opposite.
+Double factorisation pays a *larger* 1-norm than a Pauli LCU -- 3.6-10x -- and
+buys cheaper walks in exchange. Whether that trade pays depends on size, so the
+load-bearing claim is a **crossover**, and each of its parts is pinned here:
 
-* the double-factorised 1-norm is **larger** than the Pauli one -- DF pays a
-  penalty before it earns anything
-* at every molecule this repository can build, DF **loses** overall
-* the crossover is predicted at N = 9, one orbital past the largest measured
-  case, which is what makes it worth testing rather than asserting
+* the 1-norm penalty is real and DF loses at small N (H2 through H8, 0.01-0.93)
+* the penalty **shrinks** with size, because the Pauli norm grows as N^2.59
+  against DF's N^1.93 -- without this the curves never cross
+* the model put the crossover at N = 9, and **H10 was added to test it rather
+  than quote it**: measured gain 1.56, so the prediction was confirmed by
+  observation
+
+The last test guards the distinction that matters most: if a future change
+pushes the crossover past the largest molecule measured, the headline silently
+reverts to extrapolation, and the test should fail rather than let it.
 """
 
 from __future__ import annotations
@@ -69,8 +74,21 @@ def test_the_measured_molecules_all_favour_the_naive_encoding():
         )
 
 
-def test_the_crossover_is_past_every_molecule_measured():
-    """Which is exactly why it is a prediction and not a finding."""
+def test_a_bigger_one_norm_always_costs_more_walks():
+    """Sanity, and the mechanism behind DF's penalty."""
+    small = double_factorised_cost(10.0, 8, 20, CHEMICAL_ACCURACY)["walks"]
+    large = double_factorised_cost(40.0, 8, 20, CHEMICAL_ACCURACY)["walks"]
+    assert large == pytest.approx(4 * small)
+
+
+def test_the_crossover_is_observed_rather_than_predicted():
+    """H10 was added to turn the load-bearing claim into a measurement.
+
+    The model put the crossover at N = 9. H10 (N = 10) is the first molecule
+    past it, and it wins -- so the prediction was tested rather than quoted. If
+    a future change moves the crossover back outside the measured range, this
+    test should fail loudly: the headline would go back to being extrapolation.
+    """
     import json
     from pathlib import Path
 
@@ -79,40 +97,55 @@ def test_the_crossover_is_past_every_molecule_measured():
         pytest.skip("run experiments.exp020_block_encoding first")
 
     data = json.loads(path.read_text())
-    largest = max(r["orbitals"] for r in data["rows"])
-
-    # reconstruct the crossover from the saved fits
-    norm_exponent = data["df_one_norm_exponent"]
-    factor_exponent = data["df_factor_exponent"]
     rows = data["rows"]
-    anchor = np.log(np.array([r["orbitals"] for r in rows], dtype=float))
-    norms = np.log(np.array([r["df_one_norm"] for r in rows], dtype=float))
-    factors = np.log(np.array([r["df_factors"] for r in rows], dtype=float))
-    norm_fit = np.polyfit(anchor, norms, 1)
-    factor_fit = np.polyfit(anchor, factors, 1)
-    assert norm_fit[0] == pytest.approx(norm_exponent, rel=1e-6)
-    assert factor_fit[0] == pytest.approx(factor_exponent, rel=1e-6)
+    largest = max(r["orbitals"] for r in rows)
+    crossover = data.get("crossover_orbitals")
 
-    crossover = None
-    for candidate in range(2, 200):
-        lam = float(np.exp(np.polyval(norm_fit, np.log(candidate))))
-        fac = float(np.exp(np.polyval(factor_fit, np.log(candidate))))
-        pauli = 8.47 * (candidate / 4) ** 2.86
-        terms = 165 * (candidate / 4) ** 4
-        if (naive_lcu_cost(pauli, terms, CHEMICAL_ACCURACY)["t_gates"]
-                > double_factorised_cost(lam, candidate, fac, CHEMICAL_ACCURACY)["t_gates"]):
-            crossover = candidate
-            break
+    assert crossover is not None, "the experiment must report a crossover"
+    assert crossover <= largest, (
+        f"crossover N={crossover} is beyond the largest measured N={largest}; "
+        "the claim has become extrapolation again"
+    )
 
-    assert crossover is not None
-    assert crossover > largest, (
-        f"crossover at N={crossover} is within the measured range (max N={largest}); "
-        "it should be reported as measured rather than predicted"
+    # and the measurement must actually agree with the model at that point
+    beyond = [r for r in rows if r["orbitals"] >= crossover]
+    assert beyond, "no measured molecule at or past the crossover"
+    assert all(r["t_gate_speedup"] > 1.0 for r in beyond), (
+        "a molecule past the predicted crossover does not favour DF: "
+        + ", ".join(f"{r['molecule']}={r['t_gate_speedup']:.2f}" for r in beyond)
+    )
+
+    below = [r for r in rows if r["orbitals"] < crossover]
+    assert all(r["t_gate_speedup"] <= 1.0 for r in below), (
+        "a molecule below the predicted crossover already favours DF: "
+        + ", ".join(f"{r['molecule']}={r['t_gate_speedup']:.2f}" for r in below)
     )
 
 
-def test_a_bigger_one_norm_always_costs_more_walks():
-    """Sanity, and the mechanism behind DF's penalty."""
-    small = double_factorised_cost(10.0, 8, 20, CHEMICAL_ACCURACY)["walks"]
-    large = double_factorised_cost(40.0, 8, 20, CHEMICAL_ACCURACY)["walks"]
-    assert large == pytest.approx(4 * small)
+def test_the_one_norm_penalty_shrinks_with_size():
+    """The mechanism that makes a crossover exist at all.
+
+    DF pays a larger 1-norm, but the Pauli norm grows faster (N^2.59 against
+    N^1.93 measured), so the penalty is transient. Without this the two curves
+    would never cross and the whole approach would be a constant-factor loss.
+    """
+    import json
+    from pathlib import Path
+
+    path = Path("results/exp020_block_encoding.json")
+    if not path.exists():
+        pytest.skip("run experiments.exp020_block_encoding first")
+
+    data = json.loads(path.read_text())
+    exponents = data["chain_exponents"]
+    assert exponents["pauli_one_norm"] > exponents["df_one_norm"], (
+        "the DF 1-norm penalty no longer shrinks with size"
+    )
+
+    chain = sorted(
+        (r for r in data["rows"] if r["molecule"].startswith("H") and r["molecule"][1:].isdigit()),
+        key=lambda r: r["orbitals"],
+    )
+    assert chain[0]["one_norm_ratio"] > chain[-1]["one_norm_ratio"], (
+        "the measured ratio should fall along the series"
+    )

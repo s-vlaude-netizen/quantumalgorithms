@@ -23,7 +23,7 @@ an adaptive ansatz with a smaller parameter count — was measured and does not
 (Result 74): ADAPT's exponent is 3.57 ± 0.11 against UCCSD's 3.44 ± 0.13, which
 is indistinguishable and, if anything, the wrong way round.
 
-## The answer, since 75 results is a lot to read
+## The answer, since 76 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -103,6 +103,24 @@ line of algorithmic work is worth ~10⁵ — *more than every constant factor in
 repository combined, by two orders of magnitude* — and none of it was invented
 here. Seventy-five results went into optimising how a Hamiltonian is **measured**;
 the leverage was in how it is **represented**.
+
+**So the next result went after it, and it is the largest factor in this
+repository (Result 76).** Double factorisation as a block encoding: **332×** at
+50 orbitals, 1.30×10¹⁵ → 3.93×10¹² T gates. Two things make it worth more than
+the multiplier suggests:
+
+* **The crossover was measured, not extrapolated.** DF pays a *larger* 1-norm
+  (3.6–10×) and buys cheaper walks, so it loses at small sizes — 0.93 on H₈. The
+  model put the crossover at N = 9, so H₁₀ was built specifically to test it
+  rather than quote it. It wins there: **1.56**.
+* **It inverts this repository's own earlier verdict.** The same factorisation
+  ranked *fourth of five* as a measurement scheme (Result 38) — correctly, since
+  measurement is charged the 1-norm alone and sees only the penalty. An encoding
+  is charged 1-norm × per-walk cost, and the penalty is transient: the DF 1-norm
+  grows as `N^1.93` against the Pauli norm's `N^2.59`.
+
+~200× still separates this from Lee et al.'s tensor hypercontraction, which is
+the honest remaining gap and the next open item.
 
 Everything below is how that was established, and it is worth reading mainly for
 the method: every claim here is a measurement, several of them corrections to

@@ -180,10 +180,21 @@ def main() -> int:
     print(f"per-walk cost ratio (LCU/DF): {walk.min():.2f} - {walk.max():.2f}  "
           f"-- DF is better, but by LESS")
 
-    print(f"\n**Net at every size measured here: {gains.min():.2f} - {gains.max():.2f}.**")
-    print("Double factorisation LOSES on all seven molecules. The per-walk saving")
-    print("does not yet cover the 1-norm penalty it pays for. Anything positive")
-    print("below is extrapolation, and is labelled as such.")
+    # Computed from the data, not narrated: an earlier version hardcoded
+    # "loses on all seven molecules" and kept saying it after H10 was added and
+    # won, which is the same class of error as a stale comment.
+    winners = [r for r in rows if r["t_gate_speedup"] > 1.0]
+    losers = [r for r in rows if r["t_gate_speedup"] <= 1.0]
+    print(f"\n**Net across {len(rows)} molecules: {gains.min():.2f} - {gains.max():.2f}.**")
+    print(f"Double factorisation loses on {len(losers)} and wins on {len(winners)}"
+          f"{' (' + ', '.join(r['molecule'] for r in winners) + ')' if winners else ''}.")
+    if winners:
+        smallest_win = min(winners, key=lambda r: r["orbitals"])
+        print(f"The smallest molecule where it wins is {smallest_win['molecule']} "
+              f"at N = {smallest_win['orbitals']}, gain "
+              f"{smallest_win['t_gate_speedup']:.2f} -- **measured, not extrapolated.**")
+    else:
+        print("It wins nowhere measured, so anything positive below is extrapolation.")
     print("\nThe 1-norm half of this is consistent with Result 38, which ranked the")
     print("same factorisation fourth of five as a MEASUREMENT scheme -- measurement")
     print("is charged the 1-norm alone, so it saw only the penalty.")

@@ -33,12 +33,24 @@ combined, by two orders of magnitude.
 
 So the useful work is:
 
-1. **Implement double factorisation as a block encoding and measure its T count**
-   against the naive LCU on the molecules here. `qres/factorization.py` already
-   exists and was used for a *measurement scheme* (Result 38, where it ranked
-   4th) — the same factorisation is worth far more on the encoding side than it
-   ever was on the measurement side, which is itself the lesson.
-2. **Then tensor hypercontraction**, if (1) reproduces the expected gain.
+1. ~~Double factorisation as a block encoding~~ — **done, Result 76.** It wins,
+   and the crossover was *measured*: DF loses up to N = 8 (gain 0.93 on H₈) and
+   wins at N = 10 (1.56), with the model putting the crossover at N = 9. H₁₀ was
+   added specifically to test that rather than quote it. Extrapolated to 50
+   orbitals: **332×**, 1.30e15 → 3.93e12 T gates. The mechanism is that the DF
+   1-norm grows as `N^1.93` against the Pauli norm's `N^2.59`, so its penalty is
+   transient.
+
+2. **Tensor hypercontraction is now the open item**, and the gap it has to close
+   is measured: 3.93e12 against Lee et al.'s 2.1e10, so **~200×** remains. THC
+   plus QROM-based state preparation is what accounts for it; both are published
+   and neither is implemented here. This is the same shape as item 1 — a large,
+   known factor that this repository has not reached for — and item 1 suggests
+   the estimate is worth trusting enough to try.
+
+   Sizing note before starting: the measured DF exponents say the remaining gap
+   is *not* going to come from the 1-norm (already `N^1.93`), so it has to come
+   from the per-walk cost. That is what THC's `N`-independent inner loop targets.
 
 This is the first item in a long time where the measured evidence says a large
 factor is available and nothing in the repository has tried for it.

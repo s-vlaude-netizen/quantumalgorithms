@@ -3705,3 +3705,81 @@ touched.
 
 `experiments/exp019_repetitions.py`, `tests/test_repetitions.py`,
 `results/exp019_repetitions.json`.
+
+---
+
+### Result 76 — the block encoding pays, the crossover was measured, and Result 38's verdict inverts
+
+Result 75 named the block encoding as the one place a large factor was still
+available. This is the first candidate measured: **double factorisation**, on
+real molecular integrals rather than a model.
+
+The starting point is a verdict this repository already holds. `factorization.py`
+was written to shrink the *measurement* 1-norm, and Result 38 ranked it **fourth
+of five**. Measuring the 1-norm directly says why:
+
+**the double-factorised 1-norm is LARGER than the Pauli one, by 3.6–10×.**
+
+A measurement scheme is charged the 1-norm alone, so that is simply a loss — and
+Result 38 was right. But a *block encoding* is charged `λ × (cost per walk)`, and
+double factorisation trades a bigger λ for much cheaper walks: it walks over
+~N factors applied as O(N²) Givens rotations, where the LCU walks over
+`L ~ N^4.5` Pauli terms.
+
+| molecule | N | L | λ_Pauli | λ_DF | T/walk LCU | T/walk DF | **gain** |
+|---|---|---|---|---|---|---|---|
+| H₂ | 2 | 5 | 1.0 | 10.4 | 40 | 423 | 0.01 |
+| H₄ | 4 | 165 | 8.5 | 41.1 | 1 320 | 1 675 | 0.16 |
+| H₆ | 6 | 919 | 21.2 | 88.7 | 7 352 | 3 756 | 0.47 |
+| NH₃ | 8 | 2 949 | 66.1 | 261.1 | 23 592 | 6 666 | 0.90 |
+| H₈ | 8 | 2 913 | 40.0 | 151.7 | 23 304 | 6 626 | 0.93 |
+| **H₁₀** | **10** | **7 151** | **65.6** | **233.4** | **57 208** | **10 294** | **1.56** |
+
+**The crossover is at N = 9, and it was measured rather than predicted.** The
+model put it there while the largest molecule available was N = 8 (gain 0.93,
+just short). Rather than quote the extrapolation, H₁₀ was added — 10 orbitals,
+18 qubits, 7 151 terms, four minutes to build — and it wins at 1.56. The
+prediction was tested.
+
+**The mechanism, which is why a crossover exists at all.** Fitted on the H-chain
+series, one direction, all four quantities from the same data:
+
+| quantity | scaling |
+|---|---|
+| Pauli 1-norm | `N^2.59` |
+| Pauli terms | `N^4.51` |
+| **DF 1-norm** | **`N^1.93`** |
+| DF factors | `N^1.65` |
+
+The DF 1-norm grows *more slowly* than the Pauli one, so the penalty DF pays is
+**transient**. Without that the curves would never cross and this would be a
+constant-factor loss at every size.
+
+Extrapolated to 50 orbitals: **1.30e15 → 3.93e12 T gates, a 332× reduction.**
+Still ~200× behind Lee et al.'s tensor hypercontraction (2.1e10), which is the
+honest remaining gap and is published work neither arm here implements.
+
+### Four errors of my own, all in the same direction
+
+Worth recording because they were all found by the tests and the data rather
+than by reading, and every one flattered the thesis I was arguing:
+
+1. **The prose contradicted the table.** I wrote "DF is better, and by more"
+   while every measured molecule showed it losing.
+2. **The crossover was an artefact of the scan's starting point.** The experiment
+   searched upward from N = 9 and reported N = 9. A test scanning from N = 2
+   found it at 8 and failed.
+3. **I mixed two scaling directions.** The Pauli side used Result 53's `N^2.86`,
+   which is the *basis-limit* direction; this series varies atom count, where
+   Result 53 measured `N^-0.39`. Result 53 exists precisely to record that
+   confound, and I reproduced it inside a file that cites it. It predicted
+   λ = 61.5 at N = 8 against a measured 40.0 — 1.5× high, in DF's favour.
+4. **The summary text was hardcoded and went stale.** After H₁₀ was added and
+   won, the output still printed "loses on all seven molecules". It is now
+   computed from the rows.
+
+The pattern in all four: narration that does not recompute when the data
+changes. Three were caught by tests written for something else.
+
+`experiments/exp020_block_encoding.py`, `tests/test_block_encoding.py`,
+`results/exp020_block_encoding.json`, H₁₀ added to `qres/problems/chemistry.py`.

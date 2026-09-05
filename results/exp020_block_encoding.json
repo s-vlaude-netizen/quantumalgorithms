@@ -1,0 +1,222 @@
+{
+  "epsilon": 0.0016,
+  "synthesis_t_per_rotation": 99.65784284662087,
+  "rows": [
+    {
+      "molecule": "H2",
+      "orbitals": 2,
+      "qubits": 2,
+      "pauli_terms": 5,
+      "pauli_one_norm": 0.988086153726,
+      "df_one_norm": 10.400648721472406,
+      "one_norm_ratio": 10.526054516857995,
+      "df_factors": 3,
+      "naive": {
+        "one_norm": 0.988086153726,
+        "walks": 970.0513130185612,
+        "t_per_walk": 40.0,
+        "t_gates": 116406.15756222735
+      },
+      "double_factorised": {
+        "one_norm": 10.400648721472406,
+        "walks": 10210.813004983056,
+        "t_per_walk": 422.63137138648347,
+        "t_gates": 12946229.709800787,
+        "givens_rotations": 1.0
+      },
+      "t_gate_speedup": 0.008991510283036571,
+      "seconds": 1.8875174269999206
+    },
+    {
+      "molecule": "H4",
+      "orbitals": 4,
+      "qubits": 6,
+      "pauli_terms": 165,
+      "pauli_one_norm": 8.466298063627997,
+      "df_one_norm": 41.14947458131152,
+      "one_norm_ratio": 4.860385763890536,
+      "df_factors": 10,
+      "naive": {
+        "one_norm": 8.466298063627997,
+        "walks": 8311.768687436002,
+        "t_per_walk": 1320.0,
+        "t_gates": 32914604.002246574
+      },
+      "double_factorised": {
+        "one_norm": 41.14947458131152,
+        "walks": 40398.40220116506,
+        "t_per_walk": 1674.5254855459339,
+        "t_gates": 202944462.18355757,
+        "givens_rotations": 6.0
+      },
+      "t_gate_speedup": 0.16218527792335738,
+      "seconds": 1.3086778199999571
+    },
+    {
+      "molecule": "LiH",
+      "orbitals": 6,
+      "qubits": 10,
+      "pauli_terms": 631,
+      "pauli_one_norm": 12.342444274016984,
+      "df_one_norm": 60.48157253255241,
+      "one_norm_ratio": 4.900291319109033,
+      "df_factors": 21,
+      "naive": {
+        "one_norm": 12.342444274016984,
+        "walks": 12117.166330810362,
+        "t_per_walk": 5048.0,
+        "t_gates": 183502366.91379213
+      },
+      "double_factorised": {
+        "one_norm": 60.48157253255241,
+        "walks": 59377.64498307027,
+        "t_per_walk": 3755.682342478351,
+        "t_gates": 669010718.4025958,
+        "givens_rotations": 15.0
+      },
+      "t_gate_speedup": 0.2742891285089464,
+      "seconds": 2.1795575720000215
+    },
+    {
+      "molecule": "H6",
+      "orbitals": 6,
+      "qubits": 10,
+      "pauli_terms": 919,
+      "pauli_one_norm": 21.191077935794006,
+      "df_one_norm": 88.7292314125124,
+      "one_norm_ratio": 4.187103255499769,
+      "df_factors": 21,
+      "naive": {
+        "one_norm": 21.191077935794006,
+        "walks": 20804.292113981,
+        "t_per_walk": 7352.0,
+        "t_gates": 458859466.8659649
+      },
+      "double_factorised": {
+        "one_norm": 88.7292314125124,
+        "walks": 87109.71923881801,
+        "t_per_walk": 3755.682342478351,
+        "t_gates": 981469303.2104266,
+        "givens_rotations": 15.0
+      },
+      "t_gate_speedup": 0.4675229937044558,
+      "seconds": 1.9614466459998994
+    },
+    {
+      "molecule": "H2O",
+      "orbitals": 7,
+      "qubits": 12,
+      "pauli_terms": 1086,
+      "pauli_one_norm": 71.99809844487633,
+      "df_one_norm": 262.7876948517508,
+      "one_norm_ratio": 3.6499254914759742,
+      "df_factors": 28,
+      "naive": {
+        "one_norm": 71.99809844487633,
+        "walks": 70683.96785839318,
+        "t_per_walk": 8688.0,
+        "t_gates": 1842306938.26116
+      },
+      "double_factorised": {
+        "one_norm": 262.7876948517508,
+        "walks": 257991.2161250177,
+        "t_per_walk": 5107.234299484422,
+        "t_gates": 3952864763.878167,
+        "givens_rotations": 21.0
+      },
+      "t_gate_speedup": 0.46606880030311665,
+      "seconds": 9.276459670999998
+    },
+    {
+      "molecule": "NH3",
+      "orbitals": 8,
+      "qubits": 14,
+      "pauli_terms": 2949,
+      "pauli_one_norm": 66.08806100358241,
+      "df_one_norm": 261.09310836102395,
+      "one_norm_ratio": 3.9506849557421724,
+      "df_factors": 36,
+      "naive": {
+        "one_norm": 66.08806100358241,
+        "walks": 64881.80216839018,
+        "t_per_walk": 23592.0,
+        "t_gates": 4592074430.269983
+      },
+      "double_factorised": {
+        "one_norm": 261.09310836102395,
+        "walks": 256327.55972809895,
+        "t_per_walk": 6666.101942183735,
+        "t_gates": 5126116931.216093,
+        "givens_rotations": 28.0
+      },
+      "t_gate_speedup": 0.8958192900957848,
+      "seconds": 10.461405065999998
+    },
+    {
+      "molecule": "H8",
+      "orbitals": 8,
+      "qubits": 14,
+      "pauli_terms": 2913,
+      "pauli_one_norm": 40.01281396045483,
+      "df_one_norm": 151.6955698873855,
+      "one_norm_ratio": 3.791174748102149,
+      "df_factors": 31,
+      "naive": {
+        "one_norm": 40.01281396045483,
+        "walks": 39282.48824613125,
+        "t_per_walk": 23304.0,
+        "t_gates": 2746317318.263528
+      },
+      "double_factorised": {
+        "one_norm": 151.6955698873855,
+        "walks": 148926.77748135227,
+        "t_per_walk": 6626.101942183735,
+        "t_gates": 2960412028.53706,
+        "givens_rotations": 28.0
+      },
+      "t_gate_speedup": 0.927680772740499,
+      "seconds": 8.503612125000018
+    },
+    {
+      "molecule": "H10",
+      "orbitals": 10,
+      "qubits": 18,
+      "pauli_terms": 7151,
+      "pauli_one_norm": 65.57476995264807,
+      "df_one_norm": 233.3658622954381,
+      "one_norm_ratio": 3.558775157944938,
+      "df_factors": 41,
+      "naive": {
+        "one_norm": 65.57476995264807,
+        "walks": 64377.87985752495,
+        "t_per_walk": 57208.0,
+        "t_gates": 11048789252.667862
+      },
+      "double_factorised": {
+        "one_norm": 233.3658622954381,
+        "walks": 229106.39955812364,
+        "t_per_walk": 10293.784284662088,
+        "t_gates": 7075115565.860779,
+        "givens_rotations": 45.0
+      },
+      "t_gate_speedup": 1.5616408170039036,
+      "seconds": 222.36507795500006
+    }
+  ],
+  "chain_exponents": {
+    "pauli_one_norm": 2.5916622511539473,
+    "pauli_terms": 4.5054544452893746,
+    "df_one_norm": 1.9289057239102216,
+    "df_factors": 1.6481193259074804
+  },
+  "crossover_orbitals": 9,
+  "drug": {
+    "orbitals": 50,
+    "df_one_norm": 5249.112688414456,
+    "df_factors": 629.9722305968248,
+    "naive_t_gates": 1304748862494963.2,
+    "df_t_gates": 3929668475821.4062,
+    "speedup": 332.02517477564965,
+    "behind_state_of_the_art": 185.3617205576135
+  }
+}
