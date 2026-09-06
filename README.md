@@ -23,7 +23,7 @@ an adaptive ansatz with a smaller parameter count — was measured and does not
 (Result 74): ADAPT's exponent is 3.57 ± 0.11 against UCCSD's 3.44 ± 0.13, which
 is indistinguishable and, if anything, the wrong way round.
 
-## The answer, since 76 results is a lot to read
+## The answer, since 77 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -119,8 +119,22 @@ the multiplier suggests:
   is charged 1-norm × per-walk cost, and the penalty is transient: the DF 1-norm
   grows as `N^1.93` against the Pauli norm's `N^2.59`.
 
-~200× still separates this from Lee et al.'s tensor hypercontraction, which is
-the honest remaining gap and the next open item.
+~200× still separates this from Lee et al.'s tensor hypercontraction, and
+**Result 77 went after that too — with a split verdict.** Fitting the THC form on
+real integrals, judged by the *energy* of the reconstructed Hamiltonian rather
+than a tensor norm:
+
+* **The 1-norm delivers.** λ_THC falls to **0.56× the Pauli norm** at N = 8 and
+  is **6.8× below double factorisation's** — the mechanism the literature credits,
+  reproduced here.
+* **The rank does not.** `M ~ N^2.26 ± 0.13`, and THC's entire argument is
+  `M ~ O(N)`. The ±2σ interval [2.01, 2.52] excludes linear.
+
+The failure is this repository's, not THC's: the experiment **selects** χ from the
+double-factorisation eigenbasis, where published THC **optimises** χ and Z jointly.
+A selection cannot beat its pool. So the remaining gap is real, its cause is now
+identified precisely, and the open item is one sharp question rather than a
+programme: *does an optimised χ reach `M ~ N` where a selected one gives `N^2.26`?*
 
 Everything below is how that was established, and it is worth reading mainly for
 the method: every claim here is a measurement, several of them corrections to

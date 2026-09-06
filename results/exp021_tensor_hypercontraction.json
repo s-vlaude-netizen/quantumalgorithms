@@ -1,0 +1,371 @@
+{
+  "chemical_accuracy": 0.0016,
+  "rank_multiples": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    8,
+    10,
+    12
+  ],
+  "rows": [
+    {
+      "molecule": "H2",
+      "orbitals": 2,
+      "qubits": 2,
+      "pauli_terms": 5,
+      "pauli_one_norm": 0.988086153726,
+      "reference_energy": -1.8572750302023788,
+      "smallest_sufficient": {
+        "rank": 4,
+        "rank_over_orbitals": 2.0,
+        "energy_error": 6.014833520140428e-09,
+        "tensor_error": 7.1556967018437945e-09,
+        "one_norm": 1.3756551339605854,
+        "stable": true,
+        "within_chemical_accuracy": true,
+        "converged": true
+      },
+      "seconds": 1.2058424620000778,
+      "sweep": [
+        {
+          "rank": 2,
+          "rank_over_orbitals": 1.0,
+          "energy_error": 0.020307025485192698,
+          "tensor_error": 0.18093119978423144,
+          "one_norm": 1.3517236419885907,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 4,
+          "rank_over_orbitals": 2.0,
+          "energy_error": 6.014833520140428e-09,
+          "tensor_error": 7.1556967018437945e-09,
+          "one_norm": 1.3756551339605854,
+          "stable": true,
+          "within_chemical_accuracy": true,
+          "converged": true
+        },
+        {
+          "rank": 6,
+          "rank_over_orbitals": 3.0,
+          "energy_error": 3.723474861772047e-09,
+          "tensor_error": 4.7138103420607536e-09,
+          "one_norm": 1.5633945345637246,
+          "stable": true,
+          "within_chemical_accuracy": true
+        }
+      ]
+    },
+    {
+      "molecule": "H4",
+      "orbitals": 4,
+      "qubits": 6,
+      "pauli_terms": 165,
+      "pauli_one_norm": 8.466298063627997,
+      "reference_energy": -5.202578976946226,
+      "smallest_sufficient": {
+        "rank": 24,
+        "rank_over_orbitals": 6.0,
+        "energy_error": 6.0565819026692225e-09,
+        "tensor_error": 2.4035271550815196e-09,
+        "one_norm": 5.4124946698425545,
+        "stable": true,
+        "within_chemical_accuracy": true,
+        "converged": true
+      },
+      "seconds": 2.4631696239999883,
+      "sweep": [
+        {
+          "rank": 4,
+          "rank_over_orbitals": 1.0,
+          "energy_error": 0.31839549981879856,
+          "tensor_error": 0.15729596123938977,
+          "one_norm": 4.373538582970404,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 8,
+          "rank_over_orbitals": 2.0,
+          "energy_error": 0.0029854173176335763,
+          "tensor_error": 0.006693089336843788,
+          "one_norm": 5.0622295562072885,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 12,
+          "rank_over_orbitals": 3.0,
+          "energy_error": 0.007482612901021035,
+          "tensor_error": 0.0066930893368438715,
+          "one_norm": 11.580774258811102,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 16,
+          "rank_over_orbitals": 4.0,
+          "energy_error": 0.00023790403005019556,
+          "tensor_error": 0.0001557450715903297,
+          "one_norm": 113383.08728705661,
+          "stable": false,
+          "within_chemical_accuracy": true
+        },
+        {
+          "rank": 20,
+          "rank_over_orbitals": 5.0,
+          "energy_error": 6.053770551517346e-08,
+          "tensor_error": 4.5208000037932905e-08,
+          "one_norm": 11.82004800207639,
+          "stable": true,
+          "within_chemical_accuracy": true,
+          "converged": false
+        },
+        {
+          "rank": 24,
+          "rank_over_orbitals": 6.0,
+          "energy_error": 6.0565819026692225e-09,
+          "tensor_error": 2.4035271550815196e-09,
+          "one_norm": 5.4124946698425545,
+          "stable": true,
+          "within_chemical_accuracy": true,
+          "converged": true
+        },
+        {
+          "rank": 32,
+          "rank_over_orbitals": 8.0,
+          "energy_error": 3.195803621736104e-09,
+          "tensor_error": 2.038736179876821e-09,
+          "one_norm": 5.663475612916715,
+          "stable": true,
+          "within_chemical_accuracy": true
+        },
+        {
+          "rank": 40,
+          "rank_over_orbitals": 10.0,
+          "energy_error": 2.0290986668669575e-09,
+          "tensor_error": 1.6528900470547114e-09,
+          "one_norm": 5.769548752788692,
+          "stable": true,
+          "within_chemical_accuracy": true
+        }
+      ]
+    },
+    {
+      "molecule": "H6",
+      "orbitals": 6,
+      "qubits": 10,
+      "pauli_terms": 919,
+      "pauli_one_norm": 21.191077935794006,
+      "reference_energy": -9.293760447148488,
+      "smallest_sufficient": {
+        "rank": 48,
+        "rank_over_orbitals": 8.0,
+        "energy_error": 1.841381802591968e-08,
+        "tensor_error": 9.28590068727253e-09,
+        "one_norm": 13.864783613179032,
+        "stable": true,
+        "within_chemical_accuracy": true,
+        "converged": true
+      },
+      "seconds": 15.40362620399992,
+      "sweep": [
+        {
+          "rank": 6,
+          "rank_over_orbitals": 1.0,
+          "energy_error": 0.7611635763167293,
+          "tensor_error": 0.1661060834020486,
+          "one_norm": 8.200356489307152,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 12,
+          "rank_over_orbitals": 2.0,
+          "energy_error": 0.05056393237182455,
+          "tensor_error": 0.06865068199356697,
+          "one_norm": 22.065179035051155,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 18,
+          "rank_over_orbitals": 3.0,
+          "energy_error": 0.012700775076746496,
+          "tensor_error": 0.013450499887426103,
+          "one_norm": 22.034121207854056,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 24,
+          "rank_over_orbitals": 4.0,
+          "energy_error": 0.008167077734508865,
+          "tensor_error": 0.007732933942522266,
+          "one_norm": 20.16609892632723,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 30,
+          "rank_over_orbitals": 5.0,
+          "energy_error": 0.003981175722241659,
+          "tensor_error": 0.004183129294079824,
+          "one_norm": 21.95888817510316,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 36,
+          "rank_over_orbitals": 6.0,
+          "energy_error": 3.993471787921976e-06,
+          "tensor_error": 3.4853867996662014e-06,
+          "one_norm": 2259.3572761943437,
+          "stable": false,
+          "within_chemical_accuracy": true
+        },
+        {
+          "rank": 48,
+          "rank_over_orbitals": 8.0,
+          "energy_error": 1.841381802591968e-08,
+          "tensor_error": 9.28590068727253e-09,
+          "one_norm": 13.864783613179032,
+          "stable": true,
+          "within_chemical_accuracy": true,
+          "converged": true
+        },
+        {
+          "rank": 60,
+          "rank_over_orbitals": 10.0,
+          "energy_error": 1.1539212252387188e-08,
+          "tensor_error": 5.153039717153973e-09,
+          "one_norm": 12.345516167866776,
+          "stable": true,
+          "within_chemical_accuracy": true
+        },
+        {
+          "rank": 72,
+          "rank_over_orbitals": 12.0,
+          "energy_error": 7.021800030315717e-09,
+          "tensor_error": 1.3785775854202598e-09,
+          "one_norm": 11.27947121134929,
+          "stable": true,
+          "within_chemical_accuracy": true
+        }
+      ]
+    },
+    {
+      "molecule": "H8",
+      "orbitals": 8,
+      "qubits": 14,
+      "pauli_terms": 2913,
+      "pauli_one_norm": 40.01281396045483,
+      "reference_energy": -13.863956464558143,
+      "smallest_sufficient": {
+        "rank": 96,
+        "rank_over_orbitals": 12.0,
+        "energy_error": 1.1697467883209356e-08,
+        "tensor_error": 1.4287456898132156e-08,
+        "one_norm": 22.29317649402065,
+        "stable": true,
+        "within_chemical_accuracy": true,
+        "converged": true
+      },
+      "seconds": 76.76040085600005,
+      "sweep": [
+        {
+          "rank": 8,
+          "rank_over_orbitals": 1.0,
+          "energy_error": 1.3527819899380713,
+          "tensor_error": 0.1785599808660659,
+          "one_norm": 12.518569889131012,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 16,
+          "rank_over_orbitals": 2.0,
+          "energy_error": 0.15982267378930182,
+          "tensor_error": 0.05122743818344707,
+          "one_norm": 136.1302643045419,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 24,
+          "rank_over_orbitals": 3.0,
+          "energy_error": 0.1533778486034727,
+          "tensor_error": 0.04167953720345855,
+          "one_norm": 349.80319839093147,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 32,
+          "rank_over_orbitals": 4.0,
+          "energy_error": 0.011055573027579868,
+          "tensor_error": 0.006174775700962351,
+          "one_norm": 56.83834448601719,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 40,
+          "rank_over_orbitals": 5.0,
+          "energy_error": 0.01086713194464295,
+          "tensor_error": 0.0066442183586926384,
+          "one_norm": 37.72162147100381,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 48,
+          "rank_over_orbitals": 6.0,
+          "energy_error": 0.012023884490753645,
+          "tensor_error": 0.004186971803172873,
+          "one_norm": 35.16855391266762,
+          "stable": true,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 64,
+          "rank_over_orbitals": 8.0,
+          "energy_error": 0.00040658140638782925,
+          "tensor_error": 0.0018185084933301007,
+          "one_norm": 1548.263630758831,
+          "stable": true,
+          "within_chemical_accuracy": true,
+          "converged": false
+        },
+        {
+          "rank": 80,
+          "rank_over_orbitals": 10.0,
+          "energy_error": 8.35825630929321e-10,
+          "tensor_error": 5.8764477277317706e-08,
+          "one_norm": 50.42880611048744,
+          "stable": true,
+          "within_chemical_accuracy": true,
+          "converged": false
+        },
+        {
+          "rank": 96,
+          "rank_over_orbitals": 12.0,
+          "energy_error": 1.1697467883209356e-08,
+          "tensor_error": 1.4287456898132156e-08,
+          "one_norm": 22.29317649402065,
+          "stable": true,
+          "within_chemical_accuracy": true,
+          "converged": true
+        }
+      ]
+    }
+  ],
+  "rank_exponent": 2.2640913324161347,
+  "rank_exponent_stderr": 0.12560531754762916,
+  "one_norm_exponent": 2.040259280628822
+}

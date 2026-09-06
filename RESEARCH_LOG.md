@@ -3783,3 +3783,71 @@ changes. Three were caught by tests written for something else.
 
 `experiments/exp020_block_encoding.py`, `tests/test_block_encoding.py`,
 `results/exp020_block_encoding.json`, H₁₀ added to `qres/problems/chemistry.py`.
+
+---
+
+### Result 77 — tensor hypercontraction: the 1-norm delivers, the rank does not, and the difference is *selecting* versus *optimising*
+
+Result 76 left a measured ~200× gap to Lee et al.'s tensor hypercontraction and
+named THC the open item. The question that decides it is not the cost formula
+but the **rank**: THC's whole argument is that
+
+    g_pqrs ≈ Σ_{μν} χ_p^μ χ_q^μ Z_{μν} χ_r^ν χ_s^ν
+
+needs only `M ~ O(N)` auxiliary vectors where the Pauli form needs `O(N⁴)`.
+
+**Measured against the energy, not a tensor norm.** A residual in the Coulomb
+tensor is not a physical error, so each fit was used to rebuild the Hamiltonian
+and its exact ground-state energy compared against the full-information rebuild.
+That path is exact to 3.6e-12, so the measured error is the approximation's.
+
+| N | M | M/N | λ_THC | λ_Pauli | λ_THC/λ_Pauli | λ_DF (R76) |
+|---|---|---|---|---|---|---|
+| 2 | 4 | 2 | 1.38 | 0.99 | 1.39 | 10.4 |
+| 4 | 24 | 6 | 5.41 | 8.47 | 0.64 | 41.2 |
+| 6 | 48 | 8 | 13.86 | 21.19 | 0.65 | 88.7 |
+| 8 | 96 | 12 | 22.29 | 40.01 | **0.56** | 151.7 |
+
+**The positive half: the 1-norm is real.** THC's λ falls from 1.39× the Pauli
+norm to **0.56×**, and against double factorisation — the winner of Result 76 —
+it is **6.8× smaller at N = 8** (22.3 against 151.7). Since a block encoding's
+walk count is proportional to λ, that is exactly the mechanism the literature
+attributes THC's advantage to, reproduced here on real integrals.
+
+**The negative half, and it is mine rather than THC's: `M ~ N^2.26 ± 0.13`.**
+The ±2 standard error interval is [2.01, 2.52] and excludes 1. So this
+construction does *not* deliver the linear rank that makes THC's per-walk cost
+collapse, and without that the 200× gap does not close.
+
+**The reason is structural.** This experiment *selects* χ from the double
+factorisation's eigenbasis and solves for Z. Published THC *optimises* χ and Z
+jointly by nonlinear least squares. A selection can never beat its pool, and the
+DF eigenbasis is not the pool that admits an O(N) solution — which is precisely
+why the literature does the harder fit. The measurement here bounds what the
+cheap route gives: a genuine 1-norm improvement, no rank improvement.
+
+### Three numerical failures, each caught by a different signal
+
+None was caught by reading the code.
+
+1. **Lost symmetry truncated the sweep.** The reconstruction lost chemists'
+   8-fold symmetry at the 1e-16 level, qiskit-nature rejected the tensor outright,
+   and the sweep **crashed at M/N ≥ 3 on every molecule but H₂** — before the
+   ranks where THC begins to work. The conclusion drawn from that run would have
+   been far more negative than the data supports. Caught by the crash.
+2. **A pseudo-inverse through a 1e18-conditioned design.** Couplings around 1e26
+   reproduced the tensor by cancellation, and λ — the quantity the entire cost
+   argument rests on — became meaningless. It would have reported **λ = 116 109
+   for H₄** as a result. Caught by non-monotonicity: the energy error ran
+   3e-3 → 5e10 → 1.6e-12 as the rank grew, and more information cannot make a fit
+   worse. That is standing rule 10 doing its job.
+3. **Ridge regularisation was necessary but not sufficient.** H₈ at M = 64 passed
+   the regulariser-stability check with λ = 1548 while M = 80 gave 50 — stable
+   under perturbation, nowhere near converged. A second criterion was needed:
+   a rank counts only if its λ is within 2× of every larger rank's.
+
+The pattern across all three: **an ill-conditioned fit produces plausible
+individual numbers.** Every one of these would have passed a plausibility read.
+
+`experiments/exp021_tensor_hypercontraction.py`,
+`tests/test_hypercontraction.py`, `results/exp021_tensor_hypercontraction.json`.

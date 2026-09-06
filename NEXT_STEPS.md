@@ -41,16 +41,32 @@ So the useful work is:
    1-norm grows as `N^1.93` against the Pauli norm's `N^2.59`, so its penalty is
    transient.
 
-2. **Tensor hypercontraction is now the open item**, and the gap it has to close
-   is measured: 3.93e12 against Lee et al.'s 2.1e10, so **~200×** remains. THC
-   plus QROM-based state preparation is what accounts for it; both are published
-   and neither is implemented here. This is the same shape as item 1 — a large,
-   known factor that this repository has not reached for — and item 1 suggests
-   the estimate is worth trusting enough to try.
+2. ~~Tensor hypercontraction~~ — **attempted, Result 77, and it splits.**
 
-   Sizing note before starting: the measured DF exponents say the remaining gap
-   is *not* going to come from the 1-norm (already `N^1.93`), so it has to come
-   from the per-walk cost. That is what THC's `N`-independent inner loop targets.
+   | | measured | verdict |
+   |---|---|---|
+   | 1-norm | λ_THC = 0.56 × λ_Pauli at N=8; **6.8× below DF's** | THC delivers |
+   | rank | `M ~ N^2.26 ± 0.13`, interval [2.01, 2.52] | **does not reach O(N)** |
+
+   The sizing note above was right that the gap has to come from the per-walk
+   cost, and that is exactly the half this construction fails to deliver.
+
+   **The reason is that this experiment *selects* χ from the DF eigenbasis and
+   solves for Z, where published THC *optimises* χ and Z jointly by nonlinear
+   least squares.** A selection cannot beat its pool. So the open item is now
+   narrower and much better defined than "implement THC":
+
+   **Fit χ properly.** A nonlinear least-squares or ALS fit of χ and Z, with the
+   1-norm penalised as published constructions do, tested with the same energy
+   criterion and the same two numerical guards (regulariser stability *and*
+   convergence in λ) — both of which Result 77 needed and neither of which is
+   optional on a design conditioned at 1e18. The question it answers is single
+   and sharp: **does an optimised χ reach `M ~ N`, where a selected one gives
+   `N^2.26`?**
+
+   If it does, the per-walk cost collapses and the ~200× gap is addressable with
+   the λ already measured here. If it does not, the gap is not reachable by this
+   family at all, which would be worth knowing just as much.
 
 This is the first item in a long time where the measured evidence says a large
 factor is available and nothing in the repository has tried for it.
