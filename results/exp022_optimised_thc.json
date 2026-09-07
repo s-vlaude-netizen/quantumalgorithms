@@ -1,0 +1,129 @@
+{
+  "chemical_accuracy": 0.0016,
+  "rows": [
+    {
+      "molecule": "H2",
+      "orbitals": 2,
+      "pauli_one_norm": 0.988086153726,
+      "sweep": [
+        {
+          "rank": 2,
+          "rank_over_orbitals": 1.0,
+          "energy_error": 0.01141930240200617,
+          "tensor_error": 0.011424107218088175,
+          "one_norm": 1.3517220078578858,
+          "one_norm_perturbed": 1.3517220102525627,
+          "stable": true,
+          "iterations": 34,
+          "optimiser_converged": true,
+          "restart_residual_spread": 259.53394576792584,
+          "restart_one_norms": [
+            1.3517236789011218,
+            1.351722007479185,
+            1.3517220061372197,
+            1.3517220075670076,
+            1.3517220078578858,
+            1.3517220065827622
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 4,
+          "rank_over_orbitals": 2.0,
+          "energy_error": 1.0415335260915981e-10,
+          "tensor_error": 2.5259655478393483e-10,
+          "one_norm": 1.3517236689650116,
+          "one_norm_perturbed": 1.3517236838877247,
+          "stable": true,
+          "iterations": 15,
+          "optimiser_converged": true,
+          "restart_residual_spread": 11955.281473530795,
+          "restart_one_norms": [
+            1.3517236680679292,
+            1.351723668124629,
+            1.35172364478003,
+            1.7267909017660008,
+            1.3517236689650116,
+            1.7814527166567797
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": true,
+          "converged": true
+        },
+        {
+          "rank": 6,
+          "rank_over_orbitals": 3.0,
+          "energy_error": 7.05289160407574e-11,
+          "tensor_error": 1.8944035229395695e-10,
+          "one_norm": 1.5109382448888777,
+          "one_norm_perturbed": 1.5110191498262726,
+          "stable": true,
+          "iterations": 16,
+          "optimiser_converged": true,
+          "restart_residual_spread": 68.81175993109242,
+          "restart_one_norms": [
+            1.534504177991174,
+            1.5239086351695463,
+            1.5109382448888777,
+            1.5211307902455573,
+            1.3517236691322112,
+            1.3517302404022555
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": true
+        },
+        {
+          "rank": 8,
+          "rank_over_orbitals": 4.0,
+          "energy_error": 3.7515013318056845e-10,
+          "tensor_error": 1.2381352609835972e-09,
+          "one_norm": 1.4431912223850136,
+          "one_norm_perturbed": 1.4424831790629766,
+          "stable": true,
+          "iterations": 16,
+          "optimiser_converged": true,
+          "restart_residual_spread": 1668.9290407361782,
+          "restart_one_norms": [
+            1.5345041779858608,
+            1.5181729202672014,
+            1.3517236710800993,
+            1.785623033620801,
+            1.351723661115145,
+            1.4431912223850136
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": true
+        }
+      ],
+      "smallest_sufficient": {
+        "rank": 4,
+        "rank_over_orbitals": 2.0,
+        "energy_error": 1.0415335260915981e-10,
+        "tensor_error": 2.5259655478393483e-10,
+        "one_norm": 1.3517236689650116,
+        "one_norm_perturbed": 1.3517236838877247,
+        "stable": true,
+        "iterations": 15,
+        "optimiser_converged": true,
+        "restart_residual_spread": 11955.281473530795,
+        "restart_one_norms": [
+          1.3517236680679292,
+          1.351723668124629,
+          1.35172364478003,
+          1.7267909017660008,
+          1.3517236689650116,
+          1.7814527166567797
+        ],
+        "restarts": 6,
+        "within_chemical_accuracy": true,
+        "converged": true
+      },
+      "seconds": 6.833082717999787
+    }
+  ],
+  "rank_exponent": null,
+  "rank_exponent_stderr": null,
+  "selected_exponent_result_77": 2.26,
+  "selected_exponent_stderr_result_77": 0.13
+}
