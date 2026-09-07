@@ -56,17 +56,43 @@ So the useful work is:
    least squares.** A selection cannot beat its pool. So the open item is now
    narrower and much better defined than "implement THC":
 
-   **Fit χ properly.** A nonlinear least-squares or ALS fit of χ and Z, with the
-   1-norm penalised as published constructions do, tested with the same energy
-   criterion and the same two numerical guards (regulariser stability *and*
-   convergence in λ) — both of which Result 77 needed and neither of which is
-   optional on a design conditioned at 1e18. The question it answers is single
-   and sharp: **does an optimised χ reach `M ~ N`, where a selected one gives
-   `N^2.26`?**
+   ~~Fit χ properly.~~ — **done, Result 78, and the answer is yes.**
 
-   If it does, the per-walk cost collapses and the ~200× gap is addressable with
-   the λ already measured here. If it does not, the gap is not reachable by this
-   family at all, which would be worth knowing just as much.
+   | | exponent | ±2σ interval |
+   |---|---|---|
+   | selected χ (R77) | `N^2.26 ± 0.13` | [2.00, 2.52] |
+   | **optimised χ (R78)** | **`N^1.33 ± 0.26`** | **[0.80, 1.86]** |
+   | THC's claim | `N^1` | — |
+
+   The intervals do not overlap, so optimisation genuinely helps, and the
+   optimised one contains 1. Result 77's diagnosis was right: the selection was
+   the limitation, not the THC form. λ improves alongside — 1.37 → 0.86 → 0.43
+   times the Pauli norm across H₂/H₄/H₆.
+
+3. **What is actually open now: the fit's reproducibility, not its scaling.**
+
+   The exponent above rests on thresholds that move between identical runs. H₄
+   at M=8 was inside chemical accuracy on two runs of three and outside on the
+   other; H₆ at M=18 converged on one run and not the next; λ moves
+   non-monotonically across ranks (8.2, 13.4, 9.1, 30.0, 17.7 on H₆). The
+   restart spread says why: 1.6e9 between best and worst of six starts at H₄
+   M=12.
+
+   **λ is the quantity the whole cost argument depends on, and this procedure
+   does not pin it.** So before any further scaling work, the fit needs to
+   return the *same* answer twice. Concretely, in rough order of expected value:
+
+   * penalise the 1-norm in the objective, as published constructions do —
+     currently nothing steers the optimiser towards the low-λ optimum among the
+     many near-degenerate ones
+   * many more restarts, or a smarter initialisation than perturbing the DF
+     selection
+   * report the threshold as a distribution over runs rather than a single
+     number, which is the honest form given the above
+
+   Only after that does a fourth molecule (H₈, ~40 min per rank at six restarts)
+   buy anything: a fourth point on a noisy threshold does not tighten a noisy
+   exponent.
 
 This is the first item in a long time where the measured evidence says a large
 factor is available and nothing in the repository has tried for it.

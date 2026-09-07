@@ -23,7 +23,7 @@ an adaptive ansatz with a smaller parameter count — was measured and does not
 (Result 74): ADAPT's exponent is 3.57 ± 0.11 against UCCSD's 3.44 ± 0.13, which
 is indistinguishable and, if anything, the wrong way round.
 
-## The answer, since 77 results is a lot to read
+## The answer, since 78 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -132,9 +132,22 @@ than a tensor norm:
 
 The failure is this repository's, not THC's: the experiment **selects** χ from the
 double-factorisation eigenbasis, where published THC **optimises** χ and Z jointly.
-A selection cannot beat its pool. So the remaining gap is real, its cause is now
-identified precisely, and the open item is one sharp question rather than a
-programme: *does an optimised χ reach `M ~ N` where a selected one gives `N^2.26`?*
+A selection cannot beat its pool.
+
+**Result 78 tested that diagnosis and it holds.** Optimising χ and Z jointly by
+nonlinear least squares gives **`M ~ N^1.33 ± 0.26`**, whose ±2σ interval
+[0.80, 1.86] contains 1 and does not overlap the selected fit's [2.00, 2.52]. The
+1-norm improves alongside — 1.37 → 0.86 → 0.43 times the Pauli norm across
+H₂/H₄/H₆.
+
+**But the caveat is the more useful half.** The fit is barely reproducible: H₄ at
+M=8 landed inside chemical accuracy on two runs of three and outside on the
+other, and λ moves non-monotonically across ranks. The restart spread says why —
+**1.6 × 10⁹** between the best and worst of six starts at one rank. The landscape
+has many near-degenerate optima with very different λ, and λ is exactly what the
+cost depends on. So `N^1.33` should be read as *consistent with linear*, not as a
+measurement of 1.33, and the open item is now the fit's reliability rather than
+its scaling.
 
 Everything below is how that was established, and it is worth reading mainly for
 the method: every claim here is a measurement, several of them corrections to

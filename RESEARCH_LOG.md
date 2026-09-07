@@ -3851,3 +3851,84 @@ individual numbers.** Every one of these would have passed a plausibility read.
 
 `experiments/exp021_tensor_hypercontraction.py`,
 `tests/test_hypercontraction.py`, `results/exp021_tensor_hypercontraction.json`.
+
+---
+
+### Result 78 — optimising χ recovers THC's linear rank, and the fit itself is barely reproducible
+
+Result 77 fitted the THC form by **selecting** χ from the double-factorisation
+eigenbasis, got `M ~ N^2.26 ± 0.13` against THC's claimed `O(N)`, and named the
+reason: a selection cannot beat its pool, where published THC **optimises** χ and
+Z jointly. This tests that diagnosis directly — same molecules, same energy
+criterion, same guards, only the fit changes.
+
+| N | selected M (R77) | **optimised M** | λ | λ/λ_Pauli |
+|---|---|---|---|---|
+| 2 | 4 (M/N=2) | 4 (M/N=2) | 1.35 | 1.37 |
+| 4 | 24 (M/N=6) | **8 (M/N=2)** | 7.29 | 0.86 |
+| 6 | 48 (M/N=8) | **18 (M/N=3)** | 9.06 | **0.43** |
+
+**`M ~ N^1.33 ± 0.26`, and the ±2σ interval [0.80, 1.86] contains 1.** So the
+optimised fit is consistent with the linear rank THC claims. It is also
+*distinguishable* from the selected fit, whose interval is [2.00, 2.52] — the two
+do not overlap. **Result 77's diagnosis was right: the limitation was the
+selection, not the THC form.**
+
+λ improves alongside: 1.37 → 0.86 → 0.43 times the Pauli 1-norm, so the advantage
+grows with size rather than being a constant.
+
+### The caveat is the more useful half, and it is large
+
+**The fit is barely reproducible, and the threshold is effectively a random
+variable of the procedure.** H₄ at M=8, three runs of the identical
+configuration:
+
+| run | energy error | inside chemical accuracy? |
+|---|---|---|
+| A | 8.09e-5 | yes |
+| B | 9.50e-3 | **no** |
+| C | 6.86e-5 | yes |
+
+Two runs put H₄'s threshold at M/N = 2, one at 3 or higher. H₆ at M=18 gave
+1.7e-5 (converged) on one run and 3.4e-6 (not converged) on the next. And λ moves
+non-monotonically across ranks — 8.2, 13.4, 9.1, 30.0, 17.7 on H₆ — which matters
+because **λ is exactly the quantity the algorithm cost depends on**.
+
+The mechanism is visible in the restart spread, which is now recorded: at H₄
+M=12 the residual differs by **1.6 × 10⁹** between the best and worst of six
+starts. The landscape has many near-degenerate optima with very different λ, and
+floating-point noise selects among them.
+
+So `N^1.33 ± 0.26` should be read as *"consistent with linear, and not
+distinguishable from a range of nearby exponents"*, not as a measurement of 1.33.
+Three points and a noisy threshold do not support more.
+
+### Six errors, each caught by a different signal, none by reading the code
+
+1. **The analytic gradient was wrong on both blocks** — a spurious factor of two
+   plus an unwarranted symmetrisation on the coupling, a mis-folded factor on χ.
+   L-BFGS would have minimised something other than the documented objective.
+   Caught by checking against finite differences *before* use.
+2. **The first gradient test could not have caught that.** Its target was
+   symmetrised the wrong way, so both gradients looked wrong and neither said
+   which. A test that cannot distinguish right from wrong is worse than none.
+3. **Every H₆ rank exhausted the iteration budget** with the tolerances first
+   chosen, so nothing was converged. Caught by two runs disagreeing.
+4. **The stability refit used tighter tolerances than the fit it checked** —
+   comparing a loosely converged fit against a tightly converged one.
+5. **A single start is not a measurement.** Three guards were in place and H₄ at
+   M=12 still gave 3.4e-8 and 9.3e-3 on consecutive runs, both converged.
+6. **The restart spread was printed but not persisted**, so no test could check
+   the one piece of evidence justifying multi-start. Caught by the test failing.
+
+Three of the six were narration or data failing to track a change: the docstring
+and header still claiming "two guards" after a third was added, and the spread
+living only in stdout. That pattern is now this project's most common failure
+mode by a wide margin.
+
+**H₈ was dropped deliberately.** Its M/N=3 rank alone runs ~40 minutes at six
+restarts, and a fourth point for an exponent already established as
+reproducibility-limited would not improve the claim.
+
+`experiments/exp022_optimised_thc.py`, `tests/test_optimised_thc.py`,
+`results/exp022_optimised_thc.json`.

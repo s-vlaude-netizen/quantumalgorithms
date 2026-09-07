@@ -119,11 +119,273 @@
         "within_chemical_accuracy": true,
         "converged": true
       },
-      "seconds": 6.833082717999787
+      "seconds": 5.347260753000228
+    },
+    {
+      "molecule": "H4",
+      "orbitals": 4,
+      "pauli_one_norm": 8.466298063627997,
+      "sweep": [
+        {
+          "rank": 4,
+          "rank_over_orbitals": 1.0,
+          "energy_error": 0.00820681627403097,
+          "tensor_error": 0.013301156118113,
+          "one_norm": 4.37391275384077,
+          "one_norm_perturbed": 4.373912714316834,
+          "stable": true,
+          "iterations": 76,
+          "optimiser_converged": true,
+          "restart_residual_spread": 158.83491545501502,
+          "restart_one_norms": [
+            4.373527811123752,
+            4.373912861169921,
+            4.3739126112214075,
+            4.37391275384077,
+            4.373912565368158,
+            4.373912777409198
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 8,
+          "rank_over_orbitals": 2.0,
+          "energy_error": 6.86464516892471e-05,
+          "tensor_error": 0.0001288972914944564,
+          "one_norm": 7.287173940366995,
+          "one_norm_perturbed": 7.2836946072419355,
+          "stable": true,
+          "iterations": 8071,
+          "optimiser_converged": true,
+          "restart_residual_spread": 195.69459773248255,
+          "restart_one_norms": [
+            10.949274902767762,
+            4.576936225501702,
+            7.7137619048628165,
+            7.287173940366995,
+            927.337182048429,
+            5.676838760516713
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": true,
+          "converged": true
+        },
+        {
+          "rank": 12,
+          "rank_over_orbitals": 3.0,
+          "energy_error": 2.8172695287764782e-08,
+          "tensor_error": 1.0393147242826473e-07,
+          "one_norm": 5.796821906646481,
+          "one_norm_perturbed": 5.7952754778469195,
+          "stable": true,
+          "iterations": 672,
+          "optimiser_converged": true,
+          "restart_residual_spread": 1601503020.171867,
+          "restart_one_norms": [
+            5.288930526201867,
+            5.010252478001526,
+            5.796821906646481,
+            5.848304971257126,
+            6.3066376963345245,
+            10.783621233772434
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": true
+        },
+        {
+          "rank": 16,
+          "rank_over_orbitals": 4.0,
+          "energy_error": 1.2043690578167343e-07,
+          "tensor_error": 4.479817865978625e-08,
+          "one_norm": 5.304957618724865,
+          "one_norm_perturbed": 5.305286327390515,
+          "stable": true,
+          "iterations": 347,
+          "optimiser_converged": true,
+          "restart_residual_spread": 59.602712327642834,
+          "restart_one_norms": [
+            5.432274871153309,
+            4.96588638259093,
+            5.433597666512739,
+            5.304957618724865,
+            8.632169383807557,
+            10.504814217599016
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": true
+        }
+      ],
+      "smallest_sufficient": {
+        "rank": 8,
+        "rank_over_orbitals": 2.0,
+        "energy_error": 6.86464516892471e-05,
+        "tensor_error": 0.0001288972914944564,
+        "one_norm": 7.287173940366995,
+        "one_norm_perturbed": 7.2836946072419355,
+        "stable": true,
+        "iterations": 8071,
+        "optimiser_converged": true,
+        "restart_residual_spread": 195.69459773248255,
+        "restart_one_norms": [
+          10.949274902767762,
+          4.576936225501702,
+          7.7137619048628165,
+          7.287173940366995,
+          927.337182048429,
+          5.676838760516713
+        ],
+        "restarts": 6,
+        "within_chemical_accuracy": true,
+        "converged": true
+      },
+      "seconds": 293.0553201769999
+    },
+    {
+      "molecule": "H6",
+      "orbitals": 6,
+      "pauli_one_norm": 21.191077935794006,
+      "sweep": [
+        {
+          "rank": 6,
+          "rank_over_orbitals": 1.0,
+          "energy_error": 0.03510545513383079,
+          "tensor_error": 0.012892145956415302,
+          "one_norm": 8.20031468906914,
+          "one_norm_perturbed": 8.200314614361307,
+          "stable": true,
+          "iterations": 85,
+          "optimiser_converged": true,
+          "restart_residual_spread": 173.58976862404532,
+          "restart_one_norms": [
+            8.200563888565876,
+            8.200314558712899,
+            8.20031468906914,
+            8.200314527414847,
+            8.200314526395204,
+            8.200314551545405
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": false
+        },
+        {
+          "rank": 12,
+          "rank_over_orbitals": 2.0,
+          "energy_error": 0.0003548759415910041,
+          "tensor_error": 0.00022325904559372667,
+          "one_norm": 13.387026087002457,
+          "one_norm_perturbed": 18.685700623392194,
+          "stable": false,
+          "iterations": 20000,
+          "optimiser_converged": false,
+          "restart_residual_spread": 193.7399268195107,
+          "restart_one_norms": [
+            12.131115539432507,
+            99.07447597717734,
+            24.34243039123782,
+            13.387026087002457,
+            147.27785178618598,
+            12.061879236821193
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": true
+        },
+        {
+          "rank": 18,
+          "rank_over_orbitals": 3.0,
+          "energy_error": 1.3813917707494738e-05,
+          "tensor_error": 7.461158595734041e-06,
+          "one_norm": 9.064035428087191,
+          "one_norm_perturbed": 9.061188160085255,
+          "stable": true,
+          "iterations": 10616,
+          "optimiser_converged": true,
+          "restart_residual_spread": 116.84496416906077,
+          "restart_one_norms": [
+            11.201796844680667,
+            9.064035428087191,
+            11.804418425107485,
+            19.050016596311398,
+            19.827148340016393,
+            13.749587242025548
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": true,
+          "converged": true
+        },
+        {
+          "rank": 24,
+          "rank_over_orbitals": 4.0,
+          "energy_error": 1.72668713105395e-07,
+          "tensor_error": 1.1834613031225238e-07,
+          "one_norm": 29.952245176300945,
+          "one_norm_perturbed": 29.9467295734548,
+          "stable": true,
+          "iterations": 978,
+          "optimiser_converged": true,
+          "restart_residual_spread": 8312.860445501341,
+          "restart_one_norms": [
+            10.318890057207556,
+            10.30284097806845,
+            12.92529115146352,
+            15.219443330412169,
+            29.952245176300945,
+            24.10221571788308
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": true
+        },
+        {
+          "rank": 36,
+          "rank_over_orbitals": 6.0,
+          "energy_error": 4.211394966091575e-08,
+          "tensor_error": 5.582131090697828e-08,
+          "one_norm": 17.686092367920587,
+          "one_norm_perturbed": 17.690232367919258,
+          "stable": true,
+          "iterations": 469,
+          "optimiser_converged": true,
+          "restart_residual_spread": 646.3780505514185,
+          "restart_one_norms": [
+            10.380314289175482,
+            10.568487135483169,
+            14.392031269819899,
+            17.686092367920587,
+            25.2411631097237,
+            33.67445286203821
+          ],
+          "restarts": 6,
+          "within_chemical_accuracy": true
+        }
+      ],
+      "smallest_sufficient": {
+        "rank": 18,
+        "rank_over_orbitals": 3.0,
+        "energy_error": 1.3813917707494738e-05,
+        "tensor_error": 7.461158595734041e-06,
+        "one_norm": 9.064035428087191,
+        "one_norm_perturbed": 9.061188160085255,
+        "stable": true,
+        "iterations": 10616,
+        "optimiser_converged": true,
+        "restart_residual_spread": 116.84496416906077,
+        "restart_one_norms": [
+          11.201796844680667,
+          9.064035428087191,
+          11.804418425107485,
+          19.050016596311398,
+          19.827148340016393,
+          13.749587242025548
+        ],
+        "restarts": 6,
+        "within_chemical_accuracy": true,
+        "converged": true
+      },
+      "seconds": 1070.4597403480002
     }
   ],
-  "rank_exponent": null,
-  "rank_exponent_stderr": null,
+  "rank_exponent": 1.329328010844058,
+  "rank_exponent_stderr": 0.26287214846520496,
   "selected_exponent_result_77": 2.26,
   "selected_exponent_stderr_result_77": 0.13
 }
