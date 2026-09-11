@@ -69,7 +69,43 @@ So the useful work is:
    the limitation, not the THC form. λ improves alongside — 1.37 → 0.86 → 0.43
    times the Pauli norm across H₂/H₄/H₆.
 
-3. **What is actually open now: the fit's reproducibility, not its scaling.**
+3. ~~The fit's reproducibility~~ — **solved where the optimiser converges
+   (Result 79), and it uncovered a convergence problem underneath.**
+
+   A smooth `|Z|` penalty at α = 1e-4 collapses the spread across eight
+   independent fits to **exactly 1.0** on H₄ (from 1e5 in residual and 6× in λ),
+   at no cost: 8/8 inside chemical accuracy against 7/8, median λ 5.59 → 4.37.
+   H₆ replicates the λ collapse and improves λ more (14.82 → 8.20). Too much
+   penalty destroys the fit entirely (0/8 at α = 1e-2), so the working range has
+   both edges measured.
+
+   **But H₆ converges 1 fit in 8 — with or without the penalty.** Its λ spread
+   of 1.0 may mean all eight found the same optimum, or merely that all eight
+   stopped at the same iteration cap. This experiment cannot tell those apart,
+   so H₆ replicates the number without replicating the evidence.
+
+4. **The open item is now that convergence failure.** It predates the penalty —
+   the unpenalised H₆ run converges 1/8 too — and Result 78 missed it by
+   reporting iteration counts without the *fraction converging across repeats*,
+   which is the statistic that shows it.
+
+   What to measure, in order:
+
+   * **Why L-BFGS stops.** Is it the iteration cap, the gradient tolerance, or
+     line-search failure? `scipy`'s result carries the reason and it is not
+     currently recorded — record it per fit and tabulate.
+   * **Whether the cap is simply too low for N = 6.** H₄ converges comfortably at
+     the same budget; the parameter count roughly triples (432 against 192). A
+     budget sweep answers this cheaply and would be embarrassing not to try first.
+   * **Whether a better-conditioned parameterisation helps** — the χ columns are
+     free to rescale against Z without changing the model, which is a flat
+     direction the optimiser has to waste effort on. Fixing the column norms and
+     moving the scale into Z removes it.
+
+   Only once fits converge reliably does re-measuring the rank exponent
+   (Result 78's `N^1.33 ± 0.26`) mean more than it does now.
+
+5. **Superseded: what was open before.**
 
    The exponent above rests on thresholds that move between identical runs. H₄
    at M=8 was inside chemical accuracy on two runs of three and outside on the

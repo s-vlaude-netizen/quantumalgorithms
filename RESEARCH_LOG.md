@@ -3932,3 +3932,85 @@ reproducibility-limited would not improve the claim.
 
 `experiments/exp022_optimised_thc.py`, `tests/test_optimised_thc.py`,
 `results/exp022_optimised_thc.json`.
+
+---
+
+### Result 79 — penalising the 1-norm makes the fit reproducible, and exposes a convergence failure it does not fix
+
+Result 78 measured THC's linear rank and then undercut its own headline: the fit
+does not reproduce. λ varied 6× across independent fits of the identical
+configuration, the residual by 10⁵, and the restart spread reached 1.6 × 10⁹.
+
+That is not a cosmetic problem. **λ is not a diagnostic, it is the cost** — a
+block encoding's walk count is proportional to it (Result 75), so an
+unreproducible λ is an unreproducible runtime estimate.
+
+Result 78's diagnosis was specific: nothing in the objective preferred the
+low-λ optimum among the many near-degenerate ones. Published THC penalises the
+1-norm; this project minimised the residual alone. Adding a smooth `|Z|` penalty,
+eight independent fits per setting:
+
+**H₄ at M = 12** — the configuration where Result 78 saw 3.4e-8 and 9.3e-3 on two
+runs:
+
+| penalty | error spread | λ spread | inside chem. accuracy | converged |
+|---|---|---|---|---|
+| 0 | 1.0e5 | 6.0× | 7/8 | 8/8 |
+| 1e-6 | 1.9e1 | 1.5× | 8/8 | 7/8 |
+| **1e-4** | **1.0** | **1.0** | **8/8** | **8/8** |
+| 1e-2 | 1.0 | 1.0 | **0/8** | 0/8 |
+
+At 1e-4 all eight fits are **identical** — spread exactly 1.0 in both columns —
+and it costs nothing: 8/8 inside chemical accuracy against 7/8, median λ falling
+5.59 → 4.37. At 1e-2 nothing converges, so there is a working range and **both**
+its edges are measured rather than only the flattering one.
+
+**H₆ at M = 18** — and this is where it gets interesting:
+
+| penalty | error spread | λ spread | inside chem. accuracy | converged |
+|---|---|---|---|---|
+| 0 | 3.3e1 | 5.0× | 8/8 | **1/8** |
+| 1e-4 | 2.9 | **1.0** | 8/8 | **1/8** |
+| 1e-2 | 1.0 | 1.0 | 0/8 | 0/8 |
+
+The λ spread collapses to 1.0 exactly as on H₄, and median λ improves more
+(14.82 → 8.20, 1.8× against H₄'s 1.28×). **But only one fit in eight converges,
+penalty or no penalty.**
+
+### The caveat that makes H₆ weaker evidence than it looks
+
+Seven of eight H₆ fits stop at the iteration cap. Their λ spread of 1.0 may mean
+they all found the same optimum — or merely that they all stopped at the same
+place. **Those are not the same claim, and this experiment cannot distinguish
+them.** H₄'s result stands on its own (8/8 converged); H₆'s replicates the
+*number* without replicating the *evidence*.
+
+So the honest statement is: **the penalty demonstrably fixes reproducibility
+where the optimiser converges, and H₆ shows the optimiser often does not.** The
+reproducibility problem Result 78 opened is solved; a convergence problem it was
+hiding is now visible.
+
+That ordering is worth noting. The unpenalised H₆ run also converges 1/8, so this
+was true before the penalty and went unrecorded — Result 78 reported iteration
+counts but never the *fraction* converging across repeats, which is the statistic
+that would have shown it.
+
+### Two errors of my own
+
+1. **A test asserted something untrue.** It demanded relative accuracy 1e-6 from
+   the smoothed absolute value, but the smoothing subtracts δ outright, so at
+   |z| = 1e-3 that is a 0.1% shift. The achievable property is an *absolute*
+   error bounded by δ. The test now asserts the bound that holds; loosening the
+   number until it passed would have hidden the actual guarantee.
+2. **Two configurations wrote to one results path.** The H₆ run would have
+   overwritten H₄'s data while the tests reading that file still claimed to check
+   H₄. Paths now carry molecule and rank.
+
+And one process-level failure worth recording because it wasted two cycles: I
+reported the H₆ run as started twice when it had not been, both times trusting a
+process listing that was counting something else. Checking that the output file
+exists and grows is the equivalent of measuring the thing you are claiming.
+
+`experiments/exp023_penalised_thc.py`, `tests/test_penalised_thc.py`,
+`results/exp023_penalised_thc_H4_M12.json`,
+`results/exp023_penalised_thc_H6_M18.json`.

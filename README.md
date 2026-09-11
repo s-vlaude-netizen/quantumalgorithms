@@ -23,7 +23,7 @@ an adaptive ansatz with a smaller parameter count — was measured and does not
 (Result 74): ADAPT's exponent is 3.57 ± 0.11 against UCCSD's 3.44 ± 0.13, which
 is indistinguishable and, if anything, the wrong way round.
 
-## The answer, since 78 results is a lot to read
+## The answer, since 79 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -146,8 +146,24 @@ other, and λ moves non-monotonically across ranks. The restart spread says why 
 **1.6 × 10⁹** between the best and worst of six starts at one rank. The landscape
 has many near-degenerate optima with very different λ, and λ is exactly what the
 cost depends on. So `N^1.33` should be read as *consistent with linear*, not as a
-measurement of 1.33, and the open item is now the fit's reliability rather than
-its scaling.
+measurement of 1.33.
+
+**Result 79 fixed that, and found something underneath it.** Nothing in the
+objective preferred the low-λ optimum, so a smooth `|Z|` penalty was added — what
+published THC does. At α = 1e-4, eight independent fits of H₄ become
+**identical**: spread exactly 1.0 in both residual and λ, down from 10⁵ and 6×,
+while *improving* accuracy (8/8 inside chemical accuracy against 7/8) and
+lowering median λ from 5.59 to 4.37. At α = 1e-2 nothing converges at all, so the
+working range has both edges measured rather than only the flattering one.
+
+**The thing underneath: on H₆, only one fit in eight converges — penalty or no
+penalty.** Its λ spread also collapses to 1.0, but that may mean all eight found
+the same optimum *or* that all eight stopped at the same iteration cap, and the
+experiment cannot distinguish those. So reproducibility is solved where the
+optimiser converges, and H₆ shows it often does not. That convergence failure
+predates the penalty and went unrecorded because Result 78 reported iteration
+counts without the fraction converging across repeats — which is the statistic
+that shows it.
 
 Everything below is how that was established, and it is worth reading mainly for
 the method: every claim here is a measurement, several of them corrections to
