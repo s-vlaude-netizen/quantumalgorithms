@@ -4398,6 +4398,23 @@ hardware-generation problem: one weight matrix costs more two-qubit gates than
 every gate this repository has ever counted, at per-gate error rates that would
 have to be ~1e-15 to survive the depth.
 
+> ⚠️ **SCOPE CORRECTION.** "No route through this" means *through this barrier* —
+> i.e. the family that loads dense classical weights into amplitudes and runs
+> quantum linear algebra on them. As originally written, and in the README
+> summary ("LLMs: no"), it reads as a general claim about LLMs and quantum
+> computing, which the measurement does not support. It specifically does **not**
+> exclude: (a) polynomial speedups where classical compute is superlinear in the
+> data — loading an `n×n` matrix is `n²` against matmul's `~n^2.37`–`n³`;
+> (b) methods whose input is generated rather than read, which this experiment
+> measured as the loophole; (c) a combinatorially hard sub-problem with small
+> input and output, which sidesteps the barrier by construction. **"No known
+> route" is not "provably impossible"** — an impossibility proof would need
+> complexity separations nobody has.
+>
+> The *output* side is worth adding because it is what separates chemistry from
+> LLMs structurally: wanting all `n²` numbers back as classical data costs `n²`
+> again, while chemistry's answer is one number and never pays it.
+
 #### The loophole, measured rather than asserted
 
 Reporting only the barrier would be the selective quotation this project keeps
@@ -4434,8 +4451,9 @@ would have overstated a 70B model by a further ~50×.
 
 #### The verdict, in the shape the question asked for
 
-**Large language models: a confident no**, on a measured linear barrier that no
-hardware generation changes.
+**Large language models: one route confidently closed**, on a measured linear
+barrier that no hardware generation changes — the amplitude-encoding family. Not
+a general no; see the scope correction above.
 
 **Machine learning generally: not settled, and honestly so.** The sampling-based
 proposals have a real complexity-theoretic basis and do not pay the input cost.

@@ -209,11 +209,33 @@ established.
 
 **Split verdict.**
 
-*LLMs: no, on a measured barrier.* Amplitude-encoding a vector of dimension `d`
-costs `gates = d − 11` — loading is **linear**, and reading it classically is
-also linear, so the load step alone costs what the whole classical algorithm
-costs. One 4096×4096 weight matrix is 1.7e7 two-qubit gates; a 70B model is
-6.9e10. No hardware generation changes that.
+*LLMs: one route is closed, by arithmetic rather than by engineering.*
+Amplitude-encoding a general dense vector of dimension `d` costs `gates = d − 11`
+(measured; `d^1.037 ± 0.007` asymptotically). So the family of proposals that
+**loads classical weights into amplitudes and runs quantum linear algebra on
+them** cannot hold an exponential speedup in `d`: the load step alone costs what
+the whole classical algorithm costs. One 4096×4096 weight matrix is 1.7e7
+two-qubit gates; a 70B model is 6.9e10. No hardware generation changes that.
+
+The same barrier applies at the *output* end, and that is what makes chemistry
+and LLMs different problems rather than different sizes of one problem: if you
+want all `n²` numbers back as classical data, you pay for them again. Chemistry's
+answer is **one number** — a ground-state energy — so it never pays the output
+cost. A weight matrix is wanted entry by entry.
+
+**What this does not close**, stated explicitly because the short form of it
+overclaims:
+
+* **polynomial speedups on superlinear compute** — loading an `n×n` matrix is
+  `n²` while classical matmul is `~n^2.37`–`n³`, so the barrier by itself does
+  not exclude a gain in that gap
+* **methods whose input is generated rather than read** — measured here as the
+  loophole: cost tracks nonzeros, not dimension (0.06× dense at 5% sparsity)
+* **a small, combinatorially hard sub-problem** with tiny input and output, which
+  sidesteps the barrier by construction
+
+**"No known route" is not "provably impossible".** Nothing here is an
+impossibility proof; that would need complexity separations nobody has.
 
 *Machine learning generally: not settled, and said so deliberately.* Cost tracks
 **nonzeros, not dimension** (0.06× dense at 5% sparsity), so proposals whose
