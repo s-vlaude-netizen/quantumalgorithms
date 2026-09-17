@@ -1,0 +1,82 @@
+{
+  "truncations": [
+    0.001,
+    1e-06,
+    1e-09
+  ],
+  "ordering_is_not_optimised": true,
+  "rows": [
+    {
+      "qubits": 2,
+      "exact_schmidt_rank": 2,
+      "max_entropy_bits": 0.09656784485869241,
+      "maximal_rank": 2,
+      "bond_dimension": {
+        "0.001": 2,
+        "1e-06": 2,
+        "1e-09": 2
+      },
+      "molecule": "H2",
+      "seconds": 1.3306797669999924
+    },
+    {
+      "qubits": 6,
+      "exact_schmidt_rank": 6,
+      "max_entropy_bits": 0.1997697070443559,
+      "maximal_rank": 8,
+      "bond_dimension": {
+        "0.001": 3,
+        "1e-06": 6,
+        "1e-09": 6
+      },
+      "molecule": "H4",
+      "seconds": 1.016531078999833
+    },
+    {
+      "qubits": 10,
+      "exact_schmidt_rank": 20,
+      "max_entropy_bits": 0.31064984506247545,
+      "maximal_rank": 32,
+      "bond_dimension": {
+        "0.001": 7,
+        "1e-06": 16,
+        "1e-09": 20
+      },
+      "molecule": "H6",
+      "seconds": 85.90065920999996
+    },
+    {
+      "qubits": 14,
+      "exact_schmidt_rank": 70,
+      "max_entropy_bits": 0.42464504703818845,
+      "maximal_rank": 128,
+      "bond_dimension": {
+        "0.001": 11,
+        "1e-06": 38,
+        "1e-09": 61
+      },
+      "molecule": "H8",
+      "seconds": 26.471978276000073
+    }
+  ],
+  "growth": {
+    "0.001": {
+      "power_law_exponent": 0.8604043702390481,
+      "power_law_stderr": 0.21839428536662528,
+      "bits_per_qubit": 0.2150171819312085,
+      "maximal_bits_per_qubit": 0.5
+    },
+    "1e-06": {
+      "power_law_exponent": 1.45683738118372,
+      "power_law_stderr": 0.22832750925179424,
+      "bits_per_qubit": 0.35397050099024,
+      "maximal_bits_per_qubit": 0.5
+    },
+    "1e-09": {
+      "power_law_exponent": 1.6734472966871623,
+      "power_law_stderr": 0.33651379549607935,
+      "bits_per_qubit": 0.4132294401713717,
+      "maximal_bits_per_qubit": 0.5
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "helios_physical_qubits": 98,
+  "helios_logical_qubits": 48,
+  "physical_error": 0.00079,
+  "device_figures_are_published_not_measured": true,
+  "translation": [
+    {
+      "logical_qubits": 48,
+      "spatial_orbitals": 24,
+      "determinants": 7312459672336.0,
+      "exact_diagonalisation": "no"
+    },
+    {
+      "logical_qubits": 50,
+      "spatial_orbitals": 25,
+      "determinants": 27043120090000.0,
+      "exact_diagonalisation": "no"
+    },
+    {
+      "logical_qubits": 100,
+      "spatial_orbitals": 50,
+      "determinants": 1.5979641419960227e+28,
+      "exact_diagonalisation": "no"
+    },
+    {
+      "logical_qubits": 400,
+      "spatial_orbitals": 200,
+      "determinants": 8.199033506426551e+117,
+      "exact_diagonalisation": "no"
+    },
+    {
+      "logical_qubits": 1000,
+      "spatial_orbitals": 500,
+      "determinants": 1.36292352688731e+298,
+      "exact_diagonalisation": "no"
+    }
+  ],
+  "chain": [
+    "H2",
+    "H4",
+    "H6"
+  ],
+  "chain_orbitals": [
+    1,
+    3,
+    5
+  ],
+  "chain_two_qubit_gates": [
+    4.0,
+    997.0,
+    8424.0
+  ],
+  "gate_exponent": 4.79749007087717,
+  "gate_exponent_stderr": 0.20248985465343544,
+  "target_orbitals": 25,
+  "predicted_two_qubit_gates": 21607230.321494944,
+  "needed_two_qubit_error": 7.404928703001397e-11,
+  "variational_shortfall": 10668569.971238129,
+  "df_one_norm": 497.1580597211463,
+  "df_factors": 201.35941682898027,
+  "t_gates": 93561308297.76099,
+  "required_distance": 19,
+  "distillation_rounds": 2,
+  "physical_qubits": 44764.0,
+  "qubit_shortfall": 456.7755102040816
+}

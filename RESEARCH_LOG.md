@@ -4014,3 +4014,223 @@ exists and grows is the equivalent of measuring the thing you are claiming.
 `experiments/exp023_penalised_thc.py`, `tests/test_penalised_thc.py`,
 `results/exp023_penalised_thc_H4_M12.json`,
 `results/exp023_penalised_thc_H6_M18.json`.
+
+---
+
+### Result 81 — a trapped-ion machine changes the constant, not the verdict
+
+Every noise result in this repository is measured on IBM calibration snapshots,
+so every conclusion in it is a *superconducting* conclusion. Quantinuum's Helios
+announcement is the occasion to ask whether a different platform changes any of
+them, and the honest first step was to establish what the announcement actually
+says, because the headline is easy to misread.
+
+**What is published:** 98 physical qubits, all-to-all connected; **99.921%
+two-qubit gate fidelity** (so p = 7.9e-4); "48 fully error-corrected logical
+qubits" at a **2:1 encoding** via the Iceberg code with 99.99% SPAM; and
+separately "50 error-detected logical qubits".
+
+**What is not published, and is what an algorithm would need:** a logical
+two-qubit gate error rate, a logical gate count, and a post-selection acceptance
+rate. The widely quoted "99.9% at 50 logical qubits" pairs a **physical**
+fidelity with a **different configuration's** logical qubit count. Nothing can be
+sized on that pairing, and this experiment does not try to.
+
+Two things *are* determinable, and both were measured.
+
+#### Connectivity is worth 1.35×, and it saturates
+
+All-to-all connectivity removes every SWAP the heavy-hex transpiler inserts, and
+this repository's gate counts — including the whole Result 66 threshold table —
+are post-routing. Held fixed across the two arms: the circuit, the basis gate
+set (`rz, sx, x, cx`), the optimisation level, and five transpiler seeds.
+**The only difference is the coupling map**, so the ratio is routing and nothing
+else. Transpiling one arm to a device target would have confounded connectivity
+with the native gate set (`ecr` against `cx`) and the number would have meant
+something else.
+
+| molecule | ansatz | qubits | heavy-hex | all-to-all | routing |
+|---|---|---|---|---|---|
+| H₂ | uccsd | 2 | 4 | 4 | 1.00 |
+| H₄ | uccsd | 6 | 1 342 | 997 | 1.35 |
+| LiH | uccsd | 10 | 8 710 | 6 457 | 1.35 |
+| H₆ | uccsd | 10 | 11 952 | 8 424 | **1.42** |
+| BeH₂ | uccsd | 12 | 24 677 | 17 602 | 1.40 |
+| BeH₂ | puccd | 12 | 1 834 | 1 297 | 1.41 |
+
+Median **1.35×**, and it **saturates** around 1.4 rather than growing — which is
+itself worth recording, because an unbounded routing overhead would have been a
+reason to expect much more from all-to-all at scale.
+
+#### The combined advantage is 2.17×
+
+Routing 1.35× times the per-gate error ratio 1.61× (1.27e-3 on the best of the
+seven devices in Result 65, against 7.9e-4 published) gives **2.17× median**.
+
+Against Result 66's criterion — chemical accuracy needs (gates × per-gate error)
+below 1.6e-3 — **0 of 10 configurations land inside**, the same answer as on
+superconducting hardware. H₄/puccd is the closest at 115× outside; BeH₂/uccsd is
+8 691× outside.
+
+#### And "error-detected" carries a cost the announcement does not quote
+
+A distance-2 code detects a single fault and **cannot correct it**, so the shot
+is discarded. The accepted fraction is (1-p)^gates, which is a shot multiplier —
+and shots are what this project already measured to be VQE's binding cost:
+
+| configuration | gates | shots kept |
+|---|---|---|
+| H₄ / puccd | 233 | 83% |
+| H₆ / uccsd | 8 424 | **1.3e-3** |
+| BeH₂ / uccsd | 17 602 | **9.1e-7** |
+
+At BeH₂ the machine discards roughly a million shots for every one it keeps.
+Error detection buys fidelity at a price that is exponential in circuit volume,
+so it does not scale into the regime where the gate counts live.
+
+**So the platform question is closed the same way the optimiser and measurement
+lines were: a real factor, measured, in front of a requirement it does not
+reach.** What would reopen it is a published *logical* two-qubit error rate,
+which would let the error-corrected route of Result 82 be sized on real
+hardware numbers rather than on a surface-code model.
+
+`experiments/exp025_trapped_ion.py`, `tests/test_trapped_ion.py`,
+`results/exp025_trapped_ion.json`.
+
+---
+
+### Result 82 — 50 logical qubits is a 25-orbital active space, and the error-corrected route is 460× away
+
+This is the closest anything in this repository has come to a chemistry target,
+and it arrived from a question about drug metabolism: could you simulate just
+the pocket of a drug molecule that touches its target — under ~50 atoms — and
+learn something about pharmacokinetics?
+
+Three translations have to happen first, and two of them move the answer by
+orders of magnitude.
+
+**Logical qubits are not atoms.** A qubit carries one spin orbital, so 50 logical
+qubits is **25 spatial orbitals**. A 50-atom organic fragment has roughly 200
+spatial orbitals even in a minimal basis — about 400 qubits. What 25 orbitals
+buys is an **active space**: frontier orbitals treated exactly inside a classical
+description of everything else, which is the standard technique and the right
+frame for the question.
+
+**Pharmacokinetics is mostly not an electronic-structure problem.** Absorption,
+distribution and excretion are conformational and solvation thermodynamics over
+nanoseconds and thousands of atoms. A 25-orbital ground-state energy says
+nothing about them. **One exception decides clearance and half-life:**
+metabolism by cytochrome P450, whose Compound I intermediate is a high-valent
+iron-oxo species with genuine multireference character. That step *is* an
+electronic-structure problem at a transition-metal centre — and it is an
+established quantum-advantage candidate (Goings et al., PNAS 2022,
+arXiv:2202.01244, which compares DMRG against qubitized phase estimation on
+exactly these models and concludes it "has the potential to be a quantum
+advantage problem").
+
+So the direction is real. The question is whether the machine reaches it.
+
+#### Criterion 1 — is there a classical gap?
+
+| logical qubits | spatial orbitals | CAS determinants | exact diagonalisation? |
+|---|---|---|---|
+| 48 | 24 | 7.3e12 | no |
+| **50** | **25** | **2.7e13** | **no** |
+| 100 | 50 | 1.6e28 | no |
+
+The exact-diagonalisation wall is passed well before 25 orbitals. **But exact
+diagonalisation is not the classical baseline** — DMRG and selected CI are, and
+they reach considerably further; the P450 literature uses DMRG at bond dimension
+1500. So this table shows where the gap **opens**, not where it is established,
+and the measurement that would settle it is against DMRG, which this repository
+does not have. That is now the blocking item for the whole direction.
+
+#### Criterion 2 — does the hardware reach it?
+
+Two routes, sized with this repository's own measured laws at a trapped-ion
+physical error rate of 7.9e-4:
+
+| route | requirement | available | **short by** |
+|---|---|---|---|
+| variational, physical qubits | 7.4e-11 per-gate error | 7.9e-4 | **1.1e7×** |
+| phase estimation, error-corrected | 4.5e4 physical qubits | 98 | **4.6e2×** |
+
+The variational route needs 2.16e7 two-qubit gates at 25 orbitals (from a
+measured `gates ~ N^4.80 ± 0.20` on the all-to-all chain) and is hopeless by the
+same margin as everywhere else in this repository.
+
+**The error-corrected route is 460× away, and that is the smallest gap recorded
+here.** 9.4e10 T gates for one phase-estimation run — which is the same order as
+Lee et al. 2021's 2.1e10 for FeMoco, an independent sanity check on the model —
+demanding logical error 1.1e-11, met by surface-code distance 19 and two rounds
+of distillation: 50 data plus 12 factory logical qubits at 2·19² physical each.
+
+**The two qubit counts are not the same kind of qubit.** Helios's 48 logical are
+a 2:1 encoding, which is error *detection*; the 4.5e4 figure assumes a deep
+surface code. Comparing them directly would be wrong, and the 460× should be
+read as "this is the scale of the engineering gap", not as a schedule.
+
+**And the 460× is an upper bound on the gap, for a reason specific to this
+platform.** The surface code is a 2D nearest-neighbour code, and an all-to-all
+machine does not need one — high-rate qLDPC codes need far fewer physical qubits
+per logical qubit, and Helios's own 2:1 encoding is direct evidence of that. So
+applying a surface-code model to a trapped-ion architecture is pessimistic, and
+the real gap is smaller than 460×. This is the first time in this repository
+that a caveat has pointed in the *favourable* direction.
+
+`experiments/exp026_logical_qubit_budget.py`, `tests/test_logical_qubit_budget.py`,
+`results/exp026_logical_qubit_budget.json`.
+
+---
+
+### Result 83 — how hard these states actually are to simulate classically, measured
+
+The question was whether a classical computer can simulate a quantum computer
+without a worse complexity class, "since you can just use complex numbers and
+pseudorandomness for the measurements".
+
+For a general circuit, no, and the reason is memory rather than cleverness: a
+statevector is 2ⁿ complex amplitudes, so 50 qubits is 18 petabytes. "Just complex
+numbers in Python" **is** a statevector simulator, and it is what every result in
+this repository was produced on.
+
+But "in general" carries the weight in that sentence. Clifford circuits are
+simulable in polynomial time at any width (Gottesman–Knill), and a state with
+bounded entanglement across every cut is a matrix product state of bounded bond
+dimension — which is what DMRG exploits, and DMRG is the real classical
+competitor here, not exact diagonalisation. So the measurable question is whether
+*these* states are expensive, and it was measured on exact ground states:
+
+| molecule | qubits | exact Schmidt rank | maximal | χ @ 1e-3 | χ @ 1e-6 | χ @ 1e-9 |
+|---|---|---|---|---|---|---|
+| H₂ | 2 | 2 | 2 | 2 | 2 | 2 |
+| H₄ | 6 | 6 | 8 | 3 | 6 | 6 |
+| H₆ | 10 | 20 | 32 | 7 | 16 | 20 |
+| H₈ | 14 | 70 | 128 | 11 | 38 | 61 |
+
+**The answer depends on the truncation, and that is the finding:**
+
+| discarded weight | growth | fraction of maximal |
+|---|---|---|
+| 1e-3 | 2^(0.215 n), or `n^0.86 ± 0.22` | 43% |
+| 1e-6 | 2^(0.354 n) | 71% |
+| 1e-9 | 2^(0.413 n) | 83% |
+
+Exponential at every truncation measured, but with an exponent that is a
+function of how much error is accepted — a cheap approximate answer is far
+cheaper than an exact one, which is the mechanism DMRG runs on. **Neither
+"classically easy" nor "classically hard" is an honest summary of four points
+with a ±0.23 exponent**, and it is recorded that way.
+
+**Two caveats, both bounding in the same direction.** The cut is taken in the
+repository's qubit ordering and DMRG optimises the orbital ordering, so the real
+classical cost is *at most* this. And a hydrogen chain at equilibrium spacing is
+quasi-one-dimensional and weakly correlated — the best case for MPS. Neither
+transfers to the transition-metal active sites of Result 82, which are exactly
+the cases where the classical baseline is in doubt.
+
+So this does not close the advantage question; it locates it. Where the states of
+interest are compressible, no quantum method can win, and the systems this
+repository can build are substantially compressible at chemical accuracy.
+
+`experiments/exp027_entanglement.py`, `results/exp027_entanglement.json`.

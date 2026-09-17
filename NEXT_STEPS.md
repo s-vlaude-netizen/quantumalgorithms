@@ -10,6 +10,95 @@ what is left, add what the results suggested.
 
 ## Now
 
+### NEW — drug metabolism at a 25-orbital active space (Results 82, 83)
+
+**This is the best-posed advantage candidate this project has had, and it is the
+first item where a caveat points in the favourable direction.**
+
+The question came in as: given a ~50-logical-qubit machine, simulate just the
+pocket of a drug molecule that touches its target and learn something about
+pharmacokinetics. Three translations were needed and two of them matter:
+
+* **50 logical qubits is 25 spatial orbitals**, not 50 atoms — a 50-atom fragment
+  is ~200 orbitals, so ~400 qubits. What 25 orbitals buys is an *active space*.
+* **Pharmacokinetics is mostly not electronic structure** — ADME is conformational
+  and solvation thermodynamics over thousands of atoms. **One exception decides
+  clearance and half-life: cytochrome P450 metabolism**, whose Compound I is a
+  high-valent iron-oxo species with real multireference character. That is a
+  published advantage candidate (Goings et al., PNAS 2022, arXiv:2202.01244).
+* The hardware gap, sized with this repo's own laws: **1.1e7× on the variational
+  route, 460× in physical qubits on the error-corrected route.** The second is
+  the smallest gap ever recorded here, and it is an *upper* bound — a surface
+  code is a 2D nearest-neighbour code and an all-to-all machine does not need
+  one.
+
+**The blocking measurement is a classical baseline, and this repository does not
+have it.** Exact diagonalisation is out past ~24 orbitals (2.7e13 determinants),
+but exact diagonalisation is not the competitor — **DMRG is**, and Result 83
+measured that these states are substantially compressible: bond dimension grows
+at `2^(0.215 n)` at 1e-3 discarded weight and `2^(0.413 n)` at 1e-9, against a
+maximal `2^(0.5 n)`. So the gap *opens* near 25 orbitals; it is not established.
+
+In order:
+
+1. **Get a strongly-correlated system into the molecule set.** Everything here is
+   a hydrogen chain or a small closed-shell molecule — quasi-1D and weakly
+   correlated, the best case for MPS and the worst case for showing a gap. A
+   transition-metal active site is the whole point and none exists here.
+2. **Measure where CCSD(T) and FCI diverge** on that system. This repo has both
+   (`qres/classical.py`). The size at which a single-reference method starts
+   disagreeing with the exact answer *is* the multireference onset, and it is
+   measurable with tools already present.
+3. **Then, and only then, a DMRG baseline.** Without it no advantage claim at 25
+   orbitals means anything, and with it this becomes the one direction in the
+   repository where the classical side might genuinely fail.
+
+### NEW — trapped ions: measured, and it is 2.17× (Result 81)
+
+Largely closed. All-to-all connectivity removes the heavy-hex routing overhead,
+which is **1.35× and saturates** around 1.4; the per-gate error is **1.61×**
+better; the product is **2.17×**, and 0 of 10 configurations land inside chemical
+accuracy — the same verdict as on superconducting hardware.
+
+What remains open, in descending value:
+
+* **The logical two-qubit error rate is unpublished.** That is the number the
+  whole error-corrected route needs, and until it exists the "48 logical qubits"
+  figure cannot be sized. Watch for it the way item "watch one number" watches
+  the median two-qubit error.
+* **A trapped-ion *noise model*.** Every mitigation result here (Results 56, 59)
+  is on IBM channels, and the bias decomposition that drove those conclusions —
+  97% readout on a shallow circuit, 95% gate on a deep one — would be different
+  where SPAM is 99.99%. Cheap to test, and it could invert a recommendation the
+  same way Result 58 did.
+* **Not** worth re-running the whole noise suite for 2.17×.
+
+### NEW — is classical simulation of a quantum computer really exponential? (Result 83)
+
+Asked as: can you not just use complex numbers and pseudorandomness in Python?
+
+**For a general circuit, no — and it is memory, not cleverness.** A statevector is
+2ⁿ amplitudes; 50 qubits is 18 PB. That is exactly what a statevector simulator
+is, and it is what every result in this repository was produced on.
+
+**But the general case is the wrong question**, and Result 83 measured the right
+one. Clifford circuits are polynomial at any width (Gottesman–Knill), and states
+with bounded entanglement are matrix product states — which is what DMRG
+exploits. Measured on exact ground states, the bond dimension needed grows
+**exponentially at every truncation, but with an exponent that depends on how
+much error you accept** (43% to 83% of the maximal rate). Four points and a ±0.23
+exponent do not support either "classically easy" or "classically hard".
+
+Open:
+
+* **Extend the series past H₈.** Four points is not a scaling law. H₁₀ exists in
+  the molecule set and sparse diagonalisation reaches it.
+* **Optimise the orbital ordering.** The measurement takes cuts in the mapper's
+  ordering; DMRG does not. The current numbers are an upper bound of unknown
+  tightness, and a reordering pass would say by how much.
+* **Run it on something not quasi-1D**, which is item 1 of the drug-metabolism
+  direction above. These two are the same measurement on different inputs.
+
 ### The one direction with real leverage: the block encoding (Result 75)
 
 **This is now the top item, and it displaces everything below it.**

@@ -1,0 +1,392 @@
+{
+  "backend": "fake_torino",
+  "basis": [
+    "rz",
+    "sx",
+    "x",
+    "cx"
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "ibm_best_two_qubit_error": 0.0012747211439835399,
+  "helios_two_qubit_error": 0.00079,
+  "helios_figures_are_published_not_measured": true,
+  "chemical_accuracy": 0.0016,
+  "rows": [
+    {
+      "molecule": "H2",
+      "ansatz": "uccsd",
+      "qubits": 2,
+      "parameters": 3,
+      "heavy_hex": {
+        "median": 4.0,
+        "min": 4,
+        "max": 4,
+        "counts": [
+          4,
+          4,
+          4,
+          4,
+          4
+        ]
+      },
+      "all_to_all": {
+        "median": 4.0,
+        "min": 4,
+        "max": 4,
+        "counts": [
+          4,
+          4,
+          4,
+          4,
+          4
+        ]
+      },
+      "routing_factor": 1.0,
+      "error_factor": 1.6135710683335946,
+      "total_factor": 1.6135710683335946,
+      "ibm_bias_budget": 0.0050988845759341594,
+      "ion_bias_budget": 0.00316,
+      "ion_detection_survival": 0.9968437426282337,
+      "seconds": 0.2544996760000231
+    },
+    {
+      "molecule": "H2",
+      "ansatz": "puccd",
+      "qubits": 2,
+      "parameters": 1,
+      "heavy_hex": {
+        "median": 4.0,
+        "min": 4,
+        "max": 4,
+        "counts": [
+          4,
+          4,
+          4,
+          4,
+          4
+        ]
+      },
+      "all_to_all": {
+        "median": 4.0,
+        "min": 4,
+        "max": 4,
+        "counts": [
+          4,
+          4,
+          4,
+          4,
+          4
+        ]
+      },
+      "routing_factor": 1.0,
+      "error_factor": 1.6135710683335946,
+      "total_factor": 1.6135710683335946,
+      "ibm_bias_budget": 0.0050988845759341594,
+      "ion_bias_budget": 0.00316,
+      "ion_detection_survival": 0.9968437426282337,
+      "seconds": 0.09581252700002096
+    },
+    {
+      "molecule": "LiH",
+      "ansatz": "uccsd",
+      "qubits": 10,
+      "parameters": 92,
+      "heavy_hex": {
+        "median": 8710.0,
+        "min": 8710,
+        "max": 8718,
+        "counts": [
+          8710,
+          8714,
+          8710,
+          8710,
+          8718
+        ]
+      },
+      "all_to_all": {
+        "median": 6457.0,
+        "min": 6457,
+        "max": 6457,
+        "counts": [
+          6457,
+          6457,
+          6457,
+          6457,
+          6457
+        ]
+      },
+      "routing_factor": 1.348923648753291,
+      "error_factor": 1.6135710683335946,
+      "total_factor": 2.176584173019298,
+      "ibm_bias_budget": 11.102821164096632,
+      "ion_bias_budget": 5.10103,
+      "ion_detection_survival": 0.006078204320414807,
+      "seconds": 27.669744813999955
+    },
+    {
+      "molecule": "LiH",
+      "ansatz": "puccd",
+      "qubits": 10,
+      "parameters": 8,
+      "heavy_hex": {
+        "median": 961.0,
+        "min": 961,
+        "max": 1041,
+        "counts": [
+          961,
+          1041,
+          1027,
+          961,
+          961
+        ]
+      },
+      "all_to_all": {
+        "median": 729.0,
+        "min": 729,
+        "max": 729,
+        "counts": [
+          729,
+          729,
+          729,
+          729,
+          729
+        ]
+      },
+      "routing_factor": 1.318244170096022,
+      "error_factor": 1.6135710683335946,
+      "total_factor": 2.127080653866371,
+      "ibm_bias_budget": 1.225007019368182,
+      "ion_bias_budget": 0.57591,
+      "ion_detection_survival": 0.5620650972844062,
+      "seconds": 0.7320484970000507
+    },
+    {
+      "molecule": "H4",
+      "ansatz": "uccsd",
+      "qubits": 6,
+      "parameters": 26,
+      "heavy_hex": {
+        "median": 1342.0,
+        "min": 1342,
+        "max": 1342,
+        "counts": [
+          1342,
+          1342,
+          1342,
+          1342,
+          1342
+        ]
+      },
+      "all_to_all": {
+        "median": 997.0,
+        "min": 997,
+        "max": 997,
+        "counts": [
+          997,
+          997,
+          997,
+          997,
+          997
+        ]
+      },
+      "routing_factor": 1.3460381143430291,
+      "error_factor": 1.6135710683335946,
+      "total_factor": 2.171928158178219,
+      "ibm_bias_budget": 1.7106757752259105,
+      "ion_bias_budget": 0.78763,
+      "ion_detection_survival": 0.4547800980715419,
+      "seconds": 1.96571325299999
+    },
+    {
+      "molecule": "H4",
+      "ansatz": "puccd",
+      "qubits": 6,
+      "parameters": 4,
+      "heavy_hex": {
+        "median": 315.0,
+        "min": 315,
+        "max": 315,
+        "counts": [
+          315,
+          315,
+          315,
+          315,
+          315
+        ]
+      },
+      "all_to_all": {
+        "median": 233.0,
+        "min": 233,
+        "max": 233,
+        "counts": [
+          233,
+          233,
+          233,
+          233,
+          233
+        ]
+      },
+      "routing_factor": 1.351931330472103,
+      "error_factor": 1.6135710683335946,
+      "total_factor": 2.181437281223529,
+      "ibm_bias_budget": 0.40153716035481507,
+      "ion_bias_budget": 0.18407,
+      "ion_detection_survival": 0.8318170568227428,
+      "seconds": 0.37199908900004175
+    },
+    {
+      "molecule": "BeH2",
+      "ansatz": "uccsd",
+      "qubits": 12,
+      "parameters": 204,
+      "heavy_hex": {
+        "median": 24677.0,
+        "min": 24624,
+        "max": 24877,
+        "counts": [
+          24677,
+          24877,
+          24624,
+          24857,
+          24650
+        ]
+      },
+      "all_to_all": {
+        "median": 17602.0,
+        "min": 17602,
+        "max": 17602,
+        "counts": [
+          17602,
+          17602,
+          17602,
+          17602,
+          17602
+        ]
+      },
+      "routing_factor": 1.401942961027156,
+      "error_factor": 1.6135710683335946,
+      "total_factor": 2.262134601367351,
+      "ibm_bias_budget": 31.456293670081813,
+      "ion_bias_budget": 13.90558,
+      "ion_detection_survival": 9.088592469130731e-07,
+      "seconds": 232.13695228099994
+    },
+    {
+      "molecule": "BeH2",
+      "ansatz": "puccd",
+      "qubits": 12,
+      "parameters": 12,
+      "heavy_hex": {
+        "median": 1834.0,
+        "min": 1807,
+        "max": 2017,
+        "counts": [
+          1834,
+          1807,
+          2005,
+          1834,
+          2017
+        ]
+      },
+      "all_to_all": {
+        "median": 1297.0,
+        "min": 1297,
+        "max": 1297,
+        "counts": [
+          1297,
+          1297,
+          1297,
+          1297,
+          1297
+        ]
+      },
+      "routing_factor": 1.4140323824209715,
+      "error_factor": 1.6135710683335946,
+      "total_factor": 2.281641741961305,
+      "ibm_bias_budget": 2.337838578065812,
+      "ion_bias_budget": 1.02463,
+      "ion_detection_survival": 0.35878392851098706,
+      "seconds": 2.102479021000022
+    },
+    {
+      "molecule": "H6",
+      "ansatz": "uccsd",
+      "qubits": 10,
+      "parameters": 117,
+      "heavy_hex": {
+        "median": 11952.0,
+        "min": 11943,
+        "max": 11961,
+        "counts": [
+          11952,
+          11955,
+          11943,
+          11949,
+          11961
+        ]
+      },
+      "all_to_all": {
+        "median": 8424.0,
+        "min": 8424,
+        "max": 8424,
+        "counts": [
+          8424,
+          8424,
+          8424,
+          8424,
+          8424
+        ]
+      },
+      "routing_factor": 1.4188034188034189,
+      "error_factor": 1.6135710683335946,
+      "total_factor": 2.2893401482339892,
+      "ibm_bias_budget": 15.235467112891268,
+      "ion_bias_budget": 6.65496,
+      "ion_detection_survival": 0.0012842375353135566,
+      "seconds": 47.990654571999926
+    },
+    {
+      "molecule": "H6",
+      "ansatz": "puccd",
+      "qubits": 10,
+      "parameters": 9,
+      "heavy_hex": {
+        "median": 1105.0,
+        "min": 1105,
+        "max": 1129,
+        "counts": [
+          1105,
+          1105,
+          1129,
+          1105,
+          1105
+        ]
+      },
+      "all_to_all": {
+        "median": 830.0,
+        "min": 830,
+        "max": 830,
+        "counts": [
+          830,
+          830,
+          830,
+          830,
+          830
+        ]
+      },
+      "routing_factor": 1.3313253012048192,
+      "error_factor": 1.6135710683335946,
+      "total_factor": 2.148187988564605,
+      "ibm_bias_budget": 1.4085668641018116,
+      "ion_bias_budget": 0.6557000000000001,
+      "ion_detection_survival": 0.5189440848249738,
+      "seconds": 1.3344302160001007
+    }
+  ]
+}
