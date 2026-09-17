@@ -99,6 +99,52 @@ Open:
 * **Run it on something not quasi-1D**, which is item 1 of the drug-metabolism
   direction above. These two are the same measurement on different inputs.
 
+### NEW — quantum machine learning: LLMs are closed, sampling is not (Result 84)
+
+**Split verdict, and the split is the useful part.**
+
+*Large language models: a confident no.* Amplitude-encoding a general vector of
+dimension `d` costs `gates = d − 11` — measured, `d^1.037 ± 0.007` on the
+asymptotic half. Loading is linear, reading classically is linear, so the load
+step alone costs what the whole classical algorithm costs. One 4096×4096 weight
+matrix is 1.7e7 two-qubit gates; a 70B model is 6.9e10. **No hardware generation
+changes this**, and it is the same barrier dequantization attacks from the other
+side.
+
+*Machine learning generally: not settled, and the honest answer is to say so.*
+The proposals that avoid the input barrier are the ones where the input is
+**generated rather than read**:
+
+* **Quantum circuit Born machines** — the model *is* the measurement
+  distribution. Sampling from IQP/QAOA families is classically intractable up to
+  multiplicative error under standard assumptions (Coyle et al., npj QI 2020).
+  This is the strongest complexity-theoretic footing anything in this file has.
+* **Quantum reservoir computing / extreme learning machines** — fixed, *untrained*
+  quantum dynamics plus a classical linear readout. "Stochasticity as the
+  resource, no trained quantum parameters" is the defining property, not a
+  workaround.
+
+What this repository could measure, in order:
+
+1. **Whether a Born machine beats a classical generative baseline on data it did
+   not generate.** Result 68's kernel failed exactly here — it won only on
+   labels its own circuit produced — so the experimental design must fix the
+   dataset *first*, from a real source, and only then pick circuits. That
+   ordering is the whole methodology.
+2. **Where the sampling-hardness argument starts to bite.** It is asymptotic;
+   at the ≤20 qubits this repo can run, the distributions are trivially
+   classically reproducible because we *simulate them to produce them*. So the
+   honest statement is "cannot be tested here", and establishing the qubit count
+   at which it could be is itself a result.
+3. **Quantum reservoir computing is the cheapest thing on this list to try** —
+   no trained quantum parameters means no optimiser, no shot-noise gradient
+   loop, and no barren plateau, which removes three of the four failure modes
+   this repository has already measured. It needs a temporal dataset and a ridge
+   readout, both of which are a day's work.
+
+**Do not** re-run a variational QML experiment. Results 68 and 74 closed that
+shape, and the input barrier above explains why it was never going to work.
+
 ### The one direction with real leverage: the block encoding (Result 75)
 
 **This is now the top item, and it displaces everything below it.**

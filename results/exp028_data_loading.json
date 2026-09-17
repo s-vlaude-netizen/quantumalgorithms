@@ -1,0 +1,87 @@
+{
+  "basis": [
+    "rz",
+    "sx",
+    "x",
+    "cx"
+  ],
+  "dimensions": [
+    4,
+    8,
+    16,
+    32,
+    64,
+    128,
+    256,
+    512,
+    1024
+  ],
+  "two_qubit_gates": [
+    1,
+    4,
+    11,
+    26,
+    57,
+    120,
+    247,
+    502,
+    1013
+  ],
+  "exponent": 1.036770984761504,
+  "exponent_stderr": 0.006978521052631351,
+  "sparse_reference_dimension": 70000000000,
+  "sparse": [
+    {
+      "sparsity": 1.0,
+      "nonzeros": 1024,
+      "two_qubit_gates": 1013,
+      "vs_dense": 1.0
+    },
+    {
+      "sparsity": 0.5,
+      "nonzeros": 512,
+      "two_qubit_gates": 502,
+      "vs_dense": 0.49555774925962487
+    },
+    {
+      "sparsity": 0.25,
+      "nonzeros": 256,
+      "two_qubit_gates": 247,
+      "vs_dense": 0.24383020730503455
+    },
+    {
+      "sparsity": 0.1,
+      "nonzeros": 102,
+      "two_qubit_gates": 120,
+      "vs_dense": 0.11846001974333663
+    },
+    {
+      "sparsity": 0.05,
+      "nonzeros": 51,
+      "two_qubit_gates": 57,
+      "vs_dense": 0.0562685093780849
+    }
+  ],
+  "implications": [
+    {
+      "object": "a 768-dim BERT embedding",
+      "dimension": 768,
+      "predicted_gates": 759.75
+    },
+    {
+      "object": "a 4096-dim LLaMA hidden state",
+      "dimension": 4096,
+      "predicted_gates": 4052.0
+    },
+    {
+      "object": "one 4096x4096 weight matrix",
+      "dimension": 16777216,
+      "predicted_gates": 16596992.0
+    },
+    {
+      "object": "a 70B-parameter model",
+      "dimension": 70000000000,
+      "predicted_gates": 69248046875.0
+    }
+  ]
+}

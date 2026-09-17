@@ -4234,3 +4234,121 @@ interest are compressible, no quantum method can win, and the systems this
 repository can build are substantially compressible at chemical accuracy.
 
 `experiments/exp027_entanglement.py`, `results/exp027_entanglement.json`.
+
+---
+
+### Result 84 — quantum computing for machine learning: the barrier is measured, and it is the input
+
+The question was whether learning could happen *directly* on probabilistic
+hardware — using the fact that measurement is stochastic as the resource rather
+than as the noise, possibly with no trained quantum parameters at all — and
+whether any of it reaches large language models.
+
+#### The intuition is aligned with the one place hardness is established
+
+Two published lines are precisely the thing described, and neither was invented
+here:
+
+* **Quantum reservoir computing / quantum extreme learning machines.** The
+  quantum dynamics are fixed and *never trained*; only a classical linear
+  readout is fitted. "No trainable quantum parameters, the dynamics are the
+  model" is the defining property.
+* **Quantum circuit Born machines.** The model *is* the measurement
+  distribution — sampling is the forward pass. And this is where the strongest
+  known separation lives: sampling from IQP and QAOA circuit families is
+  classically intractable up to multiplicative error under standard complexity
+  assumptions (Coyle et al., *The Born supremacy*, npj Quantum Information 2020).
+
+So "stochasticity as the advantage" points at the part of quantum computing where
+hardness is best established — which is a better-founded instinct than the
+variational programme this repository spent seventy results on.
+
+**But hardness of sampling is not usefulness of learning.** A distribution that is
+hard to sample classically is not thereby a good model of anyone's data, and the
+open problem in that literature is exactly generalisation — whether a Born
+machine produces valid novel samples or memorises its training set.
+
+#### The measured barrier: loading is linear
+
+To compute on classical data, the data has to get in. Amplitude-encoding a
+general vector of dimension `d`, transpiled to a real basis:
+
+| qubits | d | 2-qubit gates | gates/d |
+|---|---|---|---|
+| 6 | 64 | 57 | 0.89 |
+| 8 | 256 | 247 | 0.96 |
+| 10 | 1 024 | 1 013 | **0.99** |
+
+`gates = d − 11` at d = 1024; fitted on the asymptotic half, `gates ~ d^1.037 ±
+0.007`. **Loading is linear in the data size, and reading the vector classically
+is also linear** — so the loading step alone costs what the entire classical
+algorithm costs, before the quantum algorithm does anything. No algorithm that
+must read its whole input can be exponentially faster than reading it.
+
+This is the same barrier that dequantization results attack from the other side:
+when a quantum ML speedup assumes QRAM state preparation, matching the classical
+algorithm with ℓ²-norm sampling access removes the exponential gap (Tang and
+successors, *Dequantizing algorithms to understand quantum advantage in machine
+learning*, Nature Reviews Physics 2022).
+
+#### What that is at the sizes machine learning actually uses
+
+| object | dimension | 2-qubit gates to load |
+|---|---|---|
+| a 768-dim BERT embedding | 7.7e2 | 7.6e2 |
+| a 4096-dim hidden state | 4.1e3 | 4.1e3 |
+| one 4096×4096 weight matrix | 1.7e7 | 1.7e7 |
+| a 70B-parameter model | 7.0e10 | **6.9e10** |
+
+**For large language models there is no route through this**, and it is not a
+hardware-generation problem: one weight matrix costs more two-qubit gates than
+every gate this repository has ever counted, at per-gate error rates that would
+have to be ~1e-15 to survive the depth.
+
+#### The loophole, measured rather than asserted
+
+Reporting only the barrier would be the selective quotation this project keeps
+catching. Input that is **sparse or generated rather than read** does not pay the
+cost:
+
+| sparsity | nonzeros | 2q gates | vs dense |
+|---|---|---|---|
+| 1.00 | 1 024 | 1 013 | 1.00 |
+| 0.25 | 256 | 247 | 0.24 |
+| 0.05 | 51 | 57 | **0.06** |
+
+Cost tracks the **nonzeros**, not the dimension. So the live proposals sit
+exactly where this barrier does not apply: Born machines, whose input is a
+circuit rather than a dataset, and reservoir computing, whose quantum part is
+never trained.
+
+#### An error of my own, and it would have produced a false negative
+
+The first version of the sparsity arm measured 1 013 gates at *every* sparsity
+and would have reported "sparsity buys nothing". That is a fact about qiskit's
+`StatePreparation`, which is a dense decomposition and never inspects the zeros —
+not a fact about the problem. **It would have turned an honest "not settled" into
+a confident negative**, which is the worst direction for this project's errors to
+run. The fixed arm prepares the `s` amplitudes on ⌈log₂ s⌉ qubits, with the
+caveat stated explicitly: it assumes the support is known, and an arbitrary
+support needs an index permutation that is not measured here.
+
+A second correction in the same experiment: the log-log fit over the full range
+read `d^1.201 ± 0.050` because the small-`d` points curve (1 gate at d = 4 is
+0.25 per dimension). The ratio is what converges, so the extrapolation uses the
+ratio and the fit is quoted on the asymptotic half. Using the inflated slope
+would have overstated a 70B model by a further ~50×.
+
+#### The verdict, in the shape the question asked for
+
+**Large language models: a confident no**, on a measured linear barrier that no
+hardware generation changes.
+
+**Machine learning generally: not settled, and honestly so.** The sampling-based
+proposals have a real complexity-theoretic basis and do not pay the input cost.
+None has a demonstrated learning advantage on data anyone cares about, and this
+repository has already measured its own QML negative — Result 68's kernel is at
+chance (0.51–0.55) and wins only on labels its own circuit produced.
+
+`experiments/exp028_data_loading.py`, `tests/test_data_loading.py`,
+`results/exp028_data_loading.json`.
