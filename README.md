@@ -23,7 +23,7 @@ an adaptive ansatz with a smaller parameter count — was measured and does not
 (Result 74): ADAPT's exponent is 3.57 ± 0.11 against UCCSD's 3.44 ± 0.13, which
 is indistinguishable and, if anything, the wrong way round.
 
-## The answer, since 79 results is a lot to read
+## The answer, since 84 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -164,6 +164,64 @@ optimiser converges, and H₆ shows it often does not. That convergence failure
 predates the penalty and went unrecorded because Result 78 reported iteration
 counts without the fraction converging across repeats — which is the statistic
 that shows it.
+
+## Two questions people actually ask
+
+### "Could this help with drug discovery or cancer research?" (Results 82, 83)
+
+**The direction is real and this is the closest anything here has come.** But
+three translations have to happen first, and two of them move the answer by
+orders of magnitude.
+
+* **50 logical qubits is 25 spatial orbitals, not 50 atoms.** A qubit carries one
+  spin orbital. A 50-atom fragment is ~200 orbitals, so ~400 qubits. What 25
+  orbitals buys is an *active space*.
+* **Pharmacokinetics is mostly not an electronic-structure problem.** Absorption,
+  distribution and excretion are solvation and conformational thermodynamics over
+  thousands of atoms. **One exception decides clearance and half-life:**
+  cytochrome P450 metabolism, whose Compound I is a high-valent iron-oxo centre
+  with genuine multireference character. That *is* electronic structure, and it
+  is an established advantage candidate (Goings et al., PNAS 2022).
+* **The gap, sized with this repo's own laws:** 1.1e7× on the variational route,
+  **460× in physical qubits on the error-corrected route** — the smallest gap
+  recorded here, and an *upper* bound, since a surface code is a 2D
+  nearest-neighbour code and an all-to-all machine does not need one. **The first
+  caveat in this repository that points the favourable way.**
+
+**What blocks it is a classical baseline, not hardware.** Exact diagonalisation
+is out past ~24 orbitals (2.7e13 determinants) — but exact diagonalisation is not
+the competitor, **DMRG is**, and Result 83 measured these states to be
+substantially compressible. So the gap *opens* near 25 orbitals; it is not
+established.
+
+### "Could this help machine learning, or LLMs?" (Result 84)
+
+**Split verdict.**
+
+*LLMs: no, on a measured barrier.* Amplitude-encoding a vector of dimension `d`
+costs `gates = d − 11` — loading is **linear**, and reading it classically is
+also linear, so the load step alone costs what the whole classical algorithm
+costs. One 4096×4096 weight matrix is 1.7e7 two-qubit gates; a 70B model is
+6.9e10. No hardware generation changes that.
+
+*Machine learning generally: not settled, and said so deliberately.* Cost tracks
+**nonzeros, not dimension** (0.06× dense at 5% sparsity), so proposals whose
+input is *generated rather than read* never pay it — Born machines, whose input
+is a circuit, and quantum reservoir computing, whose quantum part is never
+trained. Sampling from IQP/QAOA families is classically intractable up to
+multiplicative error under standard assumptions, which is the firmest
+complexity-theoretic footing anything in this repository touches. **None of them
+has a demonstrated learning advantage on data anyone cares about**, and Result 68
+is this project's own QML negative: a kernel at chance (0.51–0.55) that wins only
+on labels its own circuit produced.
+
+### And a platform question: trapped ions (Result 81)
+
+All-to-all connectivity removes heavy-hex routing overhead worth **1.35×** (it
+*saturates* near 1.4 rather than growing); per-gate error is **1.61×** better.
+Combined **2.17×**, and 0 of 10 configurations land inside chemical accuracy —
+the same verdict. Note also that "error-**detected**" logical qubits discard the
+shot on any detected fault: acceptance is (1−p)^gates, which is 9.1e-7 at BeH₂.
 
 Everything below is how that was established, and it is worth reading mainly for
 the method: every claim here is a measurement, several of them corrections to
