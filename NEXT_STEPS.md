@@ -10,6 +10,52 @@ what is left, add what the results suggested.
 
 ## Now
 
+### NEW — classical algorithm work is in scope, and it is already where the leverage was
+
+Added as an explicit direction. It is worth stating what this repository's own
+record says about it, because "classical algorithms" sounds like a detour from
+quantum algorithms and here it has not been one:
+
+**The three largest factors ever measured in this repository are classical
+algorithms.** Double factorisation as a block encoding (332×, Result 76) and
+tensor hypercontraction (Results 77–80) are *classical* preprocessing of the
+Hamiltonian that reduces the quantum cost. Result 80's gauge fixing was a
+**2× classical optimisation improvement** — removing a flat direction from a
+least-squares landscape — and it beat every error-mitigation and
+measurement-scheme result here. None of it touched a qubit.
+
+And the inverse holds: **a better classical algorithm directly tests criterion 1.**
+The whole framework is (is there a classical gap?) × (does the hardware reach
+it?), so improving the classical side is not competition with the quantum
+programme, it is the measurement that decides it.
+
+So, ranked by what would actually move something here:
+
+1. **A DMRG baseline — by a distance the most valuable classical algorithm this
+   repository could acquire.** It is the blocking item for the drug-metabolism
+   direction below: exact diagonalisation is not the competitor and DMRG is, so
+   without it no advantage claim at 25 orbitals means anything. This is classical
+   algorithm work whose entire purpose is to decide a quantum question.
+2. **More of the THC fit.** Gauge fixing took H₆ from 46 337 to 23 738 iterations
+   and the λ spread from 9.52 to 1.59. The obvious remaining items are a proper
+   second-order method (the Gauss-Newton structure is right there and unexploited)
+   and a better initialisation than perturbing the DF selection.
+3. **Factorisation: honest scoping first, and the answer is probably "size it,
+   don't build it".** Competing with GNFS implementations (CADO-NFS, msieve) is
+   not realistic here and would not be useful if it succeeded — factoring's only
+   application is breaking cryptography that is already being retired. What *is*
+   cheap and worth doing is the **cross-check**: size Shor on RSA-2048 with this
+   repository's own surface-code model (Results 69–71) against Gidney & Ekerå's
+   published ~20M qubits / 8 hours. Result 82 did exactly this against Lee et
+   al.'s T-counts and the agreement was the strongest evidence that the resource
+   model is sound. A second independent anchor, on a completely different
+   algorithm, is worth more than either estimate alone.
+
+**What to avoid:** building a classical solver for a problem where the classical
+side already wins outright (MaxCut, small-molecule FCI). Results 42 and 50
+measured those; a faster classical answer to a question already answered
+classically changes nothing.
+
 ### NEW — drug metabolism at a 25-orbital active space (Results 82, 83)
 
 **This is the best-posed advantage candidate this project has had, and it is the
