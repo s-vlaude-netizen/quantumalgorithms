@@ -219,26 +219,31 @@ So the useful work is:
    stopped at the same iteration cap. This experiment cannot tell those apart,
    so H₆ replicates the number without replicating the evidence.
 
-4. **The open item is now that convergence failure.** It predates the penalty —
-   the unpenalised H₆ run converges 1/8 too — and Result 78 missed it by
-   reporting iteration counts without the *fraction converging across repeats*,
-   which is the statistic that shows it.
+4. ~~The convergence failure~~ — **done, Result 80, and all three measurements
+   landed.**
 
-   What to measure, in order:
+   * **Why it stops: the iteration cap**, `status 1`, `nit` exactly at the limit.
+     Not line search, not tolerances. And not merely tight — 20 000 was *below
+     the median requirement* of 46 337, so every H₆ number in Results 78 and 79
+     was read off fits stopped a third of the way through.
+   * **The λ collapse is real.** It survives at a converging budget: spread 1.00
+     against the unpenalised 9.52. Result 79's caveat can be lifted.
+   * **The reparameterisation works, and I had reported it as not working.** A
+     single-start probe said 2.5%; across eight starts the gauge fixing is worth
+     **1.95× in iterations, 8/8 convergence instead of 7/8, 6× in λ spread with
+     no penalty, and 4.3× in energy error**. The probe used the unperturbed DF
+     start, where the flat direction costs nothing. See Result 80 — it is the
+     single-start error this file's own rule 3 exists to prevent.
 
-   * **Why L-BFGS stops.** Is it the iteration cap, the gradient tolerance, or
-     line-search failure? `scipy`'s result carries the reason and it is not
-     currently recorded — record it per fit and tabulate.
-   * **Whether the cap is simply too low for N = 6.** H₄ converges comfortably at
-     the same budget; the parameter count roughly triples (432 against 192). A
-     budget sweep answers this cheaply and would be embarrassing not to try first.
-   * **Whether a better-conditioned parameterisation helps** — the χ columns are
-     free to rescale against Z without changing the model, which is a flat
-     direction the optimiser has to waste effort on. Fixing the column norms and
-     moving the scale into Z removes it.
+   **Standing recommendation: gauge-fix always** (no hyperparameter, improves
+   convergence, reproducibility and accuracy at once); add the penalty only when
+   λ must be pinned, at 30× in energy error.
 
-   Only once fits converge reliably does re-measuring the rank exponent
-   (Result 78's `N^1.33 ± 0.26`) mean more than it does now.
+   **Now open:** re-measure the rank exponent. Result 78's `N^1.33 ± 0.26` was
+   fitted on fits that mostly never converged, with a parameterisation now known
+   to cost 2× the iterations and 6× the spread. With gauge + penalty the fits
+   converge 8/8 in a median of 17 681 iterations — *below the original cap* — so
+   this is now cheap, and it is the number the whole THC claim rests on.
 
 5. **Superseded: what was open before.**
 

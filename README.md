@@ -156,14 +156,25 @@ while *improving* accuracy (8/8 inside chemical accuracy against 7/8) and
 lowering median λ from 5.59 to 4.37. At α = 1e-2 nothing converges at all, so the
 working range has both edges measured rather than only the flattering one.
 
-**The thing underneath: on H₆, only one fit in eight converges — penalty or no
-penalty.** Its λ spread also collapses to 1.0, but that may mean all eight found
-the same optimum *or* that all eight stopped at the same iteration cap, and the
-experiment cannot distinguish those. So reproducibility is solved where the
-optimiser converges, and H₆ shows it often does not. That convergence failure
-predates the penalty and went unrecorded because Result 78 reported iteration
-counts without the fraction converging across repeats — which is the statistic
-that shows it.
+**The thing underneath was the iteration cap, and Result 80 settled it.** On H₆
+only one fit in eight converged, so the λ spread of 1.0 might have meant all
+eight found the same optimum *or* that all eight stopped at the same place.
+`scipy` carries the termination reason and neither experiment had recorded it: it
+is the cap, and the cap was not merely tight but **below the median requirement**
+of 46 337 iterations — a constant carried over from H₄ without re-deriving it, so
+every H₆ number in Results 78–79 was read off fits stopped a third of the way
+through. **Run to convergence the collapse is real**: spread 1.00 against the
+unpenalised 9.52.
+
+**And the fix that mattered most is one I had reported as not working.** The
+model has an exact flat direction — rescaling a χ column against its Z entries
+changes nothing — and removing it is worth **1.95× in iterations, 8/8 convergence
+instead of 7/8, 6× in λ spread with no penalty at all, and 4.3× in energy
+error**. I had measured it on a *single* start, seen 2.5%, and concluded the
+hypothesis was wrong. The start I picked was the easiest one. That is the
+single-start error this repository has a standing rule about and whose headline
+sentence is Result 78's own — *"a single start is not a measurement of
+anything"* — applied to the code and not to my own diagnostic.
 
 ## Two questions people actually ask
 

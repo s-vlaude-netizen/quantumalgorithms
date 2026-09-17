@@ -4017,6 +4017,99 @@ exists and grows is the equivalent of measuring the thing you are claiming.
 
 ---
 
+### Result 80 — the H₆ collapse was real, the cap was the problem, and I got the diagnosis wrong the way this repository has a rule about
+
+Result 79 left one question: on H₆ only 1 fit in 8 converged, so its λ spread of
+1.0 might mean all eight found the same optimum, or merely that all eight stopped
+at the same iteration cap. Three measurements were queued, in ascending cost.
+All three ran, and the cheap one settled the diagnosis while the expensive one
+overturned my conclusion about it.
+
+#### 1. Why L-BFGS stops — recorded, because it never had been
+
+`scipy` carries the reason in `result.status` and `result.message`, and neither
+Result 78 nor 79 stored it. It is unambiguous: **status 1, `STOP: TOTAL NO. OF
+ITERATIONS REACHED LIMIT`**, with `nit` exactly at the cap. Not a line-search
+failure, not an unreachable tolerance — the budget was too small.
+
+**And it was not merely tight, it was below the median requirement.** H₆ has 432
+free parameters against H₄'s 192, and the unpenalised fits need a median of
+**46 337** iterations. 20 000 was a constant carried over from the smaller
+molecule without re-deriving it, so every H₆ number in Results 78 and 79 was read
+off fits stopped roughly a third of the way through.
+
+#### 2. The collapse is real
+
+Run to a budget that converges:
+
+| parameterisation | α | converged | median iters | median λ | **λ spread** | median err |
+|---|---|---|---|---|---|---|
+| plain | 0 | 7/8 | 46 337 | 16.26 | 9.52 | 1.00e-4 |
+| plain | 1e-4 | 7/8 | 36 913 | 8.20 | **1.00** | 7.28e-4 |
+| gauge | 0 | **8/8** | 23 738 | 13.14 | 1.59 | **2.33e-5** |
+| gauge | 1e-4 | **8/8** | **17 681** | 8.20 | **1.00** | 7.41e-4 |
+
+**The penalty's λ collapse survives convergence**: spread stays exactly 1.00
+against the unpenalised 9.52, and median λ halves. Result 79 replicated the
+number without the evidence; the evidence is now here and its caveat can be
+lifted rather than argued around.
+
+(The experiment's own printed verdict takes the conservative branch, because it
+keys on the plain/1e-4 arm at 7/8. The gauge arm settles it at 8/8.)
+
+#### 3. The reparameterisation — where I was wrong, and how
+
+The model has an exact gauge freedom: scaling a χ column by `s` and its Z entries
+by `1/s²` leaves the tensor unchanged, so `M` directions of the landscape are
+pure coordinate. Normalising the columns inside the objective removes them.
+
+**Before building the experiment I probed it on one fit: 44 300 iterations
+gauge-fixed against 45 445 plain, a 2.5% saving. I reported the hypothesis as
+wrong.** Across eight starts it is worth:
+
+* **1.95× in iterations** — 46 337 → 23 738 median
+* **8/8 convergence instead of 7/8**, and the gauge arms are the only ones whose
+  termination messages contain *no* cap hits at all
+* **6× in λ spread with no penalty** — 9.52 → 1.59
+* **4.3× in energy error** — 1.00e-4 → 2.33e-5, the best of any arm
+
+The mechanism is in the column-norm ratio, which the experiment records: the
+plain arm lets the norms drift to **2.07** (2.73 with the penalty), while my
+single-start probe saw only **1.3**. The start I probed was the unperturbed
+double-factorisation selection — the easiest one. **The flat direction costs
+nothing from a good starting point; it costs on the perturbed starts, which are
+seven of the eight fits.**
+
+**This is the failure mode this repository has a standing rule about, and Result
+78's own headline is "a single start is not a measurement of anything."** I wrote
+that sentence, built the multi-start machinery underneath it, and then drew a
+conclusion from a single start anyway because it was the cheap thing to check.
+The rule was not missing; it was not applied to my own diagnostic. Cheap probes
+are for deciding what to measure, never for deciding what is true.
+
+#### What this changes
+
+The two fixes address the same disease by different routes and **compose**:
+gauge + penalty converges 8/8 in a median of **17 681** iterations — *below the
+original 20 000 cap*. Result 79's budget would have been adequate all along had
+the parameterisation been right.
+
+The standing recommendation is now:
+
+* **Gauge-fix always.** It costs nothing, has no hyperparameter, and improves
+  convergence, reproducibility *and* accuracy simultaneously.
+* **Add the penalty only when λ must be pinned**, and pay for it: it takes the
+  spread from 1.59 to 1.00 and costs **30× in energy error** (2.33e-5 → 7.41e-4,
+  both inside chemical accuracy). It also has a hard edge — 0/8 inside chemical
+  accuracy at α = 1e-2 (Result 79).
+* The penalty is nearly gauge-invariant for large |Z| (`h(z) ≈ |z|`), which is
+  why it does not fix the flat direction and in fact drifts slightly further.
+
+`experiments/exp024_convergence_budget.py`, `tests/test_convergence_budget.py`,
+`results/exp024_convergence_H6_M18.json`.
+
+---
+
 ### Result 81 — a trapped-ion machine changes the constant, not the verdict
 
 Every noise result in this repository is measured on IBM calibration snapshots,

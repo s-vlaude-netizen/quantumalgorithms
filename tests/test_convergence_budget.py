@@ -172,3 +172,80 @@ def test_a_fit_that_hits_the_cap_is_not_counted_as_converged():
 def test_the_old_budget_is_the_one_result_79_used():
     """A constant, pinned, because the whole comparison is against that number."""
     assert OLD_BUDGET == 20000
+
+
+def test_the_recorded_run_says_the_cap_was_the_problem():
+    """Result 80's first finding, read off the run rather than restated.
+
+    The plain unpenalised arm must need a median above the old budget -- that is
+    what makes every H6 number in Results 78 and 79 a number read off a fit
+    stopped partway.
+    """
+    import json
+    from pathlib import Path
+
+    path = Path("results/exp024_convergence_H6_M18.json")
+    if not path.exists():
+        pytest.skip("run experiments.exp024_convergence_budget first")
+    data = json.loads(path.read_text())
+    rows = {(r["parameterisation"], r["penalty"], r["budget"]): r for r in data["rows"]}
+
+    plain = rows[("plain", 0.0, "converged")]
+    assert plain["median_iterations"] > OLD_BUDGET, (
+        "H6 no longer needs more than the old budget; if that is real the whole "
+        "diagnosis has changed and Result 80 should be re-derived"
+    )
+    assert any(
+        "ITERATIONS REACHED LIMIT" in message for message in plain["messages"]
+    ), "the cap is no longer the binding termination reason"
+
+
+def test_the_penalised_collapse_survives_convergence():
+    """Result 80's second finding: Result 79's H6 number was not a cap artefact."""
+    import json
+    from pathlib import Path
+
+    path = Path("results/exp024_convergence_H6_M18.json")
+    if not path.exists():
+        pytest.skip("run experiments.exp024_convergence_budget first")
+    data = json.loads(path.read_text())
+    rows = {(r["parameterisation"], r["penalty"], r["budget"]): r for r in data["rows"]}
+
+    penalised = rows[("gauge", 1e-4, "converged")]
+    unpenalised = rows[("gauge", 0.0, "converged")]
+    assert penalised["converged"] == penalised["repeats"], "not every fit converged"
+    assert penalised["one_norm_spread"] < 1.05, (
+        f"the collapse no longer holds among converged fits "
+        f"({penalised['one_norm_spread']:.2f})"
+    )
+    assert penalised["one_norm_spread"] < unpenalised["one_norm_spread"]
+
+
+def test_gauge_fixing_beats_the_plain_parameterisation():
+    """Result 80's third finding, and the one a single-start probe got wrong.
+
+    Pinned because the probe that said otherwise was cheaper to run than this
+    comparison, and a future session would be tempted the same way.
+    """
+    import json
+    from pathlib import Path
+
+    path = Path("results/exp024_convergence_H6_M18.json")
+    if not path.exists():
+        pytest.skip("run experiments.exp024_convergence_budget first")
+    data = json.loads(path.read_text())
+    rows = {(r["parameterisation"], r["penalty"], r["budget"]): r for r in data["rows"]}
+
+    plain = rows[("plain", 0.0, "converged")]
+    gauge = rows[("gauge", 0.0, "converged")]
+
+    assert gauge["median_iterations"] < plain["median_iterations"] / 1.5, (
+        f"gauge fixing no longer halves the iteration count "
+        f"({gauge['median_iterations']:.0f} against {plain['median_iterations']:.0f})"
+    )
+    assert gauge["converged"] >= plain["converged"]
+    assert gauge["one_norm_spread"] < plain["one_norm_spread"] / 2
+    # and the mechanism: the plain arm lets the column norms drift, which is
+    # exactly what the gauge removes and what the single-start probe did not see
+    assert plain["median_column_norm_ratio"] > 1.5
+    assert gauge["median_column_norm_ratio"] == pytest.approx(1.0, abs=1e-6)
