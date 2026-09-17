@@ -4463,3 +4463,130 @@ chance (0.51–0.55) and wins only on labels its own circuit produced.
 
 `experiments/exp028_data_loading.py`, `tests/test_data_loading.py`,
 `results/exp028_data_loading.json`.
+
+---
+
+### Result 85 — the probabilistic classical baseline: the mechanism is visible, the complexity class is not
+
+Every classical baseline in this repository was **deterministic**: FCI (exact,
+exponential) and CCSD(T) (polynomial, single-reference). The **probabilistic**
+one was missing, and it is the one that decides the advantage question for
+chemistry, for a precise reason.
+
+**FCIQMC** samples the same imaginary-time propagation that phase estimation runs
+coherently, using signed random walkers on determinants instead of amplitudes on
+qubits. Its cost is **polynomial** — however large the determinant space gets —
+*unless* the **fermionic sign problem** bites, in which case the walker
+population needed grows **exponentially**. So:
+
+* where FCIQMC is efficient, a classical computer solves the problem in
+  polynomial time and **no quantum method can have an advantage there**, whatever
+  the hardware does
+* where the sign problem bites, the classical method fails structurally, and that
+  is precisely the window a quantum computer could occupy
+
+Implemented from scratch, vectorised over the CSR row structure, and **validated
+against exact diagonalisation on every system** before any scaling was read off
+it.
+
+#### What was measured
+
+Walkers needed for chemical accuracy, median over **five** independent seeds
+(single runs are non-monotonic in the walker count, so one realisation's
+crossing is partly luck):
+
+| geometry | H₂ (N=2) | H₄ (N=4) | H₆ (N=6) | sector sizes |
+|---|---|---|---|---|
+| equilibrium, r = 0.75 Å | 40 | 40 | 160 | 2 / 20 / 200 |
+| **stretched, r = 2.0 Å** | **1 280** | **5 120** | **10 240** | 2 / 20 / 200 |
+| factor | 32× | **128×** | 64× | — |
+
+**Correlation strength, not system size, is the axis.** H₂ at two orbitals costs
+32× more stretched than at equilibrium — identical system size, identical sector,
+purely the correlation regime.
+
+And the diagnostic that is *not* quantised by the walker ladder, the fraction of
+spawned walkers annihilated against opposite signs, at the converging point:
+
+| geometry | H₄ | H₆ |
+|---|---|---|
+| equilibrium | 0.3% | 0.7% |
+| stretched | **38.1%** | **32.9%** |
+
+A ~50× change. Nearly four in ten spawned walkers cancel. That is the sign
+problem being paid for directly, and it is the robust part of this result.
+
+#### What was NOT measured, and this is the honest headline
+
+| geometry | power law | exponential | rms (power) | rms (exp) |
+|---|---|---|---|---|
+| equilibrium | `N^1.13 ± 0.90` | `2^(0.50 N)` | 0.408 | 0.327 |
+| stretched | `N^1.90 ± 0.08` | `2^(0.75 N)` | 0.035 | 0.163 |
+
+The stretched power-law fit looks much better than the exponential one — and
+**that discrimination is not real.** The walker ladder steps by factors of two,
+so a threshold carries a log-space uncertainty of up to `ln 2 = 0.69`, or ±0.35
+taking the true value as uniform within its rung. **Both rms values are below
+that floor.** The apparent preference for a power law is smaller than the
+measurement's own granularity.
+
+So: **three points over N = 2…6 with a factor-two ladder cannot separate
+polynomial from exponential growth**, and the equilibrium arm cannot even fit
+either (40, 40, 160 is not log-linear, hence the ±0.90). This experiment measures
+a **direction**, not a complexity class, and the direction is unambiguous while
+the class is untouched.
+
+That matters for how the numbers get quoted. `N^1.90 ± 0.08` has a seductively
+tight error bar that comes from three well-behaved points, not from resolution.
+
+#### What would settle it
+
+Extend the lever arm: H₈ and H₁₀ stretched. H₈'s sector is ~5 000 determinants
+and it would likely need 40 000–80 000 walkers, which is hours rather than
+minutes but not more. Going from a factor-3 range in N to a factor-5 range, with
+a finer ladder, is what separates the two fits.
+
+#### Three bugs, all of which produced plausible output
+
+1. **The reference determinant was chosen by `argmin(diagonal)`** and landed in a
+   different particle-number sector with **no couplings at all** — `|H_ref,j|`
+   was 7e-18. Every walker sat still, and the projected energy came back as
+   *exactly* the Hartree-Fock value at every rung of the ladder: a perfectly
+   stable population and a believable 5.8e-2 error that was not a measurement of
+   anything. **Caught only because identical energies across 10 → 5 120 walkers
+   are impossible for a stochastic method** — rule 10, a number that contradicts
+   another number. Fixed by using the Hartree-Fock determinant, restricting the
+   exact comparison to the connected sector (`exact_ground_energy` returns the
+   *global* minimum, which can live in the wrong electron-number sector), and
+   raising if the reference has no couplings.
+2. **"0% annihilation" was printed both when nothing cancelled and when nothing
+   was spawned at all.** Those are different failures, and the ambiguity is what
+   let bug 1 survive a complete run. Now `None`, with gross spawns recorded.
+3. **The walker ladder started at 100 and H₄ passed on the first rung**, clipping
+   the threshold at the ladder's own floor — the identical grid artefact caught
+   in exp029 two rounds earlier. Now factor-two steps from 10. *The same mistake
+   twice in one session, in two different experiments.*
+
+And one design error worth keeping: the first version grew the population from a
+small seed, which cannot work — with the shift at the Hartree-Fock energy the
+growth rate is the **correlation energy** (~0.04 Hartree), so reaching 10⁴
+walkers needs an imaginary time of ~250 and half a million steps. It never left
+123 walkers on a target of 10 000, which silently made every rung of the ladder
+the same measurement. The population is now initialised at the target.
+
+#### What this says about the advantage question
+
+At the sizes this repository can reach, **a probabilistic classical method solves
+these molecules with tens to thousands of walkers** — trivial, and no quantum
+method can beat it there. The interesting regime is strong correlation, where the
+cost rises 32–128× and the sign problem is directly visible at 38%
+annihilation. Whether that rise is polynomial or exponential is the question that
+decides everything, and it is **exactly the question three small molecules cannot
+answer.**
+
+This also sharpens Result 82's target selection: P450 Compound I is worth
+studying because a transition-metal centre is **strongly correlated**, not
+because it is large.
+
+`experiments/exp030_stochastic_chemistry.py`, `tests/test_stochastic_chemistry.py`,
+`results/exp030_stochastic_chemistry.json`.

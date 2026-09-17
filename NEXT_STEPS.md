@@ -31,16 +31,36 @@ programme, it is the measurement that decides it.
 
 So, ranked by what would actually move something here:
 
-1. **A DMRG baseline — by a distance the most valuable classical algorithm this
-   repository could acquire.** It is the blocking item for the drug-metabolism
-   direction below: exact diagonalisation is not the competitor and DMRG is, so
-   without it no advantage claim at 25 orbitals means anything. This is classical
-   algorithm work whose entire purpose is to decide a quantum question.
-2. **More of the THC fit.** Gauge fixing took H₆ from 46 337 to 23 738 iterations
+1. ~~A probabilistic classical baseline~~ — **built, Result 85, and it needs a
+   longer lever arm rather than more machinery.** FCIQMC now exists here and is
+   validated against exact diagonalisation. The mechanism is measured:
+   correlation strength rather than system size is the axis (stretched H₂ costs
+   **32×** more than equilibrium H₂ at identical size), and the sign problem is
+   directly visible as **38% annihilation** against 0.3% at equilibrium.
+
+   **But the complexity class is not measured, and the reason is instructive.**
+   Three points over N = 2…6 on a factor-two walker ladder cannot separate
+   `N^1.90 ± 0.08` from `2^(0.75 N)` — both fits land inside the ladder's own
+   ±0.35 log-space resolution. The tight-looking error bar comes from three
+   well-behaved points, not from resolution.
+
+   **The next step is therefore H₈ and H₁₀ stretched**, which takes the range
+   from a factor of 3 in N to a factor of 5, with a finer ladder. H₈'s sector is
+   ~5 000 determinants and would want 40 000–80 000 walkers: hours, not minutes,
+   and nothing new to build. **This is now the single highest-value measurement
+   in this file**, because it is the one that decides whether there is a quantum
+   window in chemistry at all.
+
+2. **A DMRG baseline** — still wanted, and now second rather than first. It is
+   the deterministic counterpart to the above and the competitor Result 82's
+   25-orbital target actually faces. Without it no advantage claim at that size
+   means anything, but FCIQMC extended to H₈/H₁₀ answers the same question more
+   cheaply and is already written.
+3. **More of the THC fit.** Gauge fixing took H₆ from 46 337 to 23 738 iterations
    and the λ spread from 9.52 to 1.59. The obvious remaining items are a proper
    second-order method (the Gauss-Newton structure is right there and unexploited)
    and a better initialisation than perturbing the DF selection.
-3. **Factorisation: honest scoping first, and the answer is probably "size it,
+4. **Factorisation: honest scoping first, and the answer is probably "size it,
    don't build it".** Competing with GNFS implementations (CADO-NFS, msieve) is
    not realistic here and would not be useful if it succeeded — factoring's only
    application is breaking cryptography that is already being retired. What *is*
