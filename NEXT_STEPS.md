@@ -8,6 +8,70 @@ what is left, add what the results suggested.
 
 ---
 
+## How to judge a result here
+
+A standing rubric, because without one there is no way to tell a contribution
+from a well-measured restatement — and this repository has produced a lot of the
+second. Ranked:
+
+**A — new, and proved.** Something not in the literature, demonstrated by a
+script that genuinely establishes it. Symbolic tools (SymPy) count and are often
+stronger than timing, because an identity in a polynomial ring is not a
+coincidence of one random draw. The script must prove *the stated claim*, not a
+neighbouring one.
+
+**A′ — refutes a published claim.** Same bar, plus: the script must show both
+that my statement holds *and* that the paper's does not. Getting a different
+number is not a refutation; it is usually a different setup.
+
+**B — literature implemented 1:1, and beaten in the same environment.** Implement
+the published algorithm exactly as specified, time it here at small qubit counts,
+then show mine is reproducibly faster *in the same environment*. This does not
+prove anything about other scales and must not be written as if it does. It is
+still a real data point.
+
+**C — an honest crossover point.** Where a classical method is still faster at
+small size, that is a measurement worth having: enough of them draw the curve
+that says where each side wins.
+
+**D — a negative result, measured.** Cheap to produce, expensive to re-derive,
+and this repository is mostly made of them. Valuable, but not a contribution in
+the sense above, and should never be presented as one.
+
+**Below the line:** a constant factor over my own earlier baseline. That is
+engineering on my own code, not a result about the world — Result 72 established
+that nearly every "speedup" here was a published method correctly implemented.
+
+### Where this repository's results actually sit
+
+Applied honestly, as of Result 86:
+
+| tier | results | note |
+|---|---|---|
+| **A** | **86 only** | the THC gauge group, and it is a small A |
+| **A′** | none | nothing here refutes a paper |
+| **B** | 47 (arguably) | batched+lazy ADAPT, 4.6× over standard ADAPT as published |
+| **C** | 42, 50, 51, 85 | classical wins, with the size where it stops |
+| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84 … |
+
+**That is one A in eighty-six results**, and Result 72 had already said so from
+the other direction. The rubric is not a scoreboard to improve; it is a filter
+to apply *before* starting something, because tier-D work is much easier to
+begin and this file is where the choice gets made.
+
+**What it implies for what to do next.** Tier A needs either a structure nobody
+has written down or a claim someone has written down wrongly. The two places in
+this repository where that is plausible:
+
+* **the nonlinear THC fit**, which is *not* the published LS-THC (that one fixes
+  χ on a grid and solves linearly, so it has no gauge freedom at all). Anything
+  structural about the joint optimisation is unexplored territory by default.
+* **the sign problem's onset** (Result 85), where a measured boundary between
+  polynomial and exponential on real molecular Hamiltonians would be a genuine
+  A — and where the current measurement explicitly cannot resolve it yet.
+
+---
+
 ## Now
 
 ### NEW — classical algorithm work is in scope, and it is already where the leverage was

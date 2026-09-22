@@ -1,4 +1,4 @@
-"""The re-measured rank exponent (Result 86, pending its run).
+"""The re-measured rank exponent (Result 87, pending its run).
 
 The load-bearing thing here is not the fit, it is the rank grid. Sweeping only
 multiples of N quantises the threshold to a multiple of N, so an exponent of

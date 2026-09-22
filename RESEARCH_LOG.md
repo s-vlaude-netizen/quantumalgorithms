@@ -4105,6 +4105,25 @@ The standing recommendation is now:
 * The penalty is nearly gauge-invariant for large |Z| (`h(z) ≈ |z|`), which is
   why it does not fix the flat direction and in fact drifts slightly further.
 
+> ⚠️ **CORRECTED by Result 86.** "Nearly" is wrong, and the error is not
+> cosmetic. The 1-norm is **exactly** gauge-invariant — proved symbolically —
+> and so is the residual. Two things follow that this entry got backwards:
+>
+> 1. **No penalty on λ can ever remove the flat direction**, because the penalty
+>    is *constant* along it by construction. Gauge fixing is not the better of
+>    two options, it is the only one; regularisation cannot substitute for it at
+>    any strength. This entry read the penalty's failure as an approximation
+>    issue, which suggested a sharper penalty might work. It cannot.
+> 2. **The λ spread across restarts was never a gauge artefact.** If λ cannot
+>    move along the orbit, the gauge cannot have caused its spread. So gauge
+>    fixing's 9.52 → 1.59 improvement is mediated by *conditioning* — the
+>    optimiser reaches different basins — not by collapsing a degeneracy in the
+>    reported quantity. Different mechanism, and a different thing generalises.
+>
+> The only genuinely approximate part is the **smoothed** penalty this code
+> actually uses, `h(z) = √(z²+δ²) − δ`; its invariance violation is 3.8e-4
+> relative at δ = 1e-6 (measured over 2 000 random gauges).
+
 `experiments/exp024_convergence_budget.py`, `tests/test_convergence_budget.py`,
 `results/exp024_convergence_H6_M18.json`.
 
@@ -4590,3 +4609,93 @@ because it is large.
 
 `experiments/exp030_stochastic_chemistry.py`, `tests/test_stochastic_chemistry.py`,
 `results/exp030_stochastic_chemistry.json`.
+
+---
+
+### Result 86 — the THC landscape has an exact gauge group, and that makes gauge fixing necessary rather than preferable
+
+**The first result in this repository whose core claim is a proof rather than a
+measurement**, written against a rubric that was supplied for judging these: a
+contribution is either something not in the literature that a script genuinely
+establishes, or a published claim a script genuinely refutes. This is a modest
+instance of the first, and it begins by correcting my own.
+
+#### What Result 80 got wrong
+
+It explained the 1-norm penalty's failure to remove the model's flat direction
+with: *"the penalty is nearly gauge-invariant for large |Z|."* Not "nearly" —
+**exactly**, and the difference changes the conclusion.
+
+#### The proof
+
+The THC model has an `M`-parameter continuous gauge group
+
+```
+    χ_m → s_m χ_m ,      Z_mn → Z_mn / (s_m² s_n²)
+```
+
+Under it, **both** the reconstructed tensor and the 1-norm are pointwise
+unchanged. Verified in SymPy with free symbols throughout — all 81 entries of a
+3-orbital, rank-2 tensor, and the 1-norm difference simplifying to the integer
+`0`. That is an identity in the polynomial ring, not agreement on a random draw.
+A companion check pins the group rather than merely exhibiting some invariance:
+scaling `Z` by `1/(s_m s_n)` instead of `1/(s_m² s_n²)` gives a **non-zero**
+difference, so the exponents are the ones stated and not a family.
+
+#### The consequence that matters
+
+**No penalty on λ can remove the flat direction**, at any strength, because the
+penalty is constant along it. Result 80 read the failure as an approximation
+issue — implying a sharper penalty might work. It cannot. **Gauge fixing is not
+the better of two options; it is the only one.**
+
+#### And a correction to how Result 80 read its own numbers
+
+λ is exactly constant along the gauge orbit (drift 2.2e-16, machine precision).
+**So the λ spread across restarts was never a gauge artefact** — the gauge cannot
+move a quantity it leaves invariant. Gauge fixing's 9.52 → 1.59 improvement is
+therefore mediated by **conditioning**: the optimiser reaches different basins.
+That is a different mechanism from the one the log implied, and a different thing
+generalises from it.
+
+#### The prediction is a lower bound, and saying so took a second measurement
+
+The gauge predicts **at least** `M` flat Hessian directions. The first run read
+15 against a predicted 4 on H₂ at rank 4 and I nearly reported the mismatch as
+the result. It is not a mismatch: that fit is *exact* (residual 6.2e-21) and the
+model over-parameterised — 24 parameters against the 6 independent entries an
+8-fold-symmetric 2-orbital tensor has. Checking a genuinely constrained case
+instead:
+
+| case | parameters | independent entries | residual | flat directions | M |
+|---|---|---|---|---|---|
+| H₂, M=4 | 24 | 6 | 6.2e-21 | 15 | 4 |
+| **H₄, M=4** | **32** | **55** | **3.5e-01** | **4** | **4** |
+| H₄, M=6 | 60 | 55 | 3.3e-04 | 8 | 6 |
+
+Where the model is genuinely under-parameterised, the null space is **exactly**
+the gauge group. Where it can fit the tensor exactly, there is more flatness and
+it is over-parameterisation, not gauge. And in **every** case the predicted
+generators lie in the null space, `max |H g_k| / ‖H‖ = 1.1e-08`.
+
+#### How new is this, honestly
+
+The scaling indeterminacy of a multilinear factorisation is elementary and
+well known for CP decompositions. Two things make this worth recording anyway:
+
+* **Published LS-THC does not have this problem at all.** It fixes χ on a grid
+  and solves for Z linearly, so there is no joint nonlinear landscape and no
+  gauge freedom to fix. The redundancy is a property of the *joint* optimisation
+  that Result 78 introduced here, and the literature search found no treatment of
+  it in that setting.
+* The *consequence* — that λ-penalisation and gauge fixing are not
+  interchangeable, because the cost functional is itself invariant — is a
+  statement about what can and cannot be fixed by regularisation, and it is
+  checkable rather than plausible.
+
+Under the rubric this is a **small A**: proved, apparently unstated for this
+setting, and of narrow scope. It is also the only A among 86 results, which is
+consistent with Result 72's finding from the other direction.
+
+`experiments/exp031_gauge_structure.py`, `tests/test_gauge_structure.py`,
+`results/exp031_gauge_structure.json`.

@@ -1,0 +1,61 @@
+{
+  "symbolic": {
+    "orbitals": 3,
+    "rank": 2,
+    "tensor_invariant": true,
+    "tensor_terms_checked": 81,
+    "one_norm_invariant": true,
+    "one_norm_residual": "0"
+  },
+  "smoothed_violation": {
+    "worst_absolute": 0.014716262198191998,
+    "worst_relative": 0.00038203744664215225,
+    "delta": 1e-06,
+    "samples": 2000
+  },
+  "cases": [
+    {
+      "molecule": "H2",
+      "rank": 4,
+      "orbitals": 2,
+      "parameters": 24,
+      "independent_entries": 6,
+      "residual": 6.221066276931811e-21,
+      "flat_directions": 15,
+      "predicted_minimum": 4,
+      "generator_null_residual": 8.698842609547471e-11,
+      "exactly_fitted": true
+    },
+    {
+      "molecule": "H4",
+      "rank": 4,
+      "orbitals": 4,
+      "parameters": 32,
+      "independent_entries": 55,
+      "residual": 0.34813415480199006,
+      "flat_directions": 4,
+      "predicted_minimum": 4,
+      "generator_null_residual": 1.7406381918954034e-09,
+      "exactly_fitted": false
+    },
+    {
+      "molecule": "H4",
+      "rank": 6,
+      "orbitals": 4,
+      "parameters": 60,
+      "independent_entries": 55,
+      "residual": 0.0005649722436792167,
+      "flat_directions": 11,
+      "predicted_minimum": 6,
+      "generator_null_residual": 1.1086198555027803e-08,
+      "exactly_fitted": false
+    }
+  ],
+  "one_norm_along_orbit": [
+    1.375662527884523,
+    1.3756625278845225,
+    1.3756625278845225,
+    1.375662527884523
+  ],
+  "one_norm_relative_drift": 2.220446049250313e-16
+}
