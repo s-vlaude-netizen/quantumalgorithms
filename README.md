@@ -23,7 +23,70 @@ an adaptive ansatz with a smaller parameter count — was measured and does not
 (Result 74): ADAPT's exponent is 3.57 ± 0.11 against UCCSD's 3.44 ± 0.13, which
 is indistinguishable and, if anything, the wrong way round.
 
-## The answer, since 84 results is a lot to read
+## The one result here that is a proof (Result 86)
+
+Eighty-six results, and **one** of them establishes something rather than
+measuring it. It is small, and it begins by correcting an earlier entry of my own.
+
+**The claim.** The tensor-hypercontraction model used in Results 77–80 has an
+`M`-parameter continuous **gauge group**
+
+```
+    χ_m → s_m χ_m ,      Z_mn → Z_mn / (s_m² s_n²)
+```
+
+under which **both** the reconstructed two-electron tensor **and** the 1-norm λ —
+the quantity a block encoding's cost is proportional to — are *pointwise*
+unchanged.
+
+**Proved, not measured.** Verified in SymPy with free symbols throughout: all 81
+entries of a 3-orbital rank-2 tensor, and the λ difference simplifying to the
+integer `0`. That is an identity in the polynomial ring, not agreement on a
+random draw. A companion check pins the group rather than exhibiting *some*
+invariance — scaling `Z` by `1/(s_m s_n)` instead gives a non-zero difference.
+
+**Why it matters.** Result 80 had called λ "*nearly* gauge-invariant", which
+suggested a sharper penalty might flatten the redundant direction. It cannot:
+
+* **No penalty on λ can ever remove the flat direction**, at any strength,
+  because the penalty is *constant along it by construction*. Gauge fixing is not
+  the better of two options — it is the only one, and regularisation cannot
+  substitute for it.
+* **The λ spread across restarts was therefore never a gauge artefact.** The gauge
+  cannot move a quantity it leaves invariant, so gauge fixing's measured 9.52 →
+  1.59 improvement runs through *conditioning* (the optimiser reaches different
+  basins), not through collapsing a degeneracy. A different mechanism, and a
+  different thing generalises.
+
+**Checked against the code that is actually run**, because a symbolic identity
+about an idealised objective is not automatically a fact about the implemented
+one. The gauge predicts *at least* `M` flat Hessian directions — a lower bound,
+and reading it as a count was nearly a fourth bug:
+
+| case | parameters | independent tensor entries | residual | flat directions | M |
+|---|---|---|---|---|---|
+| H₂, M=4 | 24 | 6 | 6.2e-21 | 15 | 4 |
+| **H₄, M=4** | **32** | **55** | **3.5e-01** | **4** | **4** |
+| H₄, M=6 | 60 | 55 | 3.3e-04 | 8 | 6 |
+
+Where the model is genuinely under-parameterised the null space is **exactly** the
+gauge group; where it fits the tensor exactly there is more flatness and it is
+over-parameterisation. The predicted generators lie in the null space in every
+case (`max |H g_k| / ‖H‖ = 1.1e-08`).
+
+**Honest scope.** The scaling indeterminacy of a multilinear factorisation is
+elementary and well known for CP decompositions. What makes this worth recording:
+**published LS-THC does not have the problem at all** — it fixes χ on a grid and
+solves for Z linearly, so there is no joint nonlinear landscape and no gauge to
+fix. The redundancy belongs to the *joint* optimisation introduced here, and the
+consequence (that penalisation and gauge fixing are not interchangeable, because
+the cost functional is itself invariant) is checkable rather than plausible.
+
+→ `experiments/exp031_gauge_structure.py`, `tests/test_gauge_structure.py`.
+The rubric this is graded against, and where all 86 results sit under it, is at
+the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
+
+## The answer, since 86 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -204,6 +267,32 @@ is out past ~24 orbitals (2.7e13 determinants) — but exact diagonalisation is 
 the competitor, **DMRG is**, and Result 83 measured these states to be
 substantially compressible. So the gap *opens* near 25 orbitals; it is not
 established.
+
+**And Result 85 built the probabilistic half of that baseline, which sharpened the
+target.** FCIQMC — signed random walkers on determinants, the classical method
+that samples the same propagation phase estimation runs coherently — is
+polynomial *unless* the fermionic sign problem bites. So it marks the boundary
+exactly: where it is efficient no quantum method can win, and where it fails is
+the window. Measured, median over five seeds, walkers for chemical accuracy:
+
+| geometry | H₂ | H₄ | H₆ | annihilation at threshold |
+|---|---|---|---|---|
+| equilibrium (0.75 Å) | 40 | 40 | 160 | 0.3–0.7% |
+| **stretched (2.0 Å)** | **1 280** | **5 120** | **10 240** | **33–38%** |
+
+**Correlation strength, not system size, is the axis** — stretched H₂ costs 32×
+more than equilibrium H₂ at identical size and identical sector, and nearly four
+in ten spawned walkers cancel against opposite signs. That is why P450 is the
+right target: a transition-metal centre is *strongly correlated*, not large.
+
+**But the complexity class is explicitly not measured**, and that is the honest
+headline. The stretched arm fits `N^1.90 ± 0.08` far better than `2^(0.75 N)` —
+and the discrimination is not real, because both residuals sit *below* the
+factor-two walker ladder's own ±0.35 log-space resolution. Three points over
+N = 2…6 cannot separate polynomial from exponential. The tight error bar comes
+from three well-behaved points, not from resolution. **H₈ and H₁₀ stretched is now
+the highest-value open measurement in this repository**, because it is the one
+that decides whether a quantum window in chemistry exists at all.
 
 ### "Could this help machine learning, or LLMs?" (Result 84)
 
