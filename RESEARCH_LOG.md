@@ -4699,3 +4699,111 @@ consistent with Result 72's finding from the other direction.
 
 `experiments/exp031_gauge_structure.py`, `tests/test_gauge_structure.py`,
 `results/exp031_gauge_structure.json`.
+
+---
+
+### Result 87 — double factorisation has a gauge group too, and unlike THC's it leaves the cost free to move
+
+Result 86 proved that the THC model has a gauge group under which **both** the
+reconstructed tensor and the 1-norm λ are exactly invariant — and the invariance
+of λ was the whole consequence: nothing can be optimised along that direction, so
+gauge fixing is mandatory and no penalty can substitute.
+
+**Double factorisation has a gauge group too. It is far larger, and λ is *not*
+invariant under it.** Same structure, opposite consequence: where THC's gauge
+offers nothing, DF's gauge is **free optimisation** — a direction in which the
+Hamiltonian is bit-for-bit unchanged while the block-encoding cost falls.
+
+#### The structure, and why the group is the full O(T)
+
+The reshaped two-electron matrix `W_(pq),(rs) = (pq|rs)` is a Gram matrix of
+densities, hence positive semidefinite — and its eigenvalues are **measured**
+strictly positive on every molecule here rather than assumed (H₂ min 2.2e-2, H₄
+2.3e-6, H₆ 4.0e-10). So absorbing the weights, `A_t = √λ_t L^t`, gives
+
+```
+    W = Σ_t vec(A_t) vec(A_t)ᵀ
+```
+
+invariant under the **full orthogonal group O(T)** acting as `A'_t = Σ_s O_ts A_s`.
+That is `T(T−1)/2` parameters: **465 on H₈**, against THC's `M`.
+
+And this repository's own DF 1-norm rewrites as
+
+```
+    λ_2body = 2 Σ_t ( Σ_p |eig_p(A_t)| )² = 2 Σ_t ‖A_t‖_*²
+```
+
+a sum of **squared nuclear norms** — *not* a function of the outer products
+alone, which is exactly why mixing moves it. That substitution is checked against
+`DoubleFactorization.one_norm` to 1.4e-14 rather than asserted; minimising a
+1-norm of one's own invention would make every number below meaningless.
+
+#### Proved symbolically
+
+Free symbols throughout: the reconstructed tensor is invariant across all 16
+entries, and the 1-norm difference has the closed form
+
+```
+    Δλ(θ) = 2 |sin 2θ|
+```
+
+manifestly non-zero. **Invariant tensor, non-invariant cost, in one expression.**
+
+#### Measured — and the Hamiltonian is the gate, not the gain
+
+| molecule | N | T | dim O(T) | λ before | λ after | **gain** | ‖ΔH‖ | restart spread |
+|---|---|---|---|---|---|---|---|---|
+| H₂ | 2 | 3 | 3 | 6.944 | 5.407 | 1.284 | 3.0e-15 | 1.000 |
+| H₄ | 4 | 10 | 45 | 29.362 | 17.494 | 1.678 | 6.1e-15 | 1.028 |
+| H₆ | 6 | 21 | 210 | 65.702 | 32.801 | 2.003 | 3.4e-15 | 1.411 |
+| H₈ | 8 | 31 | 465 | 115.499 | 50.074 | **2.307** | 8.6e-12 | 1.456 |
+
+All four converged. `gain ~ N^0.419 ± 0.015`, extrapolating to **4.91× at 50
+orbitals**. Since λ sets the qubitized walk count (Result 75), that is the same
+factor off the runtime: Result 76's 3.93e12 T gates for a drug-sized molecule
+would become ~8.0e11, narrowing the gap to Lee et al.'s tensor hypercontraction
+from 185× to ~38×.
+
+**Every gain is a lower bound.** The objective is non-smooth where an eigenvalue
+crosses zero, and the landscape is multi-modal — on H₆ and H₈ the identity start
+lands far worse than perturbed ones (46.29 against 32.80 on H₆). More restarts
+would find more.
+
+The check that actually matters is ‖ΔH‖, not the gain: a rotation that quietly
+moved the tensor would show an improvement that is simply a different molecule.
+H₈'s 8.6e-12 is larger than the others — the matrix exponential of a 31×31
+generator — but it is 1e-13 relative to λ ≈ 115.
+
+#### Honest grading: this is a B, not an A
+
+Under the rubric, and the difference matters:
+
+* **Compressed double factorisation already minimises λ**, and it re-fits the
+  factors freely, so its search space *contains* this orbit
+  (arXiv:2212.07957, arXiv:2403.03502). The O(T) freedom of a PSD decomposition
+  is textbook linear algebra.
+* What is contributed is that this reduction is **exact** — zero approximation
+  error, no regularisation, no rank truncation — where the compression literature
+  does not isolate how much is available for free; and the **THC/DF contrast**,
+  which five targeted searches did not turn up and which is the only arguably
+  new part. Five searches are not a literature review, and the claim is scoped
+  to that.
+
+#### The bug the rubric caught, and it would have inverted the result
+
+The first symbolic witness for non-invariance used `Z = diag(1,−1)` and `X`.
+Their real rotations `cos θ·Z + sin θ·X` are unit Bloch vectors, so the
+eigenvalues are ±1 at **every** angle and the nuclear norm never moves. The
+script reported **"1-norm invariant: True"** — the exact opposite of the truth —
+and it was caught only because it flatly contradicted the numerical section of
+the same run.
+
+**A witness that happens to lie on an invariant orbit proves nothing**, and a
+symbolic `0` is not automatically a theorem. `diag(1,0)` and `diag(0,1)` are not
+degenerate and give the closed form above. This is the second round running in
+which the productive instrument was not an experiment but a *disagreement between
+two routes to the same claim*.
+
+`experiments/exp032_df_gauge.py`, `tests/test_df_gauge.py`,
+`results/exp032_df_gauge.json`.

@@ -69,204 +69,252 @@
           "iterations": 1,
           "converged": true,
           "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 5.406894676092328,
+          "iterations": 1,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 5.406894676092257,
+          "iterations": 4,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         }
       ],
-      "seconds": 0.5868078869999636
+      "seconds": 0.5983761509999113
     },
     {
       "molecule": "H4",
       "orbitals": 4,
       "factors": 10,
       "gauge_dimension": 45,
-      "rebuild_error": 1.1102230246251565e-15,
-      "one_norm_before": 29.361976647618285,
-      "one_norm_after": 17.494154681764616,
-      "reduction": 1.6783878490696285,
-      "invariance_error": 5.329070518200751e-15,
-      "restart_spread": 1.0075948914686954,
-      "iterations": 30,
+      "rebuild_error": 1.6653345369377348e-15,
+      "one_norm_before": 29.36197664761827,
+      "one_norm_after": 17.494154681764567,
+      "reduction": 1.6783878490696325,
+      "invariance_error": 6.106226635438361e-15,
+      "restart_spread": 1.027559334238354,
+      "iterations": 22,
       "converged": true,
       "attempts": [
         {
-          "value": 17.494154681765803,
-          "iterations": 19,
-          "converged": true,
-          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
-        },
-        {
-          "value": 17.49415468176472,
-          "iterations": 7,
-          "converged": true,
-          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
-        },
-        {
-          "value": 17.49415468176478,
-          "iterations": 18,
-          "converged": true,
-          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
-        },
-        {
-          "value": 17.581990636705875,
-          "iterations": 16,
+          "value": 17.666465430485264,
+          "iterations": 33,
           "converged": true,
           "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH"
         },
         {
-          "value": 17.49415468176473,
+          "value": 17.494154681764705,
+          "iterations": 14,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 17.49415468176474,
+          "iterations": 21,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 17.494154681764712,
+          "iterations": 13,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 17.494154681764723,
           "iterations": 18,
           "converged": true,
           "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         },
         {
-          "value": 17.49415468176473,
-          "iterations": 31,
+          "value": 17.494154681764712,
+          "iterations": 30,
           "converged": true,
           "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         },
         {
-          "value": 17.62702088790919,
-          "iterations": 45,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+          "value": 17.976281937856783,
+          "iterations": 34,
+          "converged": true,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH"
         },
         {
-          "value": 17.494154681764616,
-          "iterations": 30,
+          "value": 17.627786123545448,
+          "iterations": 40,
+          "converged": true,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH"
+        },
+        {
+          "value": 17.49415468176463,
+          "iterations": 26,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 17.494154681764567,
+          "iterations": 22,
           "converged": true,
           "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         }
       ],
-      "seconds": 2.984219527999983
+      "seconds": 4.212033476999977
     },
     {
       "molecule": "H6",
       "orbitals": 6,
       "factors": 21,
       "gauge_dimension": 210,
-      "rebuild_error": 1.6653345369377348e-15,
-      "one_norm_before": 65.70215621938607,
-      "one_norm_after": 32.80142661325707,
-      "reduction": 2.003027398595883,
-      "invariance_error": 2.1094237467877974e-15,
-      "restart_spread": 1.4112367279217788,
-      "iterations": 27,
+      "rebuild_error": 2.6645352591003757e-15,
+      "one_norm_before": 65.70215621938601,
+      "one_norm_after": 32.801426613256936,
+      "reduction": 2.003027398595889,
+      "invariance_error": 3.4416913763379853e-15,
+      "restart_spread": 1.4112378323811052,
+      "iterations": 82,
       "converged": true,
       "attempts": [
         {
-          "value": 46.29057796485926,
-          "iterations": 9,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+          "value": 46.290614192700616,
+          "iterations": 12,
+          "converged": true,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH"
         },
         {
-          "value": 32.80142661325707,
-          "iterations": 27,
+          "value": 32.80142661325706,
+          "iterations": 22,
           "converged": true,
           "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         },
         {
-          "value": 33.917393102488354,
-          "iterations": 28,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+          "value": 32.80142661325701,
+          "iterations": 75,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         },
         {
-          "value": 32.81426415610408,
-          "iterations": 34,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+          "value": 32.80142661325704,
+          "iterations": 54,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         },
         {
-          "value": 32.899767664442074,
-          "iterations": 30,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+          "value": 32.80142661325699,
+          "iterations": 77,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         },
         {
-          "value": 33.603072202536495,
-          "iterations": 30,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+          "value": 32.80142661325706,
+          "iterations": 67,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         },
         {
-          "value": 34.1947353215056,
-          "iterations": 32,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+          "value": 32.80142661325698,
+          "iterations": 60,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         },
         {
-          "value": 35.115755541715906,
-          "iterations": 33,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+          "value": 32.801426613256936,
+          "iterations": 82,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 32.80142661325704,
+          "iterations": 97,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 32.80142661325705,
+          "iterations": 183,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
         }
       ],
-      "seconds": 16.03021174600002
+      "seconds": 44.13645300799999
     },
     {
       "molecule": "H8",
       "orbitals": 8,
       "factors": 31,
       "gauge_dimension": 465,
-      "rebuild_error": 8.645570370724442e-12,
-      "one_norm_before": 115.49905728614739,
-      "one_norm_after": 52.898301353408634,
-      "reduction": 2.1834171293045674,
-      "invariance_error": 8.645542615148827e-12,
-      "restart_spread": 1.4213596782912576,
-      "iterations": 16,
-      "converged": false,
+      "rebuild_error": 8.645625881875674e-12,
+      "one_norm_before": 115.49905728614719,
+      "one_norm_after": 50.074280558009555,
+      "reduction": 2.306554502612274,
+      "invariance_error": 8.64565363745129e-12,
+      "restart_spread": 1.4563799139257452,
+      "iterations": 83,
+      "converged": true,
       "attempts": [
         {
-          "value": 75.1875125938349,
-          "iterations": 13,
+          "value": 72.92717640896757,
+          "iterations": 30,
+          "converged": true,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH"
+        },
+        {
+          "value": 50.07428055800958,
+          "iterations": 90,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 50.07428055800957,
+          "iterations": 55,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 50.074280558009555,
+          "iterations": 83,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 50.07428055800959,
+          "iterations": 152,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 50.28756281936165,
+          "iterations": 154,
           "converged": false,
           "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
         },
         {
-          "value": 52.898301353408634,
-          "iterations": 16,
+          "value": 50.329492168985524,
+          "iterations": 154,
           "converged": false,
           "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
         },
         {
-          "value": 56.08865252178221,
-          "iterations": 15,
+          "value": 50.90603004600574,
+          "iterations": 158,
           "converged": false,
           "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
         },
         {
-          "value": 54.46820774261924,
-          "iterations": 17,
+          "value": 50.922140066255935,
+          "iterations": 153,
           "converged": false,
           "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
         },
         {
-          "value": 56.53567919257594,
-          "iterations": 16,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
-        },
-        {
-          "value": 55.70767801408643,
-          "iterations": 17,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
-        },
-        {
-          "value": 58.93439811510064,
-          "iterations": 16,
-          "converged": false,
-          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
-        },
-        {
-          "value": 60.6612810048285,
-          "iterations": 16,
+          "value": 50.9432812437267,
+          "iterations": 160,
           "converged": false,
           "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
         }
       ],
-      "seconds": 30.47240044099999
+      "seconds": 247.86708837799995
     }
   ]
 }

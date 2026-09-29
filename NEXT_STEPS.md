@@ -44,17 +44,17 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 86:
+Applied honestly, as of Result 87:
 
 | tier | results | note |
 |---|---|---|
 | **A** | **86 only** | the THC gauge group, and it is a small A |
 | **A′** | none | nothing here refutes a paper |
-| **B** | 47 (arguably) | batched+lazy ADAPT, 4.6× over standard ADAPT as published |
+| **B** | 47 (arguably), **87** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops |
 | **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84 … |
 
-**That is one A in eighty-six results**, and Result 72 had already said so from
+**That is one A in eighty-seven results**, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
@@ -66,6 +66,10 @@ this repository where that is plausible:
 * **the nonlinear THC fit**, which is *not* the published LS-THC (that one fixes
   χ on a grid and solves linearly, so it has no gauge freedom at all). Anything
   structural about the joint optimisation is unexplored territory by default.
+  Result 87 took the obvious next step — the same question asked of double
+  factorisation — and landed at B, because the *goal* there is published even
+  though the exact route is not. **That is the trap to watch: a structural
+  question can be genuinely open while the thing it optimises is crowded.**
 * **the sign problem's onset** (Result 85), where a measured boundary between
   polynomial and exponential on real molecular Hamiltonians would be a genuine
   A — and where the current measurement explicitly cannot resolve it yet.
