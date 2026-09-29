@@ -4524,6 +4524,13 @@ crossing is partly luck):
 32× more stretched than at equilibrium — identical system size, identical sector,
 purely the correlation regime.
 
+> ⚠️ **CORRECTED by Result 87.** H₂'s sector is two determinants and one
+> coupling, so it has **no sign problem at all** — annihilation is exactly zero,
+> as this run's own H₂ rows show. Its 32× is statistical, and so are the other
+> thresholds: 4× the steps cuts every one of them 4–8×. The deterministic sign
+> gap grows with system size at both geometries (0.033 → 0.383 → 2.297 Ha at
+> equilibrium, H₄ → H₈), and by H₈ size dominates stretching.
+
 And the diagnostic that is *not* quantised by the walker ladder, the fraction of
 spawned walkers annihilated against opposite signs, at the converging point:
 
@@ -4534,6 +4541,10 @@ spawned walkers annihilated against opposite signs, at the converging point:
 
 A ~50× change. Nearly four in ten spawned walkers cancel. That is the sign
 problem being paid for directly, and it is the robust part of this result.
+
+> ⚠️ **CORRECTED by Result 87.** Each geometry is quoted at its own threshold, and
+> the stretched thresholds carry 64–128× more walkers in the same space. At equal
+> walker counts the contrast is 3.1× (H₄, 40 walkers) and 1.3× (H₆, 160).
 
 #### What was NOT measured, and this is the honest headline
 
@@ -4675,8 +4686,18 @@ instead:
 
 Where the model is genuinely under-parameterised, the null space is **exactly**
 the gauge group. Where it can fit the tensor exactly, there is more flatness and
-it is over-parameterisation, not gauge. And in **every** case the predicted
-generators lie in the null space, `max |H g_k| / ‖H‖ = 1.1e-08`.
+it is over-parameterisation, not gauge.
+
+> ⚠️ **SHARPENED by Result 88.** The exact generic count is proved in closed
+> form: `M` flat directions (gauge only) iff `M ≤ N(N−1)/2 + 1`, more beyond.
+> H₂'s 15 is `24 − P²` with `P² = 9`, not a comparison with 6 independent
+> entries. **H₄ at M=6 is inside the boundary and has exactly 6**; the 8 above is
+> not reproducible (two re-runs of the same call: 6 and 14) and the Jacobian's
+> exact zeros were 6 each time — the rest are near-flat directions under a 1e-6
+> cutoff.
+
+And in **every** case the predicted generators lie in the null space,
+`max |H g_k| / ‖H‖ = 1.1e-08`.
 
 #### How new is this, honestly
 
@@ -4699,3 +4720,248 @@ consistent with Result 72's finding from the other direction.
 
 `experiments/exp031_gauge_structure.py`, `tests/test_gauge_structure.py`,
 `results/exp031_gauge_structure.json`.
+
+---
+
+### Result 87 — Result 85's walker thresholds measured sampling efficiency, not the sign problem
+
+Result 85 read two things off its FCIQMC runs: **"correlation strength, not
+system size, is the axis"**, resting on stretched H₂ costing 32× more than
+equilibrium H₂ at identical size, and **"the sign problem is directly visible as
+33–38% annihilation against 0.3–0.7%"**. It then named H₈/H₁₀ stretched the
+highest-value open measurement in the repository. Three checks, each of which
+undercuts a *reading* rather than a number — every measured value in Result 85
+reproduces exactly (same code, same seed, identical output).
+
+#### 1. H₂ has no sign problem at all — provably
+
+H₂'s sector is **two determinants joined by one coupling**, at both geometries.
+A signed graph without a cycle is always balanced: a diagonal ±1 gauge makes the
+matrix stoquastic, and a spawn from a sign-coherent population then always
+carries the sign its target already has. **Annihilation is exactly zero** —
+not small, zero — and Result 85's own data agree: 0.0% at every rung of both H₂
+runs. (Pinned by a test that runs exp030's own `fciqmc` on H₂: gross spawns > 0,
+annihilation `== 0.0`.)
+
+So **the 32× that stretched H₂ pays is not the sign problem**, and H₂ was the
+only evidence for "correlation, not size" that holds size fixed.
+
+#### 2. The thresholds trade one-for-one against run length
+
+Identical code, seeds and ladder, **4× the propagation steps**:
+
+| system | threshold at 12 000 steps (R85) | at 48 000 steps | factor |
+|---|---|---|---|
+| H₂ stretched | 1 280 | **160** | 8× |
+| H₄ stretched | 5 120 | **1 280** | 4× |
+| H₆ stretched | 10 240 | **1 280** | 8× |
+| H₆ equilibrium | 160 | **40** | 4× |
+
+A sign-problem wall does not move when the run gets longer; a statistical error
+bar does. What Result 85 fitted `N^1.90 ± 0.08` and `2^(0.75 N)` to is
+**walkers × steps to reach chemical accuracy** — the sampling efficiency of the
+projected-energy estimator, which rises with multireference weight whether or not
+there is any sign problem (H₂ proves that). Extending that quantity to H₈/H₁₀
+would not have decided anything about a quantum window.
+
+The wall *is* visible in the same data, and it sits much lower: on stretched H₆
+the median error is 0.15–0.56 Ha at ≤ 160 walkers **at both run lengths**, and
+collapses between 160 and 320 walkers at both. That run-length-independent
+collapse is the sign problem; the threshold Result 85 reported sits 30–60× above
+it.
+
+#### 3. The annihilation contrast compared different walker counts
+
+"38% against 0.3%" compares each geometry *at its own threshold*, and the
+stretched thresholds use 64–128× more walkers in the same 20- or 200-determinant
+space — denser populations annihilate more whatever the signs. At the **same**
+walker count, from Result 85's own runs:
+
+| | equilibrium | stretched | ratio |
+|---|---|---|---|
+| H₄, 40 walkers | 0.30% | 0.92% | 3.1× |
+| H₆, 160 walkers | 0.74% | 0.98% | 1.3× |
+
+A 1.3–3× effect, not ~50×.
+
+#### What does measure the sign problem, deterministically
+
+The **sign gap**: the ground-state energy of `H` minus that of the same matrix
+with every off-diagonal element replaced by `−|H_ij|`. It is the rate at which the
+sign-incoherent component outgrows the physical one in a projector Monte Carlo
+without annihilation — the quantity FCIQMC's annihilation has to fight (Spencer,
+Blunt & Foulkes, J. Chem. Phys. 2012, analyse the annihilation plateau in these
+terms). It is zero **if and only if** the sector's sign graph is balanced,
+invariant under any determinant sign convention (so under the choice of qubit
+mapping), and needs no walkers and no seeds:
+
+| | H₂ | H₄ | H₆ | H₈ |
+|---|---|---|---|---|
+| sector (determinants) | 2 | 20 | 200 | 2 468 |
+| sign graph balanced? | **yes** | no | no | no |
+| gap, equilibrium (Ha) | **0** | 0.033 | 0.383 | 2.297 |
+| gap, stretched (Ha) | **0** | 0.699 | 1.911 | 4.446 |
+| stretched / equilibrium | — | 21× | 5.0× | **1.9×** |
+
+**Both axes matter, and size wins.** Stretching raises the gap at every size, but
+the equilibrium gap grows 70× from H₄ to H₈ and the stretched/equilibrium ratio
+falls 21× → 5× → 1.9×. By H₈ an equilibrium chain has a larger gap than stretched
+H₆. "Correlation strength, not system size" is backwards for the sign problem at
+the sizes this repository reaches.
+
+#### What this changes
+
+* **Result 85's scaling fits are withdrawn as sign-problem measurements.** They
+  are fits of a run-length-dependent statistical cost, over three points.
+* **H₈/H₁₀ "stretched walkers to chemical accuracy" is no longer the
+  highest-value measurement** — it would extend the same confounded quantity. The
+  sign gap is cheap, deterministic and already computed through H₈; the next
+  step is the FCIQMC *annihilation plateau* (population under a fixed shift) as a
+  function of `N`, which is the run-length-independent wall directly.
+* **P450 as the target is not affected** — a transition-metal centre is still the
+  right system — but the reason given (correlation, not size) was not what these
+  data showed.
+
+#### One bug of my own, and one waiting for the H₈ extension
+
+1. **The balance check first grew one breadth-first tree from determinant 0**,
+   left every other component with gauge 0 — which makes each edge it touches
+   look satisfied — and reported H₈ *balanced* alongside a 2.3 Hartree sign gap.
+   Caught because the two numbers contradicted each other. It now grows a forest,
+   with a test that hides a frustrated triangle in a second block.
+2. **exp030's `sector` joins determinants through anything above 1e-12**, and on
+   H₈ that includes the residue of Pauli coefficients rounded to 12 decimals: its
+   "sector" of 2 624 is the physical block of 2 468 plus eight blocks attached
+   only through 1e-12 couplings. Harmless for walkers and for the ground energy
+   (checked: identical to 1e-13), but anything minimised over the sector — the
+   stoquastic ground state here — would be taken over blocks that are not
+   physically connected. exp032 drops couplings below 1e-10 first; an H₈ FCIQMC
+   run should too.
+
+`experiments/exp032_sign_structure.py`, `tests/test_sign_structure.py`,
+`results/exp032_sign_structure.json`.
+
+---
+
+### Result 88 — the THC gauge is the *only* flat direction up to M = N(N−1)/2 + 1, and past that the fit cannot determine λ
+
+Result 86 proved that THC's reconstructed tensor and its 1-norm are invariant
+under an `M`-parameter gauge group, and read the Hessian's null space as a
+**lower bound** of `M` flat directions. It left the count open, and explained
+the extra flatness it saw as "over-parameterisation where the model fits
+exactly". This settles the count **exactly**, in closed form, and the answer has
+a consequence Result 86 could not reach.
+
+#### The claim
+
+With `P = N(N+1)/2` orbital pairs, the THC tensor is `V = X Z Xᵀ`, column `m` of
+`X` being the rank-one matrix `χ_m χ_mᵀ`. The generic rank of the model's
+Jacobian is
+
+```
+    P²                                            if M ≥ P
+    N·M + M² − M − M·max(0, M + N − 1 − P)         otherwise
+```
+
+so any objective built from the reconstructed tensor has **exactly `M` flat
+directions — the gauge group and nothing else — if and only if
+`M ≤ N(N−1)/2 + 1`**. Past that boundary, the span of the `M` rank-one columns
+meets the Veronese variety of rank-one matrices in a positive-dimensional set,
+the columns can **slide** along it without changing the span, `Z` re-solves to
+keep `V` fixed, and each slide is another exactly flat direction.
+
+#### Proved, and how
+
+* **Lower bound on the rank, computed.** SymPy differentiates the model; a
+  closed-form Jacobian is checked against it entry by entry; that Jacobian is
+  evaluated at an integer point and its rank taken modulo the prime 2³¹ − 1. A
+  minor non-zero mod p is non-zero over the integers, so this certifies the rank
+  at that point, and the rank at a point bounds the generic rank from below.
+  (Modular rather than rational because the rationals' entries grow during
+  elimination: 3.4 s against 22 s at N = 6, M = 12, same answer — the tests
+  check agreement where both are cheap.)
+* **Upper bound, argued.** The gauge gives `M` kernel vectors everywhere; `M ≥ P`
+  caps the image at `P²`; below that, every component of the span-Veronese
+  intersection through a column has dimension at least `M + N − 1 − P`, and each
+  column slides independently.
+
+**The two bounds meet in all 60 cases checked** — every `(N, M)` with `N ≤ 6` and
+`M ≤ P + 1` — so the count is exact there:
+
+| N | P | gauge only for | first sliding rank | saturates at |
+|---|---|---|---|---|
+| 2 | 3 | M ≤ 2 | 3 (6 flat, 3 gauge) | M = 3 |
+| 3 | 6 | M ≤ 4 | 5 (10 flat, 5 gauge) | M = 6 |
+| 4 | 10 | M ≤ 7 | 8 (16 flat, 8 gauge) | M = 10 |
+| 5 | 15 | M ≤ 11 | 12 (24 flat, 12 gauge) | M = 15 |
+| 6 | 21 | M ≤ 16 | 17 (34 flat, 17 gauge) | M = 21 |
+
+#### The consequence: past the boundary, λ is not determined by the fit
+
+Along the gauge, λ is constant (Result 86). Along the **slides it is not** — the
+exact directional derivative of λ over the rational kernel is non-zero at
+N=2/M=3, N=3/M=5, N=4/M=8, and zero at N=3/M=4 and N=4/M=7, exactly as the
+boundary says. So past the boundary the unpenalised fit has a **manifold of exact
+minimisers along which λ — the quantity the block encoding's cost is
+proportional to — varies freely**. That completes Result 86's argument from the
+other side:
+
+| flat direction | residual | λ | what fixes it |
+|---|---|---|---|
+| gauge (always, `M` of them) | constant | **constant** | only gauge fixing — a penalty cannot |
+| slides (`M > N(N−1)/2 + 1`) | constant | **varies** | only a penalty — gauge fixing cannot |
+
+This is the first mechanism in the repository for **why** Results 79–80's λ
+penalty collapsed the restart spread to exactly 1.0 while gauge fixing alone left
+1.59: the penalty is the only thing in the objective that sees the slides.
+
+#### Where this repository's own ranks sit
+
+| | N | Result 78's rank | gauge-only up to | flat beyond the gauge |
+|---|---|---|---|---|
+| H₂ | 2 | 4 | 2 | 11 — and **M ≥ P = 3 represents every tensor exactly** |
+| H₄ | 4 | 8 | 7 | 8 |
+| H₆ | 6 | 18 | 16 | 36 |
+
+**All three chemical-accuracy ranks lie past the boundary.** H₂'s point is fixed
+by algebra rather than chemistry — at M = 3 any generic χ reproduces the H₂ tensor
+exactly — so it carries no information about THC's rank exponent, and neither
+Result 78's `N^1.33` nor a re-measurement should include it. H₄ and H₆ sit one and
+two ranks past the boundary, which is exactly where Results 78–80 found the fit
+irreproducible. The boundary grows as `N²/2` while THC ranks grow as `O(N)`, so at
+production sizes the practical regime is gauge-only and the
+slides disappear (the boundary passes 8N at N = 17 and 5N at N = 11); they are a
+small-molecule effect, and that is where every THC number in this repository was
+measured.
+
+#### And Result 86's table, revisited
+
+| case | Result 86 | exact generic |
+|---|---|---|
+| H₂, M=4 | 15 | **15** (= 24 − P²) |
+| H₄, M=4 | 4 | **4** |
+| H₄, M=6 | 8 | **6** |
+
+H₂'s 15 was right, for a sharper reason than the one given: the comparison is
+with `P² = 9`, not with the 6 independent entries of an 8-fold-symmetric tensor
+(which would predict 18). H₄ at M=6 is **inside** the boundary, so the model has
+exactly 6. What a fitted point shows is not reproducible: two more runs of the
+identical call gave 6 (residual 3.2e-4; the Jacobian's next singular value
+3.8e-3) and 14 (residual 9.5e-4; next singular value 6.0e-8). The Jacobian had
+exactly 6 zero singular values in both; the rest were near-flat directions at a
+near-degenerate optimum — conditioning, which is Result 86's own word for it —
+counted by a 1e-6 cutoff.
+
+#### Honest scope
+
+Identifiability modulo scaling is a classical question for CP decompositions
+(Kruskal), and dimension counts against Veronese varieties are standard algebraic
+geometry. I found no treatment of the THC form `X Z Xᵀ` with a free coupling
+matrix, or of its consequence for λ, but did not do an exhaustive search. The
+closed form is **proved for N ≤ 6** (every rank up to one past saturation) and
+conjectured beyond; the upper-bound argument is general, the lower bound is one
+exact computation per `(N, M)`. Under the rubric: a small **A**, extending
+Result 86, and like it of narrow scope.
+
+`experiments/exp033_thc_identifiability.py`, `tests/test_thc_identifiability.py`,
+`results/exp033_thc_identifiability.json`.

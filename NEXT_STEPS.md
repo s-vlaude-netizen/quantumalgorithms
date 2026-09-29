@@ -44,17 +44,17 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 86:
+Applied honestly, as of Result 88:
 
 | tier | results | note |
 |---|---|---|
-| **A** | **86 only** | the THC gauge group, and it is a small A |
+| **A** | **86, 88** | the THC gauge group, and its exact identifiability boundary; both small |
 | **A′** | none | nothing here refutes a paper |
 | **B** | 47 (arguably) | batched+lazy ADAPT, 4.6× over standard ADAPT as published |
-| **C** | 42, 50, 51, 85 | classical wins, with the size where it stops |
-| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84 … |
+| **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 87) |
+| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 87 … |
 
-**That is one A in eighty-six results**, and Result 72 had already said so from
+**That is two A in eighty-eight results**, both on one model, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
@@ -66,9 +66,11 @@ this repository where that is plausible:
 * **the nonlinear THC fit**, which is *not* the published LS-THC (that one fixes
   χ on a grid and solves linearly, so it has no gauge freedom at all). Anything
   structural about the joint optimisation is unexplored territory by default.
-* **the sign problem's onset** (Result 85), where a measured boundary between
-  polynomial and exponential on real molecular Hamiltonians would be a genuine
-  A — and where the current measurement explicitly cannot resolve it yet.
+* **the sign problem's onset** (Results 85, 87), where a measured boundary
+  between polynomial and exponential on real molecular Hamiltonians would be a
+  genuine A. Result 87 showed Result 85's walker thresholds do not measure it
+  (they move 4–8× with run length; H₂ has no sign problem at all), and put a
+  deterministic sign gap through H₈ in their place.
 
 ---
 
@@ -95,12 +97,16 @@ programme, it is the measurement that decides it.
 
 So, ranked by what would actually move something here:
 
-1. ~~A probabilistic classical baseline~~ — **built, Result 85, and it needs a
-   longer lever arm rather than more machinery.** FCIQMC now exists here and is
-   validated against exact diagonalisation. The mechanism is measured:
-   correlation strength rather than system size is the axis (stretched H₂ costs
-   **32×** more than equilibrium H₂ at identical size), and the sign problem is
-   directly visible as **38% annihilation** against 0.3% at equilibrium.
+1. ~~A probabilistic classical baseline~~ — **built, Result 85; its reading
+   corrected by Result 87, which changes what to measure next.** FCIQMC exists
+   here and is validated against exact diagonalisation. But the walker threshold
+   at fixed step count is a *statistical* cost: 4× the steps cuts it 4–8×, and H₂
+   — which pays 32× when stretched — has **no sign problem at all** (a 2-determinant
+   sector, annihilation exactly zero). The "38% against 0.3%" annihilation compares
+   thresholds with 64–128× different walker counts; at equal counts it is 1.3–3×.
+   The deterministic **sign gap** (`E0(H) − E0` of the sign-free matrix) is now
+   computed through H₈ and grows with size at *both* geometries: 0.033 → 0.383 →
+   2.297 Ha at equilibrium, 0.699 → 1.911 → 4.446 stretched.
 
    **But the complexity class is not measured, and the reason is instructive.**
    Three points over N = 2…6 on a factor-two walker ladder cannot separate
@@ -108,12 +114,19 @@ So, ranked by what would actually move something here:
    ±0.35 log-space resolution. The tight-looking error bar comes from three
    well-behaved points, not from resolution.
 
-   **The next step is therefore H₈ and H₁₀ stretched**, which takes the range
-   from a factor of 3 in N to a factor of 5, with a finer ladder. H₈'s sector is
-   ~5 000 determinants and would want 40 000–80 000 walkers: hours, not minutes,
-   and nothing new to build. **This is now the single highest-value measurement
-   in this file**, because it is the one that decides whether there is a quantum
-   window in chemistry at all.
+   **~~The next step is H₈ and H₁₀ stretched~~ on the same observable** —
+   superseded by Result 87: extending a run-length-dependent quantity to more
+   points cannot decide a complexity class. **The next step is the annihilation
+   plateau** (the population at which, under a fixed shift, growth stalls until
+   the sign structure is resolved — Spencer, Blunt & Foulkes 2012) for H₄…H₈ at
+   both geometries, which is run-length independent and is the sign problem's
+   actual cost; and the sign gap for H₁₀ (sector ~6×10⁴, one sparse eigensolve).
+   Two cautions from building Result 87: detect the plateau over seeds, since on
+   20-determinant sectors it is tens of walkers and noisy; and for H₈ drop
+   couplings below 1e-10 before taking the sector — exp030's 1e-12 threshold
+   joins eight blocks through the residue of 12-decimal coefficient rounding.
+   **Still the highest-value measurement in this file**, now with the right
+   observable.
 
 2. **A DMRG baseline** — still wanted, and now second rather than first. It is
    the deterministic counterpart to the above and the competitor Result 82's
@@ -121,7 +134,12 @@ So, ranked by what would actually move something here:
    means anything, but FCIQMC extended to H₈/H₁₀ answers the same question more
    cheaply and is already written.
 3. **More of the THC fit.** Gauge fixing took H₆ from 46 337 to 23 738 iterations
-   and the λ spread from 9.52 to 1.59. The obvious remaining items are a proper
+   and the λ spread from 9.52 to 1.59. **Result 88 now says where the remaining
+   flatness is**: past `M = N(N−1)/2 + 1` (H₄: 7, H₆: 16) the columns slide along
+   exact minimisers on which λ varies, so the penalty is *required* there, not
+   optional — and every rank this repository fitted is past it. Any rank-exponent
+   re-measurement (exp029) should drop H₂, whose `M ≥ P = 3` makes every tensor
+   exactly representable, and report which points sit past the boundary. The obvious remaining items are a proper
    second-order method (the Gauss-Newton structure is right there and unexploited)
    and a better initialisation than perturbing the DF selection.
 4. **Factorisation: honest scoping first, and the answer is probably "size it,

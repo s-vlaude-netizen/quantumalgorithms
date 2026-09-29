@@ -23,10 +23,11 @@ an adaptive ansatz with a smaller parameter count — was measured and does not
 (Result 74): ADAPT's exponent is 3.57 ± 0.11 against UCCSD's 3.44 ± 0.13, which
 is indistinguishable and, if anything, the wrong way round.
 
-## The one result here that is a proof (Result 86)
+## The results here that are proofs (Results 86 and 88)
 
-Eighty-six results, and **one** of them establishes something rather than
-measuring it. It is small, and it begins by correcting an earlier entry of my own.
+Eighty-eight results, and **two** of them establish something rather than
+measuring it. Both are small, both concern the same model, and each begins by
+correcting an earlier entry of my own.
 
 **The claim.** The tensor-hypercontraction model used in Results 77–80 has an
 `M`-parameter continuous **gauge group**
@@ -72,7 +73,8 @@ and reading it as a count was nearly a fourth bug:
 Where the model is genuinely under-parameterised the null space is **exactly** the
 gauge group; where it fits the tensor exactly there is more flatness and it is
 over-parameterisation. The predicted generators lie in the null space in every
-case (`max |H g_k| / ‖H‖ = 1.1e-08`).
+case (`max |H g_k| / ‖H‖ = 1.1e-08`). *Result 88 below makes the count exact and
+corrects the H₄ M=6 row: that case has exactly 6.*
 
 **Honest scope.** The scaling indeterminacy of a multilinear factorisation is
 elementary and well known for CP decompositions. What makes this worth recording:
@@ -83,10 +85,50 @@ consequence (that penalisation and gauge fixing are not interchangeable, because
 the cost functional is itself invariant) is checkable rather than plausible.
 
 → `experiments/exp031_gauge_structure.py`, `tests/test_gauge_structure.py`.
-The rubric this is graded against, and where all 86 results sit under it, is at
+
+### Result 88: the gauge is the only flat direction up to `M = N(N−1)/2 + 1` — and past that, the fit cannot determine λ
+
+Result 86 left the number of flat directions as a lower bound. It is now exact.
+With `P = N(N+1)/2` orbital pairs, the model's Jacobian has generic rank
+
+```
+    P²                                            if M ≥ P
+    N·M + M² − M − M·max(0, M + N − 1 − P)         otherwise
+```
+
+so the landscape has **exactly `M` flat directions — the gauge and nothing
+else — iff `M ≤ N(N−1)/2 + 1`**. Past that, the span of the rank-one columns
+`χ_m χ_mᵀ` meets the variety of rank-one matrices in a positive-dimensional set,
+and the columns can slide along it without changing the tensor.
+
+**Proved for every `(N, M)` with `N ≤ 6` and `M ≤ P + 1`, 60 of 60:** SymPy
+differentiates the model, the Jacobian's rank at an integer point is certified
+modulo a prime (a lower bound), the gauge plus a dimension count give the upper
+bound, and the two meet in every case.
+
+**The consequence is the other half of Result 86.** λ is constant along the
+gauge — so no penalty can fix it — but its exact directional derivative along the
+*slides* is non-zero. Past the boundary the unpenalised fit has a manifold of
+exact minimisers along which the cost-determining λ varies freely:
+
+| flat direction | residual | λ | what fixes it |
+|---|---|---|---|
+| gauge (always `M`) | constant | constant | only gauge fixing |
+| slides (`M > N(N−1)/2 + 1`) | constant | **varies** | only a penalty |
+
+That is the first mechanism here for *why* the λ penalty collapsed Result 80's
+restart spread to exactly 1.0 when gauge fixing alone left 1.59. **And all three
+of Result 78's chemical-accuracy ranks sit past the boundary** (H₂ at 4 > 2,
+H₄ at 8 > 7, H₆ at 18 > 16) — H₂ even past `P = 3`, where any χ reproduces the
+tensor *exactly*, so H₂ carries no information about THC's rank exponent. The
+boundary grows as `N²/2` against THC's `O(N)` ranks, so the slides are a
+small-molecule effect; this repository measured only small molecules.
+
+→ `experiments/exp033_thc_identifiability.py`, `tests/test_thc_identifiability.py`.
+The rubric these are graded against, and where all 88 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
-## The answer, since 86 results is a lot to read
+## The answer, since 88 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -280,19 +322,38 @@ the window. Measured, median over five seeds, walkers for chemical accuracy:
 | equilibrium (0.75 Å) | 40 | 40 | 160 | 0.3–0.7% |
 | **stretched (2.0 Å)** | **1 280** | **5 120** | **10 240** | **33–38%** |
 
-**Correlation strength, not system size, is the axis** — stretched H₂ costs 32×
-more than equilibrium H₂ at identical size and identical sector, and nearly four
-in ten spawned walkers cancel against opposite signs. That is why P450 is the
-right target: a transition-metal centre is *strongly correlated*, not large.
+**Correction (Result 87): these thresholds do not measure the sign problem.**
+H₂'s sector is two determinants and one coupling, so it has no sign problem at
+all — annihilation is exactly zero, and it is in these runs — yet it pays 32×
+when stretched. Running the identical code and seeds for 4× the steps cuts every
+threshold 4–8× (H₆ stretched: 10 240 → 1 280), which a sign-problem wall would
+not do: the table measures *walkers × steps* for the estimator's statistics. And
+"33–38% against 0.3–0.7%" compares each geometry at its own threshold; at equal
+walker counts it is 1.3–3×.
+
+The sign problem itself, measured deterministically as the gap between `H` and
+its sign-free counterpart (off-diagonals replaced by `−|H_ij|`):
+
+| gap (Hartree) | H₂ | H₄ | H₆ | H₈ |
+|---|---|---|---|---|
+| equilibrium | **0** | 0.033 | 0.383 | 2.297 |
+| stretched | **0** | 0.699 | 1.911 | 4.446 |
+
+**It grows with system size at both geometries, and by H₈ size dominates
+stretching** (ratio 21× → 5× → 1.9×). P450 remains the right target — strongly
+correlated *and* the sign gap grows with size — but not for the reason first
+given.
 
 **But the complexity class is explicitly not measured**, and that is the honest
 headline. The stretched arm fits `N^1.90 ± 0.08` far better than `2^(0.75 N)` —
 and the discrimination is not real, because both residuals sit *below* the
 factor-two walker ladder's own ±0.35 log-space resolution. Three points over
 N = 2…6 cannot separate polynomial from exponential. The tight error bar comes
-from three well-behaved points, not from resolution. **H₈ and H₁₀ stretched is now
-the highest-value open measurement in this repository**, because it is the one
-that decides whether a quantum window in chemistry exists at all.
+from three well-behaved points, not from resolution. *(Result 87: and the
+fitted quantity is run-length dependent, so those fits are withdrawn as
+sign-problem measurements. The measurement that decides the question is the
+FCIQMC annihilation plateau as a function of N — run-length independent — with
+the sign gap above as its deterministic counterpart.)*
 
 ### "Could this help machine learning, or LLMs?" (Result 84)
 
@@ -785,6 +846,7 @@ quantum-algorithm benchmarks usually go wrong:
 ## Running
 
 ```bash
+# installs the pinned SymPy fork too -- see SYMPY.md for why, and how to move the pin
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m pytest tests/ -q
 
