@@ -1,0 +1,272 @@
+{
+  "symbolic": {
+    "tensor_invariant": true,
+    "tensor_terms_checked": 16,
+    "one_norm_difference": "2*Abs(sin(2*theta))",
+    "one_norm_difference_at_pi_over_4": 2.0,
+    "one_norm_invariant": false
+  },
+  "spin_factor": 2,
+  "rows": [
+    {
+      "molecule": "H2",
+      "orbitals": 2,
+      "factors": 3,
+      "gauge_dimension": 3,
+      "rebuild_error": 2.220446049250313e-16,
+      "one_norm_before": 6.944178560903622,
+      "one_norm_after": 5.4068946760922305,
+      "reduction": 1.2843191844680883,
+      "invariance_error": 2.9976021664879227e-15,
+      "restart_spread": 1.0000000000000493,
+      "iterations": 2,
+      "converged": true,
+      "attempts": [
+        {
+          "value": 5.406894676092257,
+          "iterations": 2,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 5.406894676092254,
+          "iterations": 1,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 5.406894676092255,
+          "iterations": 1,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 5.406894676092255,
+          "iterations": 2,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 5.4068946760922305,
+          "iterations": 2,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 5.406894676092497,
+          "iterations": 1,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 5.40689467609224,
+          "iterations": 1,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 5.406894676092236,
+          "iterations": 1,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        }
+      ],
+      "seconds": 0.5868078869999636
+    },
+    {
+      "molecule": "H4",
+      "orbitals": 4,
+      "factors": 10,
+      "gauge_dimension": 45,
+      "rebuild_error": 1.1102230246251565e-15,
+      "one_norm_before": 29.361976647618285,
+      "one_norm_after": 17.494154681764616,
+      "reduction": 1.6783878490696285,
+      "invariance_error": 5.329070518200751e-15,
+      "restart_spread": 1.0075948914686954,
+      "iterations": 30,
+      "converged": true,
+      "attempts": [
+        {
+          "value": 17.494154681765803,
+          "iterations": 19,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 17.49415468176472,
+          "iterations": 7,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 17.49415468176478,
+          "iterations": 18,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 17.581990636705875,
+          "iterations": 16,
+          "converged": true,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH"
+        },
+        {
+          "value": 17.49415468176473,
+          "iterations": 18,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 17.49415468176473,
+          "iterations": 31,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 17.62702088790919,
+          "iterations": 45,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 17.494154681764616,
+          "iterations": 30,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        }
+      ],
+      "seconds": 2.984219527999983
+    },
+    {
+      "molecule": "H6",
+      "orbitals": 6,
+      "factors": 21,
+      "gauge_dimension": 210,
+      "rebuild_error": 1.6653345369377348e-15,
+      "one_norm_before": 65.70215621938607,
+      "one_norm_after": 32.80142661325707,
+      "reduction": 2.003027398595883,
+      "invariance_error": 2.1094237467877974e-15,
+      "restart_spread": 1.4112367279217788,
+      "iterations": 27,
+      "converged": true,
+      "attempts": [
+        {
+          "value": 46.29057796485926,
+          "iterations": 9,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 32.80142661325707,
+          "iterations": 27,
+          "converged": true,
+          "message": "CONVERGENCE: NORM OF PROJECTED GRADIENT <= PGTOL"
+        },
+        {
+          "value": 33.917393102488354,
+          "iterations": 28,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 32.81426415610408,
+          "iterations": 34,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 32.899767664442074,
+          "iterations": 30,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 33.603072202536495,
+          "iterations": 30,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 34.1947353215056,
+          "iterations": 32,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 35.115755541715906,
+          "iterations": 33,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        }
+      ],
+      "seconds": 16.03021174600002
+    },
+    {
+      "molecule": "H8",
+      "orbitals": 8,
+      "factors": 31,
+      "gauge_dimension": 465,
+      "rebuild_error": 8.645570370724442e-12,
+      "one_norm_before": 115.49905728614739,
+      "one_norm_after": 52.898301353408634,
+      "reduction": 2.1834171293045674,
+      "invariance_error": 8.645542615148827e-12,
+      "restart_spread": 1.4213596782912576,
+      "iterations": 16,
+      "converged": false,
+      "attempts": [
+        {
+          "value": 75.1875125938349,
+          "iterations": 13,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 52.898301353408634,
+          "iterations": 16,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 56.08865252178221,
+          "iterations": 15,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 54.46820774261924,
+          "iterations": 17,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 56.53567919257594,
+          "iterations": 16,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 55.70767801408643,
+          "iterations": 17,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 58.93439811510064,
+          "iterations": 16,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        },
+        {
+          "value": 60.6612810048285,
+          "iterations": 16,
+          "converged": false,
+          "message": "STOP: TOTAL NO. OF F,G EVALUATIONS EXCEEDS LIMIT"
+        }
+      ],
+      "seconds": 30.47240044099999
+    }
+  ]
+}
