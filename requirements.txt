@@ -5,7 +5,7 @@ qiskit-nature>=0.8
 pyscf>=2.14
 numpy>=2.0
 scipy>=1.14
-# SymPy for the symbolic proofs (Results 86, 88). The independent fork, which
+# SymPy for the symbolic proofs (Results 86, 87, 89). The independent fork, which
 # carries bug fixes upstream declined, pinned to a commit so a proof re-runs on
 # the code it was checked with. Update the hash to move; see SYMPY.md.
 sympy @ git+https://github.com/s-vlaude-netizen/sympy.git@900eb89b2cdf41b813658e7be5ed0b0a113f033a

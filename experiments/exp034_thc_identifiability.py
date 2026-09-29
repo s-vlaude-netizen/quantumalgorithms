@@ -1,4 +1,4 @@
-"""Experiment 033 -- where the THC gauge stops being the only flat direction.
+"""Experiment 034 -- where the THC gauge stops being the only flat direction.
 
 Result 86 proved that the THC model has an ``M``-parameter gauge group and read
 the Hessian's null space as a **lower bound** of ``M`` flat directions. It left
@@ -59,7 +59,7 @@ three lie past it, and H2's lies past ``P = 3``, where the model represents
 *every* pair-symmetric tensor exactly -- so that point is fixed by algebra, not
 by chemistry.
 
-Run:  python -m experiments.exp033_thc_identifiability
+Run:  python -m experiments.exp034_thc_identifiability
 """
 
 from __future__ import annotations
@@ -303,7 +303,7 @@ def main() -> int:
                     help="skip the H4 fits behind section 4")
     args = ap.parse_args()
 
-    print("=== experiment 033 :: where the THC gauge stops being the only flat direction ===")
+    print("=== experiment 034 :: where the THC gauge stops being the only flat direction ===")
     print(f"Jacobian rank mod {PRIME} at one integer point per (N, M): a certified")
     print("lower bound on the generic rank. The gauge and the dimension count give")
     print("the upper bound; where they meet, the count is exact.\n")
@@ -378,7 +378,7 @@ def main() -> int:
             print(line, flush=True)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = RESULTS_DIR / "exp033_thc_identifiability.json"
+    path = RESULTS_DIR / "exp034_thc_identifiability.json"
     with open(path, "w") as fh:
         json.dump({
             "sweep": sweep,

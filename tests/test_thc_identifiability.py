@@ -1,4 +1,4 @@
-"""Where the THC gauge stops being the only flat direction (Result 88).
+"""Where the THC gauge stops being the only flat direction (Result 89).
 
 The proof has two load-bearing parts and the tests pin both: that the closed-form
 Jacobian the sweep uses is the model's Jacobian (checked against SymPy's own
@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 import sympy as sp
 
-from experiments.exp033_thc_identifiability import (
+from experiments.exp034_thc_identifiability import (
     certified_rank,
     exact_jacobian,
     gauge_generators,

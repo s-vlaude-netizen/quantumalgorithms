@@ -1,4 +1,4 @@
-"""Experiment 032 -- what Result 85's walker thresholds were actually measuring.
+"""Experiment 033 -- what Result 85's walker thresholds were actually measuring.
 
 Result 85 built FCIQMC and read two things off it: that **correlation strength,
 not system size, is the axis** of the sign problem ("stretched H2 costs 32x more
@@ -31,7 +31,7 @@ Three checks, and each one undercuts a reading rather than a number.
    stretched/equilibrium ratio falls 21x -> 5x -> 1.9x from H4 to H8: by H8 size,
    not stretching, dominates.
 
-Run:  python -m experiments.exp032_sign_structure [--skip-rerun]
+Run:  python -m experiments.exp033_sign_structure [--skip-rerun]
 """
 
 from __future__ import annotations
@@ -202,7 +202,7 @@ def main() -> int:
                     help="skip the 4x-steps FCIQMC re-run (about 10 minutes)")
     args = ap.parse_args()
 
-    print("=== experiment 032 :: what Result 85's thresholds were measuring ===\n")
+    print("=== experiment 033 :: what Result 85's thresholds were measuring ===\n")
 
     print("--- 1. sign structure of each sector, exactly ---")
     rows = structure()
@@ -239,7 +239,7 @@ def main() -> int:
                   f"({before / after:.0f}x fewer)")
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = RESULTS_DIR / "exp032_sign_structure.json"
+    path = RESULTS_DIR / "exp033_sign_structure.json"
     with open(path, "w") as fh:
         json.dump({"structure": rows, "h2_annihilation": h2_annihilation,
                    "equal_walkers": equal, "step_factor": STEP_FACTOR,

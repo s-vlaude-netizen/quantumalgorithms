@@ -1,4 +1,4 @@
-"""What Result 85's thresholds were measuring (Result 87).
+"""What Result 85's thresholds were measuring (Result 88).
 
 The load-bearing claims are structural, so they are tested on matrices whose
 answer is known by construction before being trusted on molecules: a balanced
@@ -14,7 +14,7 @@ import pytest
 from scipy import sparse
 
 from experiments.exp030_stochastic_chemistry import fciqmc, prepare, sector
-from experiments.exp032_sign_structure import balanced, sector_matrix, sign_gap
+from experiments.exp033_sign_structure import balanced, sector_matrix, sign_gap
 from qres.problems.chemistry import build_molecule
 
 

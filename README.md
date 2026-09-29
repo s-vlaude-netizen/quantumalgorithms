@@ -23,9 +23,9 @@ an adaptive ansatz with a smaller parameter count — was measured and does not
 (Result 74): ADAPT's exponent is 3.57 ± 0.11 against UCCSD's 3.44 ± 0.13, which
 is indistinguishable and, if anything, the wrong way round.
 
-## The results here that are proofs (Results 86 and 88)
+## The results here that are proofs (Results 86 and 89)
 
-Eighty-eight results, and **two** of them establish something rather than
+Eighty-nine results, and **two** of them establish something rather than
 measuring it. Both are small, both concern the same model, and each begins by
 correcting an earlier entry of my own.
 
@@ -73,7 +73,7 @@ and reading it as a count was nearly a fourth bug:
 Where the model is genuinely under-parameterised the null space is **exactly** the
 gauge group; where it fits the tensor exactly there is more flatness and it is
 over-parameterisation. The predicted generators lie in the null space in every
-case (`max |H g_k| / ‖H‖ = 1.1e-08`). *Result 88 below makes the count exact and
+case (`max |H g_k| / ‖H‖ = 1.1e-08`). *Result 89 below makes the count exact and
 corrects the H₄ M=6 row: that case has exactly 6.*
 
 **Honest scope.** The scaling indeterminacy of a multilinear factorisation is
@@ -86,7 +86,7 @@ the cost functional is itself invariant) is checkable rather than plausible.
 
 → `experiments/exp031_gauge_structure.py`, `tests/test_gauge_structure.py`.
 
-### Result 88: the gauge is the only flat direction up to `M = N(N−1)/2 + 1` — and past that, the fit cannot determine λ
+### Result 89: the gauge is the only flat direction up to `M = N(N−1)/2 + 1` — and past that, the fit cannot determine λ
 
 Result 86 left the number of flat directions as a lower bound. It is now exact.
 With `P = N(N+1)/2` orbital pairs, the model's Jacobian has generic rank
@@ -124,11 +124,55 @@ tensor *exactly*, so H₂ carries no information about THC's rank exponent. The
 boundary grows as `N²/2` against THC's `O(N)` ranks, so the slides are a
 small-molecule effect; this repository measured only small molecules.
 
-→ `experiments/exp033_thc_identifiability.py`, `tests/test_thc_identifiability.py`.
-The rubric these are graded against, and where all 88 results sit under it, is at
+→ `experiments/exp034_thc_identifiability.py`, `tests/test_thc_identifiability.py`.
+The rubric these are graded against, and where all 89 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
-## The answer, since 88 results is a lot to read
+## The same question asked of double factorisation — opposite answer (Result 87)
+
+Result 86 left an obvious follow-up: does the *other* factorisation in this
+repository have a gauge group too? It does, it is much larger, **and its cost is
+not invariant** — which inverts the consequence from "nothing to optimise" to
+"free optimisation".
+
+The reshaped two-electron matrix is positive semidefinite (measured, not
+assumed), so `W = Σ_t vec(A_t) vec(A_t)ᵀ` is invariant under the **full O(T)** —
+`T(T−1)/2` parameters, **465 on H₈** against THC's `M`. But the DF 1-norm
+rewrites as `2 Σ_t ‖A_t‖_*²`, a sum of squared nuclear norms, which is *not* a
+function of the outer products alone. Symbolically, the difference under a
+rotation by θ is exactly `2|sin 2θ|`.
+
+|  | gauge group | λ invariant? | consequence |
+|---|---|---|---|
+| **THC** (R86) | `M` parameters | **yes**, exactly | nothing to optimise; gauge fixing is mandatory |
+| **DF** (R87) | `T(T−1)/2` | **no**, `2\|sin 2θ\|` | optimisation available **for free** |
+
+Measured, with the Hamiltonian unchanged to 3e-15 and *that* check gating every
+row rather than the gain:
+
+| molecule | N | λ before | λ after | **gain** |
+|---|---|---|---|---|
+| H₂ | 2 | 6.944 | 5.407 | 1.284 |
+| H₄ | 4 | 29.362 | 17.494 | 1.678 |
+| H₆ | 6 | 65.702 | 32.801 | 2.003 |
+| H₈ | 8 | 115.499 | 50.074 | **2.307** |
+
+`gain ~ N^0.419 ± 0.015` → **~4.9× at 50 orbitals**, and λ sets the qubitized walk
+count (Result 75), so that is the same factor off the runtime. It would take
+Result 76's 3.93×10¹² T gates for a drug-sized molecule to ~8×10¹¹, narrowing the
+gap to published tensor hypercontraction from 185× to ~38×. **Every gain is a
+lower bound** — the objective is non-smooth and multi-modal, and more restarts
+find more.
+
+**Graded honestly this is a B, not an A.** Compressed double factorisation already
+minimises λ and re-fits the factors freely, so its search space *contains* this
+orbit; the O(T) freedom of a PSD decomposition is textbook. What is contributed is
+that this reduction is **exact** — no approximation, no regularisation, no rank
+truncation — and the THC/DF contrast above.
+
+→ `experiments/exp032_df_gauge.py`, `tests/test_df_gauge.py`.
+
+## The answer, since 89 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -322,7 +366,7 @@ the window. Measured, median over five seeds, walkers for chemical accuracy:
 | equilibrium (0.75 Å) | 40 | 40 | 160 | 0.3–0.7% |
 | **stretched (2.0 Å)** | **1 280** | **5 120** | **10 240** | **33–38%** |
 
-**Correction (Result 87): these thresholds do not measure the sign problem.**
+**Correction (Result 88): these thresholds do not measure the sign problem.**
 H₂'s sector is two determinants and one coupling, so it has no sign problem at
 all — annihilation is exactly zero, and it is in these runs — yet it pays 32×
 when stretched. Running the identical code and seeds for 4× the steps cuts every
@@ -349,7 +393,7 @@ headline. The stretched arm fits `N^1.90 ± 0.08` far better than `2^(0.75 N)` �
 and the discrimination is not real, because both residuals sit *below* the
 factor-two walker ladder's own ±0.35 log-space resolution. Three points over
 N = 2…6 cannot separate polynomial from exponential. The tight error bar comes
-from three well-behaved points, not from resolution. *(Result 87: and the
+from three well-behaved points, not from resolution. *(Result 88: and the
 fitted quantity is run-length dependent, so those fits are withdrawn as
 sign-problem measurements. The measurement that decides the question is the
 FCIQMC annihilation plateau as a function of N — run-length independent — with

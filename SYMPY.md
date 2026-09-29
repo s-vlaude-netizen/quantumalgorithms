@@ -1,6 +1,6 @@
 # SymPy in this repository
 
-SymPy is where the repository's **proofs** come from (Results 86 and 88): an
+SymPy is where the repository's **proofs** come from (Results 86, 87, 89): an
 identity in a polynomial ring, or a rank certified in exact arithmetic, is not a
 coincidence of one random draw. This file is the working knowledge for doing
 more of that, so a session can pick it up cold.
@@ -33,9 +33,9 @@ imports as `sympy`.
 * **Free symbols, then `expand`, compared to zero** (Result 86): proves an
   identity for all values, not for a sample.
 * **Let SymPy differentiate the model** and check any hand-derived or
-  closed-form Jacobian against it entry by entry (Result 88's tests). The fast
+  closed-form Jacobian against it entry by entry (Result 89's tests). The fast
   closed form then carries the sweep; the proof does not rest on the derivation.
-* **Rank at an integer point, modulo a large prime** (Result 88): a non-zero
+* **Rank at an integer point, modulo a large prime** (Result 89): a non-zero
   minor mod p is non-zero over the integers, so it is a *certified lower bound*
   on the generic rank. About 7× faster than rationals, whose entries grow during
   elimination. Pair it with an argued upper bound (a symmetry, a dimension
