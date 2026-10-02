@@ -382,9 +382,86 @@ conjecture.
    generic circuits); an exact statement for the Ising family is an **A**
    candidate only if it is not already there.
 
-**Do not** re-run a variational *classifier* or kernel experiment. Results 68 and
-74 closed that shape, and the input barrier above explains why it was never going
-to work. The Ising Born machine is not that shape: it generates rather than
+#### Two 2025–26 industry claims about quantum + LLMs, read against Result 84 (added on request)
+
+Both were read in full (arXiv HTML) before being placed here. Neither is a lead
+for an advantage. One of them is a cheap, high-tier *test*.
+
+**Multiverse Computing, *"Talking to a quantum computer: quantum hardware inside
+a production large language model"* (Aizpurua, Singh, Kshetrimayum, Jahromi,
+Orús; arXiv:2605.05914, May 2026).**
+
+* **What they did:** inserted "Cayley-parameterised unitary adapters" into a
+  frozen projection layer of Llama 3.1 8B. These are 1 024 independent 4×4
+  orthogonal blocks (2 qubits each), 6 144 parameters in total, **trained
+  entirely classically**. The quantum processor (IBM Heron r2) only runs the
+  trained blocks:
+  * each 4-dimensional slice is amplitude-encoded;
+  * it is measured with 8 192 shots;
+  * the output magnitudes are taken from the counts, with **signs restored from
+    the classically stored input**, because counts carry no signs.
+* **Numbers they report:** perplexity 8.877 → 8.752 (−1.4%) noiseless and 8.759
+  with device noise. One full sequence takes 1 328 circuits and about 4 h 24 min.
+  With 3 qubits per block, noise raises perplexity 35-fold.
+* **The authors' own position:** the circuits are classically simulable and no
+  advantage is claimed.
+* **Read against this repository:** this is Result 84's barrier, measured by
+  someone else.
+  * Each block is a 4×4 matrix-vector product: 16 multiply-adds on a CPU against
+    about 4 s and 8 192 shots on the QPU.
+  * **The architecture has no exponential headroom.** A block cannot exceed the
+    hidden size `d = 4096 = 2^12`, so 12 qubits is the ceiling, and a 4096×4096
+    product is about 1.7e7 flops.
+  * Reading `2^n` amplitudes from counts costs about `2^n/ε²` shots and returns
+    no signs at all.
+  * The −1.4% belongs to a classically trained 6 144-parameter adapter. Their
+    noiseless arm *is* the classical computation, and the QPU adds noise to it.
+* **What it adds here:** an external data point for Result 84 — the
+  noise wall at 3 qubits per block on current hardware. Nothing further to test.
+
+**IonQ, *"Quantum Large Language Model Fine-Tuning"* (Kim, Mei, Girotto, Yamada,
+Roetteler; arXiv:2504.08732, 2025), blog "Supercharging AI with quantum
+computing".**
+
+* **What they did:** put a parameterised-circuit classification head with data
+  re-uploading on top of frozen SetFit sentence embeddings (768-dimensional).
+  The task is SST-2 sentiment in a low-data regime: 512 training sentences,
+  9 101 test sentences. The heads have 10–18 qubits and run **in simulation
+  only**.
+* **Claim:** 92.70% for the best quantum head (14 qubits, 886 parameters) against
+  89.56% for the best classical baseline (an SVC), "up to 3.14%".
+* **Not reported:**
+  * random seeds, error bars or a significance test;
+  * the quantum figure is the best of a hyperparameter screen (5 learning rates
+    per configuration across several architectures), and how it was selected is
+    not stated;
+  * the classical heads are not parameter-matched (logistic regression 769
+    parameters, MLP 148 034);
+  * any run on hardware.
+* **Read against this repository:** this is the shape Results 67–68 measured — a
+  classically simulable circuit on classical data. Re-uploading circuits compute
+  truncated Fourier series of their inputs (Schuld, Sweke & Meyer, 2021). So the
+  fair control is a classical head of about 900 parameters, a small MLP or
+  random Fourier features, under the *same* selection protocol.
+* **Testable here, and an A′ candidate under the rubric:**
+  * reproduce their quantum head (a 14-qubit statevector is cheap) on the same
+    embeddings and split;
+  * add parameter-matched classical heads;
+  * select on validation only;
+  * report every arm over many seeds with confidence intervals.
+
+  If a matched classical head reaches about 92.7% under that protocol, the
+  claimed improvement is a baseline artefact. If it does not, that is a real
+  data point in the quantum head's favour. Both outcomes are worth having.
+  HuggingFace (SetFit models, SST-2) is reachable from this environment.
+* **Order:** do this **before** the Ising Born machine. It is cheaper, it tests a
+  published claim directly, and the parameter-matched-baseline machinery it needs
+  is the same machinery the Born machine comparison needs.
+
+**Do not** re-run a variational *classifier* or kernel experiment *as a search for
+an advantage* — the IonQ check above is a test of someone else's claim, not that.
+Results 68 and 74 closed that shape, and the input barrier above explains why it
+was never going to work. The Ising Born machine is not that shape: it generates rather than
 reads, and its training can be classical.
 
 ### The one direction with real leverage: the block encoding (Result 75)
