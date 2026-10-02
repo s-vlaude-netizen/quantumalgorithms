@@ -295,8 +295,86 @@ What this repository could measure, in order:
    this repository has already measured. It needs a temporal dataset and a ridge
    readout, both of which are a day's work.
 
-**Do not** re-run a variational QML experiment. Results 68 and 74 closed that
-shape, and the input barrier above explains why it was never going to work.
+#### Lead: the Ising Born machine (added on request, not yet started)
+
+The concrete Born machine with the firmest footing, and the one to build if this
+direction is taken up: Coyle, Mills, Danos & Kashefi, *"The Born supremacy:
+quantum advantage and training of an Ising Born machine"*, npj Quantum
+Information 6, 60 (2020).
+
+**The model.** Hadamards on every qubit, one **commuting Ising layer**
+`exp(i Σ_{i<j} J_ij Z_i Z_j + i Σ_k b_k Z_k)`, a layer of single-qubit
+rotations, then a computational-basis measurement. The trained parameters are
+`J`, `b` and the final angles. The final layer is not decoration: without it the
+diagonal Ising phases leave every bitstring at probability `2^-n` and the model
+cannot represent anything. Two settings of that layer are the known hard
+families: final Hadamards make it **IQP** (Bremner, Jozsa & Shepherd 2011), and
+final X-rotations make it **QAOA at p = 1**. Exact or multiplicative-error
+sampling from either is classically intractable unless the polynomial hierarchy
+collapses; additive-error hardness needs anticoncentration plus an average-case
+conjecture.
+
+**Why it fits this repository better than anything else in the QML list:**
+
+* **The input is generated, not read**, so Result 84's loading barrier does not
+  apply.
+* **It is shallow**: one Ising layer is `n(n−1)/2` two-qubit gates all-to-all,
+  and they commute, so routing and compilation choices are free to reorder them.
+  `ZZ` couplings are native on trapped ions (Result 81), where all-to-all
+  connectivity removes the routing overhead entirely.
+* **Training need not touch the quantum device.** For IQP-type circuits, every
+  Pauli-Z correlator `⟨Z_S⟩` of the output is an average of unit-modulus phases
+  over uniformly random bitstrings. Classical Monte Carlo estimates it to
+  additive error (Van den Nest's probabilistic simulation, 2011). A
+  Gaussian-kernel MMD loss is a weighted sum of exactly such correlators, so it
+  and its gradient can be computed classically while *sampling* stays hard. A
+  2025 preprint (Recio-Armengol, Ahmed & Bowles, *"Train on classical, deploy on
+  quantum"*) builds on this — **not yet checked here; verify before quoting.**
+  That removes the shot-noise gradient loop and the optimiser fragility that sank
+  this repository's variational experiments.
+
+**What would kill it, stated before starting:**
+
+* **The metric that makes training classical can also make the comparison
+  classical.** If the loss only sees low-order correlators, a classical model
+  fitted to the same correlators (a pairwise max-entropy / Boltzmann model with a
+  matched parameter count) may score as well on that loss. Any advantage has to
+  show up in something the loss does not directly fit: held-out likelihood at
+  small `n`, or higher-order statistics of the data.
+* **Noise.** IQP sampling with constant noise per qubit becomes classically
+  simulable once anticoncentration holds (Bremner, Montanaro & Shepherd 2017).
+  The device noise models here can measure where that happens.
+* **Result 68's trap.** A model winning on data from its own circuit family
+  proves nothing, so the dataset is fixed first, from a real source, before any
+  circuit is chosen.
+
+**What to measure, in order, and what would count:**
+
+1. **Build it** in `qres` (Qiskit, ≤ 20 qubits, exact probabilities available)
+   with the classical baselines alongside: a pairwise max-entropy Ising model
+   with the same `J`, `b` count, and an autoregressive or RBM model. Same
+   dataset, same parameter budget, **held-out** log-likelihood and total
+   variation. A win on held-out real data is **B/C**; a loss is a **D** worth
+   having, because it names which baseline closes the gap.
+2. **The noise crossover**: total-variation distance between the noiseless and
+   device-noise distributions against `n`, on this repository's IBM-device and
+   trapped-ion models. This is NEXT_STEPS' "where sampling hardness starts to
+   bite" item made concrete — a **C**, with the qubit count and error rate where
+   the hardness argument can and cannot still apply.
+3. **The proof-type angle**, which is where this repository has produced its A
+   results. For the IQP and p = 1 settings, correlators have closed forms
+   (products of cosines of the couplings), so the MMD loss and its gradient are
+   explicit trigonometric polynomials in `J` and `b`. The exact gradient variance
+   as a function of `n` and kernel bandwidth is then a SymPy computation, and it
+   would say *provably* where training is and is not trainable. **Check the
+   trainability literature first** (MMD-kernel barren-plateau results exist for
+   generic circuits); an exact statement for the Ising family is an **A**
+   candidate only if it is not already there.
+
+**Do not** re-run a variational *classifier* or kernel experiment. Results 68 and
+74 closed that shape, and the input barrier above explains why it was never going
+to work. The Ising Born machine is not that shape: it generates rather than
+reads, and its training can be classical.
 
 ### The one direction with real leverage: the block encoding (Result 75)
 
