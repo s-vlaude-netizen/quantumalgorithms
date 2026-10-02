@@ -25,7 +25,7 @@ is indistinguishable and, if anything, the wrong way round.
 
 ## The results here that are proofs (Results 86 and 89)
 
-Eighty-nine results, and **two** of them establish something rather than
+Ninety results, and **two** of them establish something rather than
 measuring it. Both are small, both concern the same model, and each begins by
 correcting an earlier entry of my own.
 
@@ -125,7 +125,32 @@ boundary grows as `N²/2` against THC's `O(N)` ranks, so the slides are a
 small-molecule effect; this repository measured only small molecules.
 
 → `experiments/exp034_thc_identifiability.py`, `tests/test_thc_identifiability.py`.
-The rubric these are graded against, and where all 89 results sit under it, is at
+
+### Result 90: so λ can be lowered without moving the tensor — and the penalty's 47× accuracy price is unnecessary
+
+Result 89's consequence, used. At an unpenalised fit, keep every column a
+rank-one matrix inside the same span, re-solve `Z` exactly, and minimise λ over
+what is left. The tensor change is measured on every start; the largest is
+3.8e-15. On Result 80's protocol (8 starts each):
+
+| H₆, M = 18 | median λ | λ spread | median energy error |
+|---|---|---|---|
+| unpenalised fit | 12.68 | 1.52 | 1.59e-5 |
+| **lowered along exact minimisers** | **8.2004** (all 8 starts) | **1.000** | **1.59e-5** |
+| penalised fit (Result 80's recommendation) | 8.1995 | 1.000 | 7.45e-4 |
+
+The penalty was selecting a point on the manifold of exact minimisers — its λ
+is the fibre's minimum to 0.01% — plus a small step off it, and the step is what
+cost **47× in energy error**. Lowering gives the same λ and a spread of 1.000 at
+the unpenalised accuracy, with no hyperparameter. H₄ at M=8 behaves the same way
+(5.76 → 4.3735 from all 8 starts), and the control holds: strictly inside the
+boundary (H₄ at M=6) nothing moves. One refinement of Result 89: at the boundary
+rank itself the fibre is a *finite* set — by Bézout, 8 exact representations of
+one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
+published; that low λ costs nothing in accuracy here is what is new.
+
+→ `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
+The rubric these are graded against, and where all 90 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -172,7 +197,7 @@ truncation — and the THC/DF contrast above.
 
 → `experiments/exp032_df_gauge.py`, `tests/test_df_gauge.py`.
 
-## The answer, since 89 results is a lot to read
+## The answer, since 90 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.

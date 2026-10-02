@@ -4102,6 +4102,14 @@ The standing recommendation is now:
   spread from 1.59 to 1.00 and costs **30× in energy error** (2.33e-5 → 7.41e-4,
   both inside chemical accuracy). It also has a hard edge — 0/8 inside chemical
   accuracy at α = 1e-2 (Result 79).
+
+  > ⚠️ **SUPERSEDED by Result 90.** The 30× was real but was never the price of a
+  > low λ. Past the identifiability boundary, every unpenalised fit can be moved
+  > along its exact minimisers to the penalised λ (8.2004 against 8.1995 on H₆ at
+  > M=18, from all 8 starts) with its tensor unchanged to 3e-15. That gives the
+  > penalty's λ and spread 1.000 at the unpenalised energy error, 47× better than
+  > the penalised fits in the same run. Recommendation now: fit unpenalised, then
+  > lower λ along the fibre.
 * The penalty is nearly gauge-invariant for large |Z| (`h(z) ≈ |z|`), which is
   why it does not fix the flat direction and in fact drifts slightly further.
 
@@ -5084,3 +5092,125 @@ Result 86, and like it of narrow scope.
 
 `experiments/exp034_thc_identifiability.py`, `tests/test_thc_identifiability.py`,
 `results/exp034_thc_identifiability.json`.
+
+---
+
+### Result 90 — THC's λ can be lowered without moving the tensor, and the penalty's accuracy price was never necessary
+
+Result 89 proved that past `M = N(N−1)/2 + 1` the THC fit has exactly flat
+directions beyond the gauge — the rank-one columns can slide inside their span —
+and that λ is **not** constant along them. That made a prediction this result
+tests: at those ranks λ can be lowered along the manifold of exact minimisers
+with the reconstructed tensor — hence the Hamiltonian, hence the energy —
+unchanged to machine precision. Every chemical-accuracy rank this repository has
+fitted (H₄ at 8, H₆ at 18) is past the boundary.
+
+It also bears on a price this repository paid. Result 80 found that the λ penalty
+collapses the restart spread but **costs 30× in energy error**, and recommended it
+"only when λ must be pinned".
+
+#### The construction
+
+At a fitted `(χ, Z)`, keep the span `U` of the columns fixed: every column must
+stay a unit-norm rank-one matrix inside `U` (`χ_mᵀ B_k χ_m = 0` for a basis
+`B_k` of the complement), and `Z` is re-solved exactly as `X⁺ V₀ X⁺ᵀ`. λ is then
+minimised over what is left. **The tensor change is measured on every start, not
+assumed**: the largest anywhere in this result is 3.8e-15.
+
+Rank-one matrices in `U` are the real solutions of `P − M` quadrics in
+`P^(N−1)`, which splits the problem into three regimes:
+
+| regime | H₄ rank | what the fibre is |
+|---|---|---|
+| strictly inside, `M < P − N + 1` | 6 | the columns only — nothing can move (**the control**) |
+| on the boundary, `M = P − N + 1` | 7 | a **finite set**: `2^(N−1)` points by Bézout, enumerated completely |
+| past it, `P − N + 1 < M < P` | 8 | continuous slides, minimised by SLSQP |
+
+#### Measured — Result 80's protocol: 8 starts, seed 4242, with and without the penalty
+
+| case | arm | median λ | λ spread | median energy error | inside chem. acc. |
+|---|---|---|---|---|---|
+| H₄, M=6 (inside) | unpenalised | 13.69 | 5.03 | 1.47e-2 | 0/8 |
+| | **lowered** | **13.69** — unchanged on all 8 | 5.03 | 1.47e-2 | 0/8 |
+| | penalised | 4.373 | 1.000 | 2.82e-2 | 0/8 |
+| H₄, M=7 (boundary) | unpenalised | 22.72 | 34.0 | 2.33e-4 | 8/8 |
+| | **lowered** | **13.57** | 42.1 | 2.33e-4 | 8/8 |
+| | penalised | 4.373 | 1.000 | 2.03e-4 | 8/8 |
+| H₄, M=8 (past) | unpenalised | 5.76 | 1.42 | 1.87e-4 | 7/8 |
+| | **lowered** | **4.3735 from all 8 starts** | **1.000** | 1.87e-4 | 7/8 |
+| | penalised | 4.3731 | 1.000 | 1.08e-4 | 8/8 |
+| **H₆, M=18 (past)** | unpenalised | 12.68 | 1.52 | 1.59e-5 | 8/8 |
+| | **lowered** | **8.2004 from all 8 starts** | **1.000** | **1.59e-5** | 8/8 |
+| | penalised | 8.1995 | 1.000 | **7.45e-4** | 8/8 |
+
+#### What it says
+
+* **Past the boundary every start reaches the same λ, exactly.** H₆ at M=18: eight
+  fits with λ from 10.24 to 15.56 all reach **8.2004**, with each fit's tensor
+  and energy error untouched. The restart spread Result 80 measured (1.59;
+  1.52 here) was **entirely** motion along exact minimisers.
+* **The penalty's λ is the fibre's minimum.** Penalised fits land at 8.1995 —
+  0.01% below the exact-fibre minimum. The penalty was selecting a point on the
+  manifold of exact minimisers, plus a small step off it.
+* **That small step is what costs accuracy, and it is avoidable.** On H₆ at M=18
+  the penalised fits have **47× the energy error** of the lowered ones (7.45e-4
+  against 1.59e-5) at the same λ to four digits. Result 80's 30× was real; it was
+  never the price of a low λ. On H₄ at M=8 the step happens to cost nothing (the
+  penalised energy error is even 1.7× lower), so the penalty's cost is
+  case-dependent — and lowering along the fibre costs nothing in every case, by
+  construction.
+* **Strictly inside, nothing moves** — the control holds on all 8 starts. A
+  procedure that lowered λ there would be moving the tensor.
+
+**Revised recommendation, replacing Result 80's:** gauge-fix, fit **unpenalised**
+for accuracy, then lower λ along the fibre. No hyperparameter, no trade-off,
+and a reproducible λ.
+
+#### The boundary rank is not "nothing else" — a refinement of Result 89
+
+I first used H₄ at M=7 as the control, since Result 89 places it in the
+gauge-only regime. On the first run the slide lowered λ on 3 of 8 starts with the
+tensor unchanged to 1e-15. Result 89's count of *continuous* flat directions
+is untouched; what it missed is that the fibre at the boundary is a **finite set**,
+not a point. The `N − 1 = 3` quadrics meet in `2^(N−1) = 8` points over ℂ; seven
+are the real columns and complex points pair up, so the eighth is real. Enumerated
+on one fit: **exactly 8 real rank-one points, 8 exact representations of one
+tensor, λ from 7.02 to 14 156.** On H₆ at its boundary rank `M = 16` the count is
+32 over ℂ with no parity argument, and one fit has **24 real points and 725 739
+exact representations** (16-subsets that span `U`), best λ 11.69 against the
+fit's 13.75. That H₆ number is from a single start, run outside the main
+experiment and not in its results file; reproduce it with
+`--cases H6:16 --repeats 1 --output exp035_thc_fibre_H6_M16.json`.
+
+#### Reproducibility, stated honestly
+
+The first complete H₄ run (lost to a container restart before H₆ finished)
+gave different *fits* — medians 6.70 / 15.34 / 5.76 at M = 6 / 7 / 8, against
+13.69 / 22.72 / 5.76 here — because the fits are not bit-reproducible
+across processes (Result 89 recorded the same). **The lowered values were
+identical in both runs**: 4.3735 on H₄ at M=8, and 8.2004 on the two H₆ starts
+that finished there. So did the regime pattern. One H₄ M=8 start in this run has
+an energy error of 9.5e-3 and still lowers to the same 4.3735.
+
+#### Not yet measured
+
+* **Saturation, `M ≥ P`** (H₄ at 10 and 12, Result 79's configuration): `Z` is no
+  longer determined by the columns, and at fixed `χ` the λ minimum is a **linear
+  programme**. On one H₄ M=12 fit it gives 5.217 → 4.655 with the tensor unchanged
+  to 3e-15. Moving `χ` jointly is open.
+* **The rank exponent with lowered λ** (exp029): it should now be re-measured with
+  unpenalised fits plus lowering, which is reproducible where the penalised
+  numbers were not free.
+
+#### Honest grading
+
+Penalising λ during the THC fit is what published THC does (Result 79 followed
+it), so the *goal* — a low λ at a given accuracy — is not new. What is new is
+that past the identifiability boundary the two are **exactly decoupled**: a low
+λ costs nothing in accuracy, the penalty's measured accuracy price was an
+avoidable side effect, and the boundary rank has a finite, enumerable set of
+exact alternatives. Same grading logic as Result 87: **B**, with the boundary
+structure arguably a small structural addition to Result 89's A.
+
+`experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`,
+`results/exp035_thc_fibre.json`.

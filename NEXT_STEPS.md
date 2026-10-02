@@ -44,17 +44,17 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 89:
+Applied honestly, as of Result 90:
 
 | tier | results | note |
 |---|---|---|
 | **A** | **86, 89** | the THC gauge group, and its exact identifiability boundary; both small |
 | **A′** | none | nothing here refutes a paper |
-| **B** | 47 (arguably), **87** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers |
+| **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
 | **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88 … |
 
-**That is two A in eighty-nine results**, both on one model, and Result 72 had already said so from
+**That is two A in ninety results**, both on one model, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
@@ -139,14 +139,25 @@ So, ranked by what would actually move something here:
    means anything, but FCIQMC extended to H₈/H₁₀ answers the same question more
    cheaply and is already written.
 3. **More of the THC fit.** Gauge fixing took H₆ from 46 337 to 23 738 iterations
-   and the λ spread from 9.52 to 1.59. **Result 89 now says where the remaining
+   and the λ spread from 9.52 to 1.59. **Result 89 says where the remaining
    flatness is**: past `M = N(N−1)/2 + 1` (H₄: 7, H₆: 16) the columns slide along
-   exact minimisers on which λ varies, so the penalty is *required* there, not
-   optional — and every rank this repository fitted is past it. Any rank-exponent
-   re-measurement (exp029) should drop H₂, whose `M ≥ P = 3` makes every tensor
-   exactly representable, and report which points sit past the boundary. The obvious remaining items are a proper
-   second-order method (the Gauss-Newton structure is right there and unexploited)
-   and a better initialisation than perturbing the DF selection.
+   exact minimisers on which λ varies — and every rank this repository fitted is
+   past it. **Result 90 used that**: an unpenalised fit lowered along its exact
+   minimisers reaches the penalised λ (8.2004 against 8.1995 on H₆ at M=18, from
+   all 8 starts) with the tensor unchanged to 3e-15, so the penalty and its 47×
+   energy-error cost are no longer needed there. Open, in order:
+
+   * **re-measure the rank exponent (exp029) with unpenalised fits plus
+     lowering**, dropping H₂ (`M ≥ P = 3` makes every tensor exactly
+     representable) and reporting which points sit past the boundary;
+   * **saturation, `M ≥ P`**: at fixed `χ` the λ minimum is a linear programme
+     (one H₄ M=12 fit: 5.217 → 4.655, tensor unchanged to 3e-15); moving `χ`
+     jointly is open;
+   * **the boundary rank's finite alternatives** at larger `N` — H₆ at M=16 has
+     725 739 exact representations on one fit, too many to enumerate as `N`
+     grows, so a smarter search is needed there;
+   * a proper second-order method (the Gauss-Newton structure is right there and
+     unexploited) and a better initialisation than perturbing the DF selection.
 4. **Factorisation: honest scoping first, and the answer is probably "size it,
    don't build it".** Competing with GNFS implementations (CADO-NFS, msieve) is
    not realistic here and would not be useful if it succeeded — factoring's only
@@ -467,8 +478,9 @@ So the useful work is:
      single-start error this file's own rule 3 exists to prevent.
 
    **Standing recommendation: gauge-fix always** (no hyperparameter, improves
-   convergence, reproducibility and accuracy at once); add the penalty only when
-   λ must be pinned, at 30× in energy error.
+   convergence, reproducibility and accuracy at once). ~~Add the penalty only when
+   λ must be pinned, at 30× in energy error~~ — superseded by Result 90: fit
+   unpenalised, then lower λ along the exact minimisers.
 
    **Now open:** re-measure the rank exponent. Result 78's `N^1.33 ± 0.26` was
    fitted on fits that mostly never converged, with a parameterisation now known

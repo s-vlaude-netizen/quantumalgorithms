@@ -324,6 +324,8 @@ def main() -> int:
     ap.add_argument("--repeats", type=int, default=REPEATS)
     ap.add_argument("--cases", default=",".join(f"{n}:{m}" for n, m in CASES),
                     help="comma-separated molecule:rank pairs")
+    ap.add_argument("--output", default="exp035_thc_fibre.json",
+                    help="results file name, so a side run does not overwrite the main one")
     args = ap.parse_args()
     cases = [(spec.split(":")[0], int(spec.split(":")[1])) for spec in args.cases.split(",")]
 
@@ -343,14 +345,14 @@ def main() -> int:
                   f"{s['median_error']:>13.2e}{s['inside_chemical_accuracy']:>6}/{args.repeats}")
         # after every case, not once at the end: the first full run lost its H6
         # arm to a container restart two starts in, with nothing on disk
-        path = save(results)
+        path = save(results, args.output)
         print(f"  saved {len(results)} case(s) -> {path}", flush=True)
     return 0
 
 
-def save(results):
+def save(results, name="exp035_thc_fibre.json"):
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = RESULTS_DIR / "exp035_thc_fibre.json"
+    path = RESULTS_DIR / name
     with open(path, "w") as fh:
         json.dump({"cases": results, "penalty": PENALTY,
                    "tensor_tolerance": TENSOR_TOLERANCE}, fh, indent=2, default=float)

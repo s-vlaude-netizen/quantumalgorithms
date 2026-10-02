@@ -1,0 +1,1666 @@
+{
+  "cases": [
+    {
+      "molecule": "H4",
+      "rank": 6,
+      "orbitals": 4,
+      "regime": "inside",
+      "repeats": 8,
+      "arms": {
+        "unpenalised": [
+          {
+            "one_norm": 11.129699107027927,
+            "error": 0.014702157056408538,
+            "residual": 0.0003276659615020185,
+            "converged": true
+          },
+          {
+            "one_norm": 10.522144595773154,
+            "error": 0.014704552147467354,
+            "residual": 0.0003276628462306496,
+            "converged": true
+          },
+          {
+            "one_norm": 10.072196146159948,
+            "error": 0.014706686810100678,
+            "residual": 0.00032766031451901,
+            "converged": true
+          },
+          {
+            "one_norm": 17.281505125104605,
+            "error": 0.014671532389037623,
+            "residual": 0.0003276816230685794,
+            "converged": true
+          },
+          {
+            "one_norm": 18.07041425075474,
+            "error": 0.0130917558655117,
+            "residual": 0.0003288176743420412,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373445830191699,
+            "error": 0.027899601547071384,
+            "residual": 0.0003191259693673268,
+            "converged": true
+          },
+          {
+            "one_norm": 16.257913842657057,
+            "error": 0.014677327987172362,
+            "residual": 0.00032767924776571874,
+            "converged": true
+          },
+          {
+            "one_norm": 21.976131018262578,
+            "error": 0.0121415988580722,
+            "residual": 0.0003297632002168281,
+            "converged": true
+          }
+        ],
+        "lowered": [
+          {
+            "one_norm": 11.129699107027907,
+            "error": 0.014702157056410314,
+            "tensor_change": 1.2212453270876722e-15,
+            "tensor_change_full": 1.1102230246251565e-15,
+            "regime": "inside",
+            "attempts": [
+              {
+                "one_norm": 11.129699107027907,
+                "tensor_change": 1.2212453270876722e-15,
+                "constraint": 4.440892098500626e-16,
+                "success": false
+              },
+              {
+                "one_norm": 11.13389045333479,
+                "tensor_change": 6.376039503042108e-07,
+                "constraint": 7.987246438134754e-07,
+                "success": false
+              },
+              {
+                "one_norm": 34.73095194117576,
+                "tensor_change": 0.00033668341625359144,
+                "constraint": 0.00018301026371622675,
+                "success": false
+              },
+              {
+                "one_norm": 26.395396854008407,
+                "tensor_change": 0.0002839153413978224,
+                "constraint": 0.00018164760314232087,
+                "success": false
+              }
+            ],
+            "rank_one_points": 6
+          },
+          {
+            "one_norm": 10.522144595773147,
+            "error": 0.014704552147462913,
+            "tensor_change": 1.4432899320127035e-15,
+            "tensor_change_full": 1.3322676295501878e-15,
+            "regime": "inside",
+            "attempts": [
+              {
+                "one_norm": 10.522144595773147,
+                "tensor_change": 1.4432899320127035e-15,
+                "constraint": 2.636779683484747e-16,
+                "success": false
+              },
+              {
+                "one_norm": 10.474631607136473,
+                "tensor_change": 1.1727712290032083e-06,
+                "constraint": 3.902300808128478e-06,
+                "success": false
+              },
+              {
+                "one_norm": 105965073.55469899,
+                "tensor_change": 0.0002364354321668649,
+                "constraint": 4.784779482625012e-07,
+                "success": false
+              },
+              {
+                "one_norm": 10.520777824669462,
+                "tensor_change": 7.144342500930989e-07,
+                "constraint": 8.573660540966976e-07,
+                "success": false
+              }
+            ],
+            "rank_one_points": 6
+          },
+          {
+            "one_norm": 10.072196146159973,
+            "error": 0.014706686810097125,
+            "tensor_change": 7.771561172376096e-16,
+            "tensor_change_full": 8.881784197001252e-16,
+            "regime": "inside",
+            "attempts": [
+              {
+                "one_norm": 10.072196146159973,
+                "tensor_change": 7.771561172376096e-16,
+                "constraint": 2.220446049250313e-16,
+                "success": false
+              },
+              {
+                "one_norm": 9537330921.126982,
+                "tensor_change": 0.0007429678269976758,
+                "constraint": 8.761636926812866e-07,
+                "success": false
+              },
+              {
+                "one_norm": 19214775424.63642,
+                "tensor_change": 0.0006517996959535255,
+                "constraint": 8.736652120366895e-07,
+                "success": false
+              },
+              {
+                "one_norm": 26.447761890488813,
+                "tensor_change": 0.00034161106020236254,
+                "constraint": 0.00021552308139816123,
+                "success": false
+              }
+            ],
+            "rank_one_points": 6
+          },
+          {
+            "one_norm": 17.281505125104523,
+            "error": 0.014671532389039399,
+            "tensor_change": 1.4432899320127035e-15,
+            "tensor_change_full": 1.6653345369377348e-15,
+            "regime": "inside",
+            "attempts": [
+              {
+                "one_norm": 17.281505125104523,
+                "tensor_change": 1.4432899320127035e-15,
+                "constraint": 2.220446049250313e-16,
+                "success": false
+              },
+              {
+                "one_norm": 40.05581155350297,
+                "tensor_change": 5.9272863903170325e-05,
+                "constraint": 9.733163604747769e-05,
+                "success": false
+              },
+              {
+                "one_norm": 78.04995057315966,
+                "tensor_change": 0.00023840207668035518,
+                "constraint": 9.709322247354601e-05,
+                "success": false
+              },
+              {
+                "one_norm": 108.45627554011823,
+                "tensor_change": 9.69432332640352e-05,
+                "constraint": 9.218856113049623e-05,
+                "success": false
+              }
+            ],
+            "rank_one_points": 6
+          },
+          {
+            "one_norm": 18.070414250754766,
+            "error": 0.013091755865517918,
+            "tensor_change": 6.661338147750939e-16,
+            "tensor_change_full": 7.771561172376096e-16,
+            "regime": "inside",
+            "attempts": [
+              {
+                "one_norm": 18.070414250754766,
+                "tensor_change": 6.661338147750939e-16,
+                "constraint": 2.220446049250313e-16,
+                "success": false
+              },
+              {
+                "one_norm": 18.078267778350583,
+                "tensor_change": 1.5065281331327895e-06,
+                "constraint": 7.270110638640803e-07,
+                "success": false
+              },
+              {
+                "one_norm": 18.074197144018676,
+                "tensor_change": 2.0519289126719187e-06,
+                "constraint": 7.481570964001927e-07,
+                "success": false
+              },
+              {
+                "one_norm": 18.074200640448062,
+                "tensor_change": 2.053533238122185e-06,
+                "constraint": 7.479350504907556e-07,
+                "success": false
+              }
+            ],
+            "rank_one_points": 6
+          },
+          {
+            "one_norm": 4.373445830191706,
+            "error": 0.027899601547059838,
+            "tensor_change": 1.2212453270876722e-15,
+            "tensor_change_full": 1.2212453270876722e-15,
+            "regime": "inside",
+            "attempts": [
+              {
+                "one_norm": 4.373445830191706,
+                "tensor_change": 1.2212453270876722e-15,
+                "constraint": 2.220446049250313e-16,
+                "success": false
+              },
+              {
+                "one_norm": 4.3734458308930915,
+                "tensor_change": 2.799496101602017e-08,
+                "constraint": 5.7177110060480096e-08,
+                "success": false
+              },
+              {
+                "one_norm": 4.373445830468538,
+                "tensor_change": 2.215793781790154e-08,
+                "constraint": 6.006884818721137e-08,
+                "success": false
+              },
+              {
+                "one_norm": 4.373445830653219,
+                "tensor_change": 2.0210582318824777e-08,
+                "constraint": 5.982552651190298e-08,
+                "success": false
+              }
+            ],
+            "rank_one_points": 6
+          },
+          {
+            "one_norm": 16.257913842657075,
+            "error": 0.01467732798716348,
+            "tensor_change": 1.6653345369377348e-15,
+            "tensor_change_full": 1.6653345369377348e-15,
+            "regime": "inside",
+            "attempts": [
+              {
+                "one_norm": 16.257913842657075,
+                "tensor_change": 1.6653345369377348e-15,
+                "constraint": 4.440892098500626e-16,
+                "success": false
+              },
+              {
+                "one_norm": 242864015.2929336,
+                "tensor_change": 0.00016368855415915817,
+                "constraint": 9.831615134792138e-07,
+                "success": false
+              },
+              {
+                "one_norm": 56379.310273554096,
+                "tensor_change": 0.0004191678104347174,
+                "constraint": 6.251858309824776e-06,
+                "success": false
+              },
+              {
+                "one_norm": 16.22453992578388,
+                "tensor_change": 1.8876300231784882e-06,
+                "constraint": 1.3601194401857697e-06,
+                "success": false
+              }
+            ],
+            "rank_one_points": 6
+          },
+          {
+            "one_norm": 21.976131018262585,
+            "error": 0.012141598858068647,
+            "tensor_change": 9.992007221626409e-16,
+            "tensor_change_full": 1.1102230246251565e-15,
+            "regime": "inside",
+            "attempts": [
+              {
+                "one_norm": 21.976131018262585,
+                "tensor_change": 9.992007221626409e-16,
+                "constraint": 2.220446049250313e-16,
+                "success": false
+              },
+              {
+                "one_norm": 21.980382964858176,
+                "tensor_change": 1.5102380135356697e-07,
+                "constraint": 5.133440110216547e-07,
+                "success": false
+              },
+              {
+                "one_norm": 21.978400366186555,
+                "tensor_change": 2.750110400517869e-07,
+                "constraint": 2.7136772173808055e-07,
+                "success": false
+              },
+              {
+                "one_norm": 21.980143533001446,
+                "tensor_change": 1.1724470981838014e-07,
+                "constraint": 4.6514546660214595e-07,
+                "success": false
+              }
+            ],
+            "rank_one_points": 6
+          }
+        ],
+        "penalised": [
+          {
+            "one_norm": 4.373045794651449,
+            "error": 0.028198858228787316,
+            "residual": 0.0003191459744403311,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373045806863712,
+            "error": 0.028198005627665168,
+            "residual": 0.00031914597550438203,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373045830681385,
+            "error": 0.028199869489021978,
+            "residual": 0.0003191459709842753,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373045794839463,
+            "error": 0.02820045354448908,
+            "residual": 0.00031914597927835297,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373045814247033,
+            "error": 0.028199614248821447,
+            "residual": 0.00031914597691126353,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373045807544049,
+            "error": 0.02819862074371393,
+            "residual": 0.0003191459709722845,
+            "converged": true
+          },
+          {
+            "one_norm": 4.3730458283373235,
+            "error": 0.028198889872316002,
+            "residual": 0.00031914596764361623,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373045837840128,
+            "error": 0.0282010806929911,
+            "residual": 0.00031914596938246423,
+            "converged": true
+          }
+        ]
+      },
+      "summary": {
+        "unpenalised": {
+          "median_one_norm": 13.693806474842493,
+          "one_norm_spread": 5.024900701079293,
+          "median_error": 0.01468974252179045,
+          "inside_chemical_accuracy": 0
+        },
+        "lowered": {
+          "median_one_norm": 13.693806474842491,
+          "one_norm_spread": 5.024900701079287,
+          "median_error": 0.014689742521786897,
+          "inside_chemical_accuracy": 0
+        },
+        "penalised": {
+          "median_one_norm": 4.37304581089554,
+          "one_norm_spread": 1.0000000098761095,
+          "median_error": 0.028199252060568725,
+          "inside_chemical_accuracy": 0
+        }
+      }
+    },
+    {
+      "molecule": "H4",
+      "rank": 7,
+      "orbitals": 4,
+      "regime": "boundary",
+      "repeats": 8,
+      "arms": {
+        "unpenalised": [
+          {
+            "one_norm": 21.78244945546077,
+            "error": 0.0002531879227465339,
+            "residual": 2.92513236961642e-06,
+            "converged": true
+          },
+          {
+            "one_norm": 5.408365183813963,
+            "error": 7.646938618854904e-05,
+            "residual": 4.791891321418236e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 8.91986054170399,
+            "error": 0.0003656524060140498,
+            "residual": 2.501987297851801e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 23.655357258475536,
+            "error": 0.00025082435223744426,
+            "residual": 2.892400598108898e-06,
+            "converged": true
+          },
+          {
+            "one_norm": 23.77594201976295,
+            "error": 7.273597647383667e-05,
+            "residual": 3.076466037698452e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 183.93018422691335,
+            "error": 0.0005188738161905349,
+            "residual": 2.342723743527639e-06,
+            "converged": true
+          },
+          {
+            "one_norm": 25.70823687547155,
+            "error": 0.00010339542748472041,
+            "residual": 1.0781586659324818e-06,
+            "converged": true
+          },
+          {
+            "one_norm": 6.328518775458632,
+            "error": 0.00021603240626433262,
+            "residual": 2.0809796646473193e-07,
+            "converged": true
+          }
+        ],
+        "lowered": [
+          {
+            "one_norm": 21.782449455461855,
+            "error": 0.0002531879227465339,
+            "tensor_change": 5.551115123125783e-16,
+            "tensor_change_full": 7.771561172376096e-16,
+            "regime": "boundary",
+            "rank_one_points": 8,
+            "options": [
+              {
+                "one_norm": 21.782449455461855,
+                "tensor_change": 5.551115123125783e-16
+              },
+              {
+                "one_norm": 3030.5514484185987,
+                "tensor_change": 3.727026283081858e-14
+              },
+              {
+                "one_norm": 66.44682006699358,
+                "tensor_change": 2.7755575615628914e-15
+              },
+              {
+                "one_norm": 6829.127804312142,
+                "tensor_change": 1.0232911523341826e-13
+              },
+              {
+                "one_norm": 5826.111024137801,
+                "tensor_change": 6.034224769163599e-14
+              },
+              {
+                "one_norm": 31633.21748928137,
+                "tensor_change": 6.652456363553938e-13
+              },
+              {
+                "one_norm": 21.974395193469146,
+                "tensor_change": 1.2212453270876722e-15
+              },
+              {
+                "one_norm": 326472.69982048357,
+                "tensor_change": 4.194604732998819e-12
+              }
+            ]
+          },
+          {
+            "one_norm": 4.906319807665826,
+            "error": 7.646938618854904e-05,
+            "tensor_change": 9.992007221626409e-16,
+            "tensor_change_full": 9.992007221626409e-16,
+            "regime": "boundary",
+            "rank_one_points": 8,
+            "options": [
+              {
+                "one_norm": 4.906319807665826,
+                "tensor_change": 9.992007221626409e-16
+              },
+              {
+                "one_norm": 5.408365183813517,
+                "tensor_change": 1.3322676295501878e-15
+              },
+              {
+                "one_norm": 1738.385412750534,
+                "tensor_change": 7.394085344003543e-14
+              },
+              {
+                "one_norm": 6.366317934766839,
+                "tensor_change": 8.326672684688674e-16
+              },
+              {
+                "one_norm": 1624.002300911155,
+                "tensor_change": 4.984901380566953e-14
+              },
+              {
+                "one_norm": 83766.65538007455,
+                "tensor_change": 1.353195333564372e-12
+              },
+              {
+                "one_norm": 6.957881232035795,
+                "tensor_change": 4.993445571312496e-16
+              },
+              {
+                "one_norm": 85868.71214221837,
+                "tensor_change": 1.4654943925052066e-12
+              }
+            ]
+          },
+          {
+            "one_norm": 4.373538470834807,
+            "error": 0.0003656524060140498,
+            "tensor_change": 1.02050868298377e-15,
+            "tensor_change_full": 1.017550843931958e-15,
+            "regime": "boundary",
+            "rank_one_points": 8,
+            "options": [
+              {
+                "one_norm": 8.919860541705845,
+                "tensor_change": 2.7755575615628914e-15
+              },
+              {
+                "one_norm": 4.373538470834807,
+                "tensor_change": 1.02050868298377e-15
+              },
+              {
+                "one_norm": 28.763284587785982,
+                "tensor_change": 1.4432899320127035e-15
+              },
+              {
+                "one_norm": 911.5582719657212,
+                "tensor_change": 5.3734794391857577e-14
+              },
+              {
+                "one_norm": 921.7122759053764,
+                "tensor_change": 1.765254609153999e-14
+              },
+              {
+                "one_norm": 46244.02323698485,
+                "tensor_change": 4.488631688559508e-13
+              },
+              {
+                "one_norm": 4.53523651455746,
+                "tensor_change": 8.881784197001252e-16
+              },
+              {
+                "one_norm": 48812.20298423531,
+                "tensor_change": 6.816439797031432e-13
+              }
+            ]
+          },
+          {
+            "one_norm": 23.655357258477125,
+            "error": 0.0002508243522365561,
+            "tensor_change": 5.551115123125783e-16,
+            "tensor_change_full": 5.551115123125783e-16,
+            "regime": "boundary",
+            "rank_one_points": 8,
+            "options": [
+              {
+                "one_norm": 23.655357258477125,
+                "tensor_change": 5.551115123125783e-16
+              },
+              {
+                "one_norm": 4854.146824982242,
+                "tensor_change": 5.0256687375051234e-14
+              },
+              {
+                "one_norm": 72.8617127367227,
+                "tensor_change": 1.1102230246251565e-15
+              },
+              {
+                "one_norm": 10470.043817598707,
+                "tensor_change": 2.54421619405934e-13
+              },
+              {
+                "one_norm": 9611.366487081474,
+                "tensor_change": 1.7719682600565723e-13
+              },
+              {
+                "one_norm": 46866.15877405666,
+                "tensor_change": 6.078044968368945e-13
+              },
+              {
+                "one_norm": 23.88561070930872,
+                "tensor_change": 1.8318679906315083e-15
+              },
+              {
+                "one_norm": 516039.1731906477,
+                "tensor_change": 7.2343242507599825e-12
+              }
+            ]
+          },
+          {
+            "one_norm": 13.126447951167133,
+            "error": 7.273597647827756e-05,
+            "tensor_change": 4.440892098500626e-16,
+            "tensor_change_full": 5.551115123125783e-16,
+            "regime": "boundary",
+            "rank_one_points": 8,
+            "options": [
+              {
+                "one_norm": 23.775942019764347,
+                "tensor_change": 6.661338147750939e-16
+              },
+              {
+                "one_norm": 45.219917306919484,
+                "tensor_change": 2.55351295663786e-15
+              },
+              {
+                "one_norm": 13.126447951167133,
+                "tensor_change": 4.440892098500626e-16
+              },
+              {
+                "one_norm": 31.583609653356124,
+                "tensor_change": 8.53463621389855e-16
+              },
+              {
+                "one_norm": 103.1632465778514,
+                "tensor_change": 4.773959005888173e-15
+              },
+              {
+                "one_norm": 6922.667291814745,
+                "tensor_change": 5.042872654290216e-14
+              },
+              {
+                "one_norm": 18.02985533311258,
+                "tensor_change": 6.661338147750939e-16
+              },
+              {
+                "one_norm": 6912.335819061722,
+                "tensor_change": 7.022160630754115e-14
+              }
+            ]
+          },
+          {
+            "one_norm": 183.9301842269314,
+            "error": 0.0005188738161923112,
+            "tensor_change": 2.7755575615628914e-15,
+            "tensor_change_full": 3.774758283725532e-15,
+            "regime": "boundary",
+            "rank_one_points": 8,
+            "options": [
+              {
+                "one_norm": 2947.1764369887087,
+                "tensor_change": 4.013391181889592e-14
+              },
+              {
+                "one_norm": 196.49502178686845,
+                "tensor_change": 3.6637359812630166e-15
+              },
+              {
+                "one_norm": 15877.876554902416,
+                "tensor_change": 4.02997080151124e-13
+              },
+              {
+                "one_norm": 19495.643374712592,
+                "tensor_change": 5.256906021600116e-13
+              },
+              {
+                "one_norm": 183.9301842269314,
+                "tensor_change": 2.7755575615628914e-15
+              },
+              {
+                "one_norm": 22910.426785470867,
+                "tensor_change": 8.555850662282302e-13
+              },
+              {
+                "one_norm": 1039501.8266523154,
+                "tensor_change": 1.1838259132744902e-11
+              },
+              {
+                "one_norm": 16502.241358139578,
+                "tensor_change": 2.33657358869252e-13
+              }
+            ]
+          },
+          {
+            "one_norm": 14.014477155271445,
+            "error": 0.0001033954274811677,
+            "tensor_change": 6.661338147750939e-16,
+            "tensor_change_full": 8.881784197001252e-16,
+            "regime": "boundary",
+            "rank_one_points": 8,
+            "options": [
+              {
+                "one_norm": 16.160006948916834,
+                "tensor_change": 5.457331635205787e-16
+              },
+              {
+                "one_norm": 14.014477155271445,
+                "tensor_change": 6.661338147750939e-16
+              },
+              {
+                "one_norm": 36.74869432363034,
+                "tensor_change": 9.52918841924666e-16
+              },
+              {
+                "one_norm": 171.41568152178795,
+                "tensor_change": 9.880984919163893e-15
+              },
+              {
+                "one_norm": 114.61310423505918,
+                "tensor_change": 2.7755575615628914e-15
+              },
+              {
+                "one_norm": 286.4936814544494,
+                "tensor_change": 1.2656542480726785e-14
+              },
+              {
+                "one_norm": 25.708236875471474,
+                "tensor_change": 1.3322676295501878e-15
+              },
+              {
+                "one_norm": 12348.716005414726,
+                "tensor_change": 1.412203687323199e-13
+              }
+            ]
+          },
+          {
+            "one_norm": 6.328518775458563,
+            "error": 0.00021603240626433262,
+            "tensor_change": 1.4432899320127035e-15,
+            "tensor_change_full": 1.3322676295501878e-15,
+            "regime": "boundary",
+            "rank_one_points": 8,
+            "options": [
+              {
+                "one_norm": 6.328518775458563,
+                "tensor_change": 1.4432899320127035e-15
+              },
+              {
+                "one_norm": 154.00618933012407,
+                "tensor_change": 4.9960036108132044e-15
+              },
+              {
+                "one_norm": 6.338314714184575,
+                "tensor_change": 1.4432899320127035e-15
+              },
+              {
+                "one_norm": 3229.050124212382,
+                "tensor_change": 7.016609515630989e-14
+              },
+              {
+                "one_norm": 3268.3051893055845,
+                "tensor_change": 5.344336084789347e-14
+              },
+              {
+                "one_norm": 209154.37792182495,
+                "tensor_change": 6.5528693582450614e-12
+              },
+              {
+                "one_norm": 161.3885771326199,
+                "tensor_change": 3.552713678800501e-15
+              },
+              {
+                "one_norm": 207478.62347568275,
+                "tensor_change": 3.238048718046116e-12
+              }
+            ]
+          }
+        ],
+        "penalised": [
+          {
+            "one_norm": 4.373138575342309,
+            "error": 7.08309528141271e-05,
+            "residual": 2.591317537297608e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.3731384776364,
+            "error": 0.0003709397323756747,
+            "residual": 7.420376651003053e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.3731385114692225,
+            "error": 0.0001944564047828834,
+            "residual": 3.341938035485067e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.37313877195208,
+            "error": 0.0001699442288147779,
+            "residual": 3.301796489377095e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373138454875215,
+            "error": 0.0003583684242007834,
+            "residual": 7.422155239214346e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.37313855151012,
+            "error": 2.0864935780018357e-05,
+            "residual": 2.6048133179676554e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.3731384433009755,
+            "error": 0.0003682663005415421,
+            "residual": 7.420953243772912e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.3731385603714985,
+            "error": 0.00021117259270653221,
+            "residual": 3.359835738484086e-07,
+            "converged": true
+          }
+        ]
+      },
+      "summary": {
+        "unpenalised": {
+          "median_one_norm": 22.718903356968156,
+          "one_norm_spread": 34.00846244210276,
+          "median_error": 0.00023342837925088844,
+          "inside_chemical_accuracy": 8
+        },
+        "lowered": {
+          "median_one_norm": 13.57046255321929,
+          "one_norm_spread": 42.05523409785473,
+          "median_error": 0.00023342837925044435,
+          "inside_chemical_accuracy": 8
+        },
+        "penalised": {
+          "median_one_norm": 4.373138531489671,
+          "one_norm_spread": 1.0000000751522296,
+          "median_error": 0.0002028144987447078,
+          "inside_chemical_accuracy": 8
+        }
+      }
+    },
+    {
+      "molecule": "H4",
+      "rank": 8,
+      "orbitals": 4,
+      "regime": "slides",
+      "repeats": 8,
+      "arms": {
+        "unpenalised": [
+          {
+            "one_norm": 5.0866909657304475,
+            "error": 0.009501420654813408,
+            "residual": 0.0003164257669271714,
+            "converged": true
+          },
+          {
+            "one_norm": 4.958462083245355,
+            "error": 0.00021652146460304778,
+            "residual": 2.035706644800279e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 5.307388327863796,
+            "error": 0.0002246026154208991,
+            "residual": 2.0225345740214937e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 6.4542565384247945,
+            "error": 0.0002317954142148082,
+            "residual": 2.0005445613053822e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 6.379499219495736,
+            "error": 5.482327174721746e-05,
+            "residual": 1.3732666366457574e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 5.011003731863656,
+            "error": 0.00011810477429818889,
+            "residual": 1.2302174125408973e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 7.059950543154928,
+            "error": 0.0001574488727102974,
+            "residual": 1.2892544009387037e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 6.221643128745993,
+            "error": 9.3861668176487e-05,
+            "residual": 1.1640083032320532e-07,
+            "converged": true
+          }
+        ],
+        "lowered": [
+          {
+            "one_norm": 4.373538583145394,
+            "error": 0.009501420654815185,
+            "tensor_change": 3.219646771412954e-15,
+            "tensor_change_full": 3.219646771412954e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 4.373538583145394,
+                "tensor_change": 3.219646771412954e-15,
+                "constraint": 1.3322676295501878e-15,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538583145404,
+                "tensor_change": 1.5543122344752192e-15,
+                "constraint": 6.661338147750939e-16,
+                "success": true
+              },
+              {
+                "one_norm": 4.3735385831454,
+                "tensor_change": 1.6653345369377348e-15,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              },
+              {
+                "one_norm": 5.029204888509181,
+                "tensor_change": 1.3322676295501878e-15,
+                "constraint": 1.7985612998927536e-14,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 4.373538448934457,
+            "error": 0.00021652146459150146,
+            "tensor_change": 2.1094237467877974e-15,
+            "tensor_change_full": 2.220446049250313e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 4.373538448934461,
+                "tensor_change": 3.7845974713803974e-16,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538448934457,
+                "tensor_change": 2.1094237467877974e-15,
+                "constraint": 2.886579864025407e-14,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538448934466,
+                "tensor_change": 8.881784197001252e-16,
+                "constraint": 8.881784197001252e-16,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538448934463,
+                "tensor_change": 8.881784197001252e-16,
+                "constraint": 2.4424906541753444e-15,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 4.3735385585789945,
+            "error": 0.00022460261541912274,
+            "tensor_change": 1.2212453270876722e-15,
+            "tensor_change_full": 1.4432899320127035e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 4.3735385585789945,
+                "tensor_change": 1.2212453270876722e-15,
+                "constraint": 4.440892098500626e-16,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538558579003,
+                "tensor_change": 6.661338147750939e-16,
+                "constraint": 4.796163466380676e-14,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538558579007,
+                "tensor_change": 1.1102230246251565e-15,
+                "constraint": 4.884981308350689e-15,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538558579002,
+                "tensor_change": 6.661338147750939e-16,
+                "constraint": 1.4654943925052066e-14,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 4.373538594387932,
+            "error": 0.00023179541419349192,
+            "tensor_change": 1.887379141862766e-15,
+            "tensor_change_full": 1.7763568394002505e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 4.373538594387932,
+                "tensor_change": 1.887379141862766e-15,
+                "constraint": 4.440892098500626e-16,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538594387943,
+                "tensor_change": 4.440892098500626e-16,
+                "constraint": 3.3306690738754696e-15,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538594387938,
+                "tensor_change": 1.3322676295501878e-15,
+                "constraint": 1.1324274851176597e-14,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538594387946,
+                "tensor_change": 9.992007221626409e-16,
+                "constraint": 6.639133687258436e-14,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 4.373538597662441,
+            "error": 5.4823271756099246e-05,
+            "tensor_change": 1.5543122344752192e-15,
+            "tensor_change_full": 1.6653345369377348e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 4.373538597662443,
+                "tensor_change": 1.5543122344752192e-15,
+                "constraint": 3.6637359812630166e-14,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538597662441,
+                "tensor_change": 1.5543122344752192e-15,
+                "constraint": 4.440892098500626e-16,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538597662445,
+                "tensor_change": 6.661338147750939e-16,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538597662444,
+                "tensor_change": 4.440892098500626e-16,
+                "constraint": 1.1102230246251565e-16,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 4.373538357282952,
+            "error": 0.00011810477428397803,
+            "tensor_change": 1.887379141862766e-15,
+            "tensor_change_full": 1.6653345369377348e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 4.3735383572829605,
+                "tensor_change": 4.440892098500626e-16,
+                "constraint": 1.6653345369377348e-14,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538357282952,
+                "tensor_change": 1.887379141862766e-15,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538357282985,
+                "tensor_change": 3.774758283725532e-15,
+                "constraint": 2.6645352591003757e-15,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538357282954,
+                "tensor_change": 1.2212453270876722e-15,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 4.373538613507887,
+            "error": 0.00015744887272006736,
+            "tensor_change": 3.9093619834396076e-16,
+            "tensor_change_full": 5.551115123125783e-16,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 4.373538613507894,
+                "tensor_change": 2.220446049250313e-15,
+                "constraint": 5.10702591327572e-15,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538613507891,
+                "tensor_change": 1.186550857568136e-15,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              },
+              {
+                "one_norm": 4.37353861350789,
+                "tensor_change": 1.5543122344752192e-15,
+                "constraint": 3.26405569239796e-14,
+                "success": true
+              },
+              {
+                "one_norm": 4.373538613507887,
+                "tensor_change": 3.9093619834396076e-16,
+                "constraint": 2.930988785010413e-14,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 4.3735385583710995,
+            "error": 9.386166816671704e-05,
+            "tensor_change": 2.3314683517128287e-15,
+            "tensor_change_full": 2.6645352591003757e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 4.37353855837112,
+                "tensor_change": 8.881784197001252e-16,
+                "constraint": 3.552713678800501e-15,
+                "success": true
+              },
+              {
+                "one_norm": 4.3735385583710995,
+                "tensor_change": 2.3314683517128287e-15,
+                "constraint": 8.881784197001252e-16,
+                "success": true
+              },
+              {
+                "one_norm": 4.3735385583711075,
+                "tensor_change": 1.4432899320127035e-15,
+                "constraint": 6.661338147750939e-15,
+                "success": true
+              },
+              {
+                "one_norm": 4.37353855837112,
+                "tensor_change": 2.1094237467877974e-15,
+                "constraint": 1.6209256159527285e-14,
+                "success": true
+              }
+            ]
+          }
+        ],
+        "penalised": [
+          {
+            "one_norm": 4.3731385760500645,
+            "error": 8.607050143716322e-05,
+            "residual": 2.2350735026511045e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373138528629653,
+            "error": 8.398778036511345e-05,
+            "residual": 2.2358962794104707e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373138572821249,
+            "error": 8.854083426257375e-05,
+            "residual": 2.2342750696424496e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373138567741226,
+            "error": 7.977828699168299e-05,
+            "residual": 2.236877513625073e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373138640775899,
+            "error": 0.00012720004175648114,
+            "residual": 2.1560059519590865e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.37313859778402,
+            "error": 0.00022100766569455033,
+            "residual": 1.437101861653035e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.37313861949097,
+            "error": 0.0001492315046709436,
+            "residual": 1.3176476740068453e-07,
+            "converged": true
+          },
+          {
+            "one_norm": 4.373138651829937,
+            "error": 0.00015697069328091118,
+            "residual": 1.457000151259207e-07,
+            "converged": true
+          }
+        ]
+      },
+      "summary": {
+        "unpenalised": {
+          "median_one_norm": 5.764515728304895,
+          "one_norm_spread": 1.4238186003298285,
+          "median_error": 0.00018698516865667258,
+          "inside_chemical_accuracy": 7
+        },
+        "lowered": {
+          "median_one_norm": 4.373538570862195,
+          "one_norm_spread": 1.0000000585852722,
+          "median_error": 0.0001869851686557844,
+          "inside_chemical_accuracy": 7
+        },
+        "penalised": {
+          "median_one_norm": 4.373138586917042,
+          "one_norm_spread": 1.0000000281720516,
+          "median_error": 0.00010787043800952745,
+          "inside_chemical_accuracy": 8
+        }
+      }
+    },
+    {
+      "molecule": "H6",
+      "rank": 18,
+      "orbitals": 6,
+      "regime": "slides",
+      "repeats": 8,
+      "arms": {
+        "unpenalised": [
+          {
+            "one_norm": 12.633139260990681,
+            "error": 0.00011755906898969215,
+            "residual": 3.945862823139125e-08,
+            "converged": true
+          },
+          {
+            "one_norm": 10.242974046009362,
+            "error": 7.531939552052336e-06,
+            "residual": 1.618901792722425e-09,
+            "converged": true
+          },
+          {
+            "one_norm": 13.41181331787164,
+            "error": 9.15875653468845e-05,
+            "residual": 2.3631460464677897e-08,
+            "converged": true
+          },
+          {
+            "one_norm": 10.352055792100291,
+            "error": 5.827283283466045e-06,
+            "residual": 2.4944828846537734e-09,
+            "converged": true
+          },
+          {
+            "one_norm": 10.9065738191641,
+            "error": 1.0819261715866446e-05,
+            "residual": 3.6098133100842645e-09,
+            "converged": true
+          },
+          {
+            "one_norm": 15.559763109441842,
+            "error": 9.816214872415685e-05,
+            "residual": 1.952563238881243e-08,
+            "converged": true
+          },
+          {
+            "one_norm": 12.735037890865295,
+            "error": 2.2211932027005332e-06,
+            "residual": 1.2936660946134897e-09,
+            "converged": true
+          },
+          {
+            "one_norm": 13.914062846216721,
+            "error": 2.0967581921382816e-05,
+            "residual": 4.211749994319906e-09,
+            "converged": true
+          }
+        ],
+        "lowered": [
+          {
+            "one_norm": 8.200356907116042,
+            "error": 0.0001175590689506123,
+            "tensor_change": 1.7763568394002505e-15,
+            "tensor_change_full": 1.942890293094024e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 8.200356907116063,
+                "tensor_change": 1.4432899320127035e-15,
+                "constraint": 4.440892098500626e-16,
+                "success": true
+              },
+              {
+                "one_norm": 8.200356907116044,
+                "tensor_change": 2.609024107869118e-15,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              },
+              {
+                "one_norm": 8.205894794688183,
+                "tensor_change": 2.4730792681123228e-06,
+                "constraint": 0.001249110535146869,
+                "success": false
+              },
+              {
+                "one_norm": 8.200356907116042,
+                "tensor_change": 1.7763568394002505e-15,
+                "constraint": 4.440892098500626e-15,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 8.200356180454017,
+            "error": 7.53193952718334e-06,
+            "tensor_change": 1.3877787807814457e-15,
+            "tensor_change_full": 1.942890293094024e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 8.200356180454023,
+                "tensor_change": 1.8318679906315083e-15,
+                "constraint": 8.881784197001252e-16,
+                "success": true
+              },
+              {
+                "one_norm": 8.200356180454051,
+                "tensor_change": 1.4432899320127035e-15,
+                "constraint": 3.3306690738754696e-15,
+                "success": true
+              },
+              {
+                "one_norm": 8.200356180454033,
+                "tensor_change": 4.440892098500626e-16,
+                "constraint": 3.552713678800501e-15,
+                "success": true
+              },
+              {
+                "one_norm": 8.200356180454017,
+                "tensor_change": 1.3877787807814457e-15,
+                "constraint": 6.661338147750939e-16,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 8.20035729666832,
+            "error": 9.158756534866086e-05,
+            "tensor_change": 1.2212453270876722e-15,
+            "tensor_change_full": 1.5543122344752192e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 8.20035729666832,
+                "tensor_change": 1.2212453270876722e-15,
+                "constraint": 1.9984014443252818e-15,
+                "success": true
+              },
+              {
+                "one_norm": 8.200357296668344,
+                "tensor_change": 7.771561172376096e-16,
+                "constraint": 4.440892098500626e-16,
+                "success": true
+              },
+              {
+                "one_norm": 8.200357296668322,
+                "tensor_change": 8.326672684688674e-16,
+                "constraint": 2.1538326677728037e-14,
+                "success": true
+              },
+              {
+                "one_norm": 8.200357296668326,
+                "tensor_change": 1.5543122344752192e-15,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 8.200357179889789,
+            "error": 5.827283272807904e-06,
+            "tensor_change": 1.887379141862766e-15,
+            "tensor_change_full": 2.6645352591003757e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 8.200357179889798,
+                "tensor_change": 1.1102230246251565e-15,
+                "constraint": 3.885780586188048e-14,
+                "success": true
+              },
+              {
+                "one_norm": 8.200357179889803,
+                "tensor_change": 6.38378239159465e-16,
+                "constraint": 4.440892098500626e-16,
+                "success": true
+              },
+              {
+                "one_norm": 8.200357179889789,
+                "tensor_change": 1.887379141862766e-15,
+                "constraint": 2.4424906541753444e-15,
+                "success": true
+              },
+              {
+                "one_norm": 8.200357179889817,
+                "tensor_change": 1.3322676295501878e-15,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 8.200357146024274,
+            "error": 1.0819261721195517e-05,
+            "tensor_change": 1.4432899320127035e-15,
+            "tensor_change_full": 1.7763568394002505e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 8.200357146024274,
+                "tensor_change": 1.4432899320127035e-15,
+                "constraint": 3.774758283725532e-15,
+                "success": true
+              },
+              {
+                "one_norm": 8.362535933529516,
+                "tensor_change": 0.00011135305419276054,
+                "constraint": 0.008941487972942141,
+                "success": false
+              },
+              {
+                "one_norm": 8.200357146024297,
+                "tensor_change": 1.2212453270876722e-15,
+                "constraint": 1.0880185641326534e-14,
+                "success": true
+              },
+              {
+                "one_norm": 8.301126996488575,
+                "tensor_change": 2.2978896660616378e-09,
+                "constraint": 3.802056202761861e-06,
+                "success": false
+              }
+            ]
+          },
+          {
+            "one_norm": 8.20035659114636,
+            "error": 9.8162148685077e-05,
+            "tensor_change": 1.4988010832439613e-15,
+            "tensor_change_full": 1.887379141862766e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 8.20035659114636,
+                "tensor_change": 1.4988010832439613e-15,
+                "constraint": 1.6431300764452317e-14,
+                "success": true
+              },
+              {
+                "one_norm": 8.200356591146381,
+                "tensor_change": 1.1518563880486e-15,
+                "constraint": 1.4654943925052066e-14,
+                "success": true
+              },
+              {
+                "one_norm": 8.201193496760915,
+                "tensor_change": 6.556291417972662e-08,
+                "constraint": 3.4841692352793885e-05,
+                "success": false
+              },
+              {
+                "one_norm": 8.200356591146404,
+                "tensor_change": 2.220446049250313e-15,
+                "constraint": 3.1086244689504383e-15,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 8.200356504149536,
+            "error": 2.2211932204641016e-06,
+            "tensor_change": 2.55351295663786e-15,
+            "tensor_change_full": 2.7755575615628914e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 8.200356504149557,
+                "tensor_change": 1.1102230246251565e-15,
+                "constraint": 4.440892098500626e-15,
+                "success": true
+              },
+              {
+                "one_norm": 8.200356504149559,
+                "tensor_change": 7.216449660063518e-16,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              },
+              {
+                "one_norm": 8.200356504149536,
+                "tensor_change": 2.55351295663786e-15,
+                "constraint": 1.5987211554602254e-14,
+                "success": true
+              },
+              {
+                "one_norm": 8.200356504149537,
+                "tensor_change": 1.1657341758564144e-15,
+                "constraint": 5.773159728050814e-15,
+                "success": true
+              }
+            ]
+          },
+          {
+            "one_norm": 8.200356120664441,
+            "error": 2.096758188052661e-05,
+            "tensor_change": 1.887379141862766e-15,
+            "tensor_change_full": 1.9984014443252818e-15,
+            "regime": "slides",
+            "attempts": [
+              {
+                "one_norm": 8.20035612066445,
+                "tensor_change": 2.1094237467877974e-15,
+                "constraint": 6.661338147750939e-15,
+                "success": true
+              },
+              {
+                "one_norm": 8.200356120664441,
+                "tensor_change": 1.887379141862766e-15,
+                "constraint": 4.440892098500626e-16,
+                "success": true
+              },
+              {
+                "one_norm": 8.200356120664441,
+                "tensor_change": 1.6653345369377348e-15,
+                "constraint": 5.551115123125783e-15,
+                "success": true
+              },
+              {
+                "one_norm": 8.20035612066447,
+                "tensor_change": 1.4432899320127035e-15,
+                "constraint": 2.220446049250313e-16,
+                "success": true
+              }
+            ]
+          }
+        ],
+        "penalised": [
+          {
+            "one_norm": 8.199456484518453,
+            "error": 0.0007531143664607498,
+            "residual": 4.6663029478086576e-08,
+            "converged": true
+          },
+          {
+            "one_norm": 8.199456727848233,
+            "error": 0.0007468344499805823,
+            "residual": 4.629645925881393e-08,
+            "converged": true
+          },
+          {
+            "one_norm": 8.199456046461084,
+            "error": 0.0007408663782744185,
+            "residual": 4.664178855318081e-08,
+            "converged": true
+          },
+          {
+            "one_norm": 8.199456819913944,
+            "error": 0.0007348052959041951,
+            "residual": 4.8665115509369536e-08,
+            "converged": true
+          },
+          {
+            "one_norm": 8.199456260755795,
+            "error": 0.000752868466191714,
+            "residual": 4.964564586896412e-08,
+            "converged": true
+          },
+          {
+            "one_norm": 8.199457384870835,
+            "error": 0.0007453228857805527,
+            "residual": 4.6770242829937346e-08,
+            "converged": true
+          },
+          {
+            "one_norm": 8.19945612956526,
+            "error": 0.0007452887435803746,
+            "residual": 4.684660711992838e-08,
+            "converged": true
+          },
+          {
+            "one_norm": 8.199457400802752,
+            "error": 0.0007411297670216754,
+            "residual": 4.828193251040395e-08,
+            "converged": true
+          }
+        ]
+      },
+      "summary": {
+        "unpenalised": {
+          "median_one_norm": 12.684088575927987,
+          "one_norm_spread": 1.5190669271981498,
+          "median_error": 1.589342181862463e-05,
+          "inside_chemical_accuracy": 8
+        },
+        "lowered": {
+          "median_one_norm": 8.2003567491312,
+          "one_norm_spread": 1.000000143408879,
+          "median_error": 1.5893421800861063e-05,
+          "inside_chemical_accuracy": 8
+        },
+        "penalised": {
+          "median_one_norm": 8.199456606183343,
+          "one_norm_spread": 1.0000001651745751,
+          "median_error": 0.0007453058146804636,
+          "inside_chemical_accuracy": 8
+        }
+      }
+    }
+  ],
+  "penalty": 0.0001,
+  "tensor_tolerance": 1e-09
+}
