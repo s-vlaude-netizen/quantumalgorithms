@@ -5214,3 +5214,81 @@ structure arguably a small structural addition to Result 89's A.
 
 `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`,
 `results/exp035_thc_fibre.json`.
+
+---
+
+### Result 91 — IonQ's "quantum-enhanced LLM" margin is the gap between a frozen and a fine-tuned representation, and a classical pipeline closes it
+
+IonQ's *"Quantum Large Language Model Fine-Tuning"* (Kim, Mei, Girotto, Yamada,
+Roetteler; arXiv:2504.08732) reports **92.70%** on SST-2 sentiment for a
+simulated 14-qubit, 886-parameter circuit head on sentence-transformer
+embeddings, against **89.56%** for the best classical head — "up to 3.14%". No
+seeds, error bars or significance test are given, and the quantum figure is the
+best of a hyperparameter screen. The link came in as a possible research lead;
+this is the check NEXT_STEPS ranked first in that direction.
+
+#### What was and was not done
+
+The quantum head is under-specified in the paper (how the 768-dimensional
+embedding reaches the qubits is not stated), so **it is not reproduced here and
+nothing below is a refutation in the rubric's A′ sense.** What is measured is the
+*classical* side of the comparison, on the paper's own data (SetFit/sst2, 9 613
+sentences), model (`paraphrase-mpnet-base-v2`) and protocol (256 + 256 sampled,
+85/15 train/validation, model chosen on validation, accuracy on the remaining
+9 101) — over many seeds rather than one.
+
+#### Measured
+
+| classical pipeline | test accuracy | best seed | seeds |
+|---|---|---|---|
+| frozen embeddings + logistic regression (769 params) | 88.96 ± 0.52% | 89.40% | 20 |
+| frozen + SVC, RBF kernel | 88.77 ± 0.71% | 89.40% | 20 |
+| frozen + MLP 1×192 (148k params) | 87.93 ± 0.46% | 88.76% | 20 |
+| frozen + PCA-14 + MLP 48 (~870 params, matched to the quantum head) | 87.60 ± 0.91% | 88.88% | 20 |
+| **SetFit fine-tuning on the same 435 sentences + logistic regression** | **92.56 ± 0.14%** | **92.80%** | 5 |
+| *paper: best classical* | *89.56%* | | *1* |
+| *paper: best quantum head* | *92.70%* | | *1* |
+
+The standard error of one accuracy on 9 101 test sentences is about 0.27
+percentage points.
+
+#### What it says
+
+* **The paper's classical number reproduces, on frozen embeddings.** 89.56% sits at
+  the top of a distribution whose mean is 88.96 and whose best seed is 89.40. It
+  is also the *ceiling* for classical heads on that representation: a 190×
+  larger MLP does worse, and a head matched to the quantum head's parameter
+  count does worse again.
+* **SetFit — the few-shot method the paper's pipeline is named after — lands on
+  the quantum number.** Contrastively fine-tuning the same sentence transformer
+  on the same 435 sentences, then an ordinary logistic regression, gives 92.56 ±
+  0.14% over five seeds, range 92.47–92.80. The paper's 92.70% is inside that
+  range, half a standard error from its mean. **The whole claimed margin is the
+  gap between a frozen and a fine-tuned representation, and a classical pipeline
+  closes it with no quantum component.**
+* **The paper does not report this baseline, and its text leaves open which
+  embeddings the quantum head saw.** It says the base model's weights were kept
+  frozen, and also that the embeddings were "output by SetFit". If the quantum
+  head saw SetFit-tuned embeddings while the classical heads saw frozen ones, the
+  comparison was not like for like, and the margin is fully explained above. If
+  it saw frozen ones, a 886-parameter classically simulable circuit beat every
+  classical head here — 3.3 points above the best of 20 seeds, 7σ above their mean — which
+  would need the head itself reproduced before anyone believes it. **These
+  measurements cannot tell the two apart; the paper's code could.**
+
+#### Grading
+
+Not A′: the quantum head was not reproduced, so the paper's own number was not
+shown to fail in this environment. What stands is weaker but solid — the claimed
+3.14% is within reach of the obvious classical baseline on the same data, and
+that baseline is missing from the paper. **D**, and the same verdict the QML
+results here have reached from the other direction (Results 67–68, 84): on
+classical data, a simulable circuit head has to beat the best classical
+*pipeline*, not the classical heads a comparison happens to include.
+
+A cost note, for whoever extends this: SetFit is ~17 CPU-minutes per seed here,
+which is why its arm has 5 seeds against the frozen arm's 20. The ML stack is
+optional and imported only inside the experiment.
+
+`experiments/exp036_quantum_llm_head.py`, `tests/test_quantum_llm_head.py`,
+`results/exp036_quantum_llm_head.json`.

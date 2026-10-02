@@ -44,7 +44,7 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 90:
+Applied honestly, as of Result 91:
 
 | tier | results | note |
 |---|---|---|
@@ -52,9 +52,9 @@ Applied honestly, as of Result 90:
 | **A′** | none | nothing here refutes a paper |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
-| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88 … |
+| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91 … |
 
-**That is two A in ninety results**, both on one model, and Result 72 had already said so from
+**That is two A in ninety-one results**, both on one model, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
@@ -457,6 +457,17 @@ computing".**
 * **Order:** do this **before** the Ising Born machine. It is cheaper, it tests a
   published claim directly, and the parameter-matched-baseline machinery it needs
   is the same machinery the Born machine comparison needs.
+* ✅ **Done, Result 91 — the classical side measured on the paper's own data and
+  protocol.** The paper's classical 89.56% reproduces on frozen embeddings (88.96
+  ± 0.52%, best of 20 seeds 89.40%), and is the ceiling for classical heads on
+  them. **SetFit, the few-shot method the paper's pipeline is named after,
+  fine-tunes the same transformer on the same 435 sentences and then uses plain
+  logistic regression: 92.56 ± 0.14%, range 92.47–92.80%.** That range contains
+  the quantum head's 92.70%. The claimed margin is the frozen-to-fine-tuned
+  representation gap, which a classical pipeline closes. Graded **D**, not A′:
+  the quantum head is under-specified in the paper and was not reproduced.
+  **Open, only if worth the effort:** reproduce the head from IonQ's code, if it
+  is released, to settle which embeddings it saw.
 
 **Do not** re-run a variational *classifier* or kernel experiment *as a search for
 an advantage* — the IonQ check above is a test of someone else's claim, not that.

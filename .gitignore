@@ -5,3 +5,4 @@ results/raw/
 *.egg-info/
 .pytest_cache/
 results/logs/
+checkpoints/

@@ -25,7 +25,7 @@ is indistinguishable and, if anything, the wrong way round.
 
 ## The results here that are proofs (Results 86 and 89)
 
-Ninety results, and **two** of them establish something rather than
+Ninety-one results, and **two** of them establish something rather than
 measuring it. Both are small, both concern the same model, and each begins by
 correcting an earlier entry of my own.
 
@@ -150,7 +150,7 @@ one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
 published; that low λ costs nothing in accuracy here is what is new.
 
 → `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
-The rubric these are graded against, and where all 90 results sit under it, is at
+The rubric these are graded against, and where all 91 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -197,7 +197,7 @@ truncation — and the THC/DF contrast above.
 
 → `experiments/exp032_df_gauge.py`, `tests/test_df_gauge.py`.
 
-## The answer, since 90 results is a lot to read
+## The answer, since 91 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -435,6 +435,25 @@ Amplitude-encoding a general dense vector of dimension `d` costs `gates = d − 
 them** cannot hold an exponential speedup in `d`: the load step alone costs what
 the whole classical algorithm costs. One 4096×4096 weight matrix is 1.7e7
 two-qubit gates; a 70B model is 6.9e10. No hardware generation changes that.
+
+**Two industry claims, read against this — one of them re-measured (Result 91).**
+
+* **Multiverse Computing (arXiv:2605.05914)** ran 2-qubit adapter blocks inside
+  Llama 3.1 8B on IBM hardware. The authors themselves call it a feasibility
+  demonstration with no advantage. It is this barrier, measured by someone else:
+  * each block is a 4×4 matrix-vector product, which takes about 4 s on the
+    processor;
+  * signs cannot be read from counts and are restored classically;
+  * 3-qubit blocks drown in noise.
+* **IonQ (arXiv:2504.08732)** reported 92.70% against 89.56% for a simulated
+  circuit head on SST-2. Re-measured here on the paper's own data and protocol:
+  * classical heads on the frozen embeddings top out at the paper's classical
+    number (88.96 ± 0.52%, best of 20 seeds 89.40%);
+  * **standard classical SetFit reaches 92.56 ± 0.14%, range 92.47–92.80%**, with
+    no quantum component.
+
+  The claimed margin is the gap between a frozen and a fine-tuned
+  representation.
 
 The same barrier applies at the *output* end, and that is what makes chemistry
 and LLMs different problems rather than different sizes of one problem: if you

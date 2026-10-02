@@ -141,13 +141,19 @@ def setfit_arm(texts, labels, seed, iterations=SETFIT_ITERATIONS):
     from setfit import SetFitModel, Trainer, TrainingArguments
     from sklearn.linear_model import LogisticRegression
 
+    import tempfile
+
     train, val, test = paper_split(labels, seed)
     model = SetFitModel.from_pretrained(MODEL)
     dataset = Dataset.from_dict({"text": [texts[i] for i in train],
                                  "label": [int(labels[i]) for i in train]})
-    Trainer(model=model, args=TrainingArguments(batch_size=16, num_iterations=iterations,
-                                                num_epochs=1, seed=seed),
-            train_dataset=dataset).train()
+    # SetFit's trainer writes 1.3 GB of checkpoints to ./checkpoints by default,
+    # inside the repository; keep them out of it
+    with tempfile.TemporaryDirectory() as scratch:
+        Trainer(model=model, args=TrainingArguments(output_dir=scratch, batch_size=16,
+                                                    num_iterations=iterations,
+                                                    num_epochs=1, seed=seed),
+                train_dataset=dataset).train()
     tuned = model.model_body.encode(texts, batch_size=64, show_progress_bar=False,
                                     convert_to_numpy=True)
     logistic = [LogisticRegression(C=c, max_iter=5000) for c in (0.01, 0.1, 1, 10, 100)]
