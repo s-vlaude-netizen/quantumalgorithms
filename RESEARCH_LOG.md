@@ -4978,6 +4978,17 @@ meets the Veronese variety of rank-one matrices in a positive-dimensional set,
 the columns can **slide** along it without changing the span, `Z` re-solves to
 keep `V` fixed, and each slide is another exactly flat direction.
 
+> ⚠️ **REFINED by Result 90.** "Nothing else" holds *locally* — no continuous
+> flat direction beyond the gauge — but not globally at the boundary rank itself,
+> `M = N(N−1)/2 + 1`. There the span meets the rank-one variety in `2^(N−1)`
+> points over ℂ by Bézout (8 for H₄). `M` of them are the real columns and
+> complex ones pair up, so when `2^(N−1) − M` is odd an extra real point is
+> forced: H₄ at M=7 has exactly 8 real rank-one points, so a fit has 8 exact
+> representations of the same tensor, with λ from 7.02 to 14 156 on one fit.
+> (For H₆ at M=16 the count is 32 − 16, even, so extra real points are possible
+> but not forced.) Strictly inside the boundary (H₄ at M=6) the columns
+> are the only rank-one points and nothing moves.
+
 #### Proved, and how
 
 * **Lower bound on the rank, computed.** SymPy differentiates the model; a

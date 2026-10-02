@@ -341,14 +341,20 @@ def main() -> int:
         for arm, s in row["summary"].items():
             print(f"  {arm:<13}{s['median_one_norm']:>15.4f}{s['one_norm_spread']:>9.3f}"
                   f"{s['median_error']:>13.2e}{s['inside_chemical_accuracy']:>6}/{args.repeats}")
+        # after every case, not once at the end: the first full run lost its H6
+        # arm to a container restart two starts in, with nothing on disk
+        path = save(results)
+        print(f"  saved {len(results)} case(s) -> {path}", flush=True)
+    return 0
 
+
+def save(results):
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     path = RESULTS_DIR / "exp035_thc_fibre.json"
     with open(path, "w") as fh:
         json.dump({"cases": results, "penalty": PENALTY,
                    "tensor_tolerance": TENSOR_TOLERANCE}, fh, indent=2, default=float)
-    print(f"\nsaved -> {path}")
-    return 0
+    return path
 
 
 if __name__ == "__main__":
