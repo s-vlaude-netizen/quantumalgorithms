@@ -132,3 +132,25 @@ def test_the_spectrum_is_invariant_under_orbital_rotations():
     rotation, _ = np.linalg.qr(np.random.default_rng(9).normal(size=(4, 4)))
     rotated = np.einsum("ap,bq,cr,ds,pqrs->abcd", rotation, rotation, rotation, rotation, target)
     np.testing.assert_allclose(pair_spectrum(rotated), pair_spectrum(target), atol=1e-10)
+
+
+@pytest.mark.parametrize("name", ["H2", "H4"])
+def test_fci_energy_equals_the_series_qiskit_route(name):
+    """The energy criterion changed implementation for H10; it must not change value."""
+    import numpy as np
+
+    from qres.factorization import molecular_integrals
+    from qres.problems.chemistry import build_molecule
+    from experiments.exp021_tensor_hypercontraction import energy_of
+    from experiments.exp038_thc_rank_regime import fci_energy, integrals
+
+    problem = build_molecule(name)
+    one_body, two_body, _ = molecular_integrals(problem)
+    ours = integrals(name)
+    np.testing.assert_allclose(ours[1], two_body, atol=1e-12)
+    noise = np.random.default_rng(0).normal(scale=1e-4, size=two_body.shape)
+    for axes in ((1, 0, 2, 3), (0, 1, 3, 2), (2, 3, 0, 1)):
+        noise = 0.5 * (noise + noise.transpose(axes))
+    for tensor in (two_body, two_body + noise):
+        assert fci_energy(one_body, tensor) == pytest.approx(
+            energy_of(problem, one_body, tensor), abs=1e-10)

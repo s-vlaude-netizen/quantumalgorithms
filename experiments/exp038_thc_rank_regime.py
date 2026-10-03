@@ -29,7 +29,9 @@ far from zero, the threshold is chemistry.
 **Fits:** gauge-fixed, **unpenalised** (Result 90: the penalty only moves lambda
 along exact minimisers and costs accuracy), best of 3 starts, 150 000-iteration
 cap. Energy criterion as everywhere in this series: rebuild the Hamiltonian,
-compare exact ground energies, chemical accuracy 1.6e-3 Ha.
+compare exact ground energies, chemical accuracy 1.6e-3 Ha. The exact energies
+come from PySCF FCI (:func:`fci_energy`), checked equal to the qiskit route the
+series used before within 1e-12.
 
 One (molecule, rank) per invocation, so ranks can run as parallel processes:
 
@@ -77,21 +79,49 @@ def algebraic_rank(orbitals):
     return rank
 
 
-def measure_rank(name, rank, restarts=RESTARTS, bond_length=None):
-    from qres.factorization import molecular_integrals
-    from qres.problems.chemistry import build_molecule
+def integrals(name, bond_length=None):
+    """MO-basis integrals straight from PySCF, as ``molecular_integrals`` does.
 
-    from experiments.exp021_tensor_hypercontraction import energy_of
+    Bypasses ``build_molecule``, which also builds the qubit Hamiltonian and its
+    exact ground energy: at H10 (18 qubits) that alone peaked above the
+    container's memory and killed five runs.
+    """
+    from types import SimpleNamespace
+
+    from qres.factorization import molecular_integrals
+    from qres.problems.chemistry import GEOMETRIES
+
+    geometry = GEOMETRIES[name]() if bond_length is None else GEOMETRIES[name](bond_length)
+    one_body, two_body, _ = molecular_integrals(
+        SimpleNamespace(metadata={"geometry": geometry, "basis": "sto3g"}))
+    return one_body, two_body
+
+
+def fci_energy(one_body, two_body):
+    """Exact ground energy in the neutral singlet sector, by PySCF FCI.
+
+    Replaces the qiskit route (``energy_of``) used for H2-H8: checked equal to
+    it within 1e-12 on H2-H8 for exact and perturbed tensors, 40-90x faster, and
+    small enough in memory to run H10. Hydrogen chains in STO-3G have one
+    electron per orbital.
+    """
+    from pyscf import fci
+
+    orbitals = one_body.shape[0]
+    return float(fci.direct_spin1.kernel(one_body, two_body, orbitals,
+                                         (orbitals // 2, orbitals // 2),
+                                         tol=1e-12, conv_tol=1e-12)[0])
+
+
+def measure_rank(name, rank, restarts=RESTARTS, bond_length=None):
     from experiments.exp029_rank_exponent import MAX_ITERATIONS, gauge_thc_fit
 
     started = time.perf_counter()
-    problem = (build_molecule(name) if bond_length is None
-               else build_molecule(name, bond_length=bond_length))
-    one_body, two_body, _ = molecular_integrals(problem)
-    reference = energy_of(problem, one_body, two_body)
+    one_body, two_body = integrals(name, bond_length)
+    reference = fci_energy(one_body, two_body)
     fit = gauge_thc_fit(one_body, two_body, rank, alpha=0.0, restarts=restarts,
                         iterations=MAX_ITERATIONS)
-    error = abs(energy_of(problem, one_body, fit["two_body"]) - reference)
+    error = abs(fci_energy(one_body, fit["two_body"]) - reference)
     orbitals = one_body.shape[0]
     return {
         "molecule": label(name, bond_length), "orbitals": orbitals, "rank": rank,
@@ -140,12 +170,7 @@ SIGNIFICANT = 1e-2
 
 
 def spectrum_of(name, bond_length):
-    from qres.factorization import molecular_integrals
-    from qres.problems.chemistry import build_molecule
-
-    problem = (build_molecule(name) if bond_length is None
-               else build_molecule(name, bond_length=bond_length))
-    return pair_spectrum(molecular_integrals(problem)[1])
+    return pair_spectrum(integrals(name, bond_length)[1])
 
 
 def label(name, bond_length):
