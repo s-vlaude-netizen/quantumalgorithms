@@ -155,3 +155,21 @@ def test_fci_energy_equals_the_series_qiskit_route(name):
     for tensor in (two_body, two_body + noise):
         assert fci_energy(one_body, tensor) == pytest.approx(
             energy_of(problem, one_body, tensor), abs=1e-10)
+
+
+@pytest.mark.parametrize("name, orbitals", [("H4", 4), ("H6", 6)])
+def test_the_significant_eigenvalues_are_the_local_pair_densities(name, orbitals):
+    """2N - 1 eigenvalues above 0.01, and their eigenvectors live on the 2N - 1
+    on-site and nearest-neighbour pair densities of atom-localised orbitals."""
+    from experiments.exp038_thc_rank_regime import (
+        SIGNIFICANT,
+        local_pair_weight,
+        spectrum_of,
+    )
+
+    spectrum = spectrum_of(name, None)
+    assert int((spectrum > SIGNIFICANT).sum()) == 2 * orbitals - 1
+    assert spectrum[2 * orbitals - 2] / spectrum[2 * orbitals - 1] > 20
+    weight = local_pair_weight(name)
+    assert len(weight) == 2 * orbitals - 1
+    assert weight.min() > 0.9

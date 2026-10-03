@@ -175,6 +175,37 @@ def spectrum_of(name, bond_length):
     return pair_spectrum(integrals(name, bond_length)[1])
 
 
+def local_pair_weight(name, bond_length=None):
+    """Where the significant eigenvectors live, in atom-localised orbitals.
+
+    In Loewdin-orthogonalised atomic orbitals, ordered along the chain, a
+    hydrogen chain has exactly ``2N - 1`` *local* pair densities: ``N`` on-site
+    (``p = q``) and ``N - 1`` nearest-neighbour (``|p - q| = 1``). Returns the
+    squared weight each of the ``2N - 1`` largest eigenvectors carries on them;
+    the spectrum itself is basis-independent, so this explains the count without
+    changing it.
+    """
+    import numpy as np
+    from pyscf import ao2mo, gto
+
+    from qres.problems.chemistry import GEOMETRIES
+
+    geometry = GEOMETRIES[name]() if bond_length is None else GEOMETRIES[name](bond_length)
+    mol = gto.M(atom=geometry, basis="sto3g", unit="Angstrom", verbose=0)
+    values, vectors = np.linalg.eigh(mol.intor("int1e_ovlp"))
+    lowdin = vectors @ np.diag(values ** -0.5) @ vectors.T
+    n = mol.nao
+    order = np.lexsort(mol.atom_coords().T[::-1])
+    eri = ao2mo.restore(1, ao2mo.kernel(mol, lowdin), n)[np.ix_(order, order, order, order)]
+    index = [(p, q) for p in range(n) for q in range(p, n)]
+    weight = np.sqrt([1.0 if p == q else 2.0 for p, q in index])
+    matrix = np.array([[eri[p, q, r, s] for r, s in index] for p, q in index])
+    values, vectors = np.linalg.eigh(weight[:, None] * matrix * weight[None, :])
+    keep = np.argsort(-np.abs(values))[: 2 * n - 1]
+    local = np.array([abs(p - q) <= 1 for p, q in index])
+    return (vectors[local][:, keep] ** 2).sum(axis=0)
+
+
 def label(name, bond_length):
     return name if bond_length is None else f"{name}@{bond_length:g}"
 
@@ -190,12 +221,14 @@ def summarise():
         orbitals = entries[0]["orbitals"]
         spectrum = spectrum_of(name.split("@")[0], entries[0].get("bond_length"))
         significant = int((spectrum > SIGNIFICANT).sum())
+        locality = local_pair_weight(name.split("@")[0], entries[0].get("bond_length"))
         for r in entries:
             r["eckart_young_bound"] = eckart_young_bound(spectrum, r["rank"])
         print(f"\n  {name} (N={orbitals}, algebraic count M >= {algebraic_rank(orbitals)}, "
               f"identifiability boundary {orbitals * (orbitals - 1) // 2 + 1})")
         print(f"  significant ERI eigenvalues (> {SIGNIFICANT:g}): {significant};"
-              f"  2N - 1 = {2 * orbitals - 1}")
+              f"  2N - 1 = {2 * orbitals - 1};  their weight on the 2N - 1 local pair"
+              f" densities: min {locality.min():.3f}, mean {locality.mean():.3f}")
         print(f"  {'M':>4}{'cap':>8}{'residual':>12}{'Eckart-Young':>14}{'energy err':>12}"
               f"{'chem acc':>10}{'exact':>7}{'lambda':>9}{'converged':>11}")
         for r in entries:
@@ -214,6 +247,7 @@ def summarise():
             "first_exact_rank": min(exact) if exact else None,
             "algebraic_rank": algebraic_rank(orbitals),
             "significant_eigenvalues": significant,
+            "local_pair_weight": [float(w) for w in locality],
             "spectrum_head": [float(v) for v in spectrum[:2 * orbitals + 2]],
             "ranks_measured": [r["rank"] for r in entries], "rows": entries,
         })
