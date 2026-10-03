@@ -81,6 +81,49 @@ this repository where that is plausible:
 
 ## Now
 
+### NEW — public quantum-advantage claims as refutation targets (added on request, October 2026)
+
+**Why this belongs here:** tier **A′** — *refutes a published claim* — is the one
+rung of the rubric this repository has never reached. Press-release advantage
+claims are the natural supply. Many have since been answered by better classical
+algorithms: one survey (arXiv:2607.07530, "The NISQ Trap") counts more than
+thirty such announcements and finds all but one reproduced or explained
+classically within eighteen months. The bar is unchanged: a refutation must show
+that our statement holds **and** that theirs does not. Getting a different number
+is not a refutation.
+
+Researched October 2026, ranked by fit to this repository (4 cores, 15 GB,
+exact simulation up to ~20 qubits, strong on baselines and statistics):
+
+| claim | status | route to a refutation | fit here |
+|---|---|---|---|
+| **IonQ + Ansys, March 2025** (arXiv:2503.13128): "quantum outperforming classical", LS-DYNA up to **12% faster** | **open, and weak** | The 12% comes from a **noiseless statevector simulation** of VarQITE, run on a classical computer; hardware only ran small instances. The quantum step partitions graphs coarsened to **≤ 32 nodes**, compared only against LS-DYNA's production setting (coarsened to 10 000 nodes). **No classical partitioner was run on the same 32-node graphs.** An exact one (branch and bound or an ILP) solves those in well under a second. | **best — do this first** |
+| **IBM tracker, July 2026**: Qedma's Floquet Ising, 74 qubits on heavy-hex (arXiv:2607.24937) | open, fresh | Heavy-hex is tree-like, which is where belief-propagation tensor networks and Pauli propagation reproduced IBM's 2023 "utility" result on a laptop. The claim rests on *late* times and on an error-mitigation extrapolation with no accuracy bound. | possible, research-grade |
+| IBM tracker, July 2026: Algorithmiq's Loschmidt echo, 56 qubits (arXiv:2607.25998) | open | Classical methods disagree with each other; the rescaling heuristic has no error bound. Algorithmiq released `monoprop` to invite challengers. | hard |
+| IBM/UChicago, July 2026: doped-Clifford sampling, 97 qubits, 468 T gates (arXiv:2607.25941) | open | Stabiliser-rank cost grows exponentially in the T count, unless the T placement allows cutting. | hard |
+| Google "Quantum Echoes", OTOC(2), 65 qubits, "13 000×" (Nature, Oct 2025) | open as far as found | Tensor-network or Pauli-path simulation of deep echo circuits. | hard |
+| Quantinuum Helios, random circuit sampling, 98 qubits (Nov 2025) | open | Tensor-network contraction at 98 fully connected qubits. | out of reach |
+| D-Wave spin-glass dynamics (Science, March 2025) | **contested** | Reproduced by Flatiron/BU belief propagation in Science (May 2026). D-Wave answers that the 3D cubic and diamond lattices, the largest sizes and the fourth-order observables were not reproduced. | the remaining gap is 3D, heavy |
+| Kipu Quantum, "runtime quantum advantage" in optimisation (May 2025) | **refuted by others** | arXiv:2510.06337: a better classical baseline removes it. Kipu's own March 2026 benchmark concedes that classical solvers "reach or surpass" it. | done |
+| "Peaked circuits" verifiable-advantage proposals | **refuted by others** | arXiv:2604.21908: efficient classical simulation. | done |
+| Microsoft: Majorana 1 (Feb 2025); logical qubits with Quantinuum and Atom | not an advantage claim | These are hardware claims. Microsoft itself says the chemistry demonstration "does not demonstrate scientific quantum advantage". A classical algorithm cannot refute a qubit-physics claim. | out of scope |
+
+**Plan for the top item.**
+1. Implement VarQITE graph bisection exactly as the paper describes, simulated as
+   they did, up to ~20 qubits here.
+2. Build FEA-type meshes (2-D/3-D grids and unstructured meshes) and coarsen them
+   multilevel to 10–32 nodes, as LS-DYNA does.
+3. Compare cut quality and time: VarQITE against an exact classical optimum,
+   Kernighan–Lin/Fiduccia–Mattheyses from random starts, spectral bisection, and
+   METIS-style multilevel.
+4. If an exact classical partition of the same coarse graph is at least as good
+   in milliseconds, the 12% is a property of the *pipeline* (coarsen to ~32, then
+   partition well) and is available classically. Their own speedup ran on a
+   classical computer.
+
+Without LS-DYNA the wall-clock figure itself cannot be re-measured here. What can
+be shown is that every input to it is classically matched.
+
 ### NEW — classical algorithm work is in scope, and it is already where the leverage was
 
 Added as an explicit direction. It is worth stating what this repository's own
