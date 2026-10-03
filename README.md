@@ -25,7 +25,7 @@ is indistinguishable and, if anything, the wrong way round.
 
 ## The results here that are proofs (Results 86 and 89)
 
-Ninety-four results, and **two** of them establish something rather than
+Ninety-five results, and **two** of them establish something rather than
 measuring it. Both are small, both concern the same model, and each begins by
 correcting an earlier entry of my own.
 
@@ -150,7 +150,7 @@ one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
 published; that low λ costs nothing in accuracy here is what is new.
 
 → `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
-The rubric these are graded against, and where all 94 results sit under it, is at
+The rubric these are graded against, and where all 95 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -197,7 +197,7 @@ truncation — and the THC/DF contrast above.
 
 → `experiments/exp032_df_gauge.py`, `tests/test_df_gauge.py`.
 
-## A public advantage claim, checked: IonQ + Ansys (Result 93)
+## A public advantage claim, checked: IonQ + Ansys (Results 93, 95)
 
 **The claim.** IonQ, 20 March 2025: "Demonstrating Quantum Outperforming
 Classical Computing" — Ansys LS-DYNA "12% faster ... over the classical
@@ -229,11 +229,20 @@ pipeline against LS-GPart's — it is not quantum against classical. LS-DYNA isn
 available here, so the 12% itself is not re-measured. It does not need to be: it
 is invariant under swapping the solver.
 
-→ `experiments/exp039_ionq_ansys_partitioning.py`,
-`tests/test_ionq_ansys_partitioning.py`, Result 93 in the research log. The METIS
-arm needs `pip install pymetis` and is skipped without it.
+**And the pipeline around it does not beat METIS (Result 95).** The paper's own
+merit metric is the Cholesky factor's flops. Built into a nested-dissection
+ordering, the exact 32-vertex bisection (the quantum step's best case) costs
+1.000–1.118× METIS's flops, median 1.067, on nine mesh instances. METIS's own
+nested dissection is the cheapest ordering every time. The paper beat LS-GPart,
+which is not available here. A pipeline can beat LS-GPart and still not beat
+METIS.
 
-## The answer, since 94 results is a lot to read
+→ `experiments/exp039_ionq_ansys_partitioning.py`,
+`experiments/exp040_nested_dissection_fill.py`, their tests, Results 93 and 95
+in the research log. The METIS arms need `pip install pymetis` and are skipped
+without it.
+
+## The answer, since 95 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.

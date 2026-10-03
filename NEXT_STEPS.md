@@ -44,7 +44,7 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 94:
+Applied honestly, as of Result 95:
 
 | tier | results | note |
 |---|---|---|
@@ -52,9 +52,9 @@ Applied honestly, as of Result 94:
 | **A′** | **93** (narrow) | IonQ + Ansys: every partition the quantum step handed LS-DYNA is computed exactly classically, faster — refutes the press release's "quantum outperforming classical", not the paper's pipeline claim |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
-| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94 … |
+| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94, 95 … |
 
-**That is two A and one narrow A′ in ninety-four results**; the two A are both on one model, and Result 72 had already said so from
+**That is two A and one narrow A′ in ninety-five results**; the two A are both on one model, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
@@ -113,15 +113,13 @@ FEA-type meshes coarsened METIS-style, and the exact, FM, METIS and spectral
 comparison. An exact classical partition of the same coarse graph is the
 quantum step's output, so the 12% is a property of the pipeline.
 
-**Follow-up on this claim (tier B/C, optional): is the pipeline itself any good?**
-The paper's merit metrics are the factor's non-zeros and flops. Build nested-dissection
-orderings whose top separator comes from (i) the exact 32-vertex coarse bisection
-plus multilevel FM, (ii) the exact 256-vertex one (the MILP reaches it, and the
-coarse cut is 10–25% lower there), and (iii) METIS's own nested dissection
-(`pymetis.nested_dissection`). Count `nnz(L)` and flops by symbolic Cholesky
-(elimination tree and column counts). If (i) does not beat (iii), the 12% over
-LS-GPart says more about LS-GPart than about any solver. If (ii) beats (i), a
-classical exact solver does better than the quantum step can at its size limit.
+**Follow-up done — Result 95 (D).** Same meshes, about four times larger, with
+fill measured by symbolic Cholesky. METIS nested dissection is the cheapest
+ordering on 9 of 9 instances. The exact-32 top split (the quantum step's best
+case) costs 1.000–1.118× its flops, median 1.067. Against METIS's own bisection
+through the same construction, the exact-32 split ties (median 1.001). The 10
+lowest-energy partitions collapse to 1–3 distinct orderings after refinement.
+Still open on this claim: LS-GPart itself, which is not available here.
 
 **Next refutation target: Qedma's Floquet Ising (arXiv:2607.24937).** It is the
 only other row that fits here, and the paper read on 2026-10-03 says what to try.

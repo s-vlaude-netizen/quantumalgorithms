@@ -5691,3 +5691,93 @@ other systems.
 
 `experiments/exp038_thc_rank_regime.py`, `tests/test_thc_rank_regime.py`,
 `results/exp038_thc_rank_regime.json`.
+
+---
+
+### Result 95 — the quantum step's best case does not beat METIS where the paper measures it
+
+Result 93 showed that every partition VarQITE handed LS-DYNA is computed exactly
+by a classical solver, so the 12% compares two pipelines. This asks the
+remaining question: **is "coarsen to ≤ 32 vertices and solve exactly" a better
+pipeline than a standard open-source one?** The paper compared it only with
+LS-GPart, which is not available here. METIS is. The merit metrics are the
+paper's own: the Cholesky factor's non-zeros and the flops to compute it.
+
+#### Design
+
+* **Meshes:** the three types of Result 93, about four times larger: a quad
+  shell (24 273 vertices), a hex housing (31 200), and an unstructured mesh
+  (24 000).
+* **Top-level bisections compared:**
+  * `exact32`: the exact optimum of the paper's QUBO on the 32-vertex coarse
+    graph, which is the best VarQITE can return.
+  * `exact32_best_of_10`: the cheapest ordering among the 10 lowest-energy
+    coarse partitions. This is the paper's selection, with flops standing in
+    for wall clock.
+  * `exact256`: the MILP-exact balanced bisection at 256 vertices.
+  * `metis_top`: METIS's own bisection.
+
+  The coarse ones are refined multilevel by FM, in the paper's rule. Below the
+  top level all four share one construction: a minimum vertex separator of the
+  cut (Kőnig), each half ordered by METIS nested dissection, separator last.
+  So they differ only in the part the quantum computer supplied.
+* **Reference:** METIS nested dissection end to end, which builds and refines
+  vertex separators directly.
+* **Fill** by symbolic Cholesky (elimination tree, row subtrees). It is checked
+  against numeric factorisations, and the separator against brute-force minimum
+  covers. Three coarsening/METIS seeds per mesh: 9 instances.
+
+#### Measured
+
+Flops relative to METIS nested dissection (non-zeros in brackets):
+
+| | min | median | max |
+|---|---|---|---|
+| `metis_top` | 0.999 | 1.082 (1.014) | 1.091 |
+| **`exact32`** — the quantum step's best case | **1.000** | **1.067** (1.017) | **1.118** |
+| `exact32_best_of_10` — the paper's selection rule | 1.000 | 1.038 (1.006) | 1.118 |
+| `exact256` | 1.008 | 1.076 (1.023) | 1.172 |
+
+* **METIS nested dissection is the cheapest ordering on every instance.** No
+  variant beats it by more than 0.12% (`metis_top` on two shell seeds); the
+  exact-32 variant never beats it (its best is 0.9998).
+* **Against METIS's bisection, through the same construction, the exact coarse
+  solve is a tie.** `exact32 / metis_top` has a median of 1.001 and ranges
+  0.92–1.05; it is better on 4 instances of 9 and worse on 5. Solving the
+  coarse problem *exactly* buys nothing over a heuristic bisection, on average.
+* **The 10 lowest-energy partitions collapse under refinement.** They give only
+  1–3 distinct fine orderings per instance, and the best of them improves on
+  the optimum in 1 instance of 9. The selection the 12% came from is mostly a
+  choice among near-identical refined partitions.
+* **More exactness at finer resolution does not help either.** `exact256` has a
+  lower coarse cut (Result 93) but a larger median cost. It optimises cut
+  *edges* with 5% balance slack, and nested dissection pays for separator
+  *vertices* and imbalance. A sharper solution of the wrong objective is not a
+  better ordering.
+
+#### What it says, with its limits
+
+On these meshes, the pipeline the quantum step sits in does not beat METIS on
+the paper's own merit metric. At its best it ties it, and in median it costs
+4–7% more flops. Combined with Result 93: the quantum step's output is
+classically computable, and the pipeline built around it is not better than a
+standard classical tool. So the press release's "outperforming classical
+computing" fails against classical computing in general, not just against an
+exact solver in the same slot.
+
+The limits are real. These are not the paper's meshes. The refinement and
+separator construction are mine, not LS-DYNA's, and they cost about 8%
+against METIS's integrated nested dissection (`metis_top` against the
+reference). LS-GPart is not available, so the paper's own comparison is not
+repeated: if LS-GPart is weaker than METIS here, a pipeline can beat LS-GPart
+and still not beat METIS. That is the reading these numbers support.
+
+#### Grading
+
+**D**, measured: nine instances, three synthetic meshes, my own refinement. It
+supports Result 93's A′, extending it from the solver to the pipeline, but it is
+not a proof of anything, and LS-DYNA's own orderings were not measured.
+
+`experiments/exp040_nested_dissection_fill.py`,
+`tests/test_nested_dissection_fill.py`,
+`results/exp040_nested_dissection_fill.json`.
