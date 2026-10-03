@@ -77,7 +77,7 @@ def algebraic_rank(orbitals):
     return rank
 
 
-def measure_rank(name, rank, restarts=RESTARTS):
+def measure_rank(name, rank, restarts=RESTARTS, bond_length=None):
     from qres.factorization import molecular_integrals
     from qres.problems.chemistry import build_molecule
 
@@ -85,7 +85,8 @@ def measure_rank(name, rank, restarts=RESTARTS):
     from experiments.exp029_rank_exponent import MAX_ITERATIONS, gauge_thc_fit
 
     started = time.perf_counter()
-    problem = build_molecule(name)
+    problem = (build_molecule(name) if bond_length is None
+               else build_molecule(name, bond_length=bond_length))
     one_body, two_body, _ = molecular_integrals(problem)
     reference = energy_of(problem, one_body, two_body)
     fit = gauge_thc_fit(one_body, two_body, rank, alpha=0.0, restarts=restarts,
@@ -93,7 +94,8 @@ def measure_rank(name, rank, restarts=RESTARTS):
     error = abs(energy_of(problem, one_body, fit["two_body"]) - reference)
     orbitals = one_body.shape[0]
     return {
-        "molecule": name, "orbitals": orbitals, "rank": rank,
+        "molecule": label(name, bond_length), "orbitals": orbitals, "rank": rank,
+        "bond_length": bond_length,
         "residual": fit["residual"], "energy_error": error,
         "within_chemical_accuracy": bool(error < CHEMICAL_ACCURACY),
         "exact": bool(fit["residual"] < EXACT_RESIDUAL),
@@ -105,6 +107,51 @@ def measure_rank(name, rank, restarts=RESTARTS):
     }
 
 
+def pair_spectrum(two_body):
+    """Eigenvalues of the ERI pair matrix in the metric the THC residual uses.
+
+    The fit's residual is half the squared Frobenius error over all ``N^4``
+    entries, where an off-diagonal pair ``(p, q)`` appears twice; weighting the
+    pair-space matrix by the square roots of those multiplicities makes its
+    eigenvalues the ones Eckart-Young applies to. They are invariant under
+    orbital rotations.
+    """
+    import numpy as np
+
+    orbitals = two_body.shape[0]
+    index = [(p, q) for p in range(orbitals) for q in range(p, orbitals)]
+    weight = np.sqrt([1.0 if p == q else 2.0 for p, q in index])
+    matrix = np.array([[two_body[p, q, r, s] for r, s in index] for p, q in index])
+    return np.sort(np.abs(np.linalg.eigvalsh(weight[:, None] * matrix * weight[None, :])))[::-1]
+
+
+def eckart_young_bound(spectrum, rank):
+    """Least residual any rank-``rank`` factorisation can reach -- THC included.
+
+    ``X Z X^T`` has rank at most ``M``, so no choice of ``chi`` and ``Z`` can beat
+    the truncated eigendecomposition.
+    """
+    return 0.5 * float((spectrum[rank:] ** 2).sum())
+
+
+#: eigenvalues above this count as significant; on every equilibrium chain here
+#: the last significant one is ~0.024 and the next ~1e-3
+SIGNIFICANT = 1e-2
+
+
+def spectrum_of(name, bond_length):
+    from qres.factorization import molecular_integrals
+    from qres.problems.chemistry import build_molecule
+
+    problem = (build_molecule(name) if bond_length is None
+               else build_molecule(name, bond_length=bond_length))
+    return pair_spectrum(molecular_integrals(problem)[1])
+
+
+def label(name, bond_length):
+    return name if bond_length is None else f"{name}@{bond_length:g}"
+
+
 def summarise():
     rows = [json.loads(path.read_text()) for path in sorted(RAW.glob("*.json"))]
     by_molecule = {}
@@ -114,12 +161,19 @@ def summarise():
     for name, entries in sorted(by_molecule.items(), key=lambda kv: kv[1][0]["orbitals"]):
         entries.sort(key=lambda r: r["rank"])
         orbitals = entries[0]["orbitals"]
+        spectrum = spectrum_of(name.split("@")[0], entries[0].get("bond_length"))
+        significant = int((spectrum > SIGNIFICANT).sum())
+        for r in entries:
+            r["eckart_young_bound"] = eckart_young_bound(spectrum, r["rank"])
         print(f"\n  {name} (N={orbitals}, algebraic count M >= {algebraic_rank(orbitals)}, "
               f"identifiability boundary {orbitals * (orbitals - 1) // 2 + 1})")
-        print(f"  {'M':>4}{'residual':>12}{'energy err':>12}{'chem acc':>10}{'exact':>7}"
-              f"{'lambda':>9}{'converged':>11}")
+        print(f"  significant ERI eigenvalues (> {SIGNIFICANT:g}): {significant};"
+              f"  2N - 1 = {2 * orbitals - 1}")
+        print(f"  {'M':>4}{'residual':>12}{'Eckart-Young':>14}{'energy err':>12}"
+              f"{'chem acc':>10}{'exact':>7}{'lambda':>9}{'converged':>11}")
         for r in entries:
-            print(f"  {r['rank']:>4}{r['residual']:>12.2e}{r['energy_error']:>12.2e}"
+            print(f"  {r['rank']:>4}{r['residual']:>12.2e}{r['eckart_young_bound']:>14.2e}"
+                  f"{r['energy_error']:>12.2e}"
                   f"{'yes' if r['within_chemical_accuracy'] else 'no':>10}"
                   f"{'yes' if r['exact'] else 'no':>7}{r['one_norm']:>9.2f}"
                   f"{'yes' if r['all_converged'] else 'no':>11}")
@@ -130,6 +184,8 @@ def summarise():
             "first_chemically_accurate_rank": min(accurate) if accurate else None,
             "first_exact_rank": min(exact) if exact else None,
             "algebraic_rank": algebraic_rank(orbitals),
+            "significant_eigenvalues": significant,
+            "spectrum_head": [float(v) for v in spectrum[:2 * orbitals + 2]],
             "ranks_measured": [r["rank"] for r in entries], "rows": entries,
         })
         print(f"  first chemically accurate rank: {summary[-1]['first_chemically_accurate_rank']}"
@@ -146,6 +202,8 @@ def main() -> int:
     ap.add_argument("--molecule")
     ap.add_argument("--ranks", help="comma-separated")
     ap.add_argument("--restarts", type=int, default=RESTARTS)
+    ap.add_argument("--bond-length", type=float, default=None,
+                    help="stretch the chain; default is each molecule's equilibrium")
     ap.add_argument("--summarise", action="store_true")
     args = ap.parse_args()
 
@@ -156,9 +214,10 @@ def main() -> int:
 
     RAW.mkdir(parents=True, exist_ok=True)
     for rank in (int(r) for r in args.ranks.split(",")):
-        row = measure_rank(args.molecule, rank, args.restarts)
-        (RAW / f"{args.molecule}_M{rank:03d}.json").write_text(json.dumps(row, default=float))
-        print(f"  {args.molecule} M={rank:>3}  residual {row['residual']:.2e}  "
+        row = measure_rank(args.molecule, rank, args.restarts, args.bond_length)
+        tag = label(args.molecule, args.bond_length)
+        (RAW / f"{tag}_M{rank:03d}.json").write_text(json.dumps(row, default=float))
+        print(f"  {tag} M={rank:>3}  residual {row['residual']:.2e}  "
               f"err {row['energy_error']:.2e}  lambda {row['one_norm']:.2f}  "
               f"({row['seconds']:.0f}s)", flush=True)
     return 0
