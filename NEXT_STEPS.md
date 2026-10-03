@@ -158,6 +158,20 @@ only other row that fits here, and the paper read on 2026-10-03 says what to try
   then rest entirely on the `Z₄`-breaking higher-order terms, which is testable
   in the same framework. Research-grade, and the Gibbs step is the cheap first
   check.
+* **Read more closely on 2026-10-03, which lowers the value.** The paper already
+  draws the prethermal *plateau* from a fourth-order Magnus effective
+  Hamiltonian. So a Gibbs plateau would confirm their own estimate, not refute
+  anything. What is left is the oscillation *amplitude* in the thermodynamic
+  limit, `M(N_c) = C e^{−γN_c} + A cos(2πN_c/T + φ)`. That is an equilibrium
+  ordering question for `H_eff`. The leading order checks out (first-order
+  average: `(θ_zz/4) Σ (ZZ + YY)`, the `θ_z` field averages out), so the
+  leading order is U(1). But a 4-fold anisotropy is relevant in the 2-D
+  low-temperature phase (José–Kadanoff–Kirkpatrick–Nelson), so true `Z₄` order
+  and a nonzero `A` are *plausible*. Mermin–Wagner does not refute it. The likely
+  outcome of this route is to *confirm* their physics classically, by QMC on
+  `H_eff`, possibly with a sign problem at fourth order. That still answers
+  "classical methods fail", but at high cost. The exact angles are given only
+  as "≈", and the data only as figures. **Ranked below the Result 93 follow-up.**
 
 ### NEW — classical algorithm work is in scope, and it is already where the leverage was
 
