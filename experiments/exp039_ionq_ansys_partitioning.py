@@ -139,7 +139,7 @@ def mesh(kind):
 
 # ------------------------------------------------------------- coarsening
 
-def coarsen(graph, target, seed=0, return_map=False):
+def coarsen(graph, target, seed=0, return_map=False, return_levels=False):
     """Multilevel heavy-edge matching down to exactly ``target`` vertices.
 
     METIS-style: visit vertices in random order and contract each with its
@@ -147,12 +147,14 @@ def coarsen(graph, target, seed=0, return_map=False):
     1.5x the final average vertex weight. Vertex weights count fine vertices, edge
     weights count fine edges, so the coarse cut equals the fine cut of the
     projected partition. With ``return_map`` also returns each fine vertex's
-    coarse vertex.
+    coarse vertex; with ``return_levels``, every level's ``(graph, weights,
+    group)``, finest first, for multilevel refinement on the way back.
     """
     rng = np.random.default_rng(seed)
     graph = graph.tocsr().astype(np.int64)
     weights = np.ones(graph.shape[0], dtype=np.int64)
     fine_to_coarse = np.arange(graph.shape[0])
+    levels = []
     cap = 1.5 * weights.sum() / target
     while graph.shape[0] > target:
         n = graph.shape[0]
@@ -184,6 +186,7 @@ def coarsen(graph, target, seed=0, return_map=False):
                 if mate[u] >= 0:
                     group[mate[u]] = count
                 count += 1
+        levels.append((graph, weights, group))
         project = sp.csr_matrix((np.ones(n, dtype=np.int64), (np.arange(n), group)),
                                 shape=(n, count))
         graph = (project.T @ graph @ project).tocsr()
@@ -191,6 +194,8 @@ def coarsen(graph, target, seed=0, return_map=False):
         graph.eliminate_zeros()
         weights = project.T @ weights
         fine_to_coarse = group[fine_to_coarse]
+    if return_levels:
+        return graph.toarray(), weights, levels
     if return_map:
         return graph.toarray(), weights, fine_to_coarse
     return graph.toarray(), weights
