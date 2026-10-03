@@ -44,7 +44,7 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 93:
+Applied honestly, as of Result 94:
 
 | tier | results | note |
 |---|---|---|
@@ -52,9 +52,9 @@ Applied honestly, as of Result 93:
 | **A′** | **93** (narrow) | IonQ + Ansys: every partition the quantum step handed LS-DYNA is computed exactly classically, faster — refutes the press release's "quantum outperforming classical", not the paper's pipeline claim |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
-| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92 … |
+| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94 … |
 
-**That is two A and one narrow A′ in ninety-three results**; the two A are both on one model, and Result 72 had already said so from
+**That is two A and one narrow A′ in ninety-four results**; the two A are both on one model, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
@@ -242,11 +242,16 @@ So, ranked by what would actually move something here:
    * **re-measure the rank exponent (exp029) with unpenalised fits plus
      lowering**, dropping H₂ (`M ≥ P = 3` makes every tensor exactly
      representable) and reporting which points sit past the boundary;
-     **in progress as exp038.** Fine-grid, converged, unpenalised thresholds so
-     far: **3, 7, 10, 16 for H₂, H₄, H₆, H₈** (Result 78's 4, 8, 18 superseded).
-     They track the ERI pair-matrix spectrum, which at equilibrium has exactly
-     `2N − 1` eigenvalues ≥ 0.023 and a 28–40× gap after them. **Prediction,
-     recorded before measuring: H₁₀'s chemical-accuracy rank is 19 ± 1.**
+     **done as exp038, Result 94.** Fine-grid, unpenalised thresholds: **3, 7,
+     10, 16, 21 for H₂…H₁₀** (Result 78's 4, 8, 18 superseded). They track the
+     `2N − 1` significant ERI pair-matrix eigenvalues, which are the chain's
+     on-site and nearest-neighbour pair densities (94–99% of the eigenvector
+     weight). The prediction recorded beforehand, H₁₀ at 19 ± 1, **missed by one**
+     at the 150 000-iteration budget. At M = 19 and 20 the fits sit 56× and 24×
+     above the Eckart–Young floor, so they are optimiser-limited; reruns at a
+     600 000 cap are pending, and Result 94 gets an addendum. Open: does any of
+     this survive away from hydrogen chains? The mechanism (locality) predicts
+     not.
    * **saturation, `M ≥ P`**: at fixed `χ` the λ minimum is a linear programme
      (one H₄ M=12 fit: 5.217 → 4.655, tensor unchanged to 3e-15); moving `χ`
      jointly is open;

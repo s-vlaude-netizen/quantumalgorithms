@@ -25,7 +25,7 @@ is indistinguishable and, if anything, the wrong way round.
 
 ## The results here that are proofs (Results 86 and 89)
 
-Ninety-three results, and **two** of them establish something rather than
+Ninety-four results, and **two** of them establish something rather than
 measuring it. Both are small, both concern the same model, and each begins by
 correcting an earlier entry of my own.
 
@@ -150,7 +150,7 @@ one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
 published; that low λ costs nothing in accuracy here is what is new.
 
 → `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
-The rubric these are graded against, and where all 93 results sit under it, is at
+The rubric these are graded against, and where all 94 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -233,7 +233,7 @@ is invariant under swapping the solver.
 `tests/test_ionq_ansys_partitioning.py`, Result 93 in the research log. The METIS
 arm needs `pip install pymetis` and is skipped without it.
 
-## The answer, since 93 results is a lot to read
+## The answer, since 94 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -357,6 +357,13 @@ other, and λ moves non-monotonically across ranks. The restart spread says why 
 has many near-degenerate optima with very different λ, and λ is exactly what the
 cost depends on. So `N^1.33` should be read as *consistent with linear*, not as a
 measurement of 1.33.
+
+**Superseded by Result 94.** Converged, unpenalised fits on a one-step rank grid
+put the thresholds at **3, 7, 10, 16, 21** for H₂…H₁₀. That is `≈ 2N − 1`: the
+number of significant eigenvalues of the ERI pair matrix, which are the chain's
+on-site and nearest-neighbour pair densities. So the rank is linear here because
+hydrogen chains are local, not because of anything THC does, and it should not be
+carried over to other molecules.
 
 **Result 79 fixed that, and found something underneath it.** Nothing in the
 objective preferred the low-λ optimum, so a smooth `|Z|` penalty was added — what

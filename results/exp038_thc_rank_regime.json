@@ -609,7 +609,7 @@
     {
       "molecule": "H10",
       "orbitals": 10,
-      "first_chemically_accurate_rank": null,
+      "first_chemically_accurate_rank": 21,
       "first_exact_rank": null,
       "algebraic_rank": 47,
       "significant_eigenvalues": 19,
@@ -662,7 +662,9 @@
         17,
         18,
         19,
-        20
+        20,
+        21,
+        22
       ],
       "rows": [
         {
@@ -732,6 +734,42 @@
           "algebraic_rank": 47,
           "seconds": 4249.820251413,
           "eckart_young_bound": 6.695239319968432e-07
+        },
+        {
+          "molecule": "H10",
+          "orbitals": 10,
+          "rank": 21,
+          "bond_length": null,
+          "residual": 4.0066014626684686e-06,
+          "energy_error": 0.0006067963074265492,
+          "within_chemical_accuracy": true,
+          "exact": false,
+          "one_norm": 49.56045158466847,
+          "restart_residual_spread": 11.636707808051195,
+          "all_converged": false,
+          "iterations": 150000,
+          "iteration_cap": 150000,
+          "algebraic_rank": 47,
+          "seconds": 3898.923100467,
+          "eckart_young_bound": 3.8293246103721575e-07
+        },
+        {
+          "molecule": "H10",
+          "orbitals": 10,
+          "rank": 22,
+          "bond_length": null,
+          "residual": 3.0467419833221198e-06,
+          "energy_error": 0.0007652924473866562,
+          "within_chemical_accuracy": true,
+          "exact": false,
+          "one_norm": 30.236649377627067,
+          "restart_residual_spread": 8.316726470381258,
+          "all_converged": false,
+          "iterations": 150000,
+          "iteration_cap": 150000,
+          "algebraic_rank": 47,
+          "seconds": 3736.142808745999,
+          "eckart_young_bound": 1.808429996485942e-07
         }
       ]
     }
