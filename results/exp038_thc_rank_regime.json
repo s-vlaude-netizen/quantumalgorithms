@@ -609,7 +609,7 @@
     {
       "molecule": "H10",
       "orbitals": 10,
-      "first_chemically_accurate_rank": 21,
+      "first_chemically_accurate_rank": 20,
       "first_exact_rank": null,
       "algebraic_rank": 47,
       "significant_eigenvalues": 19,
@@ -662,6 +662,8 @@
         17,
         18,
         19,
+        19,
+        20,
         20,
         21,
         22
@@ -721,6 +723,24 @@
         {
           "molecule": "H10",
           "orbitals": 10,
+          "rank": 19,
+          "bond_length": null,
+          "residual": 5.889942139621823e-05,
+          "energy_error": 0.009845636060351382,
+          "within_chemical_accuracy": false,
+          "exact": false,
+          "one_norm": 35.17553829480426,
+          "restart_residual_spread": 1.897918669561991,
+          "all_converged": false,
+          "iterations": 162963,
+          "iteration_cap": 600000,
+          "algebraic_rank": 47,
+          "seconds": 8470.661571560002,
+          "eckart_young_bound": 1.0520731910943454e-06
+        },
+        {
+          "molecule": "H10",
+          "orbitals": 10,
           "rank": 20,
           "bond_length": null,
           "residual": 1.6127015812450507e-05,
@@ -733,6 +753,24 @@
           "iterations": 150000,
           "algebraic_rank": 47,
           "seconds": 4249.820251413,
+          "eckart_young_bound": 6.695239319968432e-07
+        },
+        {
+          "molecule": "H10",
+          "orbitals": 10,
+          "rank": 20,
+          "bond_length": null,
+          "residual": 1.3455570926572468e-05,
+          "energy_error": 0.0005088983250587376,
+          "within_chemical_accuracy": true,
+          "exact": false,
+          "one_norm": 60.900410995651534,
+          "restart_residual_spread": 27.564349021020355,
+          "all_converged": true,
+          "iterations": 229953,
+          "iteration_cap": 600000,
+          "algebraic_rank": 47,
+          "seconds": 5124.137201267,
           "eckart_young_bound": 6.695239319968432e-07
         },
         {

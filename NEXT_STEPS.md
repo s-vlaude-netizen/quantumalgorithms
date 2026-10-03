@@ -241,15 +241,17 @@ So, ranked by what would actually move something here:
      lowering**, dropping H₂ (`M ≥ P = 3` makes every tensor exactly
      representable) and reporting which points sit past the boundary;
      **done as exp038, Result 94.** Fine-grid, unpenalised thresholds: **3, 7,
-     10, 16, 21 for H₂…H₁₀** (Result 78's 4, 8, 18 superseded). They track the
+     10, 16, 20 for H₂…H₁₀** (Result 78's 4, 8, 18 superseded). They track the
      `2N − 1` significant ERI pair-matrix eigenvalues, which are the chain's
      on-site and nearest-neighbour pair densities (94–99% of the eigenvector
-     weight). The prediction recorded beforehand, H₁₀ at 19 ± 1, **missed by one**
-     at the 150 000-iteration budget. At M = 19 and 20 the fits sit 56× and 24×
-     above the Eckart–Young floor, so they are optimiser-limited; reruns at a
-     600 000 cap are pending, and Result 94 gets an addendum. Open: does any of
-     this survive away from hydrogen chains? The mechanism (locality) predicts
-     not.
+     weight). The prediction recorded beforehand, H₁₀ at 19 ± 1, held at its
+     upper edge, but only with a 600 000-iteration budget; at 150 000 it was 21.
+     At the count itself (H₈ M = 15, H₁₀ M = 19) fits stall 40–60× above the
+     Eckart–Young floor even with four times the budget, so the largest chains
+     need `2N`. Open: (a) why THC cannot follow the floor at the count. Is it
+     the rank-one column constraint, or local minima? An exact-rank test like
+     Result 89's would separate them. (b) Does any of this survive away from
+     hydrogen chains? The mechanism (locality) predicts not.
    * **saturation, `M ≥ P`**: at fixed `χ` the λ minimum is a linear programme
      (one H₄ M=12 fit: 5.217 → 4.655, tensor unchanged to 3e-15); moving `χ`
      jointly is open;

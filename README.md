@@ -368,7 +368,7 @@ cost depends on. So `N^1.33` should be read as *consistent with linear*, not as 
 measurement of 1.33.
 
 **Superseded by Result 94.** Converged, unpenalised fits on a one-step rank grid
-put the thresholds at **3, 7, 10, 16, 21** for H₂…H₁₀. That is `≈ 2N − 1`: the
+put the thresholds at **3, 7, 10, 16, 20** for H₂…H₁₀. That is `≈ 2N − 1`: the
 number of significant eigenvalues of the ERI pair matrix, which are the chain's
 on-site and nearest-neighbour pair densities. So the rank is linear here because
 hydrogen chains are local, not because of anything THC does, and it should not be

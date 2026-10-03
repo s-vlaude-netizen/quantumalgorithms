@@ -3870,7 +3870,7 @@ criterion, same guards, only the fit changes.
 
 > **Corrected by Result 94.** These thresholds came from penalised, mostly
 > unconverged fits on a coarse rank grid. Unpenalised, gauge-fixed fits on a
-> one-step grid give **3, 7, 10** for H₂, H₄, H₆ (then 16 for H₈ and 21 for H₁₀).
+> one-step grid give **3, 7, 10** for H₂, H₄, H₆ (then 16 for H₈ and 20 for H₁₀).
 > They track the `2N − 1` significant eigenvalues of the ERI pair matrix, which
 > are the on-site and nearest-neighbour pair densities of the chain. "Linear"
 > survives, as `≈ 2N − 1`, but `N^1.33` does not. And the mechanism is the
@@ -5621,7 +5621,7 @@ The thresholds, on a one-step rank grid:
 | H₄ | 4 | 8 | 7 | **7** | 7 | 8 |
 | H₆ | 6 | 17 | 11 | **10** | 12 | 18 |
 | H₈ | 8 | 30 | 15 | **16** | 20 | — |
-| H₁₀ | 10 | 47 | 19 | **21** (prediction 19 ± 1) | none to 22 | — |
+| H₁₀ | 10 | 47 | 19 | **20** (21 at the standard budget; prediction 19 ± 1) | none to 22 | — |
 
 And the residual against the Eckart–Young floor, which separates what the rank
 forbids from what the optimiser failed at:
@@ -5630,27 +5630,41 @@ forbids from what the optimiser failed at:
 |---|---|---|
 | residual ÷ Eckart–Young bound | **1.07–2.06** for every fit with 2 ≤ M < 2N − 1 (H₄ M=4–6, H₆ M=6–10, H₈ M=12–14, H₁₀ M=17–18) | 1.7 (H₄ M=7), then 11–22 000; mostly unconverged |
 
-**H₁₀, against a prediction recorded before measuring (19 ± 1): missed by one.**
+**H₁₀, against a prediction recorded before measuring (19 ± 1): met at its upper edge, once the fit converges.**
 
 | M | residual | Eckart–Young | ratio | energy error | chemically accurate |
 |---|---|---|---|---|---|
 | 17 | 8.1e-4 | 5.9e-4 | 1.4 | 1.1e-2 | no |
 | 18 | 4.1e-4 | 2.9e-4 | 1.4 | 7.3e-3 | no |
 | 19 | 5.9e-5 | 1.05e-6 | **56** | 1.0e-2 | no |
+| 19, 600 000 cap | 5.9e-5 | 1.05e-6 | **56** | 9.9e-3 | no — stalled at 163 000 iterations |
 | 20 | 1.6e-5 | 6.7e-7 | **24** | 1.69e-3 | no, by 6% |
-| 21 | 4.0e-6 | 3.8e-7 | 10 | 6.1e-4 | **yes** |
+| 20, 600 000 cap | 1.35e-5 | 6.7e-7 | 20 | 5.1e-4 | **yes** — all starts converged |
+| 21 | 4.0e-6 | 3.8e-7 | 10 | 6.1e-4 | yes |
 | 22 | 3.0e-6 | 1.8e-7 | 17 | 7.7e-4 | yes |
 
-All six hit the 150 000-iteration cap. At M = 17 and 18 the fit sits 1.4× above
-the floor, so the rank is what fails there. At M = 19 and 20 the floor has
-dropped 276× and the fits are 56× and 24× above it, so the optimiser is what
-fails. The measured threshold at this protocol's budget is 21. The prediction
-was about the spectrum, and the spectrum held: exactly 19 significant
-eigenvalues. What it did not anticipate is that the fit at the count would be
-optimiser-limited. H₈ shows the same thing at M = 15 (42× above the floor,
-error 4.8e-3). **M = 19 and 20 are being rerun at a 600 000-iteration cap,
-which will say whether the extra rank is the optimiser's or the model's.** This
-entry gets an addendum either way.
+At the 150 000-iteration budget every fit hits the cap, and the first
+chemically accurate rank is 21: the prediction missed by one. With a 600 000
+cap, M = 20 converges from every start at 230 000 iterations and lands at
+5.1e-4, inside chemical accuracy. **So H₁₀'s threshold is 20, the upper edge of
+19 ± 1.**
+
+What the reruns separate is more useful than the number:
+
+* **At M = 17 and 18 the rank is what fails.** The fits sit 1.4× above the
+  floor.
+* **At M = 20 it was the budget**, and only partly. The residual barely moves
+  (1.6e-5 → 1.35e-5), still 20× above the floor, but the energy error drops
+  3.3×. The converged minimum is a different one, not a deeper one.
+* **At M = 19, the spectral count itself, it is the landscape.** With four times
+  the budget, the fit stalls at the same 5.9e-5, 56× above a floor that has just
+  dropped 276×, with error 1e-2. H₈ does the same at its count, M = 15 (42×,
+  error 4.8e-3), and it too needs one more rank (16).
+
+The prediction was about the spectrum, and the spectrum held: exactly 19
+significant eigenvalues. What it did not anticipate is that **the fit cannot
+follow the floor down at the count itself**. On the two largest chains the
+threshold is `2N`, not `2N − 1`.
 
 #### What it says
 
@@ -5658,21 +5672,23 @@ entry gets an addendum either way.
   dimension count (10 against 17, 16 against 30). The fit is chemically
   accurate long before it could represent a generic tensor, because this
   tensor is not generic.
-* **They are spectral, to within −1/+2: `M ≈ 2N − 1`, the number of local pair
+* **They are spectral, to within ±1: `M ≈ 2N − 1`, the number of local pair
   densities.** Below that count every fit sits within about 2× of the best
   residual any rank-`M` factorisation can reach. So missing chemical accuracy
   there is the rank's fault, not the optimiser's, and THC is nearly optimal
   among all rank-`M` factorisations. At the count, the floor drops by 100–300×
   and the fits stop following it.
-* **±2, not exact, for two reasons.** First, energy error is not monotone in
+* **±1, not exact, for two reasons.** First, energy error is not monotone in
   the residual. H₆ is chemically accurate at M = 10 with a residual of 3.5e-4
   (error 1.7e-4), and has a *larger* error (1.2e-3) at M = 11, where the
   residual is 66× smaller. Errors partly cancel in the ground energy. Second, at
-  the count itself the fits are optimiser-limited (H₈ M = 15, H₁₀ M = 19 and 20).
-  So the measured threshold also carries the fitting budget, and an exponent
-  fitted to it inherits both.
+  the count itself the fits stall far above the floor (H₈ M = 15; H₁₀ M = 19,
+  even at four times the budget), so the largest chains need `2N`. Close to
+  the count the budget matters too (H₁₀ M = 20: 1.69e-3 at 150 000 iterations,
+  5.1e-4 at 600 000). An exponent fitted to single-rank thresholds inherits all
+  of this.
 * **For Result 78: the thresholds 4, 8, 18 and `N^1.33` are superseded** by
-  3, 7, 10, 16, 21. On these chains the chemical-accuracy rank is linear,
+  3, 7, 10, 16, 20. On these chains the chemical-accuracy rank is linear,
   `≈ 2N − 1` — consistent
   with Result 78's "consistent with linear" reading. But the reason is the
   locality of STO-3G hydrogen chains (two significant pair densities per atom),
@@ -5684,8 +5700,9 @@ entry gets an addendum either way.
 **D**, with a correction. It replaces one of this repository's own numbers with
 a better-measured one, and it names the mechanism. Eckart–Young is a theorem,
 but it bounds every rank-`M` factorisation. The THC-specific content is
-empirical: thresholds within −1/+2 of the spectral count on five chains, and
-a prediction from it that missed by one at a fixed budget. It is not
+empirical: thresholds within ±1 of the spectral count on five chains, and a
+prediction from it (H₁₀ at 19 ± 1) that held at its upper edge, 20, once the
+fits could converge — after missing by one at the standard budget. It is not
 an exponent anyone has claimed wrongly — the published THC scaling is about
 other systems.
 
