@@ -150,6 +150,11 @@ So, ranked by what would actually move something here:
    * **re-measure the rank exponent (exp029) with unpenalised fits plus
      lowering**, dropping H₂ (`M ≥ P = 3` makes every tensor exactly
      representable) and reporting which points sit past the boundary;
+     **in progress as exp038.** Fine-grid, converged, unpenalised thresholds so
+     far: **3, 7, 10, 16 for H₂, H₄, H₆, H₈** (Result 78's 4, 8, 18 superseded).
+     They track the ERI pair-matrix spectrum, which at equilibrium has exactly
+     `2N − 1` eigenvalues ≥ 0.023 and a 28–40× gap after them. **Prediction,
+     recorded before measuring: H₁₀'s chemical-accuracy rank is 19 ± 1.**
    * **saturation, `M ≥ P`**: at fixed `χ` the λ minimum is a linear programme
      (one H₄ M=12 fit: 5.217 → 4.655, tensor unchanged to 3e-15); moving `χ`
      jointly is open;
