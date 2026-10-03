@@ -5292,3 +5292,109 @@ optional and imported only inside the experiment.
 
 `experiments/exp036_quantum_llm_head.py`, `tests/test_quantum_llm_head.py`,
 `results/exp036_quantum_llm_head.json`.
+
+---
+
+### Result 92 — the Ising Born machine on real data: a parameter-matched RBM wins every split, and the provably hard IQP setting models worse than independent bits
+
+The lead came in on request: Coyle, Mills, Danos & Kashefi's Ising Born machine
+(npj QI 2020) — Hadamards, one commuting Ising layer
+`exp(i Σ J_ij z_i z_j + i Σ b_k z_k)`, final single-qubit rotations, measurement.
+With every final angle at π/2 it is IQP, whose sampling is classically
+intractable under standard assumptions. NEXT_STEPS planned its first measurement
+before anything else: **sampling hardness only matters if the model is good, so
+is it a better model of real data than classical models with the same number of
+parameters?**
+
+#### Design, fixed before any circuit was chosen
+
+* **Data:** the UCI handwritten digits shipped with scikit-learn (1 797 images),
+  pooled 8×8 → 4×4 and thresholded at half intensity — 16 bits, 235 distinct
+  patterns. Real, chosen first, small enough that **every likelihood is exact**,
+  quantum included (a 2¹⁶ statevector).
+* **Metric:** held-out negative log-likelihood, bits per sample — the honest
+  metric for a generative model, and computable exactly here.
+* **The comparison that isolates the quantum ingredient:** the fully visible
+  Boltzmann machine uses the **same energy** `θ(z)` with the same `J`, `b`, and
+  maps it to probabilities by the Gibbs rule `e^θ/Z` instead of the Born rule.
+  The RBM with 8 hidden units has **exactly the Born machine's 152 parameters**.
+* **Protocol:** ten random 80/20 splits; exact L2-penalised maximum likelihood
+  (L-BFGS, full batch), penalty chosen per model on a validation fifth of
+  training, then refitted; best of 3 starts for non-convex models.
+* **Implementation checked against Qiskit's statevector to 1e-16**, gate by gate
+  (and pinned by a test).
+
+#### Measured
+
+| model | params | held-out bits/sample, mean ± sd | median | train |
+|---|---|---|---|---|
+| **RBM, 8 hidden** | **152** | **7.112 ± 0.238** | **7.052** | 6.991 |
+| Ising Born machine (final angles trained) | 152 | 7.333 ± 0.369 | 7.236 | 7.298 |
+| FVSBN (autoregressive) | 136 | 7.527 ± 0.791 | 7.259 | 7.208 |
+| Boltzmann machine (same energy, Gibbs rule) | 136 | 7.638 ± 1.025 | 7.250 | 7.203 |
+| independent bits | 16 | 7.787 ± 0.086 | 7.774 | 7.836 |
+| **Ising Born machine, IQP (angles fixed at π/2)** | 136 | **8.252 ± 0.702** | **8.315** | 8.208 |
+
+Paired, on identical splits:
+
+| | median difference | Born better on |
+|---|---|---|
+| Born machine − RBM (equal parameters) | **+0.168 bits** | **0 / 10** |
+| Born machine − Boltzmann machine (same energy) | −0.008 bits | 7 / 10 |
+| Born machine − FVSBN | −0.019 bits | 7 / 10 |
+
+#### What it says
+
+* **At equal parameter count, the classical RBM is the better model on every
+  split**, by 0.14–0.61 bits. Not an optimisation artefact: with 12 starts
+  instead of 3 the Born machine's best test score moves from 7.144 to 7.155,
+  while the RBM's stays at 6.972. The Born machine also fits *training* data
+  worse (7.30 against 6.99), so this is capacity on this data, not overfitting.
+* **Born rule against Gibbs rule on the same energy is a tie on typical
+  splits** (median −0.008 bits). The Born machine's mean advantage (−0.31) comes
+  from two splits where the Boltzmann and FVSBN fits generalise badly to rare
+  test patterns. That is robustness from bounded, periodic phases, not a better
+  model.
+* **The setting where sampling is provably hard is a poor model of this data.**
+  IQP — final angles fixed at π/2 — reaches 8.25 bits, **worse than 16
+  independent bits (7.79)**. When the angles are trained, most stay within a few
+  degrees of π/2, but some move by up to 63°, and that is what makes the model
+  competitive. **Where the circuit models the data, it is no longer the circuit
+  the hardness theorem is about.**
+* **The trained couplings are sparse and partly Clifford** (one split examined):
+  19 of 120 exceed 0.1 in magnitude, four sit at exactly π/2, and setting all
+  `J` to zero destroys the model (124 bits). That is an observation, not a
+  measurement of the trend; but structure near the classically simulable
+  Clifford set is the opposite of what an advantage would need.
+* **The landscape is rugged**: the Born machine's training likelihood spreads
+  2.3 bits across 12 starts, the RBM's 0.03. Trainability is a cost here even
+  before scale.
+
+#### A protocol error caught on the way, and why it matters beyond this result
+
+The first run used **unregularised** maximum likelihood, and it flattered the
+Born machine. A pair of pixels that never co-occur in training drives the
+Boltzmann and FVSBN couplings to infinity, so a test image with that pair costs
+~10 bits. The longer the optimiser ran, the worse it got: on one split the
+Boltzmann machine scored 7.32 after one L-BFGS call and 7.91 after
+convergence, and on another it reached 11.2. The
+Born machine's bounded phases cannot run away like that, so the unregularised
+comparison showed a "quantum advantage" that was an artefact of the protocol.
+The run was discarded, and L2 chosen on validation removed the effect (the
+Boltzmann machine's validation score at zero penalty was 27.2 bits, against
+7.27 at 1e-3). **Any Born-machine-versus-Boltzmann comparison should be read
+with this in mind before it is believed.**
+
+#### Grading and what it does to the lead
+
+**D**, measured: one dataset, 16 bits, one Ising layer. It does not touch
+sampling hardness, which is asymptotic. But hardness only matters if the hard
+model is the *good* model. Here the hard setting is the worst model in the
+table, and the trainable setting loses to the parameter-matched classical model
+on every split. Steps 2 and 3 of the lead (the noise crossover; an exact
+trainability statement) only have value if some dataset fixed in advance shows
+the Born machine winning. Choosing a dataset *after* seeing which one it wins on
+is exactly Result 68's trap. They are therefore downgraded, not dropped.
+
+`experiments/exp037_ising_born_machine.py`, `tests/test_ising_born_machine.py`,
+`results/exp037_ising_born_machine.json`.

@@ -25,7 +25,7 @@ is indistinguishable and, if anything, the wrong way round.
 
 ## The results here that are proofs (Results 86 and 89)
 
-Ninety-one results, and **two** of them establish something rather than
+Ninety-two results, and **two** of them establish something rather than
 measuring it. Both are small, both concern the same model, and each begins by
 correcting an earlier entry of my own.
 
@@ -150,7 +150,7 @@ one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
 published; that low λ costs nothing in accuracy here is what is new.
 
 → `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
-The rubric these are graded against, and where all 91 results sit under it, is at
+The rubric these are graded against, and where all 92 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -197,7 +197,7 @@ truncation — and the THC/DF contrast above.
 
 → `experiments/exp032_df_gauge.py`, `tests/test_df_gauge.py`.
 
-## The answer, since 91 results is a lot to read
+## The answer, since 92 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
@@ -435,6 +435,13 @@ Amplitude-encoding a general dense vector of dimension `d` costs `gates = d − 
 them** cannot hold an exponential speedup in `d`: the load step alone costs what
 the whole classical algorithm costs. One 4096×4096 weight matrix is 1.7e7
 two-qubit gates; a 70B model is 6.9e10. No hardware generation changes that.
+
+**The Born machine lead, measured (Result 92).** Coyle et al.'s Ising Born
+machine was tested on real data fixed in advance: 16-bit UCI digits, with exact
+held-out likelihoods. **An RBM with the same 152 parameters beat it on all 10
+splits**, by a median 0.17 bits. The IQP setting, where sampling is provably
+hard, modelled the data *worse than independent bits*. Where the circuit models
+the data, it is not the circuit the hardness theorem is about.
 
 **Two industry claims, read against this — one of them re-measured (Result 91).**
 

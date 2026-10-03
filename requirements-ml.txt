@@ -1,0 +1,10 @@
+# Optional machine-learning stack, only for exp036 (Result 91) and exp037
+# (Result 92). Not needed for anything else; tests that need it skip without it.
+# Install torch from the CPU index first so pip does not pull the CUDA build:
+#   pip install --index-url https://download.pytorch.org/whl/cpu torch
+#   pip install -r requirements-ml.txt
+torch
+scikit-learn
+sentence-transformers
+datasets
+setfit

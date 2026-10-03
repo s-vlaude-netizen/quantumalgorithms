@@ -44,7 +44,7 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 91:
+Applied honestly, as of Result 92:
 
 | tier | results | note |
 |---|---|---|
@@ -52,9 +52,9 @@ Applied honestly, as of Result 91:
 | **A′** | none | nothing here refutes a paper |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
-| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91 … |
+| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92 … |
 
-**That is two A in ninety-one results**, both on one model, and Result 72 had already said so from
+**That is two A in ninety-two results**, both on one model, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
@@ -306,7 +306,7 @@ What this repository could measure, in order:
    this repository has already measured. It needs a temporal dataset and a ridge
    readout, both of which are a day's work.
 
-#### Lead: the Ising Born machine (added on request, not yet started)
+#### Lead: the Ising Born machine (added on request; step 1 done, Result 92)
 
 The concrete Born machine with the firmest footing, and the one to build if this
 direction is taken up: Coyle, Mills, Danos & Kashefi, *"The Born supremacy:
@@ -367,6 +367,18 @@ conjecture.
    dataset, same parameter budget, **held-out** log-likelihood and total
    variation. A win on held-out real data is **B/C**; a loss is a **D** worth
    having, because it names which baseline closes the gap.
+
+   ✅ **Done — Result 92, and it is a D.** On 16-bit UCI digits, with exact
+   held-out likelihoods and L2 chosen on validation, **an RBM with the same 152
+   parameters beats the Born machine on 10/10 splits** (median +0.17 bits).
+   That is not a matter of starts: 12 starts instead of 3 leave the gap as it
+   is. On the same Ising energy, Born against Gibbs is a tie on typical splits.
+   **The IQP setting, where sampling is provably hard, is worse than
+   independent bits** (8.25 against 7.79). Unregularised MLE had shown a
+   spurious Born advantage — couplings diverge for the classical models — and
+   that run was discarded. **Steps 2 and 3 below are downgraded**: they only
+   pay if a dataset fixed in advance shows the Born machine winning, and picking
+   one after the fact is Result 68's trap.
 2. **The noise crossover**: total-variation distance between the noiseless and
    device-noise distributions against `n`, on this repository's IBM-device and
    trapped-ion models. This is NEXT_STEPS' "where sampling hardness starts to
