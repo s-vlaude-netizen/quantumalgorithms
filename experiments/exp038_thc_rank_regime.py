@@ -113,14 +113,15 @@ def fci_energy(one_body, two_body):
                                          tol=1e-12, conv_tol=1e-12)[0])
 
 
-def measure_rank(name, rank, restarts=RESTARTS, bond_length=None):
+def measure_rank(name, rank, restarts=RESTARTS, bond_length=None, iterations=None):
     from experiments.exp029_rank_exponent import MAX_ITERATIONS, gauge_thc_fit
 
+    iterations = iterations or MAX_ITERATIONS
     started = time.perf_counter()
     one_body, two_body = integrals(name, bond_length)
     reference = fci_energy(one_body, two_body)
     fit = gauge_thc_fit(one_body, two_body, rank, alpha=0.0, restarts=restarts,
-                        iterations=MAX_ITERATIONS)
+                        iterations=iterations)
     error = abs(fci_energy(one_body, fit["two_body"]) - reference)
     orbitals = one_body.shape[0]
     return {
@@ -132,6 +133,7 @@ def measure_rank(name, rank, restarts=RESTARTS, bond_length=None):
         "one_norm": fit["one_norm"],
         "restart_residual_spread": fit["restart_residual_spread"],
         "all_converged": fit["all_converged"], "iterations": fit["iterations"],
+        "iteration_cap": iterations,
         "algebraic_rank": algebraic_rank(orbitals),
         "seconds": time.perf_counter() - started,
     }
@@ -184,7 +186,7 @@ def summarise():
         by_molecule.setdefault(row["molecule"], []).append(row)
     summary = []
     for name, entries in sorted(by_molecule.items(), key=lambda kv: kv[1][0]["orbitals"]):
-        entries.sort(key=lambda r: r["rank"])
+        entries.sort(key=lambda r: (r["rank"], r.get("iteration_cap", 150000)))
         orbitals = entries[0]["orbitals"]
         spectrum = spectrum_of(name.split("@")[0], entries[0].get("bond_length"))
         significant = int((spectrum > SIGNIFICANT).sum())
@@ -194,10 +196,12 @@ def summarise():
               f"identifiability boundary {orbitals * (orbitals - 1) // 2 + 1})")
         print(f"  significant ERI eigenvalues (> {SIGNIFICANT:g}): {significant};"
               f"  2N - 1 = {2 * orbitals - 1}")
-        print(f"  {'M':>4}{'residual':>12}{'Eckart-Young':>14}{'energy err':>12}"
+        print(f"  {'M':>4}{'cap':>8}{'residual':>12}{'Eckart-Young':>14}{'energy err':>12}"
               f"{'chem acc':>10}{'exact':>7}{'lambda':>9}{'converged':>11}")
         for r in entries:
-            print(f"  {r['rank']:>4}{r['residual']:>12.2e}{r['eckart_young_bound']:>14.2e}"
+            cap = r.get("iteration_cap", 150000)
+            print(f"  {r['rank']:>4}{cap // 1000:>7}k{r['residual']:>12.2e}"
+                  f"{r['eckart_young_bound']:>14.2e}"
                   f"{r['energy_error']:>12.2e}"
                   f"{'yes' if r['within_chemical_accuracy'] else 'no':>10}"
                   f"{'yes' if r['exact'] else 'no':>7}{r['one_norm']:>9.2f}"
@@ -229,6 +233,8 @@ def main() -> int:
     ap.add_argument("--restarts", type=int, default=RESTARTS)
     ap.add_argument("--bond-length", type=float, default=None,
                     help="stretch the chain; default is each molecule's equilibrium")
+    ap.add_argument("--iterations", type=int, default=None,
+                    help="L-BFGS cap per start; default exp029's 150 000")
     ap.add_argument("--summarise", action="store_true")
     args = ap.parse_args()
 
@@ -239,9 +245,11 @@ def main() -> int:
 
     RAW.mkdir(parents=True, exist_ok=True)
     for rank in (int(r) for r in args.ranks.split(",")):
-        row = measure_rank(args.molecule, rank, args.restarts, args.bond_length)
+        row = measure_rank(args.molecule, rank, args.restarts, args.bond_length,
+                           args.iterations)
         tag = label(args.molecule, args.bond_length)
-        (RAW / f"{tag}_M{rank:03d}.json").write_text(json.dumps(row, default=float))
+        suffix = f"_it{args.iterations // 1000}k" if args.iterations else ""
+        (RAW / f"{tag}_M{rank:03d}{suffix}.json").write_text(json.dumps(row, default=float))
         print(f"  {tag} M={rank:>3}  residual {row['residual']:.2e}  "
               f"err {row['energy_error']:.2e}  lambda {row['one_norm']:.2f}  "
               f"({row['seconds']:.0f}s)", flush=True)
