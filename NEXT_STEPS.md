@@ -123,10 +123,41 @@ coarse cut is 10–25% lower there), and (iii) METIS's own nested dissection
 LS-GPart says more about LS-GPart than about any solver. If (ii) beats (i), a
 classical exact solver does better than the quantum step can at its size limit.
 
-**Next refutation target.** Qedma's Floquet Ising claim (arXiv:2607.24937) is
-the only other row that fits here. Start by checking whether its observables
-are reproducible by belief-propagation tensor networks on heavy-hex at the
-claimed depths, at reduced size first.
+**Next refutation target: Qedma's Floquet Ising (arXiv:2607.24937).** It is the
+only other row that fits here, and the paper read on 2026-10-03 says what to try.
+
+* **The model:**
+  `U_F = Π_{r=1..3} e^{−iθ_zz C_r/2} e^{−iθ_z Z_Σ/2} e^{−iθ_x X_Σ/2}`
+  over the three edge colours `C_r` of heavy-hex, with `θ_x ≈ π/6`,
+  `θ_z ≈ π/27`, `θ_zz = π/3`. The start is `|0…0⟩`, up to 30 cycles, at 51 and 74
+  qubits. The observable is the magnetisation; the claim is a long-lived
+  oscillation of period ≈ 4 cycles, with "a nonzero asymptotic oscillation
+  amplitude in the thermodynamic limit".
+* **Their classical baselines fail by dynamics:** PEPS-BP (D = 700) at about 12
+  cycles, sparse Pauli paths (W = 20) at about 15, TEBD (χ = 4096) with
+  non-monotonic size scaling.
+* **The route they did not take is statistical mechanics, not dynamics.**
+  `3 θ_x = π/2`, so each cycle is a π/2 rotation about X times a weak remainder.
+  The period-4 oscillation is the free precession; what is claimed is that its
+  *amplitude* survives. In the toggling frame the leading-order effective
+  Hamiltonian averages `ZZ → (ZZ + YY)/2` and the `θ_z` field to zero. That is an
+  easy-plane magnet whose exact symmetry is the `Z₄` of the π/2 kick (U(1) at
+  leading order). Prethermalisation theory says the plateau is the Gibbs state
+  of that Hamiltonian at the initial state's energy.
+* **Steps.** (1) Build `H_eff` to second order (Floquet–Magnus in the toggling
+  frame) and check it against exact dynamics at 12–21 qubits. (2) Compute the
+  plateau magnetisation from the Gibbs ensemble at the initial energy: exact at
+  ≤ 21 qubits, and by sign-free QMC (stochastic series expansion on the
+  easy-plane ferromagnet) at 51, 74 and the thermodynamic limit. (3) Compare
+  with their mitigated 30-cycle data.
+* **What would count.** If the Gibbs prediction matches their data, their physics
+  is classically computable without simulating dynamics: a refutation of
+  "classical methods fail" for the quantity they report. If the leading-order
+  `H_eff` is U(1)-symmetric at finite temperature, Mermin–Wagner forbids a
+  nonzero amplitude in the 2-D thermodynamic limit. Their asymptotic claim would
+  then rest entirely on the `Z₄`-breaking higher-order terms, which is testable
+  in the same framework. Research-grade, and the Gibbs step is the cheap first
+  check.
 
 ### NEW — classical algorithm work is in scope, and it is already where the leverage was
 
