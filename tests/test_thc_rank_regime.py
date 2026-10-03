@@ -1,4 +1,4 @@
-"""Small-molecule THC thresholds: chemistry or algebra (Result 93).
+"""Small-molecule THC thresholds: chemistry or algebra (Result 94).
 
 The algebraic count is the reference every threshold is compared with, so it is
 pinned here, together with the independent-entry count it rests on.
@@ -42,7 +42,8 @@ def test_algebraic_rank(orbitals, rank):
 def test_algebraic_rank_is_the_first_rank_that_reaches_the_count():
     for orbitals in range(2, 12):
         rank = algebraic_rank(orbitals)
-        free = lambda m: orbitals * m + m * (m - 1) // 2  # noqa: E731
+        def free(m, orbitals=orbitals):
+            return orbitals * m + m * (m - 1) // 2
         assert free(rank) >= independent_entries(orbitals) > free(rank - 1)
 
 
@@ -139,10 +140,10 @@ def test_fci_energy_equals_the_series_qiskit_route(name):
     """The energy criterion changed implementation for H10; it must not change value."""
     import numpy as np
 
-    from qres.factorization import molecular_integrals
-    from qres.problems.chemistry import build_molecule
     from experiments.exp021_tensor_hypercontraction import energy_of
     from experiments.exp038_thc_rank_regime import fci_energy, integrals
+    from qres.factorization import molecular_integrals
+    from qres.problems.chemistry import build_molecule
 
     problem = build_molecule(name)
     one_body, two_body, _ = molecular_integrals(problem)
