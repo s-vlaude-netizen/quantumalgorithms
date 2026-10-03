@@ -5398,3 +5398,165 @@ is exactly Result 68's trap. They are therefore downgraded, not dropped.
 
 `experiments/exp037_ising_born_machine.py`, `tests/test_ising_born_machine.py`,
 `results/exp037_ising_born_machine.json`.
+
+---
+
+### Result 93 — IonQ + Ansys: every partition the quantum computer was asked for is computed exactly by a classical one, faster
+
+**The claim.** IonQ press release, 20 March 2025: "IonQ and Ansys Achieve Major
+Quantum Computing Milestone – Demonstrating Quantum Outperforming Classical
+Computing"; "12% faster performance over the classical computing
+alternative"; "one of the first cases ever where quantum computing is
+outperforming key classical methods". The paper is arXiv:2503.13128.
+
+**What the quantum computer was given.** LS-DYNA's sparse direct solver orders
+its matrix by nested dissection, which needs graph bisections. The paper coarsens
+the mesh graph to **10–32 vertices**, bisects that coarse graph with VarQITE on
+the QUBO `C(x) = Σ w_ij (x_i + x_j − 2x_i x_j) + λ(Σ v_i x_i − V/2)²` (their
+Eq. 3), projects back, and refines with Fiduccia–Mattheyses. For the wall-clock
+runs it takes "the partition which yielded the lowest WCT amongst the 10 lowest
+energy partitions from the solver's optimized distribution". In noiseless
+simulation "the optimal solution is found in each case". The baseline is
+LS-GPart at its production setting. **No classical solver was run on the same
+coarse graphs.**
+
+So the quantum computer's whole contribution to the 12% is one of a short list of
+low-energy bisections of a ≤ 32-vertex weighted graph. The question is therefore
+a narrow one: can a classical computer produce that list?
+
+#### Design
+
+* **Meshes:** stiffness-matrix graphs of three FEA-type meshes — a 2-D quad shell
+  with two openings (5 681 nodes, a roof), a 3-D hex hollow cylinder (8 288
+  nodes, a pump housing), and an unstructured Delaunay plate with a hole (6 000
+  nodes). The paper's own graphs are not public. The argument below does not
+  depend on them, because the exact solver's cost is instance-independent.
+* **Coarsening** METIS-style by heavy-edge matching to exactly 10, 12, …, 32
+  vertices, two seeds per mesh: 72 instances. Vertex weights count fine vertices
+  and edge weights count fine edges, so a coarse cut is the fine cut of the
+  projected partition (pinned by a test).
+* **λ** is not given in the paper. It is set where a 5% imbalance costs as much as
+  cutting every edge, `λ = Σw / (0.05 V)²`. For VarQITE it is then halved while
+  the QUBO optimum stays balanced; that choice uses the exact answer and so
+  favours VarQITE on purpose.
+* **Exact, two independent ways.** First, enumeration of all `2^(n−1)` bisections,
+  streamed (`x ↔ 1 − x` symmetry fixes vertex 0). It returns the QUBO optimum,
+  its degeneracy, **the 10 lowest-energy partitions**, and the minimum
+  balanced cut. Second, an **MILP** (HiGHS, inside SciPy) for the balanced
+  minimum cut, which proves optimality by bounds. Both are checked against
+  brute force over every partition, and against each other.
+* **Heuristics:** the paper's own FM refinement (their Algorithm 1: best-gain move
+  from the heavier side), started from 20 random balanced splits; METIS
+  (pymetis, ufactor for the 5% balance); spectral bisection.
+* **VarQITE as written:** `G θ̇ = D` with `G_αj = Re⟨ψ|P_α ∂_jψ⟩`,
+  `D_α = −½⟨{P_α, H − E}⟩`, `P_α` the Z-terms of `C`. The ansatz is two layers
+  of RZY gates (HeavyNeighbors), starting from `|+⟩ⁿ` with zero angles, with
+  forward Euler and 2 000 shots. `G` and `D` are exact, the best case.
+  Implementation checks: the gate against `expm`, the Jacobian against finite
+  differences, and `G`, `D` against exact imaginary-time evolution of the
+  moments.
+
+#### Measured
+
+72 coarse instances (3 meshes × sizes 10, 12, …, 32 × 2 seeds). One core, shared
+with five other jobs, so the times are upper bounds:
+
+| | what it returns | instances | worst time |
+|---|---|---|---|
+| **enumeration** | QUBO optimum, its degeneracy, **the 10 lowest partitions**, balanced optimum | 72 / 72 exact | **87 s at n = 32** (54–87 s), 23 s at 30, 6 s at 28, < 1.5 s at ≤ 24 |
+| **MILP (HiGHS)** | balanced minimum cut, proved optimal | 72 / 72, equal to enumeration in 72 / 72 | **0.59 s** |
+| the paper's FM, 20 random starts | QUBO optimum | **67 / 72**, all 5 misses at n ≤ 18 (ratio ≤ 1.088); 54 / 54 at n ≥ 20 | 43 ms |
+| METIS | balanced minimum cut | 50 / 72 | 5 ms |
+| spectral bisection | balanced minimum cut | 13 / 72 | 0.4 ms |
+
+* The QUBO optimum is balanced in 72/72 instances and unique up to the side swap
+  in 72/72. METIS and the MILP solve the balanced-cut problem, which allows the
+  5% slack the quadratic penalty charges for, so their QUBO "approximation
+  ratios" (up to 10.5) measure that difference in objective, not quality.
+* **Past the quantum step's limit.** The MILP proves the balanced optimum at
+  64, 128 and 256 coarse vertices in at most 3.2, 16.4 and 84 s. At 256 the
+  coarse balanced cut is 10%, 19% and 25% lower than at 32 (shell 195 → 175,
+  housing 3 236 → 2 617, unstructured 175 → 132). That is a coarse-level number
+  before any refinement, not a factorisation cost.
+
+**VarQITE as the paper specifies it** (9 instances, 10–14 qubits, up to 1 000
+Euler steps):
+
+| | |
+|---|---|
+| optimum "sampled at any given iteration" in 2 000 shots (the paper's criterion) | 9 / 9 |
+| … of which already at **step 0**, where the state is uniform | **5 / 9**; the other 4 at steps 1–2 |
+| 2 000 *uniform* shots contain the optimum with probability | 0.98 (n = 10), 0.62 (12), 0.22 (14) |
+| final probability of the optimum ≥ 0.9 | 2 / 9 (both on the housing mesh) |
+| final probability, the rest | 0.000–0.496 |
+| circuits spent (their count, `2m + 1` per step) | 7 225–99 000 per instance |
+
+The reproduction depends on choices the paper does not publish: λ, the step, the
+regulariser, the ansatz's `g` and gate orientation. It is therefore **not** used
+as evidence against VarQITE's convergence. The argument below grants VarQITE the
+optimum, as the paper reports it.
+
+#### What it says
+
+* **Everything the quantum computer handed to LS-DYNA is computed exactly by a
+  classical computer, faster.**
+  * The balanced optimum is proved in under 0.6 s.
+  * The QUBO optimum together with the full list of the 10 lowest-energy
+    partitions — the set the 12% run was selected from — takes at most 87 s on a
+    shared core. That cost is `2^(n−1)` streamed evaluations, so it holds for
+    every 32-vertex instance, including the paper's unpublished ones.
+  * The paper's own FM refinement, started from random splits instead of from
+    VarQITE's answer, reaches the optimum in 54 of 54 instances at n ≥ 20, in
+    43 ms.
+
+  For comparison, VarQITE spends `2m + 1` circuits per Euler step: 121 and 165
+  for the paper's 60- and 82-gate hardware ansätze, at 128 shots each.
+* **So the 12% is invariant under replacing the quantum solver with a classical
+  one.** LS-DYNA receives the same partition. Whatever the 12% measures — the
+  coarsen-to-≤32-then-solve-exactly pipeline against LS-GPart's production
+  setting — it is a comparison between two pipelines that both run on classical
+  computers. "Quantum outperforming classical computing" does not follow from
+  it. LS-DYNA isn't available here, so the 12% itself was not re-measured. It
+  does not have to be: the claim fails whatever its value.
+* **A classical exact solver is not even limited to 32 vertices.** It proves
+  balanced optima at 256 coarse vertices in seconds to a minute, where the
+  coarse cut is 10–25% lower. Whether finer exact coarse partitions also give
+  cheaper factorisations is open. The paper itself found 28 better than 32 on
+  one problem, so it need not be monotone. That is the next measurement, below.
+* **The paper's readout criterion is weak at its small sizes.** "The best
+  solution sampled at any given iteration" in 2 000 shots is met at step 0 by
+  uniform sampling with probability 0.98 at 10 qubits and 0.62 at 12. At 30–32
+  qubits, where the paper reports it, uniform sampling would not meet it
+  (2 000 · 2/2³² ≈ 10⁻⁶), so this does not touch their large-instance
+  statement. It does mean that 10–14-qubit success under that criterion is no
+  evidence of a working optimiser.
+* **What the press release's numbers describe.** "2.6 million vertices and 40
+  million edges" is the mesh LS-DYNA handled classically. The quantum computer
+  handled the ≤ 32-vertex coarse graph. The paper does not say whether the
+  wall-clock runs used partitions from simulation or from hardware; the press
+  release says "on an IonQ production system". It also selects the best of ten
+  runs by wall-clock time against an unrepeated baseline with no reported
+  run-to-run spread. The expected minimum of ten draws is 1.54 σ below the mean,
+  so timing noise alone favours the selected run. That is a caveat, not part of
+  the refutation, because σ is unknown.
+
+#### Grading
+
+**A′ — narrow.** What it refutes is the press release's attribution, "quantum
+outperforming classical computing". The script establishes that our statement
+holds: an exact classical computation of every partition the quantum step
+contributes, checked against brute force and by two independent exact methods,
+on every instance of the paper's size. It also establishes that theirs does
+not: the same pipeline with the classical solver produces identical input to
+LS-DYNA, faster, so the improvement cannot be quantum. It does **not** refute
+the paper's careful sentence that the VarQITE-powered pipeline "improves upon
+LS-GPart in most cases". That is a pipeline-against-pipeline claim, and it
+survives as one, with a classical solver in the slot. The observation is not
+deep: 32 binary variables are enumerable, and anyone could have said so. What
+the result adds is the concrete check, including the exact selection set the
+12% was drawn from and the readout criterion's weakness at small sizes. It is
+the repository's first A′.
+
+`experiments/exp039_ionq_ansys_partitioning.py`,
+`tests/test_ionq_ansys_partitioning.py`, `results/exp039_classical.json`,
+`results/exp039_varqite.json`.

@@ -25,7 +25,7 @@ is indistinguishable and, if anything, the wrong way round.
 
 ## The results here that are proofs (Results 86 and 89)
 
-Ninety-two results, and **two** of them establish something rather than
+Ninety-three results, and **two** of them establish something rather than
 measuring it. Both are small, both concern the same model, and each begins by
 correcting an earlier entry of my own.
 
@@ -150,7 +150,7 @@ one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
 published; that low λ costs nothing in accuracy here is what is new.
 
 → `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
-The rubric these are graded against, and where all 92 results sit under it, is at
+The rubric these are graded against, and where all 93 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -197,7 +197,43 @@ truncation — and the THC/DF contrast above.
 
 → `experiments/exp032_df_gauge.py`, `tests/test_df_gauge.py`.
 
-## The answer, since 92 results is a lot to read
+## A public advantage claim, checked: IonQ + Ansys (Result 93)
+
+**The claim.** IonQ, 20 March 2025: "Demonstrating Quantum Outperforming
+Classical Computing" — Ansys LS-DYNA "12% faster ... over the classical
+computing alternative", "one of the first cases ever where quantum computing is
+outperforming key classical methods" (paper: arXiv:2503.13128).
+
+**What the quantum computer actually did.** LS-DYNA's sparse solver needs graph
+bisections for nested dissection. The paper coarsens the mesh graph to
+**10–32 vertices**, bisects that coarse graph with VarQITE, and takes "the
+lowest-WCT partition amongst the **10 lowest energy partitions**". No classical
+solver was run on the same coarse graphs.
+
+**Measured here, on FEA-type meshes coarsened the way METIS does it:**
+
+| on the same coarse graphs (72 instances, 10–32 vertices) | result | time |
+|---|---|---|
+| exact enumeration: optimum **and the 10 lowest partitions** | 72 / 72 | ≤ 87 s at 32 vertices, one shared core |
+| exact MILP (HiGHS, in SciPy): balanced optimum, proved | 72 / 72, equal to enumeration | ≤ 0.6 s |
+| the paper's own FM refinement, from random starts | optimum in 54 / 54 at ≥ 20 vertices | ≤ 43 ms |
+| VarQITE as specified, 10–14 qubits | "optimum sampled at any iteration" 9 / 9 — but 5 / 9 already at step 0, where the state is uniform | `2m + 1` circuits per step |
+
+The MILP keeps proving optima at 256 coarse vertices (≤ 84 s), eight times the
+quantum step's limit, where the coarse cut is 10–25% lower.
+
+**So every partition the quantum computer handed to LS-DYNA is one a classical
+computer produces exactly, faster.** Replace VarQITE with the enumeration and
+LS-DYNA receives the same input. Whatever the 12% measures — the coarsen-to-32
+pipeline against LS-GPart's — it is not quantum against classical. LS-DYNA isn't
+available here, so the 12% itself is not re-measured. It does not need to be: it
+is invariant under swapping the solver.
+
+→ `experiments/exp039_ionq_ansys_partitioning.py`,
+`tests/test_ionq_ansys_partitioning.py`, Result 93 in the research log. The METIS
+arm needs `pip install pymetis` and is skipped without it.
+
+## The answer, since 93 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.

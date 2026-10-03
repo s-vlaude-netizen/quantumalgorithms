@@ -44,17 +44,17 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 92:
+Applied honestly, as of Result 93:
 
 | tier | results | note |
 |---|---|---|
 | **A** | **86, 89** | the THC gauge group, and its exact identifiability boundary; both small |
-| **A′** | none | nothing here refutes a paper |
+| **A′** | **93** (narrow) | IonQ + Ansys: every partition the quantum step handed LS-DYNA is computed exactly classically, faster — refutes the press release's "quantum outperforming classical", not the paper's pipeline claim |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
 | **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92 … |
 
-**That is two A in ninety-two results**, both on one model, and Result 72 had already said so from
+**That is two A and one narrow A′ in ninety-three results**; the two A are both on one model, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
@@ -84,7 +84,7 @@ this repository where that is plausible:
 ### NEW — public quantum-advantage claims as refutation targets (added on request, October 2026)
 
 **Why this belongs here:** tier **A′** — *refutes a published claim* — is the one
-rung of the rubric this repository has never reached. Press-release advantage
+rung of the rubric this repository had never reached, until Result 93 reached it, narrowly, from this list. Press-release advantage
 claims are the natural supply. Many have since been answered by better classical
 algorithms: one survey (arXiv:2607.07530, "The NISQ Trap") counts more than
 thirty such announcements and finds all but one reproduced or explained
@@ -97,7 +97,7 @@ exact simulation up to ~20 qubits, strong on baselines and statistics):
 
 | claim | status | route to a refutation | fit here |
 |---|---|---|---|
-| **IonQ + Ansys, March 2025** (arXiv:2503.13128): "quantum outperforming classical", LS-DYNA up to **12% faster** | **open, and weak** | The 12% comes from a **noiseless statevector simulation** of VarQITE, run on a classical computer; hardware only ran small instances. The quantum step partitions graphs coarsened to **≤ 32 nodes**, compared only against LS-DYNA's production setting (coarsened to 10 000 nodes). **No classical partitioner was run on the same 32-node graphs.** An exact one (branch and bound or an ILP) solves those in well under a second. | **best — do this first** |
+| **IonQ + Ansys, March 2025** (arXiv:2503.13128): "quantum outperforming classical", LS-DYNA up to **12% faster** | **refuted here — Result 93 (A′, narrow)** | The quantum step bisects graphs coarsened to **≤ 32 vertices**, and the 12% run is the best by wall clock among the **10 lowest-energy partitions**. Enumeration computes that whole list exactly (≤ 87 s at 32 on a shared core), an MILP proves the balanced optimum in < 0.6 s, and the paper's own FM refinement from random starts reaches the optimum in 54 of 54 instances at n ≥ 20. Same input to LS-DYNA, no quantum computer. The paper's pipeline-versus-LS-GPart claim stands, as a classical pipeline. | done; follow-up below |
 | **IBM tracker, July 2026**: Qedma's Floquet Ising, 74 qubits on heavy-hex (arXiv:2607.24937) | open, fresh | Heavy-hex is tree-like, which is where belief-propagation tensor networks and Pauli propagation reproduced IBM's 2023 "utility" result on a laptop. The claim rests on *late* times and on an error-mitigation extrapolation with no accuracy bound. | possible, research-grade |
 | IBM tracker, July 2026: Algorithmiq's Loschmidt echo, 56 qubits (arXiv:2607.25998) | open | Classical methods disagree with each other; the rescaling heuristic has no error bound. Algorithmiq released `monoprop` to invite challengers. | hard |
 | IBM/UChicago, July 2026: doped-Clifford sampling, 97 qubits, 468 T gates (arXiv:2607.25941) | open | Stabiliser-rank cost grows exponentially in the T count, unless the T placement allows cutting. | hard |
@@ -108,21 +108,25 @@ exact simulation up to ~20 qubits, strong on baselines and statistics):
 | "Peaked circuits" verifiable-advantage proposals | **refuted by others** | arXiv:2604.21908: efficient classical simulation. | done |
 | Microsoft: Majorana 1 (Feb 2025); logical qubits with Quantinuum and Atom | not an advantage claim | These are hardware claims. Microsoft itself says the chemistry demonstration "does not demonstrate scientific quantum advantage". A classical algorithm cannot refute a qubit-physics claim. | out of scope |
 
-**Plan for the top item.**
-1. Implement VarQITE graph bisection exactly as the paper describes, simulated as
-   they did, up to ~20 qubits here.
-2. Build FEA-type meshes (2-D/3-D grids and unstructured meshes) and coarsen them
-   multilevel to 10–32 nodes, as LS-DYNA does.
-3. Compare cut quality and time: VarQITE against an exact classical optimum,
-   Kernighan–Lin/Fiduccia–Mattheyses from random starts, spectral bisection, and
-   METIS-style multilevel.
-4. If an exact classical partition of the same coarse graph is at least as good
-   in milliseconds, the 12% is a property of the *pipeline* (coarsen to ~32, then
-   partition well) and is available classically. Their own speedup ran on a
-   classical computer.
+**Top item done — Result 93.** All four plan steps ran: VarQITE as specified,
+FEA-type meshes coarsened METIS-style, and the exact, FM, METIS and spectral
+comparison. An exact classical partition of the same coarse graph is the
+quantum step's output, so the 12% is a property of the pipeline.
 
-Without LS-DYNA the wall-clock figure itself cannot be re-measured here. What can
-be shown is that every input to it is classically matched.
+**Follow-up on this claim (tier B/C, optional): is the pipeline itself any good?**
+The paper's merit metrics are the factor's non-zeros and flops. Build nested-dissection
+orderings whose top separator comes from (i) the exact 32-vertex coarse bisection
+plus multilevel FM, (ii) the exact 256-vertex one (the MILP reaches it, and the
+coarse cut is 10–25% lower there), and (iii) METIS's own nested dissection
+(`pymetis.nested_dissection`). Count `nnz(L)` and flops by symbolic Cholesky
+(elimination tree and column counts). If (i) does not beat (iii), the 12% over
+LS-GPart says more about LS-GPart than about any solver. If (ii) beats (i), a
+classical exact solver does better than the quantum step can at its size limit.
+
+**Next refutation target.** Qedma's Floquet Ising claim (arXiv:2607.24937) is
+the only other row that fits here. Start by checking whether its observables
+are reproducible by belief-propagation tensor networks on heavy-hex at the
+claimed depths, at reduced size first.
 
 ### NEW — classical algorithm work is in scope, and it is already where the leverage was
 

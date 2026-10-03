@@ -1,0 +1,4514 @@
+{
+ "nu": 0.05,
+ "keep": 10,
+ "shots": 2000,
+ "summary": {
+  "milp_seconds_by_size": {
+   "64": 3.1602472920003493,
+   "128": 16.382279961000677,
+   "256": 83.9840214729993
+  },
+  "exact_seconds_by_size": {
+   "10": 0.0005455609989439836,
+   "12": 0.0005030359989177668,
+   "14": 0.0007802219988661818,
+   "16": 0.0063339209991681855,
+   "18": 0.01757123000061256,
+   "20": 0.29060140200090245,
+   "22": 0.7950955440010148,
+   "24": 1.4352173570005107,
+   "26": 2.168822704001286,
+   "28": 6.317904661000284,
+   "30": 23.341733492999992,
+   "32": 87.34834524899998
+  },
+  "milp": {
+   "instances": 72,
+   "optimal": 12,
+   "balanced_cut_optimal": 72,
+   "worst_ratio": 7.704637022012166,
+   "max_seconds": 0.5930673090006167
+  },
+  "fm": {
+   "instances": 72,
+   "optimal": 67,
+   "balanced_cut_optimal": 12,
+   "worst_ratio": 1.0879836532479368,
+   "max_seconds": 0.04303746699952171
+  },
+  "metis": {
+   "instances": 72,
+   "optimal": 15,
+   "balanced_cut_optimal": 50,
+   "worst_ratio": 10.536486165659804,
+   "max_seconds": 0.004834052999285632
+  },
+  "spectral": {
+   "instances": 72,
+   "optimal": 9,
+   "balanced_cut_optimal": 13,
+   "worst_ratio": 16.624249303858548,
+   "max_seconds": 0.00039898799877846614
+  }
+ },
+ "classical": [
+  {
+   "mesh": "shell",
+   "vertices": 10,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 17,
+   "lambda": 0.014253064587049521,
+   "exact_seconds": 0.0005455609989439836,
+   "optimum": 405.2270413417265,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    405.2270413417265,
+    440.88039683382425,
+    470.0035632661468,
+    488.1976622123464,
+    512.6760335431622,
+    528.9405255247444,
+    553.0811027881132,
+    560.0320693953208,
+    570.6449925064512,
+    571.1394448573874
+   ],
+   "balanced_cut": 311,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.11124516599920753,
+    "energy": 488.1976622123464,
+    "approximation_ratio": 1.204750948001644,
+    "optimal": false,
+    "cut": 311,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.004260118999809492,
+    "energy": 440.88039683382425,
+    "approximation_ratio": 1.0879836532479368,
+    "optimal": false,
+    "cut": 437,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002630620001582429,
+    "energy": 3711.2234189253613,
+    "approximation_ratio": 9.158380464041391,
+    "optimal": false,
+    "cut": 240,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004806580000149552,
+    "energy": 2021.3058657774652,
+    "approximation_ratio": 4.988082382372171,
+    "optimal": false,
+    "cut": 220,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 10,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 16,
+   "lambda": 0.014984308770211192,
+   "exact_seconds": 0.0003550709989212919,
+   "optimum": 297.21049167464554,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    297.21049167464554,
+    375.7791026896431,
+    428.28643070139856,
+    432.00374607719255,
+    449.808346662789,
+    451.3318835074722,
+    477.12837967660477,
+    482.6330870455414,
+    485.58894456087717,
+    507.5858063149194
+   ],
+   "balanced_cut": 209,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.027316517000144813,
+    "energy": 375.7791026896431,
+    "approximation_ratio": 1.2643534236368954,
+    "optimal": false,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.00871873599862738,
+    "energy": 297.21049167464554,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 275,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00018495600124879275,
+    "energy": 375.7791026896431,
+    "approximation_ratio": 1.2643534236368954,
+    "optimal": false,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.0003367099998285994,
+    "energy": 375.7791026896431,
+    "approximation_ratio": 1.2643534236368954,
+    "optimal": false,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 10,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 23,
+   "lambda": 0.06875433244883052,
+   "exact_seconds": 0.0004278719989088131,
+   "optimum": 5254.718858311221,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    5254.718858311221,
+    5314.50009689778,
+    5376.507042791551,
+    5477.910092835527,
+    5512.4841674617255,
+    5652.079152209642,
+    5722.072913483326,
+    5760.409981962105,
+    5782.276403713421,
+    6088.743120024672
+   ],
+   "balanced_cut": 3589,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.0564700510003604,
+    "energy": 13674.504272586499,
+    "approximation_ratio": 2.6023284292285154,
+    "optimal": false,
+    "cut": 3589,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.004214257000057842,
+    "energy": 5254.718858311221,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 5253,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00014435999946726952,
+    "energy": 13674.504272586499,
+    "approximation_ratio": 2.6023284292285154,
+    "optimal": false,
+    "cut": 3589,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.00037453900040418375,
+    "energy": 13674.504272586499,
+    "approximation_ratio": 2.6023284292285154,
+    "optimal": false,
+    "cut": 3589,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 10,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 23,
+   "lambda": 0.07086814820888179,
+   "exact_seconds": 0.00042479500007175375,
+   "optimum": 4010.4892504024983,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    4010.4892504024983,
+    4770.275680241052,
+    5005.400450574678,
+    5338.5606281957635,
+    5422.231260062462,
+    5529.2539262235205,
+    5583.068628318749,
+    5613.480894832367,
+    5731.63333367496,
+    5815.175413399472
+   ],
+   "balanced_cut": 3973,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.062376975000006496,
+    "energy": 4010.4892504024983,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3973,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.00840120599968941,
+    "energy": 4010.4892504024983,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3973,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.0001849349991971394,
+    "energy": 15991.366327648662,
+    "approximation_ratio": 3.9873854109056013,
+    "optimal": false,
+    "cut": 3609,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00047981500028981827,
+    "energy": 37378.19427492509,
+    "approximation_ratio": 9.32010833121514,
+    "optimal": false,
+    "cut": 3540,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 10,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 20,
+   "lambda": 0.010744444444444444,
+   "exact_seconds": 0.00037898800110269804,
+   "optimum": 367.5472,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    367.5472,
+    374.2049777777778,
+    394.9463,
+    403.4575,
+    416.16194444444443,
+    418.7852,
+    421.8012444444444,
+    424.24564444444445,
+    424.4175,
+    461.3952777777778
+   ],
+   "balanced_cut": 285,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.050959895001142286,
+    "energy": 403.4575,
+    "approximation_ratio": 1.0977025535767924,
+    "optimal": false,
+    "cut": 285,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.005188143999475869,
+    "energy": 374.2049777777778,
+    "approximation_ratio": 1.0181140756283216,
+    "optimal": false,
+    "cut": 291,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00014162899969960563,
+    "energy": 367.5472,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 366,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0003745789999811677,
+    "energy": 1481.7132,
+    "approximation_ratio": 4.031354884488305,
+    "optimal": false,
+    "cut": 225,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 10,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 20,
+   "lambda": 0.00938888888888889,
+   "exact_seconds": 0.0004288750005798647,
+   "optimum": 340.0093888888889,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    340.0093888888889,
+    352.0845,
+    358.7605,
+    362.83472222222224,
+    364.93888888888887,
+    368.6005,
+    370.2347222222222,
+    376.338,
+    382.03755555555557,
+    394.03755555555557
+   ],
+   "balanced_cut": 241,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.023070059000019683,
+    "energy": 624.1042222222222,
+    "approximation_ratio": 1.8355499660221801,
+    "optimal": false,
+    "cut": 241,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.004393994999190909,
+    "energy": 352.0845,
+    "approximation_ratio": 1.0355140519812442,
+    "optimal": false,
+    "cut": 352,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00013358499927562661,
+    "energy": 2815.848,
+    "approximation_ratio": 8.281677188979584,
+    "optimal": false,
+    "cut": 316,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00039064500015228987,
+    "energy": 3582.5042222222223,
+    "approximation_ratio": 10.536486165659804,
+    "optimal": false,
+    "cut": 225,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 12,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 19,
+   "lambda": 0.016930161935573604,
+   "exact_seconds": 0.00041276999945694115,
+   "optimum": 350.3496819289205,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    350.3496819289205,
+    419.0855220127583,
+    470.0042325404839,
+    479.5121373985511,
+    502.866550353397,
+    503.5801049961298,
+    511.5801049961298,
+    521.480005723535,
+    523.1334450608344,
+    524.5512203551361
+   ],
+   "balanced_cut": 205,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.04565028000070015,
+    "energy": 1518.1414525874438,
+    "approximation_ratio": 4.333217727582943,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.005959152000286849,
+    "energy": 350.3496819289205,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 341,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00014078499953029677,
+    "energy": 350.3496819289205,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 341,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0003195690005668439,
+    "energy": 1518.1414525874438,
+    "approximation_ratio": 4.333217727582943,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 12,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 21,
+   "lambda": 0.018144770917774347,
+   "exact_seconds": 0.0005030359989177668,
+   "optimum": 410.95583650755793,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    410.95583650755793,
+    432.00453619272946,
+    441.8456034299814,
+    442.6253399781947,
+    463.2407131911276,
+    490.6810373913347,
+    510.0004609936846,
+    514.895086692871,
+    524.7619604978794,
+    545.3109596988091
+   ],
+   "balanced_cut": 209,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.025249365000490798,
+    "energy": 410.95583650755793,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.006633555998632801,
+    "energy": 410.95583650755793,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.00015033799900265876,
+    "energy": 410.95583650755793,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.0003455749993008794,
+    "energy": 410.95583650755793,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 12,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 28,
+   "lambda": 0.076149776017054,
+   "exact_seconds": 0.00045179300104791764,
+   "optimum": 3895.133699603837,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3895.133699603837,
+    4391.869312146882,
+    4467.960276568626,
+    4582.708424330287,
+    4657.353072451589,
+    4909.618883327619,
+    4930.0419616303425,
+    5122.410622279408,
+    5332.358566509146,
+    5347.903744400426
+   ],
+   "balanced_cut": 3589,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.07076525299999048,
+    "energy": 14759.334494165634,
+    "approximation_ratio": 3.7891727556532304,
+    "optimal": false,
+    "cut": 3589,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.007302832000277704,
+    "energy": 3895.133699603837,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3878,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00016840399985085241,
+    "energy": 37922.28036720531,
+    "approximation_ratio": 9.735809677357745,
+    "optimal": false,
+    "cut": 5749,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0003884310008288594,
+    "energy": 14759.334494165634,
+    "approximation_ratio": 3.7891727556532304,
+    "optimal": false,
+    "cut": 3589,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 12,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 28,
+   "lambda": 0.07961457044468627,
+   "exact_seconds": 0.0004617260001396062,
+   "optimum": 4722.60268369583,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    4722.60268369583,
+    4815.831958751361,
+    5034.823414975925,
+    5213.09533250846,
+    5438.834075595176,
+    5443.039021854176,
+    5505.533452095228,
+    5572.111395178963,
+    5616.008610858515,
+    5638.533250845992
+   ],
+   "balanced_cut": 3622,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.038422379999246914,
+    "energy": 6004.784478839016,
+    "approximation_ratio": 1.2714989765219402,
+    "optimal": false,
+    "cut": 3622,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.0067983000008098315,
+    "energy": 4722.60268369583,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 4120,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0001429920012014918,
+    "energy": 41554.44471049924,
+    "approximation_ratio": 8.799055837146865,
+    "optimal": false,
+    "cut": 3540,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004569630000332836,
+    "energy": 6004.784478839016,
+    "approximation_ratio": 1.2714989765219402,
+    "optimal": false,
+    "cut": 3622,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 12,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 26,
+   "lambda": 0.011722222222222222,
+   "exact_seconds": 0.00048068199976114556,
+   "optimum": 338.09172222222224,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    338.09172222222224,
+    367.0117222222222,
+    367.688,
+    371.0,
+    381.7768888888889,
+    389.1055,
+    395.29755555555556,
+    397.4895,
+    397.7655,
+    402.9983888888889
+   ],
+   "balanced_cut": 237,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.028066471000784077,
+    "energy": 402.9983888888889,
+    "approximation_ratio": 1.1919794611948664,
+    "optimal": false,
+    "cut": 237,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.005879197000467684,
+    "energy": 338.09172222222224,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 279,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00014147900037642103,
+    "energy": 1678.0717222222222,
+    "approximation_ratio": 4.963362342007453,
+    "optimal": false,
+    "cut": 315,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00036877899947285186,
+    "energy": 1596.078,
+    "approximation_ratio": 4.720843176843364,
+    "optimal": false,
+    "cut": 225,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 12,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 26,
+   "lambda": 0.011933333333333334,
+   "exact_seconds": 0.0004420730001584161,
+   "optimum": 387.165,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    387.165,
+    394.9666,
+    395.05993333333333,
+    408.0167333333333,
+    417.4656,
+    426.21973333333335,
+    430.44393333333335,
+    441.58473333333336,
+    463.565,
+    465.73193333333336
+   ],
+   "balanced_cut": 281,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.08471541300059471,
+    "energy": 470.45360000000005,
+    "approximation_ratio": 1.215124301008614,
+    "optimal": false,
+    "cut": 281,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.010375951998867095,
+    "energy": 387.165,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 363,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00016268299987132195,
+    "energy": 470.45360000000005,
+    "approximation_ratio": 1.215124301008614,
+    "optimal": false,
+    "cut": 281,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.00040431100023852196,
+    "energy": 1706.5877333333335,
+    "approximation_ratio": 4.4079080839779765,
+    "optimal": false,
+    "cut": 228,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 14,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 24,
+   "lambda": 0.017872103595239486,
+   "exact_seconds": 0.0005408199995144969,
+   "optimum": 264.81290466890425,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    264.81290466890425,
+    350.869869210471,
+    370.2571908802324,
+    401.540631133756,
+    405.7925161867562,
+    422.8754585187639,
+    433.0647897219044,
+    438.6129573494704,
+    441.86568020380395,
+    451.2571908802324
+   ],
+   "balanced_cut": 195,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.021064952999950037,
+    "energy": 264.81290466890425,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.004937641000651638,
+    "energy": 264.81290466890425,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.00015743500080134254,
+    "energy": 4402.315746094791,
+    "approximation_ratio": 16.624249303858548,
+    "optimal": false,
+    "cut": 276,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00031094699988898356,
+    "energy": 264.81290466890425,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 14,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 26,
+   "lambda": 0.019123894485058617,
+   "exact_seconds": 0.0005042760003561852,
+   "optimum": 303.3463926004781,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    303.3463926004781,
+    312.8380563703127,
+    421.8537265923237,
+    432.0047809736213,
+    433.9079922231561,
+    440.0047809736213,
+    446.0462883145227,
+    456.5706423865505,
+    459.1482869319135,
+    467.5706423865505
+   ],
+   "balanced_cut": 209,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.019417569999859552,
+    "energy": 421.8537265923237,
+    "approximation_ratio": 1.390666699465009,
+    "optimal": false,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.005598841000391985,
+    "energy": 303.3463926004781,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 275,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00011622700003499631,
+    "energy": 1814.665291256262,
+    "approximation_ratio": 5.982155501174079,
+    "optimal": false,
+    "cut": 405,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0003029039999091765,
+    "energy": 421.8537265923237,
+    "approximation_ratio": 1.390666699465009,
+    "optimal": false,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 14,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 33,
+   "lambda": 0.07861298281182451,
+   "exact_seconds": 0.000496319999001571,
+   "optimum": 3895.6879211326604,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3895.6879211326604,
+    4102.34507162982,
+    4392.285594095199,
+    4471.517147180274,
+    4593.438153128308,
+    4664.80427300577,
+    4695.852036157779,
+    4779.0,
+    4806.281078099611,
+    4818.20361577794
+   ],
+   "balanced_cut": 3589,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.07867064200036111,
+    "energy": 15120.659835683726,
+    "approximation_ratio": 3.8813837611734145,
+    "optimal": false,
+    "cut": 3589,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.014089946000240161,
+    "energy": 3895.6879211326604,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3878,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00020243300059519242,
+    "energy": 10302.102920350026,
+    "approximation_ratio": 2.6444887601147267,
+    "optimal": false,
+    "cut": 4486,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0005572290010604775,
+    "energy": 15120.659835683726,
+    "approximation_ratio": 3.8813837611734145,
+    "optimal": false,
+    "cut": 3589,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 14,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 32,
+   "lambda": 0.08209524679119273,
+   "exact_seconds": 0.0007802219988661818,
+   "optimum": 4741.378922962538,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    4741.378922962538,
+    4829.785763200459,
+    4893.933524861734,
+    4922.893532166337,
+    5030.816015339664,
+    5043.168410205572,
+    5058.885722112073,
+    5094.313523948659,
+    5213.254095794637,
+    5252.742718224982
+   ],
+   "balanced_cut": 3622,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.16231737099951715,
+    "energy": 6079.028641213607,
+    "approximation_ratio": 1.2821225090812338,
+    "optimal": false,
+    "cut": 3622,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.019987493000371614,
+    "energy": 4741.378922962538,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 4120,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00019406899991736282,
+    "energy": 42738.9205331055,
+    "approximation_ratio": 9.014027612541268,
+    "optimal": false,
+    "cut": 3540,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0005239940001047216,
+    "energy": 42738.9205331055,
+    "approximation_ratio": 9.014027612541268,
+    "optimal": false,
+    "cut": 3540,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 14,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 32,
+   "lambda": 0.012633333333333333,
+   "exact_seconds": 0.000709138999809511,
+   "optimum": 267.5606333333333,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    267.5606333333333,
+    317.3728,
+    342.68463333333335,
+    352.5606333333333,
+    355.8593,
+    367.0126333333333,
+    367.8192,
+    371.0,
+    375.2852,
+    383.8425
+   ],
+   "balanced_cut": 237,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.12625847999879625,
+    "energy": 415.9006333333333,
+    "approximation_ratio": 1.5544163883600712,
+    "optimal": false,
+    "cut": 237,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.010299230998498388,
+    "energy": 267.5606333333333,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 263,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00021566000032180455,
+    "energy": 1103.4566333333332,
+    "approximation_ratio": 4.124136722156062,
+    "optimal": false,
+    "cut": 256,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004583689988066908,
+    "energy": 1702.6452,
+    "approximation_ratio": 6.363586372135711,
+    "optimal": false,
+    "cut": 225,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 14,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 31,
+   "lambda": 0.013166666666666667,
+   "exact_seconds": 0.0006161880010040477,
+   "optimum": 336.7531666666667,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    336.7531666666667,
+    340.0131666666667,
+    344.2585,
+    346.9625,
+    349.83316666666667,
+    352.1185,
+    392.05266666666665,
+    398.0731666666667,
+    404.474,
+    407.98516666666666
+   ],
+   "balanced_cut": 264,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.08920118199966964,
+    "energy": 895.4865,
+    "approximation_ratio": 2.6591776667282017,
+    "optimal": false,
+    "cut": 264,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.006219247999979416,
+    "energy": 336.7531666666667,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 332,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00015000600069470238,
+    "energy": 757.3265,
+    "approximation_ratio": 2.248906840272227,
+    "optimal": false,
+    "cut": 287,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004167059996689204,
+    "energy": 895.4865,
+    "approximation_ratio": 2.6591776667282017,
+    "optimal": false,
+    "cut": 264,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 16,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 27,
+   "lambda": 0.02037568537487775,
+   "exact_seconds": 0.0021443990008265246,
+   "optimum": 274.5925209956162,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    274.5925209956162,
+    354.28398785006806,
+    358.14550684068087,
+    370.71346865957145,
+    408.5925209956162,
+    436.1598573528508,
+    437.1465005581469,
+    438.83890560508274,
+    439.4126076288413,
+    445.31519072103185
+   ],
+   "balanced_cut": 195,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.027380186000300455,
+    "energy": 274.5925209956162,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.008889142000043648,
+    "energy": 274.5925209956162,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.00015702599921496585,
+    "energy": 1785.3840029676119,
+    "approximation_ratio": 6.501939661335914,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00034631700145837385,
+    "energy": 274.5925209956162,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 16,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 29,
+   "lambda": 0.02046244315932066,
+   "exact_seconds": 0.0015767780005262466,
+   "optimum": 305.33045637290303,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    305.33045637290303,
+    314.9265269393301,
+    315.47472263923623,
+    324.6206194561582,
+    416.73473302352335,
+    425.26108989900496,
+    428.6225972237943,
+    432.00511561078986,
+    434.7753106927947,
+    436.61345558703243
+   ],
+   "balanced_cut": 209,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.050102221999623,
+    "energy": 436.7521079740288,
+    "approximation_ratio": 1.430424311948164,
+    "optimal": false,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.009735624000313692,
+    "energy": 305.33045637290303,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 275,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00014908199955243617,
+    "energy": 436.7521079740288,
+    "approximation_ratio": 1.430424311948164,
+    "optimal": false,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.00036309499955677893,
+    "energy": 436.7521079740288,
+    "approximation_ratio": 1.430424311948164,
+    "optimal": false,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 16,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 41,
+   "lambda": 0.08712647769114949,
+   "exact_seconds": 0.0063339209991681855,
+   "optimum": 3507.6911066471876,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3507.6911066471876,
+    3897.6034574805085,
+    4444.557595015727,
+    4849.0968572509355,
+    5014.394023643058,
+    5076.276147959184,
+    5139.204574041085,
+    5158.073926018545,
+    5170.359982707473,
+    5172.076789627466
+   ],
+   "balanced_cut": 3354,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.1261750289995689,
+    "energy": 3507.6911066471876,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.00747582800067903,
+    "energy": 3507.6911066471876,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.0001984229984373087,
+    "energy": 3507.6911066471876,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.00042689799920481164,
+    "energy": 3507.6911066471876,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 16,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 38,
+   "lambda": 0.08815135805965921,
+   "exact_seconds": 0.001475204000598751,
+   "optimum": 4019.63206841356,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    4019.63206841356,
+    4187.4989956172385,
+    4215.679209183673,
+    4240.403762335833,
+    4371.87474890431,
+    4415.657858130469,
+    4734.87474890431,
+    4880.87474890431,
+    4915.410421728954,
+    4934.679209183673
+   ],
+   "balanced_cut": 3525,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.08817314400039322,
+    "energy": 5014.757951208241,
+    "approximation_ratio": 1.2475664105216053,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.008857979999447707,
+    "energy": 4019.63206841356,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3973,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00015775000065332279,
+    "energy": 5014.757951208241,
+    "approximation_ratio": 1.2475664105216053,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.0005392819984990638,
+    "energy": 5014.757951208241,
+    "approximation_ratio": 1.2475664105216053,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 16,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 34,
+   "lambda": 0.012177777777777777,
+   "exact_seconds": 0.0015202329996100161,
+   "optimum": 267.3961777777778,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    267.3961777777778,
+    274.5193777777778,
+    278.7824,
+    281.77937777777777,
+    285.0775111111111,
+    289.4384,
+    291.5224,
+    294.69759999999997,
+    301.19484444444447,
+    301.4708444444444
+   ],
+   "balanced_cut": 168,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.07805127299980086,
+    "energy": 294.69759999999997,
+    "approximation_ratio": 1.1021010189790794,
+    "optimal": false,
+    "cut": 168,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.017286587999478797,
+    "energy": 274.5193777777778,
+    "approximation_ratio": 1.0266391242357988,
+    "optimal": false,
+    "cut": 271,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.000204873998882249,
+    "energy": 1008.0344,
+    "approximation_ratio": 3.769816039920125,
+    "optimal": false,
+    "cut": 253,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004473349999898346,
+    "energy": 294.69759999999997,
+    "approximation_ratio": 1.1021010189790794,
+    "optimal": false,
+    "cut": 168,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 16,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 36,
+   "lambda": 0.014077777777777778,
+   "exact_seconds": 0.006176975000926177,
+   "optimum": 225.3307,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    225.3307,
+    244.27247777777777,
+    252.01407777777777,
+    267.1267,
+    304.0684777777778,
+    321.2083,
+    332.75924444444445,
+    340.0140777777778,
+    346.0684777777778,
+    347.8747
+   ],
+   "balanced_cut": 210,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.11377759700008028,
+    "energy": 225.3307,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 210,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.025029669999639736,
+    "energy": 225.3307,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 210,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.00018062399976770394,
+    "energy": 1218.8363,
+    "approximation_ratio": 5.409100047175107,
+    "optimal": false,
+    "cut": 346,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0003577469997253502,
+    "energy": 225.3307,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 210,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 18,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 32,
+   "lambda": 0.021937325494850134,
+   "exact_seconds": 0.01757123000061256,
+   "optimum": 242.97243686597295,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    242.97243686597295,
+    280.69267771425837,
+    354.6123226852922,
+    360.2260018905141,
+    360.27044245013775,
+    370.99807757143645,
+    374.97984362591023,
+    395.9724493528969,
+    402.7183059327979,
+    413.76731122226505
+   ],
+   "balanced_cut": 195,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.050587313000505674,
+    "energy": 280.69267771425837,
+    "approximation_ratio": 1.155244937799642,
+    "optimal": false,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.026675170000089565,
+    "energy": 242.97243686597295,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 237,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00025538400041114073,
+    "energy": 712.9058384611574,
+    "approximation_ratio": 2.934101693413094,
+    "optimal": false,
+    "cut": 286,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004999180000595516,
+    "energy": 280.69267771425837,
+    "approximation_ratio": 1.155244937799642,
+    "optimal": false,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 18,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 33,
+   "lambda": 0.022495054109125983,
+   "exact_seconds": 0.016920361000302364,
+   "optimum": 262.57038576941807,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    262.57038576941807,
+    272.63993074745764,
+    352.12427848120956,
+    360.8891103209198,
+    425.12427848120956,
+    432.4044367497175,
+    442.0301786333486,
+    450.48007971553113,
+    454.55374432499514,
+    455.48007971553113
+   ],
+   "balanced_cut": 216,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.04982404200018209,
+    "energy": 262.57038576941807,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 216,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01723922500059416,
+    "energy": 262.57038576941807,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 216,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.00018034500135399867,
+    "energy": 262.57038576941807,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 216,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.0004494280001381412,
+    "energy": 262.57038576941807,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 216,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 18,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 48,
+   "lambda": 0.09439381121330928,
+   "exact_seconds": 0.007853592998799286,
+   "optimum": 3520.5106829802776,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3520.5106829802776,
+    3525.3775752448532,
+    3781.7464185089666,
+    4135.71245257599,
+    4162.592708814716,
+    4195.240865520788,
+    4394.7948604112935,
+    4401.041203917652,
+    4410.225127551021,
+    4629.094393811213
+   ],
+   "balanced_cut": 3354,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.0880731540000852,
+    "energy": 3520.5106829802776,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.008663589998832322,
+    "energy": 3520.5106829802776,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.00016929200137383305,
+    "energy": 3525.3775752448532,
+    "approximation_ratio": 1.0013824392830575,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004746670001622988,
+    "energy": 3520.5106829802776,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 18,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 44,
+   "lambda": 0.09520323377707547,
+   "exact_seconds": 0.01031811300163099,
+   "optimum": 3558.8568291039937,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3558.8568291039937,
+    4325.065919606521,
+    4374.98462609569,
+    4449.427316415975,
+    4665.219752985197,
+    4685.519591287026,
+    4689.709265663899,
+    4715.095203233777,
+    4730.163382002728,
+    4731.403157423488
+   ],
+   "balanced_cut": 3525,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.18824087799839617,
+    "energy": 5133.934650832575,
+    "approximation_ratio": 1.4425797095426105,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.008721152998987236,
+    "energy": 3558.8568291039937,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3558,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00017349799963994883,
+    "energy": 12472.061419449992,
+    "approximation_ratio": 3.504513392462056,
+    "optimal": false,
+    "cut": 4187,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004750659991259454,
+    "energy": 5133.934650832575,
+    "approximation_ratio": 1.4425797095426105,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 18,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 40,
+   "lambda": 0.013766666666666667,
+   "exact_seconds": 0.009041076000357862,
+   "optimum": 267.96976666666666,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    267.96976666666666,
+    274.97856666666667,
+    280.84159999999997,
+    281.88106666666664,
+    286.91426666666666,
+    289.4956,
+    293.9391,
+    296.37666666666667,
+    304.1417666666667,
+    304.9824
+   ],
+   "balanced_cut": 232,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.07124772799943457,
+    "energy": 351.0679,
+    "approximation_ratio": 1.3101026446640187,
+    "optimal": false,
+    "cut": 232,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.007742997000605101,
+    "energy": 274.97856666666667,
+    "approximation_ratio": 1.02615518939761,
+    "optimal": false,
+    "cut": 271,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00013865500113752205,
+    "energy": 801.6041666666667,
+    "approximation_ratio": 2.99139778579499,
+    "optimal": false,
+    "cut": 380,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00034407599923724774,
+    "energy": 351.0679,
+    "approximation_ratio": 1.3101026446640187,
+    "optimal": false,
+    "cut": 232,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 18,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 42,
+   "lambda": 0.014544444444444445,
+   "exact_seconds": 0.007072047999827191,
+   "optimum": 225.8389,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    225.8389,
+    244.91134444444444,
+    252.01454444444445,
+    267.1309,
+    300.91134444444447,
+    304.20334444444444,
+    311.8389,
+    315.99694444444447,
+    321.4141,
+    324.8301
+   ],
+   "balanced_cut": 205,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.054276778999337694,
+    "energy": 377.80254444444444,
+    "approximation_ratio": 1.6728851603707087,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.010793228999318671,
+    "energy": 225.8389,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 210,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00023142600002756808,
+    "energy": 811.3344444444444,
+    "approximation_ratio": 3.592536292217348,
+    "optimal": false,
+    "cut": 391,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004453860001376597,
+    "energy": 377.80254444444444,
+    "approximation_ratio": 1.6728851603707087,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 20,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 37,
+   "lambda": 0.023895572629418674,
+   "exact_seconds": 0.14505852500042238,
+   "optimum": 354.19632998459645,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    354.19632998459645,
+    362.5380961022795,
+    371.35496811171157,
+    388.3441259604048,
+    394.4192125299558,
+    395.0971336436432,
+    399.1541499610163,
+    403.3180191177595,
+    415.14934732893386,
+    420.35496811171157
+   ],
+   "balanced_cut": 251,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.06098438799926953,
+    "energy": 874.2502992136552,
+    "approximation_ratio": 2.4682647029450453,
+    "optimal": false,
+    "cut": 251,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.008150024001224665,
+    "energy": 354.19632998459645,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 341,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0001533049999125069,
+    "energy": 1030.921324013027,
+    "approximation_ratio": 2.9105929021282084,
+    "optimal": false,
+    "cut": 261,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004480380011955276,
+    "energy": 874.2502992136552,
+    "approximation_ratio": 2.4682647029450453,
+    "optimal": false,
+    "cut": 251,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 20,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 39,
+   "lambda": 0.024069088198304497,
+   "exact_seconds": 0.027149446999828797,
+   "optimum": 265.82902984253985,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    265.82902984253985,
+    276.0433859567839,
+    310.67640598193685,
+    320.5537948614046,
+    352.5528092619884,
+    361.37115826073074,
+    395.33306840191324,
+    396.0605257936935,
+    397.2376454358697,
+    401.64823222803193
+   ],
+   "balanced_cut": 216,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.05887781900128175,
+    "energy": 265.82902984253985,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 216,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.017588200000318466,
+    "energy": 265.82902984253985,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 216,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.0001987410014407942,
+    "energy": 265.82902984253985,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 216,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.00042739899981825147,
+    "energy": 265.82902984253985,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 216,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 20,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 54,
+   "lambda": 0.09781202016964564,
+   "exact_seconds": 0.29060140200090245,
+   "optimum": 3525.3912480806785,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3525.3912480806785,
+    3526.540403579255,
+    3788.364071048434,
+    4138.997351383029,
+    4163.084930904429,
+    4204.483702538721,
+    4395.53023140867,
+    4401.259969290857,
+    4414.422005905174,
+    4414.904655612245
+   ],
+   "balanced_cut": 3354,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.3012339540000539,
+    "energy": 3526.540403579255,
+    "approximation_ratio": 1.000325965380212,
+    "optimal": false,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01599876399995992,
+    "energy": 3525.3912480806785,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0001576409995323047,
+    "energy": 3525.3912480806785,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00038502799907291774,
+    "energy": 3525.3912480806785,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 20,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 53,
+   "lambda": 0.10079349033258299,
+   "exact_seconds": 0.15815817300062918,
+   "optimum": 4225.6126958453215,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    4225.6126958453215,
+    4232.986288265306,
+    4329.767325369702,
+    4377.449929236669,
+    4670.306898795859,
+    4690.514262607892,
+    4691.069099297863,
+    4715.100793490333,
+    4716.228201726271,
+    4765.05217316565
+   ],
+   "balanced_cut": 3525,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.14627181099967856,
+    "energy": 5228.4099866206525,
+    "approximation_ratio": 1.2373140566718985,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01141815799928736,
+    "energy": 4225.6126958453215,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 4224,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00018267400082550012,
+    "energy": 5228.4099866206525,
+    "approximation_ratio": 1.2373140566718985,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.0004884280006081099,
+    "energy": 5228.4099866206525,
+    "approximation_ratio": 1.2373140566718985,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 20,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 42,
+   "lambda": 0.014333333333333333,
+   "exact_seconds": 0.05165947500063339,
+   "optimum": 281.576,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    281.576,
+    287.56933333333336,
+    287.62233333333336,
+    293.55833333333334,
+    296.93333333333334,
+    302.69733333333335,
+    303.09433333333334,
+    308.801,
+    311.62233333333336,
+    313.7493333333333
+   ],
+   "balanced_cut": 242,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.11175567999998748,
+    "energy": 484.23333333333335,
+    "approximation_ratio": 1.7197251659705846,
+    "optimal": false,
+    "cut": 242,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.018615909000800457,
+    "energy": 281.576,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 263,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002387650001764996,
+    "energy": 594.2143333333333,
+    "approximation_ratio": 2.1103159833697944,
+    "optimal": false,
+    "cut": 276,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.004641167000954738,
+    "energy": 1607.2093333333332,
+    "approximation_ratio": 5.707905976835146,
+    "optimal": false,
+    "cut": 194,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 20,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 49,
+   "lambda": 0.0161,
+   "exact_seconds": 0.07980680900072912,
+   "optimum": 282.4864,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    282.4864,
+    301.8656,
+    309.7025,
+    314.0441,
+    318.62239999999997,
+    330.0441,
+    330.4864,
+    333.1556,
+    334.0644,
+    334.2736
+   ],
+   "balanced_cut": 246,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.059120089001226006,
+    "energy": 617.9744000000001,
+    "approximation_ratio": 2.187625315767414,
+    "optimal": false,
+    "cut": 246,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.007793001999743865,
+    "energy": 282.4864,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 266,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00019443800010776613,
+    "energy": 282.4864,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 266,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00042245099939464126,
+    "energy": 601.6544,
+    "approximation_ratio": 2.129852622993532,
+    "optimal": false,
+    "cut": 249,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 22,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 41,
+   "lambda": 0.025494394657009447,
+   "exact_seconds": 0.6785537670002668,
+   "optimum": 294.5874791289432,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    294.5874791289432,
+    301.777629263599,
+    355.07927944933346,
+    355.36019647663625,
+    364.96490728180083,
+    377.1864969502625,
+    394.0573623879783,
+    409.426174191474,
+    414.8107570109353,
+    420.64635342623995
+   ],
+   "balanced_cut": 195,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.038362690998837934,
+    "energy": 294.5874791289432,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.011762524000005214,
+    "energy": 294.5874791289432,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.00022463599998445716,
+    "energy": 2182.4026119856308,
+    "approximation_ratio": 7.4083345919477335,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004327450005803257,
+    "energy": 294.5874791289432,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 22,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 46,
+   "lambda": 0.025742274041132048,
+   "exact_seconds": 0.16212195300067833,
+   "optimum": 269.2929428336536,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    269.2929428336536,
+    279.66123204543777,
+    353.0083341076982,
+    359.8835714250967,
+    361.8835714250967,
+    368.8102932905774,
+    397.44170086033665,
+    397.8102932905774,
+    401.16088921275707,
+    403.63974167745744
+   ],
+   "balanced_cut": 208,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.06254426700070326,
+    "energy": 452.7124926035115,
+    "approximation_ratio": 1.6811153231117495,
+    "optimal": false,
+    "cut": 208,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.012348845000815345,
+    "energy": 269.2929428336536,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 216,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00039898799877846614,
+    "energy": 732.6841729725891,
+    "approximation_ratio": 2.720770047899767,
+    "optimal": false,
+    "cut": 267,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0005948180005361792,
+    "energy": 452.7124926035115,
+    "approximation_ratio": 1.6811153231117495,
+    "optimal": false,
+    "cut": 208,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 22,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 59,
+   "lambda": 0.10138163190769367,
+   "exact_seconds": 0.13923402999898826,
+   "optimum": 3525.4055265276306,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3525.4055265276306,
+    3532.8371986851716,
+    3766.649738748677,
+    3795.274839373295,
+    3861.2992916213234,
+    4142.427748263293,
+    4163.598954994708,
+    4175.0,
+    4214.135932678404,
+    4247.907209660709
+   ],
+   "balanced_cut": 3354,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.3194825110003876,
+    "energy": 3532.8371986851716,
+    "approximation_ratio": 1.0021080332749297,
+    "optimal": false,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.022869718999572797,
+    "energy": 3525.4055265276306,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002206049994128989,
+    "energy": 22031.05726332717,
+    "approximation_ratio": 6.249226393261711,
+    "optimal": false,
+    "cut": 3719,
+    "balanced": false,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00047289500071201473,
+    "energy": 3532.8371986851716,
+    "approximation_ratio": 1.0021080332749297,
+    "optimal": false,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 22,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 56,
+   "lambda": 0.10381572278290424,
+   "exact_seconds": 0.10717248299988569,
+   "optimum": 4027.9185173521564,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    4027.9185173521564,
+    4104.409073545416,
+    4237.123724489796,
+    4291.297283321655,
+    4322.130934989043,
+    4383.514229998062,
+    4408.38157227829,
+    4414.545176726644,
+    4476.409073545416,
+    4487.717714404973
+   ],
+   "balanced_cut": 3525,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.2276615770006174,
+    "energy": 5279.485715031082,
+    "approximation_ratio": 1.3107230675812358,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.022854073999042157,
+    "energy": 4027.9185173521564,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3973,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00017114799993578345,
+    "energy": 5041.765701167245,
+    "approximation_ratio": 1.2517049884319815,
+    "optimal": false,
+    "cut": 4085,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00046083400047791656,
+    "energy": 5279.485715031082,
+    "approximation_ratio": 1.3107230675812358,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 22,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 51,
+   "lambda": 0.01622222222222222,
+   "exact_seconds": 0.7950955440010148,
+   "optimum": 284.024,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    284.024,
+    291.3262222222222,
+    296.616,
+    296.6222222222222,
+    298.55555555555554,
+    299.9555555555556,
+    306.584,
+    308.85,
+    309.0,
+    314.26955555555554
+   ],
+   "balanced_cut": 237,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.1770936149987392,
+    "energy": 466.72288888888886,
+    "approximation_ratio": 1.6432515875027773,
+    "optimal": false,
+    "cut": 237,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.026795716001288383,
+    "energy": 284.024,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 263,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00018918099885922857,
+    "energy": 546.954,
+    "approximation_ratio": 1.9257316283131,
+    "optimal": false,
+    "cut": 277,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.004621759999281494,
+    "energy": 466.72288888888886,
+    "approximation_ratio": 1.6432515875027773,
+    "optimal": false,
+    "cut": 237,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 22,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 53,
+   "lambda": 0.0176,
+   "exact_seconds": 0.24443959400014137,
+   "optimum": 295.8976,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    295.8976,
+    305.0944,
+    310.76,
+    311.84,
+    312.1664,
+    321.6336,
+    325.24,
+    327.1664,
+    329.0224,
+    329.7776
+   ],
+   "balanced_cut": 202,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.16788813400125946,
+    "energy": 652.56,
+    "approximation_ratio": 2.205357529091145,
+    "optimal": false,
+    "cut": 202,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.026581037998766988,
+    "energy": 295.8976,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 284,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00018692300000111572,
+    "energy": 632.6176,
+    "approximation_ratio": 2.1379612406454127,
+    "optimal": false,
+    "cut": 362,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0005259770005068276,
+    "energy": 652.56,
+    "approximation_ratio": 2.205357529091145,
+    "optimal": false,
+    "cut": 202,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 24,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 46,
+   "lambda": 0.02685773126968375,
+   "exact_seconds": 1.4352173570005107,
+   "optimum": 244.31201733817142,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    244.31201733817142,
+    299.91301277220214,
+    303.9047752135241,
+    305.1347391461441,
+    355.646837999451,
+    355.83218209368283,
+    361.4525699375415,
+    366.7812124840362,
+    375.42391024708894,
+    378.3729406374423
+   ],
+   "balanced_cut": 195,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.12636495600054332,
+    "energy": 299.91301277220214,
+    "approximation_ratio": 1.2275819095589924,
+    "optimal": false,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.011541302999830805,
+    "energy": 244.31201733817142,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 237,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00019441000040387735,
+    "energy": 2288.1460671720283,
+    "approximation_ratio": 9.365671374260833,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004989539993403014,
+    "energy": 299.91301277220214,
+    "approximation_ratio": 1.2275819095589924,
+    "optimal": false,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 24,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 47,
+   "lambda": 0.026361972501438548,
+   "exact_seconds": 0.3471874110000499,
+   "optimum": 254.80446948838718,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    254.80446948838718,
+    263.54260471842747,
+    293.41251216429345,
+    302.9415065693769,
+    304.80446948838716,
+    312.11905820334977,
+    314.3791680182548,
+    322.9064074682836,
+    334.164762328134,
+    337.84483345464446
+   ],
+   "balanced_cut": 199,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.11040636799953063,
+    "energy": 1186.0515648919875,
+    "approximation_ratio": 4.654751807428724,
+    "optimal": false,
+    "cut": 199,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01171158800025296,
+    "energy": 254.80446948838718,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 250,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002558169999247184,
+    "energy": 254.80446948838718,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 250,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00042848700104514137,
+    "energy": 1186.0515648919875,
+    "approximation_ratio": 4.654751807428724,
+    "optimal": false,
+    "cut": 199,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 24,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 65,
+   "lambda": 0.10364102726554462,
+   "exact_seconds": 0.6397144959992147,
+   "optimum": 3525.414564109062,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3525.414564109062,
+    3536.8227720964205,
+    3733.865078692178,
+    3766.7310769815595,
+    3799.6490287860943,
+    3861.9522568797424,
+    3895.3641027265544,
+    3901.3192311347475,
+    4144.599027202188,
+    4148.313641344047
+   ],
+   "balanced_cut": 3354,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.2842746160004026,
+    "energy": 3536.8227720964205,
+    "approximation_ratio": 1.00323599048563,
+    "optimal": false,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01212508800017531,
+    "energy": 3525.414564109062,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0001813870003388729,
+    "energy": 3536.8227720964205,
+    "approximation_ratio": 1.00323599048563,
+    "optimal": false,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.000513838000188116,
+    "energy": 3536.8227720964205,
+    "approximation_ratio": 1.00323599048563,
+    "optimal": false,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 24,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 62,
+   "lambda": 0.10835198305034212,
+   "exact_seconds": 0.9192186669988587,
+   "optimum": 3940.2548924061957,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3940.2548924061957,
+    4074.4334079322016,
+    4267.410742236997,
+    4306.0355929305615,
+    4420.424170033243,
+    4470.934526915222,
+    4485.106042508311,
+    4499.983762168125,
+    4517.934526915222,
+    4531.947954711468
+   ],
+   "balanced_cut": 3521,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.3216763330001413,
+    "energy": 21118.33721522301,
+    "approximation_ratio": 5.359637331057706,
+    "optimal": false,
+    "cut": 3521,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.010313232000044081,
+    "energy": 3940.2548924061957,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3815,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00017458699949202128,
+    "energy": 5083.571875791953,
+    "approximation_ratio": 1.2901632038042006,
+    "optimal": false,
+    "cut": 4085,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00042163000034634024,
+    "energy": 21118.33721522301,
+    "approximation_ratio": 5.359637331057706,
+    "optimal": false,
+    "cut": 3521,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 24,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 56,
+   "lambda": 0.0163,
+   "exact_seconds": 0.6313875159994495,
+   "optimum": 277.8843,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    277.8843,
+    284.1248,
+    286.0,
+    291.6227,
+    291.7792,
+    294.0,
+    294.8843,
+    296.63,
+    297.2608,
+    298.75
+   ],
+   "balanced_cut": 168,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.12955529399914667,
+    "energy": 337.5852,
+    "approximation_ratio": 1.2148408528297567,
+    "optimal": false,
+    "cut": 168,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01168914899972151,
+    "energy": 277.8843,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 272,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00025988000015786383,
+    "energy": 782.1587,
+    "approximation_ratio": 2.814691941934107,
+    "optimal": false,
+    "cut": 175,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0005609550007648068,
+    "energy": 337.5852,
+    "approximation_ratio": 1.2148408528297567,
+    "optimal": false,
+    "cut": 168,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 24,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 59,
+   "lambda": 0.018,
+   "exact_seconds": 0.4023584579990711,
+   "optimum": 229.602,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    229.602,
+    246.642,
+    284.432,
+    296.168,
+    301.328,
+    305.642,
+    310.8,
+    312.2,
+    312.602,
+    314.2
+   ],
+   "balanced_cut": 202,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.14323937700100942,
+    "energy": 662.8,
+    "approximation_ratio": 2.8867344361111833,
+    "optimal": false,
+    "cut": 202,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.014526052000292111,
+    "energy": 229.602,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 210,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002740820000326494,
+    "energy": 1316.9379999999999,
+    "approximation_ratio": 5.7357427200111495,
+    "optimal": false,
+    "cut": 373,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0005660249989887234,
+    "energy": 418.85799999999995,
+    "approximation_ratio": 1.82427853415911,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 26,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 50,
+   "lambda": 0.02801037040585384,
+   "exact_seconds": 2.1229454340009397,
+   "optimum": 308.5865492714035,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    308.5865492714035,
+    318.7514233621548,
+    325.2789434426313,
+    331.29050490892587,
+    341.163713829324,
+    346.5781759367927,
+    351.57558333532927,
+    356.5781759367927,
+    360.5279359291283,
+    361.7294914900064
+   ],
+   "balanced_cut": 205,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.17359843800113595,
+    "energy": 2377.547352011437,
+    "approximation_ratio": 7.704637022012166,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.0332493030000478,
+    "energy": 308.5865492714035,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 299,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002623010004754178,
+    "energy": 341.163713829324,
+    "approximation_ratio": 1.105568971281599,
+    "optimal": false,
+    "cut": 242,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.004834052999285632,
+    "energy": 553.851343758789,
+    "approximation_ratio": 1.794800664729148,
+    "optimal": false,
+    "cut": 218,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 26,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 54,
+   "lambda": 0.02709321668460022,
+   "exact_seconds": 1.5355006480003794,
+   "optimum": 254.9377387407684,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    254.9377387407684,
+    294.0064652520665,
+    304.9377387407684,
+    314.4451628057852,
+    334.16933260427874,
+    341.5486376378632,
+    347.98702713947716,
+    350.2627033149313,
+    355.3021956443192,
+    360.2972976096588
+   ],
+   "balanced_cut": 199,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.18175704200075415,
+    "energy": 1213.4309924089725,
+    "approximation_ratio": 4.759715052006643,
+    "optimal": false,
+    "cut": 199,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01603572200110648,
+    "energy": 254.9377387407684,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 250,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00025418299992452376,
+    "energy": 410.3741259037024,
+    "approximation_ratio": 1.609703325724515,
+    "optimal": false,
+    "cut": 260,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004731879998871591,
+    "energy": 1213.4309924089725,
+    "approximation_ratio": 4.759715052006643,
+    "optimal": false,
+    "cut": 199,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 26,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 70,
+   "lambda": 0.10538215925522874,
+   "exact_seconds": 2.168822704001286,
+   "optimum": 3525.421528637021,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3525.421528637021,
+    3539.8941289262234,
+    3589.1053821592554,
+    3735.761171428944,
+    3766.793757733188,
+    3803.019860318123,
+    3820.163725803506,
+    3862.455444024761,
+    3895.5382159255228,
+    3901.7109858324266
+   ],
+   "balanced_cut": 3354,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.263393447999988,
+    "energy": 3539.8941289262234,
+    "approximation_ratio": 1.004105211297895,
+    "optimal": false,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.014148085001579602,
+    "energy": 3525.421528637021,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002468410002620658,
+    "energy": 3539.8941289262234,
+    "approximation_ratio": 1.004105211297895,
+    "optimal": false,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.0004797040000994457,
+    "energy": 3539.8941289262234,
+    "approximation_ratio": 1.004105211297895,
+    "optimal": false,
+    "cut": 3354,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 26,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 68,
+   "lambda": 0.1110015317302962,
+   "exact_seconds": 1.6593932320010936,
+   "optimum": 3558.9990137855725,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3558.9990137855725,
+    3774.4390750547846,
+    3910.352288185179,
+    4031.7198102853267,
+    4039.7198102853267,
+    4104.991124070154,
+    4193.779633484146,
+    4196.833329761781,
+    4203.317770680223,
+    4225.776024507685
+   ],
+   "balanced_cut": 3558,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.3125168290007423,
+    "energy": 3558.9990137855725,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3558,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.015679825999541208,
+    "energy": 3558.9990137855725,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3558,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.00028289299916650634,
+    "energy": 5982.897286023614,
+    "approximation_ratio": 1.6810617993568455,
+    "optimal": false,
+    "cut": 4078,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0006306879986368585,
+    "energy": 3558.9990137855725,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3558,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 26,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 61,
+   "lambda": 0.01691111111111111,
+   "exact_seconds": 1.7120554409993929,
+   "optimum": 212.4792,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    212.4792,
+    219.1049111111111,
+    221.31457777777777,
+    227.805,
+    228.7408,
+    235.56944444444446,
+    236.76444444444445,
+    243.4578,
+    263.8873111111111,
+    265.4162
+   ],
+   "balanced_cut": 168,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.10836963500150887,
+    "energy": 343.9432,
+    "approximation_ratio": 1.6187146788956284,
+    "optimal": false,
+    "cut": 168,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.013183480001316639,
+    "energy": 212.4792,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 207,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00025402500068594236,
+    "energy": 594.5902444444444,
+    "approximation_ratio": 2.7983456472183836,
+    "optimal": false,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00047023499973875005,
+    "energy": 343.9432,
+    "approximation_ratio": 1.6187146788956284,
+    "optimal": false,
+    "cut": 168,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 26,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 62,
+   "lambda": 0.0183,
+   "exact_seconds": 1.7200270789999195,
+   "optimum": 229.9287,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    229.9287,
+    247.05270000000002,
+    250.05270000000002,
+    258.7623,
+    267.7623,
+    277.0575,
+    280.0575,
+    284.7392,
+    296.3708,
+    298.9383
+   ],
+   "balanced_cut": 202,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.15885771799912618,
+    "energy": 670.48,
+    "approximation_ratio": 2.916034405448298,
+    "optimal": false,
+    "cut": 202,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.02520580399868777,
+    "energy": 229.9287,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 210,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00022838600125396624,
+    "energy": 1131.7903000000001,
+    "approximation_ratio": 4.922353320833807,
+    "optimal": false,
+    "cut": 238,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004268749999027932,
+    "energy": 670.48,
+    "approximation_ratio": 2.916034405448298,
+    "optimal": false,
+    "cut": 202,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 28,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 54,
+   "lambda": 0.028902736188695204,
+   "exact_seconds": 4.646455164000145,
+   "optimum": 244.86876992737226,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    244.86876992737226,
+    307.9013132370906,
+    314.85769424270075,
+    324.08822268963326,
+    328.0276531452284,
+    333.65728205646684,
+    336.67873998323284,
+    338.7268566560929,
+    344.3229117920282,
+    348.14637488329913
+   ],
+   "balanced_cut": 195,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.10208884500025306,
+    "energy": 307.9013132370906,
+    "approximation_ratio": 1.2574135661661294,
+    "optimal": false,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.009799657000257866,
+    "energy": 244.86876992737226,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 237,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002037939993897453,
+    "energy": 994.6351694802473,
+    "approximation_ratio": 4.061911079045543,
+    "optimal": false,
+    "cut": 222,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00041969499943661503,
+    "energy": 307.9013132370906,
+    "approximation_ratio": 1.2574135661661294,
+    "optimal": false,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 28,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 58,
+   "lambda": 0.02802276437505997,
+   "exact_seconds": 4.756641059000685,
+   "optimum": 255.1071488073547,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    255.1071488073547,
+    263.8917862098564,
+    294.76149036364245,
+    304.38681069739596,
+    305.1071488073547,
+    312.37855693360314,
+    314.52905448484915,
+    316.53674249493264,
+    323.08950977235037,
+    326.7225181161873
+   ],
+   "balanced_cut": 199,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.10309993999908329,
+    "energy": 1248.2353494220893,
+    "approximation_ratio": 4.892984595914636,
+    "optimal": false,
+    "cut": 199,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.016286179999951855,
+    "energy": 255.1071488073547,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 250,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002580620002845535,
+    "energy": 474.39140384041383,
+    "approximation_ratio": 1.8595770681387398,
+    "optimal": false,
+    "cut": 208,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004598180003085872,
+    "energy": 1248.2353494220893,
+    "approximation_ratio": 4.892984595914636,
+    "optimal": false,
+    "cut": 199,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 28,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 80,
+   "lambda": 0.11236415676570116,
+   "exact_seconds": 4.559607337998386,
+   "optimum": 3525.449456627063,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3525.449456627063,
+    3722.4406389290557,
+    3743.3645667178484,
+    3803.191306033005,
+    3809.2819352722827,
+    3814.9058824406316,
+    3837.180438574261,
+    3878.4059867920873,
+    4004.191306033005,
+    4012.7652241320193
+   ],
+   "balanced_cut": 3469,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.3985080790007487,
+    "energy": 11182.12517702479,
+    "approximation_ratio": 3.171829667279693,
+    "optimal": false,
+    "cut": 3469,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.014174002000800101,
+    "energy": 3525.449456627063,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00024090999977488536,
+    "energy": 8045.581446311176,
+    "approximation_ratio": 2.282143467178991,
+    "optimal": false,
+    "cut": 3729,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0005095129999972414,
+    "energy": 11182.12517702479,
+    "approximation_ratio": 3.171829667279693,
+    "optimal": false,
+    "cut": 3469,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 28,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 73,
+   "lambda": 0.11209629030574976,
+   "exact_seconds": 5.5899031610006205,
+   "optimum": 3559.0088666127517,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3559.0088666127517,
+    3911.2729801471355,
+    3944.5833115934465,
+    3977.221665318794,
+    4035.696650318272,
+    4074.448385161223,
+    4142.433864003965,
+    4195.718195632891,
+    4229.737856099343,
+    4237.3540644892
+   ],
+   "balanced_cut": 3521,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.22836220099998172,
+    "energy": 21726.446412266512,
+    "approximation_ratio": 6.104633965957051,
+    "optimal": false,
+    "cut": 3521,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01478407799913839,
+    "energy": 3559.0088666127517,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3558,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00030695100031152833,
+    "energy": 21726.446412266512,
+    "approximation_ratio": 6.104633965957051,
+    "optimal": false,
+    "cut": 3521,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "metis": {
+    "seconds": 0.0005244829990260769,
+    "energy": 5419.427306167171,
+    "approximation_ratio": 1.5227349830474157,
+    "optimal": false,
+    "cut": 3525,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 28,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 67,
+   "lambda": 0.018355555555555556,
+   "exact_seconds": 4.7798973730004946,
+   "optimum": 212.9472,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    212.9472,
+    218.62635555555556,
+    221.59768888888888,
+    227.13,
+    229.5728,
+    235.47222222222223,
+    237.34222222222223,
+    243.0948,
+    247.84035555555556,
+    252.3792
+   ],
+   "balanced_cut": 168,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.13970137299838825,
+    "energy": 358.9712,
+    "approximation_ratio": 1.685728668890692,
+    "optimal": false,
+    "cut": 168,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.014459508000072674,
+    "energy": 212.9472,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 207,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00020414400023582857,
+    "energy": 1186.6352000000002,
+    "approximation_ratio": 5.572438613891143,
+    "optimal": false,
+    "cut": 282,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00048304400115739554,
+    "energy": 358.9712,
+    "approximation_ratio": 1.685728668890692,
+    "optimal": false,
+    "cut": 168,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 28,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 69,
+   "lambda": 0.01948888888888889,
+   "exact_seconds": 6.317904661000284,
+   "optimum": 222.1754,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    222.1754,
+    237.0194888888889,
+    240.48722222222221,
+    256.5786,
+    282.0354888888889,
+    282.30962222222223,
+    290.68028888888887,
+    298.39015555555557,
+    300.2234,
+    300.46500000000003
+   ],
+   "balanced_cut": 205,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.17013206200135755,
+    "energy": 436.5474888888889,
+    "approximation_ratio": 1.9648776997313335,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01669071600008465,
+    "energy": 222.1754,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 222,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00024906500038923696,
+    "energy": 282.30962222222223,
+    "approximation_ratio": 1.2706610282786583,
+    "optimal": false,
+    "cut": 272,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.000516164000146091,
+    "energy": 222.1754,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 222,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 30,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 57,
+   "lambda": 0.029485252741383312,
+   "exact_seconds": 20.463598604001163,
+   "optimum": 245.0273600588416,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    245.0273600588416,
+    254.89192889542684,
+    258.0273600588416,
+    286.00737131318533,
+    294.62955807970445,
+    295.0273600588416,
+    299.60707074084115,
+    310.1767685210286,
+    317.65954119818883,
+    319.94939653918857
+   ],
+   "balanced_cut": 195,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.2347884620012337,
+    "energy": 310.1767685210286,
+    "approximation_ratio": 1.2658862604018661,
+    "optimal": false,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.02439927900013572,
+    "energy": 245.0273600588416,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 237,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00023183600023912732,
+    "energy": 1010.207147595844,
+    "approximation_ratio": 4.122834067808794,
+    "optimal": false,
+    "cut": 222,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004403200000524521,
+    "energy": 310.1767685210286,
+    "approximation_ratio": 1.2658862604018661,
+    "optimal": false,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 30,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 64,
+   "lambda": 0.030142133109308203,
+   "exact_seconds": 23.341733492999992,
+   "optimum": 255.49340375917143,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    255.49340375917143,
+    279.00753553327735,
+    296.4829476180356,
+    300.2735051238683,
+    305.49340375917143,
+    308.2416474795113,
+    314.7203275131151,
+    319.67817680127206,
+    323.59992205432764,
+    329.2735051238683
+   ],
+   "balanced_cut": 199,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.14055774199914595,
+    "energy": 1327.589283411995,
+    "approximation_ratio": 5.196178311763317,
+    "optimal": false,
+    "cut": 199,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.017481767001299886,
+    "energy": 255.49340375917143,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 250,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00029286000062711537,
+    "energy": 427.29637428993783,
+    "approximation_ratio": 1.6724360316272908,
+    "optimal": false,
+    "cut": 260,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004896440004813485,
+    "energy": 494.5386528703611,
+    "approximation_ratio": 1.9356219988227725,
+    "optimal": false,
+    "cut": 208,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 30,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 90,
+   "lambda": 0.1172731008035062,
+   "exact_seconds": 19.18005969600017,
+   "optimum": 3649.760180788897,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3649.760180788897,
+    3659.190045197224,
+    3701.760180788897,
+    3767.7104067750183,
+    3810.386447680789,
+    3837.887326515705,
+    3849.8919261322135,
+    3879.996484660336,
+    3904.386447680789,
+    3949.9092403214026
+   ],
+   "balanced_cut": 3280,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.32984584900077607,
+    "energy": 7785.163440467494,
+    "approximation_ratio": 2.133061640993828,
+    "optimal": false,
+    "cut": 3280,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.015672024001105456,
+    "energy": 3649.760180788897,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3593,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00033337000058963895,
+    "energy": 4926.351476899196,
+    "approximation_ratio": 1.3497740215452632,
+    "optimal": false,
+    "cut": 3321,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0005022670011385344,
+    "energy": 4260.351853542732,
+    "approximation_ratio": 1.1672963818192175,
+    "optimal": false,
+    "cut": 3393,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 30,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 80,
+   "lambda": 0.11828051162027994,
+   "exact_seconds": 21.279967807000503,
+   "optimum": 3628.9576258553093,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3628.9576258553093,
+    3720.25809841833,
+    3812.25809841833,
+    3877.3228857649706,
+    3922.2815625885123,
+    3954.1829802775746,
+    3973.0323936733203,
+    4006.129574693281,
+    4008.957012790507,
+    4032.1182805116205
+   ],
+   "balanced_cut": 3549,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.5930673090006167,
+    "energy": 3628.9576258553093,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3549,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01350697900124942,
+    "energy": 3628.9576258553093,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3549,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "spectral": {
+    "seconds": 0.00024346499958483037,
+    "energy": 4783.830503421237,
+    "approximation_ratio": 1.318238182043731,
+    "optimal": false,
+    "cut": 4464,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00046081800064712297,
+    "energy": 3628.9576258553093,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3549,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 30,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 74,
+   "lambda": 0.018588888888888887,
+   "exact_seconds": 19.964024049000727,
+   "optimum": 211.75875555555555,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    211.75875555555555,
+    217.3721888888889,
+    229.7072,
+    234.29742222222222,
+    235.61805555555554,
+    239.46472222222224,
+    248.33408888888889,
+    248.6768,
+    254.14152222222222,
+    255.06285555555556
+   ],
+   "balanced_cut": 168,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.16649146300005668,
+    "energy": 361.3988,
+    "approximation_ratio": 1.7066533992979853,
+    "optimal": false,
+    "cut": 168,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.04303746699952171,
+    "energy": 211.75875555555555,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 207,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002753280004981207,
+    "energy": 248.33408888888889,
+    "approximation_ratio": 1.172721705118529,
+    "optimal": false,
+    "cut": 209,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004598439991241321,
+    "energy": 361.3988,
+    "approximation_ratio": 1.7066533992979853,
+    "optimal": false,
+    "cut": 168,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 30,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 75,
+   "lambda": 0.020055555555555556,
+   "exact_seconds": 22.015364430000773,
+   "optimum": 222.1805,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    222.1805,
+    237.02005555555556,
+    240.5013888888889,
+    256.6245,
+    260.6093888888889,
+    272.24005555555556,
+    282.24005555555556,
+    282.6093888888889,
+    287.2733888888889,
+    291.45605555555557
+   ],
+   "balanced_cut": 205,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.1731377039996005,
+    "energy": 443.2800555555556,
+    "approximation_ratio": 1.9951348365655652,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.036773468000319554,
+    "energy": 222.1805,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 222,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00025133400049526244,
+    "energy": 282.24005555555556,
+    "approximation_ratio": 1.2703187523457529,
+    "optimal": false,
+    "cut": 275,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004740489985124441,
+    "energy": 443.2800555555556,
+    "approximation_ratio": 1.9951348365655652,
+    "optimal": false,
+    "cut": 205,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 32,
+   "seed": 0,
+   "fine_vertices": 5681,
+   "coarse_edges": 62,
+   "lambda": 0.031170832553416995,
+   "exact_seconds": 83.24302414799968,
+   "optimum": 245.48625916266778,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    245.48625916266778,
+    276.4365842890142,
+    281.75335933112973,
+    286.00779270813837,
+    288.9814668330722,
+    295.408717347817,
+    295.48625916266775,
+    299.8704425864714,
+    300.8704425864714,
+    306.8704425864714
+   ],
+   "balanced_cut": 195,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.15789713599951938,
+    "energy": 316.76106466178516,
+    "approximation_ratio": 1.2903413239593513,
+    "optimal": false,
+    "cut": 195,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.016530025000975,
+    "energy": 245.48625916266778,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 237,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.0002732310003921157,
+    "energy": 352.3525399472345,
+    "approximation_ratio": 1.4353248982206919,
+    "optimal": false,
+    "cut": 242,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0004965059997630306,
+    "energy": 1055.2664885260815,
+    "approximation_ratio": 4.2986784357116505,
+    "optimal": false,
+    "cut": 222,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "shell",
+   "vertices": 32,
+   "seed": 1,
+   "fine_vertices": 5681,
+   "coarse_edges": 67,
+   "lambda": 0.031703773229280585,
+   "exact_seconds": 87.34834524899998,
+   "optimum": 248.4871104734276,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    248.4871104734276,
+    254.65506917523496,
+    255.77801267103638,
+    258.57955950656014,
+    264.05003519732327,
+    264.66571832145627,
+    275.198148582683,
+    283.3883712220587,
+    297.75138980548314,
+    300.3394844189371
+   ],
+   "balanced_cut": 199,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.17395559000033245,
+    "energy": 1386.060603194031,
+    "approximation_ratio": 5.577997991739905,
+    "optimal": false,
+    "cut": 199,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.019378053999389522,
+    "energy": 248.4871104734276,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 215,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00026892500136455055,
+    "energy": 955.7552163195357,
+    "approximation_ratio": 3.8462969547941244,
+    "optimal": false,
+    "cut": 266,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00048234299902105704,
+    "energy": 248.4871104734276,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 215,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 32,
+   "seed": 0,
+   "fine_vertices": 8288,
+   "coarse_edges": 93,
+   "lambda": 0.11851343897675944,
+   "exact_seconds": 84.46333400600088,
+   "optimum": 3594.896215023628,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3594.896215023628,
+    3595.774436874823,
+    3650.3605044647516,
+    3664.2210909199325,
+    3702.070899360475,
+    3702.3605044647516,
+    3754.5995885571174,
+    3769.061135045691,
+    3792.474053755907,
+    3804.066620950791
+   ],
+   "balanced_cut": 3236,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.39848506299858855,
+    "energy": 15145.296969335579,
+    "approximation_ratio": 4.2129997817575475,
+    "optimal": false,
+    "cut": 3236,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.01397475700105133,
+    "energy": 3594.896215023628,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3593,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00021435899907373823,
+    "energy": 3951.6661796932067,
+    "approximation_ratio": 1.099243467218492,
+    "optimal": false,
+    "cut": 3249,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.00047471299876633566,
+    "energy": 3951.6661796932067,
+    "approximation_ratio": 1.099243467218492,
+    "optimal": false,
+    "cut": 3249,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "housing",
+   "vertices": 32,
+   "seed": 1,
+   "fine_vertices": 8288,
+   "coarse_edges": 93,
+   "lambda": 0.12041762011597917,
+   "exact_seconds": 76.28114735599956,
+   "optimum": 3559.0837585810436,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    3559.0837585810436,
+    3630.402311198402,
+    3720.3350343241755,
+    3878.0153089175774,
+    3926.803684165412,
+    3973.340137296701,
+    3979.0939645260955,
+    4007.360549186804,
+    4009.0104405028997,
+    4032.120417620116
+   ],
+   "balanced_cut": 3549,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.4368088880000869,
+    "energy": 3630.402311198402,
+    "approximation_ratio": 1.0200384586188531,
+    "optimal": false,
+    "cut": 3549,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.014503979000437539,
+    "energy": 3559.0837585810436,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 3558,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00025363200074934866,
+    "energy": 8272.880004910108,
+    "approximation_ratio": 2.3244409421284282,
+    "optimal": false,
+    "cut": 3694,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.000485585998831084,
+    "energy": 6583.483203142469,
+    "approximation_ratio": 1.849769111859062,
+    "optimal": false,
+    "cut": 3653,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 32,
+   "seed": 0,
+   "fine_vertices": 6000,
+   "coarse_edges": 79,
+   "lambda": 0.019477777777777778,
+   "exact_seconds": 54.404043012998955,
+   "optimum": 191.2192,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    191.2192,
+    197.17361111111111,
+    197.42724444444445,
+    203.30374444444445,
+    209.8048,
+    211.98631111111112,
+    213.3108,
+    215.29174444444445,
+    216.9477777777778,
+    217.62907777777778
+   ],
+   "balanced_cut": 175,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.2516601540010015,
+    "energy": 900.5277444444445,
+    "approximation_ratio": 4.709400229916476,
+    "optimal": false,
+    "cut": 175,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.016769144000136293,
+    "energy": 191.2192,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 180,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00026149099903705064,
+    "energy": 296.8725777777778,
+    "approximation_ratio": 1.5525249440316546,
+    "optimal": false,
+    "cut": 222,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0005281849989842158,
+    "energy": 191.2192,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 180,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   }
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 32,
+   "seed": 1,
+   "fine_vertices": 6000,
+   "coarse_edges": 81,
+   "lambda": 0.02098888888888889,
+   "exact_seconds": 57.42155832500066,
+   "optimum": 240.34328888888888,
+   "optimal_partitions": 1,
+   "ten_lowest": [
+    240.34328888888888,
+    250.8569,
+    254.11805555555554,
+    257.0224,
+    260.6516555555556,
+    260.9577888888889,
+    262.37315555555557,
+    262.5025,
+    265.0657888888889,
+    265.2561
+   ],
+   "balanced_cut": 202,
+   "optimum_is_balanced": true,
+   "milp": {
+    "seconds": 0.20488504599961743,
+    "energy": 260.9577888888889,
+    "approximation_ratio": 1.0857710656091177,
+    "optimal": false,
+    "cut": 202,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   },
+   "fm": {
+    "seconds": 0.02080725099949632,
+    "energy": 240.34328888888888,
+    "approximation_ratio": 1.0,
+    "optimal": true,
+    "cut": 239,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "spectral": {
+    "seconds": 0.00032714400003897026,
+    "energy": 667.2199555555555,
+    "approximation_ratio": 2.7761122793988746,
+    "optimal": false,
+    "cut": 244,
+    "balanced": true,
+    "balanced_and_cut_optimal": false
+   },
+   "metis": {
+    "seconds": 0.0005866389983566478,
+    "energy": 260.9577888888889,
+    "approximation_ratio": 1.0857710656091177,
+    "optimal": false,
+    "cut": 202,
+    "balanced": true,
+    "balanced_and_cut_optimal": true
+   }
+  }
+ ],
+ "milp_scaling": [
+  {
+   "mesh": "shell",
+   "vertices": 64,
+   "seed": 0,
+   "seconds": 0.5500480930004414,
+   "balanced_cut": 195
+  },
+  {
+   "mesh": "housing",
+   "vertices": 64,
+   "seed": 0,
+   "seconds": 3.1602472920003493,
+   "balanced_cut": 2968
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 64,
+   "seed": 0,
+   "seconds": 0.6488734039994597,
+   "balanced_cut": 178
+  },
+  {
+   "mesh": "shell",
+   "vertices": 128,
+   "seed": 0,
+   "seconds": 4.585962589999326,
+   "balanced_cut": 190
+  },
+  {
+   "mesh": "housing",
+   "vertices": 128,
+   "seed": 0,
+   "seconds": 16.382279961000677,
+   "balanced_cut": 2829
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 128,
+   "seed": 0,
+   "seconds": 8.300638075999814,
+   "balanced_cut": 157
+  },
+  {
+   "mesh": "shell",
+   "vertices": 256,
+   "seed": 0,
+   "seconds": 7.299225514998398,
+   "balanced_cut": 175
+  },
+  {
+   "mesh": "housing",
+   "vertices": 256,
+   "seed": 0,
+   "seconds": 83.9840214729993,
+   "balanced_cut": 2617
+  },
+  {
+   "mesh": "unstructured",
+   "vertices": 256,
+   "seed": 0,
+   "seconds": 7.318651539999337,
+   "balanced_cut": 132
+  }
+ ],
+ "varqite": []
+}
