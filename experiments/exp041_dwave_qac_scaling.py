@@ -494,43 +494,55 @@ def median_tte(results, side):
     return best
 
 
-def summarise(results, method):
-    sides = sorted({r["side"] for r in results if r["method"] == method})
+#: the upper half of the size range: L >= 10, N >= 600. The paper fits QAC only
+#: on sizes whose optimal annealing time is resolved, which are the larger ones
+LARGE = 600
+
+
+def summarise(results, method, boot=300):
+    """Median TTe per size with the effort optimised per size, a power-law fit
+    over all sizes and over N >= LARGE, and bootstrap intervals for both
+    (instances resampled within each size, effort re-optimised per resample)."""
     mine = [r for r in results if r["method"] == method]
+    sides = sorted({r["side"] for r in mine})
     sizes, medians, chosen, at_edge = [], [], [], []
-    per_side = {}
     for side in sides:
-        median, sweeps, values = median_tte(mine, side)
+        median, sweeps, _ = median_tte(mine, side)
         grid = [row["sweeps"] for row in next(r for r in mine if r["side"] == side)["rows"]]
-        n = next(r["n"] for r in mine if r["side"] == side)
-        sizes.append(n)
+        sizes.append(next(r["n"] for r in mine if r["side"] == side))
         medians.append(median)
         chosen.append(sweeps)
         at_edge.append(sweeps in (grid[0], grid[-1]))
-        per_side[side] = values
-    finite = [k for k, m in enumerate(medians) if math.isfinite(m)]
-    alpha = fit_exponent([sizes[k] for k in finite], [medians[k] for k in finite])
-    # bootstrap over instances at each size, effort re-optimised in each resample
+
+    def fits(points):
+        full = [(n, m) for n, m in points if math.isfinite(m)]
+        large = [(n, m) for n, m in full if n >= LARGE]
+        return (fit_exponent(*zip(*full)),
+                fit_exponent(*zip(*large)) if len(large) >= 3 else math.nan)
+
+    alpha, alpha_large = fits(list(zip(sizes, medians)))
     rng = np.random.default_rng(0)
-    alphas = []
-    for _ in range(300):
-        boot = []
+    draws = []
+    by_side = {side: [r for r in mine if r["side"] == side] for side in sides}
+    for _ in range(boot):
+        points = []
         for side in sides:
-            subset = [r for r in mine if r["side"] == side]
-            pick = rng.integers(0, len(subset), len(subset))
-            boot += [subset[p] for p in pick]
-        b_sizes, b_medians = [], []
-        for side in sides:
-            med, _, _ = median_tte(boot, side)
-            if math.isfinite(med):
-                b_sizes.append(next(r["n"] for r in boot if r["side"] == side))
-                b_medians.append(med)
-        alphas.append(fit_exponent(b_sizes, b_medians))
+            subset = by_side[side]
+            sample = [subset[k] for k in rng.integers(0, len(subset), len(subset))]
+            points.append((subset[0]["n"], median_tte(sample, side)[0]))
+        draws.append(fits(points))
+    draws = np.array(draws)
+
+    def interval(column):
+        values = draws[:, column][np.isfinite(draws[:, column])]
+        return [float(np.percentile(values, 2.5)), float(np.percentile(values, 97.5))]
+
     return {"method": method, "sizes": sizes, "median_tte_updates": medians,
             "optimal_sweeps": chosen, "optimum_at_grid_edge": at_edge,
-            "alpha": alpha, "alpha_2se": 2 * float(np.std(alphas)),
-            "alpha_bootstrap_95": [float(np.percentile(alphas, 2.5)),
-                                   float(np.percentile(alphas, 97.5))]}
+            "alpha": alpha, "alpha_2se": 2 * float(np.nanstd(draws[:, 0])),
+            "alpha_bootstrap_95": interval(0),
+            "alpha_large": alpha_large, "alpha_large_2se": 2 * float(np.nanstd(draws[:, 1])),
+            "alpha_large_bootstrap_95": interval(1)}
 
 
 GRIDS = {
@@ -577,7 +589,8 @@ def main() -> int:
                if any(r["method"] == m for r in results)}
     for m, s in summary.items():
         print(f"\n  {m}: alpha = {s['alpha']:.2f} +- {s['alpha_2se']:.2f} "
-              f"(bootstrap 95% {s['alpha_bootstrap_95'][0]:.2f}..{s['alpha_bootstrap_95'][1]:.2f})")
+              f"(bootstrap 95% {s['alpha_bootstrap_95'][0]:.2f}..{s['alpha_bootstrap_95'][1]:.2f});"
+              f"  N >= {LARGE}: {s['alpha_large']:.2f} +- {s['alpha_large_2se']:.2f}")
         for n, med, sw, edge in zip(s["sizes"], s["median_tte_updates"], s["optimal_sweeps"],
                                     s["optimum_at_grid_edge"]):
             print(f"    N={n:>5}  median TTe {med:12.4g} spin updates  optimal sweeps {sw:>5}"
