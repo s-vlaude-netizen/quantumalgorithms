@@ -68,8 +68,10 @@ PT_TEMPERATURES, PT_BETA_MIN, PT_BETA_MAX, PT_ICM = 32, 0.1, 5.0, 8
 #: 1000-1003) among six ranges and frozen for every size; only the number of
 #: sweeps is optimised per size, as the paper optimises QA's annealing time
 SA_BETA_MIN, SA_BETA_MAX = 1.0, 8.0
-#: path-integral SQA: Trotter slices, inverse temperature, initial transverse field
-SQA_SLICES, SQA_BETA, SQA_GAMMA = 16, 8.0, 3.0
+#: path-integral SQA: Trotter slices, inverse temperature, initial transverse field;
+#: beta and Gamma chosen among six pairs on the same held-out instances as SA, by
+#: single-slice success
+SQA_SLICES, SQA_BETA, SQA_GAMMA = 16, 16.0, 1.5
 
 
 # ------------------------------------------------------------------ the graph
@@ -304,12 +306,12 @@ def _kernels():
         return out, single
 
     @njit(cache=True)
-    def tempering(pointer, index, weight, betas, n_icm, sweeps, target, runs, seed):
+    def tempering(pointer, index, weight, betas, n_icm, checkpoints, runs, seed):
         """PT-ICM (Zhu, Ochoa & Katzgraber 2015): two replicas per temperature,
         Houdayer cluster moves between the pair at the ``n_icm`` coldest
-        temperatures, then replica exchange. Returns, per run, the first sweep at
-        which any replica reaches ``target`` (1/28 units; -1 if never) and the
-        best energy."""
+        temperatures, then replica exchange. Runs ``checkpoints[-1]`` sweeps and
+        returns, per run, the lowest energy seen by any replica up to each
+        checkpoint (1/28 units), so any target can be evaluated afterwards."""
         state = seeded(seed)
         n = pointer.shape[0] - 1
         m = betas.shape[0]
@@ -317,8 +319,8 @@ def _kernels():
         tables = np.empty((m, 2 * size + 1))
         for k in range(m):
             tables[k] = table(betas[k], size)
-        hit = np.full(runs, -1)
-        best = np.empty(runs, dtype=np.int64)
+        sweeps = checkpoints[-1]
+        trace = np.empty((runs, checkpoints.shape[0]), dtype=np.int64)
         spins = np.empty((2, m, n), dtype=np.int64)
         energies = np.empty((2, m), dtype=np.int64)
         stack = np.empty(n, dtype=np.int64)
@@ -330,6 +332,7 @@ def _kernels():
                         spins[c, k, a] = 1 if uniform(state) < 0.5 else -1
                     energies[c, k] = integer_energy(spins[c, k], pointer, index, weight)
             low = energies[0, 0]
+            mark = 0
             for step in range(sweeps):
                 for c in range(2):
                     for k in range(m):
@@ -383,10 +386,10 @@ def _kernels():
                 for c in range(2):
                     for k in range(m):
                         low = min(low, energies[c, k])
-                if hit[r] < 0 and low <= target:
-                    hit[r] = step + 1
-            best[r] = low
-        return hit, best
+                while mark < checkpoints.shape[0] and checkpoints[mark] == step + 1:
+                    trace[r, mark] = low
+                    mark += 1
+        return trace
 
     return integer_energy, sweep, anneal, quantum_anneal, tempering
 
@@ -424,35 +427,52 @@ def betas_geometric(steps, low=PT_BETA_MIN, high=PT_BETA_MAX):
 
 
 def ground_energy(side, seed, effort=4):
-    """Best energy from long PT-ICM runs and many SA runs; cached on disk."""
+    """Best energy from PT-ICM and SA runs; cached on disk.
+
+    Two stages. The first (2 PT-ICM runs of ``2000 effort max(1, L//5)``
+    sweeps, 32 SA runs) left PT-ICM and SA disagreeing on every instance from
+    L = 8 up, by up to 0.7% -- enough to loosen a 1% target. The second adds
+    two PT-ICM runs of 50 000 sweeps for L >= 8 and records whether they found
+    anything lower, which is the evidence the reference is a ground state.
+    """
     cache = RAW / f"ground_L{side:02d}_s{seed:03d}.json"
-    if cache.exists():
-        return json.loads(cache.read_text())["energy"]
+    record = json.loads(cache.read_text()) if cache.exists() else None
     _, _, anneal, _, tempering = kernels()
     n, i, j, couplings = instance(side, seed)
     pointer, index, weight = neighbour_arrays(n, i, j, couplings)
     weight = integer_weights(weight)
     betas = betas_geometric(PT_TEMPERATURES)
-    sweeps = 2000 * effort * max(1, side // 5)
-    _, best_pt = tempering(pointer, index, weight, betas, PT_ICM, sweeps, -(1 << 60), 2, seed)
-    sa = anneal(pointer, index, weight, betas_geometric(4000 * effort), 32, seed + 1)
-    value = float(min(best_pt.min(), sa.min())) / UNIT
+    if record is None:
+        sweeps = 2000 * effort * max(1, side // 5)
+        best_pt = tempering(pointer, index, weight, betas, PT_ICM, np.array([sweeps]), 2,
+                            seed)[:, -1]
+        sa = anneal(pointer, index, weight, betas_geometric(4000 * effort), 32, seed + 1)
+        record = {"energy": float(min(best_pt.min(), sa.min())) / UNIT,
+                  "pt": (best_pt / UNIT).tolist(), "sa_best": float(sa.min()) / UNIT,
+                  "pt_sweeps": sweeps}
+    if side >= 8 and "refined" not in record:
+        long_runs = tempering(pointer, index, weight, betas, PT_ICM, np.array([50_000]), 2,
+                              seed + 7919)[:, -1] / UNIT
+        record["refined"] = long_runs.tolist()
+        record["refinement_improved"] = bool(long_runs.min() < record["energy"] - 1e-9)
+        record["first_stage_energy"] = record["energy"]
+        record["energy"] = float(min(record["energy"], long_runs.min()))
     RAW.mkdir(parents=True, exist_ok=True)
-    cache.write_text(json.dumps({"energy": value, "pt": (best_pt / UNIT).tolist(),
-                                 "sa_best": float(sa.min()) / UNIT, "pt_sweeps": sweeps}))
-    return value
+    cache.write_text(json.dumps(record))
+    return record["energy"]
 
 
 def solve_one(task):
-    """One (method, side, seed): success probabilities across the effort grid."""
+    """One (method, side, seed): raw final energies across the effort grid.
+
+    Energies, not success rates, are stored, so targets can be re-evaluated
+    against any reference energy and any gap.
+    """
     method, side, seed, grid, runs = task
     _, _, anneal, quantum_anneal, tempering = kernels()
     n, i, j, couplings = instance(side, seed)
     pointer, index, weight = neighbour_arrays(n, i, j, couplings)
     weight = integer_weights(weight)
-    e0 = ground_energy(side, seed)
-    # within e |E0| of the ground state, in exact 1/28 units
-    target = math.floor(round((e0 + EPSILON * abs(e0)) * UNIT, 6))
     rows = []
     started = time.perf_counter()
     if method == "sa":
@@ -460,25 +480,36 @@ def solve_one(task):
             final = anneal(pointer, index, weight,
                            betas_geometric(sweeps, SA_BETA_MIN, SA_BETA_MAX), runs,
                            1000 * seed + sweeps)
-            rows.append({"sweeps": sweeps, "updates": sweeps * n,
-                         "p": float(np.mean(final <= target))})
-    elif method in ("sqa", "sqa_single"):
+            rows.append({"sweeps": sweeps, "updates": sweeps * n, "energies": final.tolist()})
+    elif method == "sqa":
         for sweeps in grid:
             gammas = np.linspace(SQA_GAMMA, 1e-3, sweeps)
             best, single = quantum_anneal(pointer, index, weight, SQA_SLICES, SQA_BETA, gammas,
                                           runs, 1000 * seed + sweeps)
-            final = best if method == "sqa" else single
             rows.append({"sweeps": sweeps, "updates": sweeps * n * SQA_SLICES,
-                         "p": float(np.mean(final <= target))})
+                         "energies": best.tolist(), "single": single.tolist()})
     elif method == "pt_icm":
         betas = betas_geometric(PT_TEMPERATURES)
-        hits, _ = tempering(pointer, index, weight, betas, PT_ICM, max(grid), target, runs, seed)
+        trace = tempering(pointer, index, weight, betas, PT_ICM, np.array(grid), runs, seed)
         per_sweep = 2 * PT_TEMPERATURES * n
-        for sweeps in grid:
+        for g, sweeps in enumerate(grid):
             rows.append({"sweeps": sweeps, "updates": sweeps * per_sweep,
-                         "p": float(np.mean((hits > 0) & (hits <= sweeps)))})
-    return {"method": method, "side": side, "seed": seed, "n": n, "e0": e0,
+                         "energies": trace[:, g].tolist()})
+    return {"method": method, "side": side, "seed": seed, "n": n,
             "seconds": time.perf_counter() - started, "rows": rows}
+
+
+def with_success(results, epsilon, readout="energies"):
+    """Attach ``p`` to every row against each instance's reference energy."""
+    out = []
+    for r in results:
+        e0 = ground_energy(r["side"], r["seed"])
+        target = math.floor(round((e0 + epsilon * abs(e0)) * UNIT, 6))
+        rows = [{"sweeps": row["sweeps"], "updates": row["updates"],
+                 "p": float(np.mean(np.array(row[readout]) <= target))} for row in r["rows"]]
+        out.append(dict(r, rows=rows, method=r["method"] + ("" if readout == "energies"
+                                                             else "_" + readout)))
+    return out
 
 
 def median_tte(results, side):
@@ -546,12 +577,13 @@ def summarise(results, method, boot=300):
 
 
 GRIDS = {
-    "sa": tuple(2 ** k for k in range(5, 16)),
+    "sa": tuple(2 ** k for k in range(6, 15)),
     "sqa": tuple(2 ** k for k in range(4, 12)),
-    "sqa_single": tuple(2 ** k for k in range(4, 12)),
-    "pt_icm": tuple(int(v) for v in np.unique(np.geomspace(1, 4096, 25).astype(int))),
+    "pt_icm": tuple(int(v) for v in np.unique(np.geomspace(1, 2048, 23).astype(int))),
 }
-RUNS = {"sa": 64, "sqa": 32, "sqa_single": 32, "pt_icm": 20}
+RUNS = {"sa": 64, "sqa": 32, "pt_icm": 20}
+#: the paper's gaps: 1% is the headline, 1.25% and 1.5% where QA's exponent falls further
+EPSILONS = (0.01, 0.0125, 0.015)
 
 
 def main() -> int:
@@ -559,6 +591,9 @@ def main() -> int:
     ap.add_argument("--instances", type=int, default=30)
     ap.add_argument("--sizes", default=",".join(map(str, SIZES)))
     ap.add_argument("--methods", default="sa,pt_icm,sqa")
+    ap.add_argument("--grounds-only", action="store_true")
+    ap.add_argument("--skip-grounds", action="store_true",
+                    help="solvers only; summarise later with --summarise")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--summarise", action="store_true")
     args = ap.parse_args()
@@ -572,8 +607,14 @@ def main() -> int:
         tasks = [(m, side, seed, GRIDS[m], RUNS[m]) for m in methods for side in sides
                  for seed in range(args.instances)
                  if not (RAW / f"{m}_L{side:02d}_s{seed:03d}.json").exists()]
-        # ground states first, in parallel, so solvers never race on the cache
-        grounds = sorted({(side, seed) for _, side, seed, _, _ in tasks})
+        # reference energies, largest first; solvers store raw energies and never
+        # need them, so the two can run as separate invocations
+        grounds = [(side, seed) for side in sorted(sides, reverse=True)
+                   for seed in range(args.instances)]
+        if args.skip_grounds:
+            grounds = []
+        if args.grounds_only:
+            tasks = []
         with mp.Pool(args.workers) as pool:
             for _ in pool.imap_unordered(_ground_task, grounds):
                 pass
@@ -583,21 +624,41 @@ def main() -> int:
                 print(f"  {result['method']:>6} L={result['side']:>2} s{result['seed']:<3} "
                       f"({result['seconds']:.1f}s)", flush=True)
 
-    results = [json.loads(p.read_text()) for p in sorted(RAW.glob("*_L*_s*.json"))
-               if not p.name.startswith("ground")]
-    summary = {m: summarise(results, m) for m in methods
-               if any(r["method"] == m for r in results)}
-    for m, s in summary.items():
-        print(f"\n  {m}: alpha = {s['alpha']:.2f} +- {s['alpha_2se']:.2f} "
-              f"(bootstrap 95% {s['alpha_bootstrap_95'][0]:.2f}..{s['alpha_bootstrap_95'][1]:.2f});"
-              f"  N >= {LARGE}: {s['alpha_large']:.2f} +- {s['alpha_large_2se']:.2f}")
-        for n, med, sw, edge in zip(s["sizes"], s["median_tte_updates"], s["optimal_sweeps"],
-                                    s["optimum_at_grid_edge"]):
-            print(f"    N={n:>5}  median TTe {med:12.4g} spin updates  optimal sweeps {sw:>5}"
-                  f"{'  (grid edge)' if edge else ''}")
+    if args.skip_grounds or args.grounds_only:
+        return 0
+    raw = [json.loads(p.read_text()) for p in sorted(RAW.glob("*_L*_s*.json"))
+           if not p.name.startswith("ground")]
+    summary = {}
+    for epsilon in EPSILONS:
+        evaluated = []
+        for m in methods:
+            mine = [r for r in raw if r["method"] == m]
+            if not mine:
+                continue
+            evaluated += with_success(mine, epsilon)
+            if m == "sqa":
+                evaluated += with_success(mine, epsilon, readout="single")
+        for m in sorted({r["method"] for r in evaluated}):
+            s = summarise(evaluated, m)
+            summary[f"{m}@{epsilon:g}"] = s
+            print(f"\n  {m} @ e = {epsilon:g}: alpha = {s['alpha']:.2f} +- {s['alpha_2se']:.2f} "
+                  f"(95% {s['alpha_bootstrap_95'][0]:.2f}..{s['alpha_bootstrap_95'][1]:.2f});"
+                  f"  N >= {LARGE}: {s['alpha_large']:.2f} +- {s['alpha_large_2se']:.2f}")
+            for n, med, sw, edge in zip(s["sizes"], s["median_tte_updates"], s["optimal_sweeps"],
+                                        s["optimum_at_grid_edge"]):
+                print(f"    N={n:>5}  median TTe {med:12.4g} spin updates  optimal sweeps {sw:>5}"
+                      f"{'  (grid edge)' if edge else ''}")
+    grounds = [json.loads(p.read_text()) for p in sorted(RAW.glob("ground_L*_s*.json"))]
+    refined = [g for g in grounds if "refined" in g]
+    print(f"\n  ground states: {len(refined)} refined with 2 x 50 000 PT-ICM sweeps; "
+          f"{sum(g['refinement_improved'] for g in refined)} improved on the first stage")
     path = RESULTS_DIR / "exp041_dwave_qac_scaling.json"
-    path.write_text(json.dumps({"epsilon": EPSILON, "instances": args.instances,
-                                "summary": summary}, indent=1, default=float))
+    path.write_text(json.dumps({"epsilons": EPSILONS, "instances": args.instances,
+                                "summary": summary,
+                                "ground_refined": len(refined),
+                                "ground_improved_by_refinement":
+                                    sum(g["refinement_improved"] for g in refined)},
+                               indent=1, default=float))
     print(f"saved -> {path}")
     return 0
 

@@ -90,20 +90,21 @@ def test_every_solver_finds_the_ground_state_of_a_tiny_glass(seed):
     assert anneal(pointer, index, q, betas_geometric(500, 0.5, 8.0), 20, seed).min() == exact
     best, single = quantum_anneal(pointer, index, q, 8, 8.0, np.linspace(3, 1e-3, 300), 10, seed)
     assert best.min() == exact and (best <= single).all()
-    hits, best = tempering(pointer, index, q, betas_geometric(8), 2, 300, exact, 5, seed)
-    assert (best == exact).all() and (hits > 0).all()
+    trace = tempering(pointer, index, q, betas_geometric(8), 2, np.array([300]), 5, seed)
+    assert (trace[:, -1] == exact).all()
 
 
-def test_tempering_reports_the_first_hitting_sweep():
+def test_tempering_traces_the_best_energy_at_each_checkpoint():
     _, _, _, _, tempering = kernels()
     n, i, j, couplings = tiny(7)
     pointer, index, weight = neighbour_arrays(n, i, j, couplings)
     q = integer_weights(weight)
     exact = round(brute_force(n, i, j, couplings) * UNIT)
-    unreachable, _ = tempering(pointer, index, q, betas_geometric(8), 2, 50, exact - 1, 3, 0)
-    assert (unreachable == -1).all()
-    hits, _ = tempering(pointer, index, q, betas_geometric(8), 2, 200, exact, 3, 0)
-    assert ((hits >= 1) & (hits <= 200)).all()
+    checkpoints = np.array([1, 2, 5, 20, 100, 300])
+    trace = tempering(pointer, index, q, betas_geometric(8), 2, checkpoints, 4, 0)
+    assert trace.shape == (4, len(checkpoints))
+    assert (np.diff(trace, axis=1) <= 0).all()
+    assert (trace >= exact).all() and (trace[:, -1] == exact).all()
 
 
 def test_repetitions_follow_the_tts_formula():
