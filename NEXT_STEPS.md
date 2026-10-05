@@ -103,7 +103,8 @@ exact simulation up to ~20 qubits, strong on baselines and statistics):
 | IBM/UChicago, July 2026: doped-Clifford sampling, 97 qubits, 468 T gates (arXiv:2607.25941) | open | Stabiliser-rank cost grows exponentially in the T count, unless the T placement allows cutting. | hard |
 | Google "Quantum Echoes", OTOC(2), 65 qubits, "13 000×" (Nature, Oct 2025) | open as far as found | Tensor-network or Pauli-path simulation of deep echo circuits. | hard |
 | Quantinuum Helios, random circuit sampling, 98 qubits (Nov 2025) | open | Tensor-network contraction at 98 fully connected qubits. | out of reach |
-| D-Wave spin-glass dynamics (Science, March 2025) | **contested** | Reproduced by Flatiron/BU belief propagation in Science (May 2026). D-Wave answers that the 3D cubic and diamond lattices, the largest sizes and the fourth-order observables were not reproduced. | the remaining gap is 3D, heavy |
+| D-Wave spin-glass dynamics (Science, March 2025) | **contested** | Reproduced by Flatiron/BU belief propagation in Science (May 2026). D-Wave answers that the 3D cubic and diamond lattices, the largest sizes and the fourth-order observables were not reproduced. | the remaining gap is 3D, heavy. SQA cannot attack it: it samples Monte Carlo dynamics, not Schrödinger dynamics. |
+| **D-Wave/USC "scaling advantage in approximate optimization"** (Munoz-Bauza & Lidar, PRL 134, 160601, 2025) | **open — in progress as exp041** | QAC: median time-to-ε at a 1% gap scales as `N^1.69 ± 0.12`, against PT-ICM's `N^1.93 ± 0.03` — "the first demonstration of an algorithmic quantum speedup in approximate optimization". PT-ICM was the only classical opponent; SA was dropped as "not competitive". At a fixed relative gap an annealer's energy density self-averages, so a tuned classical annealer should approach `N^1`. The instance class is rebuilt from Pegasus P16, and SA, SQA and PT-ICM are running. | **good fit; second A′ candidate** |
 | Kipu Quantum, "runtime quantum advantage" in optimisation (May 2025) | **refuted by others** | arXiv:2510.06337: a better classical baseline removes it. Kipu's own March 2026 benchmark concedes that classical solvers "reach or surpass" it. | done |
 | "Peaked circuits" verifiable-advantage proposals | **refuted by others** | arXiv:2604.21908: efficient classical simulation. | done |
 | Microsoft: Majorana 1 (Feb 2025); logical qubits with Quantinuum and Atom | not an advantage claim | These are hardware claims. Microsoft itself says the chemistry demonstration "does not demonstrate scientific quantum advantage". A classical algorithm cannot refute a qubit-physics claim. | out of scope |
@@ -170,6 +171,74 @@ only other row that fits here, and the paper read on 2026-10-03 says what to try
   `H_eff`, possibly with a sign problem at fourth order. That still answers
   "classical methods fail", but at high cost. The exact angles are given only
   as "≈", and the data only as figures. **Ranked below the Result 93 follow-up.**
+
+### NEW — building on Troyer's critical programme (added on request, October 2026)
+
+Matthias Troyer's group wrote the methodology this repository has been
+reinventing. What to take from it, and where:
+
+* **Rønnow et al., "Defining and detecting quantum speedup"** (Science 2014,
+  arXiv:1401.2910). Scale hardware resources identically on both sides. An
+  analog device with N qubits sweeps in constant time, so either divide the
+  serial classical time by N, or charge the device N/N_max for unused qubits.
+  *Checked for the D-Wave/USC claim: they charge N/N_max, so the timing
+  convention is fair* (exp041).
+* **Heim, Rønnow, Isakov & Troyer, "Quantum versus classical annealing of Ising
+  spin glasses"** (Science 2015, arXiv:1411.5693). Discrete-time SQA with
+  best-of-slices readout manufactures a scaling advantage over SA that vanishes
+  in the continuous-time limit with physical readout. *Applied in exp041*: SQA
+  is reported with both readouts, and only the single-slice one may stand in
+  for an annealer. Follow-up: a continuous-time SQA arm.
+* **Isakov, Zintchenko, Rønnow & Troyer, "Optimised simulated annealing for
+  Ising spin glasses"** (CPC 2015, arXiv:1401.1084). Its multi-spin-coded
+  codes run at about 0.1 ns per spin update; exp041's numba kernels run at
+  12–17 ns. That changes absolute times, not exponents; quote it whenever an
+  absolute "×-faster" is compared.
+* **Hoefler, Häner & Troyer, "Disentangling hype from practicality"** (CACM
+  2023, arXiv:2307.00523). Quadratic speedups do not survive realistic
+  overheads; small data and super-quadratic speedups are required. *As a
+  filter for refutation targets*: a polynomial exponent gap like D-Wave/USC's
+  `N^0.24` cannot be practical, even before exp041. Their own exclusion of
+  readout time — "can reach 200 μs per sample", and it "scales with problem
+  size" — against annealing times of about 1 μs is exactly the overhead that
+  paper says must be counted.
+* **Beverland et al., "Assessing requirements to scale to practical quantum
+  advantage"** (arXiv:2211.07629). It provides the resource-estimation
+  framework. This repository's THC/DF results (76–80, 94) feed exactly that
+  kind of estimate, and Result 82's 25-orbital target should be re-costed with it.
+* **Goings et al., cytochrome P450** (PNAS 2022) and **Reiher et al., FeMoco**
+  (PNAS 2017). These are the models of a careful classical-against-quantum
+  comparison in chemistry: DMRG/CCSD(T) baselines next to fault-tolerant
+  resource estimates. They are the template for the still-open DMRG baseline
+  item below.
+* **Carleo, Bauer & Troyer, "Simulating adiabatic quantum computation with a
+  variational approach"** (arXiv:2403.05147, work from 2016). Time-dependent
+  VMC with Jastrow states reproduces annealing dynamics on Chimera spin
+  glasses. That is the route EPFL used against D-Wave's 2025 dynamics claim,
+  and the only one in this list that can address coherent dynamics rather than
+  sampling.
+* **The more optimistic recent papers**: "Quantum computers will not be that
+  different" (Hoefler & Troyer, arXiv:2609.19639) and "Assessing the benefits
+  and risks of quantum computers" (arXiv:2401.16317). These argue engineering
+  and cost-performance, not new speedups, so there is nothing to refute. Use
+  them for the cost model: a QPU judged as a heterogeneous accelerator,
+  quantum-classical I/O included.
+
+### NEW — Google "Quantum Echoes" (OTOC(2)): is the *observable* classically approximable?
+
+Prompted by the "a physical system just measuring itself" argument. Solid-state
+NMR has measured OTOC-type echoes on clusters of thousands of nuclear spins for
+a decade (Álvarez & Suter; Pastawski's group; arXiv:2504.15183). By "cost of
+an exact classical simulation of the measured quantity" that exceeded 65 qubits
+long ago, and nobody called it advantage. One reason: Elsayed & Fine
+(arXiv:1409.8564) showed that classical spin simulations reproduce such NMR
+signals when each spin has many neighbours. The same reason cuts the other way
+for Google: the agreement degrades at four or fewer neighbours, and Google's
+grid has four. **Testable here at 20–24 qubits:** exact OTOC(1)/OTOC(2) on
+Google-style grid circuits against truncated Pauli paths and classical-spin
+(TWA) estimates, mapping where each fails. A refutation would need the
+observable to stay accurate where Google says it does not. A confirmation is
+the likelier outcome and would still be worth recording (tier C).
 
 ### NEW — classical algorithm work is in scope, and it is already where the leverage was
 

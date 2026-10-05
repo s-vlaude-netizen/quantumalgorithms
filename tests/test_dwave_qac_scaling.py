@@ -88,7 +88,8 @@ def test_every_solver_finds_the_ground_state_of_a_tiny_glass(seed):
     q = integer_weights(weight)
     exact = round(brute_force(n, i, j, couplings) * UNIT)
     assert anneal(pointer, index, q, betas_geometric(500, 0.5, 8.0), 20, seed).min() == exact
-    assert quantum_anneal(pointer, index, q, 8, 8.0, np.linspace(3, 1e-3, 300), 10, seed).min() == exact
+    best, single = quantum_anneal(pointer, index, q, 8, 8.0, np.linspace(3, 1e-3, 300), 10, seed)
+    assert best.min() == exact and (best <= single).all()
     hits, best = tempering(pointer, index, q, betas_geometric(8), 2, 300, exact, 5, seed)
     assert (best == exact).all() and (hits > 0).all()
 

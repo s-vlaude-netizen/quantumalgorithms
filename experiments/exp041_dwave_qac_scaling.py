@@ -68,6 +68,8 @@ PT_TEMPERATURES, PT_BETA_MIN, PT_BETA_MAX, PT_ICM = 32, 0.1, 5.0, 8
 #: 1000-1003) among six ranges and frozen for every size; only the number of
 #: sweeps is optimised per size, as the paper optimises QA's annealing time
 SA_BETA_MIN, SA_BETA_MAX = 1.0, 8.0
+#: path-integral SQA: Trotter slices, inverse temperature, initial transverse field
+SQA_SLICES, SQA_BETA, SQA_GAMMA = 16, 8.0, 3.0
 
 
 # ------------------------------------------------------------------ the graph
@@ -261,12 +263,17 @@ def _kernels():
         ``H = sum J s s - Gamma sum sigma^x`` at inverse temperature ``beta`` with
         ``slices`` Trotter slices, Gamma lowered along ``gammas``; one sweep is one
         Metropolis attempt per spin per slice. Returns, per run, the lowest
-        classical energy (1/28 units) among the slices at the end.
+        classical energy (1/28 units) among the slices at the end, and the
+        energy of slice 0 alone. Heim, Ronnow, Isakov & Troyer (Science 2015)
+        showed that discrete time plus best-of-slices readout -- which no
+        physical annealer can do -- manufactures SQA's apparent scaling
+        advantage over SA; the single-slice readout is the honest one.
         """
         state = seeded(seed)
         n = pointer.shape[0] - 1
         size = largest_delta(pointer, weight)
         out = np.empty(runs, dtype=np.int64)
+        single = np.empty(runs, dtype=np.int64)
         spins = np.empty((slices, n), dtype=np.int64)
         accept = np.empty((2 * size + 1, 3))
         for r in range(runs):
@@ -290,10 +297,11 @@ def _kernels():
                         if uniform(state) < accept[delta + size, m]:
                             spins[s, a] = -spins[s, a]
             best = integer_energy(spins[0], pointer, index, weight)
+            single[r] = best
             for s in range(1, slices):
                 best = min(best, integer_energy(spins[s], pointer, index, weight))
             out[r] = best
-        return out
+        return out, single
 
     @njit(cache=True)
     def tempering(pointer, index, weight, betas, n_icm, sweeps, target, runs, seed):
@@ -454,13 +462,13 @@ def solve_one(task):
                            1000 * seed + sweeps)
             rows.append({"sweeps": sweeps, "updates": sweeps * n,
                          "p": float(np.mean(final <= target))})
-    elif method == "sqa":
-        slices, beta = 16, 8.0
+    elif method in ("sqa", "sqa_single"):
         for sweeps in grid:
-            gammas = np.linspace(3.0, 1e-3, sweeps)
-            final = quantum_anneal(pointer, index, weight, slices, beta, gammas, runs,
-                                   1000 * seed + sweeps)
-            rows.append({"sweeps": sweeps, "updates": sweeps * n * slices,
+            gammas = np.linspace(SQA_GAMMA, 1e-3, sweeps)
+            best, single = quantum_anneal(pointer, index, weight, SQA_SLICES, SQA_BETA, gammas,
+                                          runs, 1000 * seed + sweeps)
+            final = best if method == "sqa" else single
+            rows.append({"sweeps": sweeps, "updates": sweeps * n * SQA_SLICES,
                          "p": float(np.mean(final <= target))})
     elif method == "pt_icm":
         betas = betas_geometric(PT_TEMPERATURES)
@@ -528,9 +536,10 @@ def summarise(results, method):
 GRIDS = {
     "sa": tuple(2 ** k for k in range(5, 16)),
     "sqa": tuple(2 ** k for k in range(4, 12)),
+    "sqa_single": tuple(2 ** k for k in range(4, 12)),
     "pt_icm": tuple(int(v) for v in np.unique(np.geomspace(1, 4096, 25).astype(int))),
 }
-RUNS = {"sa": 64, "sqa": 32, "pt_icm": 20}
+RUNS = {"sa": 64, "sqa": 32, "sqa_single": 32, "pt_icm": 20}
 
 
 def main() -> int:
