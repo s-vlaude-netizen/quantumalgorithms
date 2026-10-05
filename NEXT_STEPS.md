@@ -44,17 +44,17 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 95:
+Applied honestly, as of Result 96:
 
 | tier | results | note |
 |---|---|---|
 | **A** | **86, 89** | the THC gauge group, and its exact identifiability boundary; both small |
-| **A′** | **93** (narrow) | IonQ + Ansys: every partition the quantum step handed LS-DYNA is computed exactly classically, faster — refutes the press release's "quantum outperforming classical", not the paper's pipeline claim |
+| **A′** | **93** (narrow), **96** | 93 — IonQ + Ansys: every partition the quantum step handed LS-DYNA is computed exactly classically, faster; it refutes the press release, not the paper's pipeline claim. 96 — D-Wave/USC's "algorithmic quantum speedup in approximate optimization": on the rebuilt instances, classical SQA scales as N^1.09 and SA as N^1.74 against QAC's N^1.69, with PT-ICM's 1.93 reproduced (1.91) |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
 | **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94, 95 … |
 
-**That is two A and one narrow A′ in ninety-five results**; the two A are both on one model, and Result 72 had already said so from
+**That is two A and two A′ in ninety-six results**; the two A are both on one model, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
@@ -104,7 +104,7 @@ exact simulation up to ~20 qubits, strong on baselines and statistics):
 | Google "Quantum Echoes", OTOC(2), 65 qubits, "13 000×" (Nature, Oct 2025) | open as far as found | Tensor-network or Pauli-path simulation of deep echo circuits. | hard |
 | Quantinuum Helios, random circuit sampling, 98 qubits (Nov 2025) | open | Tensor-network contraction at 98 fully connected qubits. | out of reach |
 | D-Wave spin-glass dynamics (Science, March 2025) | **contested** | Reproduced by Flatiron/BU belief propagation in Science (May 2026). D-Wave answers that the 3D cubic and diamond lattices, the largest sizes and the fourth-order observables were not reproduced. | the remaining gap is 3D, heavy. SQA cannot attack it: it samples Monte Carlo dynamics, not Schrödinger dynamics. |
-| **D-Wave/USC "scaling advantage in approximate optimization"** (Munoz-Bauza & Lidar, PRL 134, 160601, 2025) | **open — in progress as exp041** | QAC: median time-to-ε at a 1% gap scales as `N^1.69 ± 0.12`, against PT-ICM's `N^1.93 ± 0.03` — "the first demonstration of an algorithmic quantum speedup in approximate optimization". PT-ICM was the only classical opponent; SA was dropped as "not competitive". At a fixed relative gap an annealer's energy density self-averages, so a tuned classical annealer should approach `N^1`. The instance class is rebuilt from Pegasus P16, and SA, SQA and PT-ICM are running. | **good fit; second A′ candidate** |
+| **D-Wave/USC "scaling advantage in approximate optimization"** (Munoz-Bauza & Lidar, PRL 134, 160601, 2025) | **refuted here — Result 96 (A′)** | QAC's median time-to-ε at a 1% gap is `N^1.69 ± 0.12` against PT-ICM's `N^1.93`. On the instance class rebuilt from Pegasus P16, with the paper's metric: PT-ICM reproduces at 1.91; SA (which the paper dropped) gives 1.74, and 1.42 for N ≥ 600; classical SQA gives 1.09 [1.03, 1.16] with the single-slice readout. The cause is self-averaging at a fixed relative gap. QAC beats PT-ICM, not classical computation. | done |
 | Kipu Quantum, "runtime quantum advantage" in optimisation (May 2025) | **refuted by others** | arXiv:2510.06337: a better classical baseline removes it. Kipu's own March 2026 benchmark concedes that classical solvers "reach or surpass" it. | done |
 | "Peaked circuits" verifiable-advantage proposals | **refuted by others** | arXiv:2604.21908: efficient classical simulation. | done |
 | Microsoft: Majorana 1 (Feb 2025); logical qubits with Quantinuum and Atom | not an advantage claim | These are hardware claims. Microsoft itself says the chemistry demonstration "does not demonstrate scientific quantum advantage". A classical algorithm cannot refute a qubit-physics claim. | out of scope |
@@ -182,13 +182,17 @@ reinventing. What to take from it, and where:
   analog device with N qubits sweeps in constant time, so either divide the
   serial classical time by N, or charge the device N/N_max for unused qubits.
   *Checked for the D-Wave/USC claim: they charge N/N_max, so the timing
-  convention is fair* (exp041).
+  convention is fair* (exp041, Result 96).
 * **Heim, Rønnow, Isakov & Troyer, "Quantum versus classical annealing of Ising
   spin glasses"** (Science 2015, arXiv:1411.5693). Discrete-time SQA with
   best-of-slices readout manufactures a scaling advantage over SA that vanishes
   in the continuous-time limit with physical readout. *Applied in exp041*: SQA
   is reported with both readouts, and only the single-slice one may stand in
-  for an annealer. Follow-up: a continuous-time SQA arm.
+  for an annealer. Result 96 found the single-slice readout scaling *better*
+  (1.09) than best-of-slices (1.30), because small sizes inflate the latter's
+  baseline. Neither is evidence about the hardware, and neither needs to be.
+  Follow-up: a continuous-time SQA arm, to say what a physical annealer
+  *could* reach on these instances.
 * **Isakov, Zintchenko, Rønnow & Troyer, "Optimised simulated annealing for
   Ising spin glasses"** (CPC 2015, arXiv:1401.1084). Its multi-spin-coded
   codes run at about 0.1 ns per spin update; exp041's numba kernels run at

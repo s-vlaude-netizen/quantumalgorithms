@@ -25,7 +25,7 @@ is indistinguishable and, if anything, the wrong way round.
 
 ## The results here that are proofs (Results 86 and 89)
 
-Ninety-five results, and **two** of them establish something rather than
+Ninety-six results, and **two** of them establish something rather than
 measuring it. Both are small, both concern the same model, and each begins by
 correcting an earlier entry of my own.
 
@@ -150,7 +150,7 @@ one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
 published; that low λ costs nothing in accuracy here is what is new.
 
 → `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
-The rubric these are graded against, and where all 95 results sit under it, is at
+The rubric these are graded against, and where all 96 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -242,7 +242,39 @@ METIS.
 in the research log. The METIS arms need `pip install pymetis` and are skipped
 without it.
 
-## The answer, since 95 results is a lot to read
+## A second public claim, checked: D-Wave/USC's "algorithmic quantum speedup" (Result 96)
+
+**The claim.** Munoz-Bauza & Lidar, PRL 2025: with quantum annealing correction
+on D-Wave, the median time to get within 1% of the optimum scales as
+`N^1.69`, against `N^1.93` for PT-ICM, "the top classical heuristic". It is
+billed as "the first demonstration of an algorithmic quantum speedup in
+approximate optimization". Simulated annealing was tried and dropped.
+
+**Measured here** on the instance class rebuilt from D-Wave's Pegasus graph
+(6L² logical qubits, bulk degree 5, Sidon-28 couplings), with the paper's own
+metric and fit:
+
+| method | exponent at a 1% gap |
+|---|---|
+| D-Wave QAC (paper) | 1.69 ± 0.12 |
+| PT-ICM (paper) / here | 1.93 / **1.91** — the setup reproduces it |
+| simulated annealing, here | **1.74**; 1.42 on the larger half |
+| simulated quantum annealing (classical), single-slice readout, here | **1.09** [1.03, 1.16] |
+
+At a fixed *relative* gap, an annealer's success per run stops depending on
+size once it reaches the target energy density. Here that happens at about a
+thousand sweeps, so the time grows only like N. **The quantum annealer beat
+one classical algorithm, not classical computation.** Following Heim, Rønnow,
+Isakov & Troyer (Science 2015), the SQA numbers say nothing about how the
+*hardware* should scale. They are a classical computer running a classical
+algorithm, which is all a claim of advantage over classical heuristics has to
+survive.
+
+→ `experiments/exp041_dwave_qac_scaling.py`, `tests/test_dwave_qac_scaling.py`,
+Result 96 in the research log. Needs `numba`; rebuilding the graph needs
+`dwave-networkx`, but it is cached in `results/exp041_qac_logical_graph.json`.
+
+## The answer, since 96 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.

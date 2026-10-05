@@ -5798,3 +5798,144 @@ not a proof of anything, and LS-DYNA's own orderings were not measured.
 `experiments/exp040_nested_dissection_fill.py`,
 `tests/test_nested_dissection_fill.py`,
 `results/exp040_nested_dissection_fill.json`.
+
+---
+
+### Result 96 — D-Wave/USC's "algorithmic quantum speedup in approximate optimization": classical annealers scale as well or better
+
+**The claim.** Munoz-Bauza & Lidar, *Scaling advantage in approximate
+optimization with quantum annealing*, PRL 134, 160601 (2025), arXiv:2401.07184.
+It is promoted as "the first demonstration of an algorithmic quantum speedup in
+approximate optimization", and a USC press release ran under "Quantum computer
+outperforms supercomputers in approximate optimization tasks". The paper used
+quantum annealing correction (QAC) on D-Wave Advantage 4.1, Sidon-28 spin
+glasses on QAC's degree-5 logical graph, and N = 142–1322. The median
+time-to-ε at a 1% optimality gap scales as **`N^1.69 ± 0.12`**, against
+**`N^1.93 ± 0.03`** for PT-ICM, called "the top classical heuristic". Simulated
+annealing "was not competitive at large problem sizes" and is not shown. No
+other classical method was run.
+
+**The test.** If a classical heuristic scales no worse than QAC on the same
+instances, by the same metric, there is no scaling advantage over the best
+classical heuristic.
+
+#### Design
+
+* **Instances, rebuilt from the paper's description.** QAC's `[[3,1,3]]` code
+  applied cell by cell to Pegasus P16 (dwave_networkx, nice coordinates). A
+  logical bond exists wherever at least two physical couplers join the data
+  qubits. The result matches every property the paper states: 6L² logical
+  qubits (1350 at L = 15; the chip's 1322 lacks dead qubits), bulk degree 5,
+  native 5-loops, and a non-planar honeycomb. Sidon-28 couplings
+  `±{8,13,19,28}/28`, no fields, L = 5…15, 30 instances per size.
+* **Metric, as theirs.** `TTε = t · log(0.01)/log(1 − p_ε)`, with R clipped at
+  1. The per-run effort is optimised per size to minimise the median, as they
+  optimise QA's annealing time, and a power law is fitted to the medians.
+  Classical time is counted in serial spin updates. That is their own
+  convention: they charge QA `N/N_max` for unused qubits (Rønnow et al. 2014),
+  which was checked before anything else.
+* **Reference energies.** Two stages of PT-ICM plus SA. The first stage left
+  PT-ICM and SA disagreeing from L = 8 up. A second stage of two 50 000-sweep
+  PT-ICM runs per instance for L ≥ 8 improved 53 of 240 references, by at most
+  2.8e-4 relative, and the two long runs never disagree by more than that. The
+  solvers store raw final energies, so every target is evaluated against the
+  final references. Results are also reported at ε = 0.97%, the 1% target
+  tightened by the worst observed uncertainty.
+* **Solvers** (numba, exact integer energies):
+  * PT-ICM with the paper's temperature set 1, as **calibration**.
+  * **SA** with a geometric β schedule from 1 to 8, chosen once among six
+    ranges on held-out instances (L = 10, seeds 1000–1003), then frozen.
+  * Path-integral **SQA** (16 slices; β and Γ chosen on the same held-out
+    instances), reported with the best-of-slices readout and with the
+    single-slice readout that Heim, Rønnow, Isakov & Troyer (Science 2015)
+    showed is the only one a physical annealer can match.
+
+#### Measured
+
+Exponent α of the median time-to-ε (`TTε ∝ N^α`), N = 150–1350, 30 instances
+per size. Bootstrap 95% intervals resample instances within each size and
+re-optimise the effort in every resample:
+
+| method | ε = 1% | N ≥ 600 only | ε = 1.25% | ε = 1.5% |
+|---|---|---|---|---|
+| *QAC on D-Wave (paper)* | *1.69 ± 0.12* | — | *1.15 ± 0.22 (3 sizes)* | *not determinable* |
+| *U3, unprotected QA (paper)* | *worse than PT-ICM* | — | *1.76 ± 0.06* | *1.60 ± 0.07* |
+| *PT-ICM (paper)* | *1.93 ± 0.03* | — | *1.87 ± 0.02* | *1.86 ± 0.04* |
+| PT-ICM, here (calibration) | **1.91** [1.87, 2.00] | 2.11 ± 0.30 | 1.91 | 1.84 |
+| SA, here | **1.74** [1.67, 1.84] | **1.42** ± 0.17 | 1.54 | 1.38 |
+| SQA, best of slices | **1.30** [1.21, 1.37] | 0.84 ± 0.23 | 1.16 | 1.19 |
+| **SQA, single slice** (Heim et al.'s physical readout) | **1.09** [1.03, 1.16] | **0.62** ± 0.28 | **0.94** | **0.96** |
+
+* **The calibration holds.** PT-ICM reproduces the paper's exponent: 1.91
+  against 1.93 at 1%, and 1.84–1.91 against 1.86–1.87 at the wider gaps. So
+  the rebuilt instances, reference energies, metric and fit measure the same
+  thing the paper measured.
+* **Simulated annealing, the method the paper dropped, matches QAC.** It scales
+  as 1.74 against 1.69 ± 0.12 over the full range, and 1.42 over the upper
+  half, where the paper's QAC fit also lives. It is also faster than PT-ICM in
+  absolute terms at the largest size: 2.5e7 against 4.4e7 spin updates.
+* **Classical SQA scales as N^1.09**, against QAC's N^1.69 — intervals
+  [1.03, 1.16] and [1.57, 1.81], far apart. The mechanism is visible directly:
+  at a fixed 1024 sweeps, the single-slice success probability at the 1% gap
+  is 0.86–0.94 at every size from L = 5 to 15. Success per run does not decay
+  with N, so TTε grows only as the cost of one run, ∝ N. That is the
+  self-averaging the design was built to test, and it arrives at 1% here.
+* **Robust to the reference energies.** With the target tightened to 0.97%,
+  which covers the worst observed reference uncertainty, the exponents become
+  SA 1.76, SQA 1.28 and SQA single-slice 1.12.
+* **Absolute cost is not where the classical side wins.** At N = 1350 the
+  median TTε is 2.5e7 (SA), 3.7e7 (SQA) and 4.4e7 (PT-ICM) spin updates, which
+  is 0.3–0.7 s for this numba code. Isakov et al.'s optimised codes run about
+  100× faster. The paper reports QAC about 10⁴× ahead of its PT-ICM in raw
+  annealing time, but excludes a readout of up to 200 μs per sample, about
+  200× the annealing time. No absolute comparison is claimed here.
+
+#### What it says
+
+* **There is no scaling advantage over the best classical heuristic.** PT-ICM
+  is not the best classical heuristic for approximate optimisation on these
+  instances. It is an equilibrium sampler built to find ground states, and at a
+  1% gap it is beaten in exponent by plain SA and by a wide margin by SQA. QAC's
+  1.69 is better than PT-ICM's 1.93, as the paper says, and worse than
+  classical SQA's 1.09. "The first demonstration of an algorithmic quantum
+  speedup in approximate optimization" therefore does not hold. The quantum
+  device beat one classical algorithm, not classical computation.
+* **The reason is the one the design predicted.** At a fixed *relative* gap the
+  target is an energy density, and an annealer's final energy density
+  self-averages. Once a fixed number of sweeps reaches it, success stops
+  depending on N, and TTε grows as one run's cost. The paper itself calls this
+  "unsurprising" at large gaps. The measurement shows it already holds at 1%.
+* **Heim, Rønnow, Isakov & Troyer apply, and they do not rescue the claim.**
+  They showed that discrete-time SQA, especially with best-of-slices readout,
+  can scale better than a physical annealer could. So the SQA rows are *not*
+  evidence about how D-Wave's hardware ought to scale, and they are not offered
+  as such. They are what a classical computer does with a classical algorithm.
+  That is all a refutation of "advantage over classical heuristics" needs.
+  SA, which involves no quantum-inspired step at all, already erases the gap.
+* **The Hoefler–Häner–Troyer filter would have flagged it first.** Even taken
+  at face value, a polynomial gap of `N^0.24` against one baseline, with a
+  per-sample readout excluded that is 200× the annealing time and grows with
+  N, is not the kind of speedup that becomes practical.
+
+#### Grading
+
+**A′ — the repository's second.** The script establishes our statement: on the
+paper's instance class, rebuilt from its description, a classical heuristic
+scales strictly better than QAC's reported exponent at the paper's headline
+gap. Its intervals do not overlap QAC's, and the result survives a stricter
+target. The calibration arm establishes that the setup reproduces the paper's
+own classical exponent. Together they show the paper's statement — a scaling
+advantage over the best available classical heuristic — does not hold.
+
+**Limits:**
+* QAC itself was not re-run; its exponent is the paper's.
+* The rebuilt graph lacks the chip's 28 dead qubits.
+* Reference energies come from PT-ICM, not a proof of optimality. Two
+  independent 50 000-sweep runs agree to 2.8e-4 relative, and 53 of 240
+  references moved by at most that much in the second stage.
+* SA's and SQA's schedules were each chosen once on held-out instances and
+  frozen; all four arms are reported.
+* What is *not* refuted is the paper's narrower comparison, QAC against PT-ICM.
+
+`experiments/exp041_dwave_qac_scaling.py`, `tests/test_dwave_qac_scaling.py`,
+`results/exp041_dwave_qac_scaling.json`, `results/exp041_qac_logical_graph.json`.
