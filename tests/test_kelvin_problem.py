@@ -88,3 +88,52 @@ def test_sphere_bound_is_below_everything():
 
     assert SPHERE == pytest.approx(4.835976, abs=1e-6)
     assert math.isclose(SPHERE, (36 * math.pi) ** (1 / 3))
+
+
+def test_opening_six_cell_vertices_leaves_only_plateau_vertices():
+    from experiments.exp042_kelvin_problem import axis_choice, open_six_cell_vertices
+
+    for name in ("fcc", "hcp"):
+        box, points = point_set(name)
+        foam = periodic_voronoi(points, box)
+        choose = axis_choice(foam, 2) if name == "fcc" else (lambda vid, pairs: 0)
+        opened = open_six_cell_vertices(foam, choose)
+        measures = foam_measures(opened)
+        assert set(measures["vertex_cells"]) == {4}
+        assert measures["volumes"].sum() == pytest.approx(abs(np.linalg.det(box)))
+        # every cell now has 14 faces, like Kelvin's truncated octahedron
+        faces = [sum(f["cells"].count(c) for f in opened["faces"]) for c in range(len(points))]
+        assert faces == [14] * len(points)
+
+
+def test_free_box_gradient_matches_finite_differences():
+    box, points = point_set("a15")
+    mesh = triangulate(periodic_voronoi(points, box), 1)
+    rng = np.random.default_rng(1)
+    strained = box + rng.normal(scale=1e-2, size=(3, 3))
+    frac = mesh["y"] @ np.linalg.inv(box)
+    _, _, ga, _, ba, _ = surface_terms(frac @ strained, mesh, strained,
+                                       want_box=True)
+    analytic = frac.T @ ga + ba
+    for i, j in ((0, 0), (1, 2), (2, 1)):
+        step = np.zeros((3, 3))
+        step[i, j] = 1e-6
+        plus = surface_terms(frac @ (strained + step), mesh, strained + step)[0]
+        minus = surface_terms(frac @ (strained - step), mesh, strained - step)[0]
+        assert (plus - minus) / 2e-6 == pytest.approx(analytic[i, j], abs=1e-6)
+
+
+def test_opened_densest_packing_foams_relax_into_kelvins_foam():
+    """With the box free, FCC opened along one axis follows the Bain path
+    (c/a -> 1/sqrt 2) and HCP shears; both land on Kelvin's relaxed cost."""
+    from experiments.exp042_kelvin_problem import axis_choice, open_six_cell_vertices
+
+    box, points = point_set("bcc")
+    kelvin = relax(triangulate(periodic_voronoi(points, box), 1))["cost"]
+    box, points = point_set("fcc")
+    foam = periodic_voronoi(points, box)
+    result = relax(triangulate(open_six_cell_vertices(foam, axis_choice(foam, 2)), 1),
+                   free_box=True)
+    assert result["cost"] == pytest.approx(kelvin, abs=1e-5)
+    lengths = np.linalg.norm(result["box"], axis=1)
+    assert lengths[2] / lengths[0] == pytest.approx(1 / math.sqrt(2), abs=2e-3)

@@ -81,6 +81,46 @@ this repository where that is plausible:
 
 ## Now
 
+### NEW, top priority on request — the Kelvin problem (the 3-D analogue of the honeycomb)
+
+Added October 2026 at the request of the person who asked Math StackExchange
+1494037 in 2015 ("rhombic dodecahedral honeycomb?"). It is pure mathematics,
+kept here because this is the repository that exists. **Status: Result 97 built
+and validated the toolkit and settled the original question.** The open problem
+itself — is Weaire–Phelan (5.2883) optimal among all equal-volume partitions?
+— remains open. What is realistic, and in what order:
+
+1. **Search beyond Weaire–Phelan, systematically.** The toolkit has periodic
+   Voronoi foams, Plateau census, equal-volume relaxation with the box free,
+   and vertex opening, all validated against Kelvin and Weaire–Phelan to 1e-5.
+   * (a) Reproduce the known ranking on Frank–Kasper phases: A15 (WP), C15, C14,
+     C36, Z, σ, μ, χ. Then quasicrystal approximants (arXiv:1610.09286 came
+     within a hair of WP).
+   * (b) Random equal-volume starts: power diagrams with weights solved for
+     equal volumes, seeds in periodic boxes of 2–24 cells, screened by flat
+     cost, the best relaxed with the box free.
+   * (c) Decorations of WP itself.
+
+   A structure below 5.2883 after extrapolation would be a genuine result. The
+   literature says many have tried. Report the search's coverage either way.
+2. **Kelvin among single-cell foams with curved faces.** Hales & Song
+   (arXiv:2609.00997, 2026) prove the truncated octahedron optimal among *flat*
+   parallelohedra. Whether Kelvin's *curved* foam is optimal among foams with
+   one cell per lattice point is open (Cesaroni–Novaga, arXiv:2302.07112, prove
+   existence only). Numerical scan: relax the Voronoi foam of lattices sampled
+   over Selling parameters with the box free, and check that every one lands at
+   or above 5.3063. This is evidence, not proof, but it is the curved companion
+   to Hales–Song.
+3. **Independent check of Hales–Song's certificate.** Their final inequality is
+   an exact Bernstein certificate. Re-verifying it in SymPy (exact rational
+   arithmetic) is a well-defined, checkable task, and a computer-assisted proof
+   one month old benefits from an independent check.
+4. **Quantum-hardware angle (speculative).** Tetrahedrally close-packed
+   arrangements (A15, Frank–Kasper) are also candidate 3-D neutral-atom layouts
+   with uniform nearest-neighbour structure. Only worth pursuing if a concrete
+   hardware question comes with it.
+
+
 ### NEW — public quantum-advantage claims as refutation targets (added on request, October 2026)
 
 **Why this belongs here:** tier **A′** — *refutes a published claim* — is the one

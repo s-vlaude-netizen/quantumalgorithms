@@ -355,8 +355,8 @@ def triangulate(foam, refine=0):
     """
     box = foam["box"]
     y = [np.array(v, float) for v in foam["vertices"]]
-    tri, shift, cell_a, cell_b, cell_shift = [], [], [], [], []
-    for face in foam["faces"]:
+    tri, shift, cell_a, cell_b, cell_shift, face_of = [], [], [], [], [], []
+    for number, face in enumerate(foam["faces"]):
         corners = face["polygon"]
         points = face["points"]
         centre = len(y)
@@ -368,6 +368,7 @@ def triangulate(foam, refine=0):
             cell_a.append(face["cells"][0])
             cell_b.append(face["cells"][1])
             cell_shift.append(face["shift"])
+            face_of.append(number)
     tri, shift = np.array(tri), np.array(shift)
     for _ in range(refine):
         midpoints = {}
@@ -383,15 +384,23 @@ def triangulate(foam, refine=0):
         cell_a = [cell_a[t] for t in parents]
         cell_b = [cell_b[t] for t in parents]
         cell_shift = [cell_shift[t] for t in parents]
+        face_of = [face_of[t] for t in parents]
         tri, shift = np.array(new_tri), np.array(new_shift)
     return {"box": box, "y": np.array(y), "tri": tri, "shift": shift,
             "cell_a": np.array(cell_a), "cell_b": np.array(cell_b),
-            "cell_shift": np.array(cell_shift), "cells": len(foam["points"])}
+            "cell_shift": np.array(cell_shift), "face": np.array(face_of),
+            "cells": len(foam["points"])}
 
 
-def surface_terms(y, mesh):
-    """Total area, cell volumes and their gradients with respect to ``y``."""
-    box, tri = mesh["box"], mesh["tri"]
+def surface_terms(y, mesh, box=None, want_box=False):
+    """Total area, cell volumes and their gradients with respect to ``y``.
+
+    With ``want_box`` also the derivatives with respect to the periodic box at
+    fixed ``y`` through the image shifts only (``sum_corners shift^T grad``),
+    which is what the chain rule needs when the box is a variable.
+    """
+    box = mesh["box"] if box is None else box
+    tri = mesh["tri"]
     p = y[tri] + mesh["shift"] @ box
     p0, p1, p2 = p[:, 0], p[:, 1], p[:, 2]
     normal = np.cross(p1 - p0, p2 - p0)
@@ -399,54 +408,94 @@ def surface_terms(y, mesh):
     area = 0.5 * length.sum()
     unit = normal / length[:, None]
     grad_area = np.zeros_like(y)
+    box_area = np.zeros((3, 3))
     for k, (a, b) in enumerate(((p1, p2), (p2, p0), (p0, p1))):
-        np.add.at(grad_area, tri[:, k], 0.5 * np.cross(a - b, unit))
+        corner = 0.5 * np.cross(a - b, unit)
+        np.add.at(grad_area, tri[:, k], corner)
+        if want_box:
+            box_area += mesh["shift"][:, k].T @ corner
     cells = mesh["cells"]
     volumes = np.zeros(cells)
     grad_volume = np.zeros((cells,) + y.shape)
+    box_volume = np.zeros((cells, 3, 3))
     offset = mesh["cell_shift"] @ box
-    for sign, cell, q in ((1.0, mesh["cell_a"], p), (-1.0, mesh["cell_b"], p - offset[:, None, :])):
+    passes = ((1.0, mesh["cell_a"], p, mesh["shift"]),
+              (-1.0, mesh["cell_b"], p - offset[:, None, :],
+               mesh["shift"] - mesh["cell_shift"][:, None, :]))
+    for sign, cell, q, shifts in passes:
         q0, q1, q2 = q[:, 0], q[:, 1], q[:, 2]
         np.add.at(volumes, cell, sign * np.einsum("ij,ij->i", q0, np.cross(q1, q2)) / 6)
         for k, (a, b) in enumerate(((q1, q2), (q2, q0), (q0, q1))):
-            np.add.at(grad_volume, (cell, tri[:, k]), sign * np.cross(a, b) / 6)
+            corner = sign * np.cross(a, b) / 6
+            np.add.at(grad_volume, (cell, tri[:, k]), corner)
+            if want_box:
+                np.add.at(box_volume, cell, np.einsum("ti,tj->tij", shifts[:, k], corner))
+    if want_box:
+        return area, volumes, grad_area, grad_volume, box_area, box_volume
     return area, volumes, grad_area, grad_volume
 
 
-def relax(mesh, target=None, rho=50.0, tolerance=1e-10, rounds=40, inner=400):
+def relax(mesh, target=None, rho=50.0, tolerance=1e-10, rounds=40, inner=400,
+          free_box=False):
     """Minimise total area with every cell at the same volume.
 
     Augmented Lagrangian: ``A - lam.(V - V0) + rho/2 |V - V0|^2`` minimised by
     L-BFGS, multipliers updated between rounds. The multipliers converge to
-    the cells' pressures. Returns the relaxed positions, the cost per cell
-    ``2 A / n / V0^(2/3)`` and diagnostics.
+    the cells' pressures. With ``free_box`` the periodic box is a variable too
+    (vertices are carried in fractional coordinates); the volume constraints
+    keep its volume fixed. Returns the relaxed positions, the box, the cost
+    per cell ``2 A / n / V0^(2/3)`` and diagnostics.
     """
     from scipy.optimize import minimize
 
     cells = mesh["cells"]
-    target = abs(np.linalg.det(mesh["box"])) / cells if target is None else target
+    box0 = np.array(mesh["box"], float)
+    target = abs(np.linalg.det(box0)) / cells if target is None else target
     lam = np.zeros(cells)
-    y = mesh["y"].copy()
-    shape = y.shape
+    shape = mesh["y"].shape
+    frac0 = mesh["y"] @ np.linalg.inv(box0)
 
-    def objective(flat):
-        area, volumes, ga, gv = surface_terms(flat.reshape(shape), mesh)
+    def unpack(x):
+        if not free_box:
+            return x.reshape(shape), box0
+        frac = x[:-9].reshape(shape)
+        box = x[-9:].reshape(3, 3)
+        return frac @ box, box
+
+    def objective(x):
+        y, box = unpack(x)
+        if not free_box:
+            area, volumes, ga, gv = surface_terms(y, mesh)
+            gap = volumes - target
+            weights = lam - rho * gap
+            grad = ga - np.einsum("c,cij->ij", weights, gv)
+            return area - lam @ gap + 0.5 * rho * gap @ gap, grad.ravel()
+        area, volumes, ga, gv, ba, bv = surface_terms(y, mesh, box, want_box=True)
         gap = volumes - target
+        weights = lam - rho * gap
+        grad_y = ga - np.einsum("c,cij->ij", weights, gv)
+        grad_box_shift = ba - np.einsum("c,cij->ij", weights, bv)
+        frac = x[:-9].reshape(shape)
+        grad_frac = grad_y @ box.T
+        grad_box = frac.T @ grad_y + grad_box_shift
         value = area - lam @ gap + 0.5 * rho * gap @ gap
-        grad = ga - np.einsum("c,cij->ij", lam - rho * gap, gv)
-        return value, grad.ravel()
+        return value, np.concatenate([grad_frac.ravel(), grad_box.ravel()])
 
+    x = (np.concatenate([frac0.ravel(), box0.ravel()]) if free_box
+         else mesh["y"].ravel().copy())
     for _ in range(rounds):
-        result = minimize(objective, y.ravel(), jac=True, method="L-BFGS-B",
+        result = minimize(objective, x, jac=True, method="L-BFGS-B",
                           options={"maxiter": inner, "ftol": 1e-15, "gtol": 1e-11})
-        y = result.x.reshape(shape)
-        area, volumes, _, _ = surface_terms(y, mesh)
+        x = result.x
+        y, box = unpack(x)
+        area, volumes = surface_terms(y, mesh, box)[:2]
         gap = volumes - target
         lam = lam - rho * gap
         if np.abs(gap).max() < tolerance * target and result.nit < inner:
             break
-    area, volumes, _, _ = surface_terms(y, mesh)
-    return {"y": y, "area": area, "cost": 2 * area / cells / target ** (2 / 3),
+    y, box = unpack(x)
+    area, volumes = surface_terms(y, mesh, box)[:2]
+    return {"y": y, "box": box, "area": area, "cost": 2 * area / cells / target ** (2 / 3),
             "volume_error": float(np.abs(volumes / target - 1).max()),
             "pressures": lam.tolist()}
 
@@ -467,6 +516,274 @@ def relaxed_cost(structure, levels=(1, 2, 3)):
     extrapolated = (4 * costs[-1] - costs[-2]) / 3 if len(costs) > 1 else costs[-1]
     return {"levels": list(levels), "costs": costs, "extrapolated": extrapolated,
             "volume_error": max(out[level]["volume_error"] for level in levels)}
+
+
+# ------------------------------------------- opening the six-cell vertices
+
+def six_cell_vertices(foam):
+    """Vertices where six cells meet, with those cells as (cell, image) pairs
+    relative to the vertex's canonical position."""
+    around = {}
+    for face in foam["faces"]:
+        a, b = face["cells"]
+        for vid, vshift in face["polygon"]:
+            around.setdefault(vid, set())
+            around[vid].add((a, tuple(-np.array(vshift))))
+            around[vid].add((b, tuple(np.array(face["shift"]) - np.array(vshift))))
+    return {vid: sorted(cells) for vid, cells in around.items() if len(cells) == 6}
+
+
+def open_six_cell_vertices(foam, choose, size=0.03):
+    """Replace every six-cell vertex by a small square face, as a soap film does
+    in a cubic wire frame.
+
+    The six cells around such a vertex sit in three opposite pairs (the
+    octahedral hole of the packing). ``choose(vid, pairs)`` picks the pair that
+    becomes the square's two sides; the other four cells keep meeting along the
+    square's edges. Every new vertex has four cells around it, as Plateau's
+    laws require. Returns a new foam.
+    """
+    box, points = foam["box"], foam["points"]
+    vertices = [np.array(v) for v in foam["vertices"]]
+    faces = [dict(face, polygon=list(face["polygon"])) for face in foam["faces"]]
+    replace = {}   # vid -> data for rewriting faces
+    for vid, cells in six_cell_vertices(foam).items():
+        centre = vertices[vid]
+        direction = {c: points[c[0]] + np.array(c[1]) @ box - centre for c in cells}
+        unit = {c: d / np.linalg.norm(d) for c, d in direction.items()}
+        pairs = []
+        for c1, c2 in itertools.combinations(cells, 2):
+            if np.dot(unit[c1], unit[c2]) < -0.9:
+                pairs.append((c1, c2))
+        if len(pairs) != 3:
+            raise RuntimeError(f"vertex {vid} is not an octahedral six-cell vertex")
+        top, bottom = pairs[choose(vid, pairs)]
+        axis = unit[top] - unit[bottom]
+        axis /= np.linalg.norm(axis)
+        sides = [c for c in cells if c not in (top, bottom)]
+        corners = {}
+        for x, y in itertools.combinations(sides, 2):
+            if np.dot(unit[x], unit[y]) < -0.9:
+                continue   # opposite sides do not share a corner
+            out = unit[x] + unit[y]
+            out -= np.dot(out, axis) * axis
+            corners[frozenset((x, y))] = len(vertices)
+            vertices.append(centre + size * out / np.linalg.norm(out))
+        replace[vid] = {"top": top, "bottom": bottom, "sides": sides, "corners": corners,
+                        "axis": axis}
+    for face in faces:
+        a, b = face["cells"]
+        polygon = []
+        for k, (vid, vshift) in enumerate(face["polygon"]):
+            if vid not in replace:
+                polygon.append((vid, vshift))
+                continue
+            data = replace[vid]
+            here = {(a, tuple(-np.array(vshift))),
+                    (b, tuple(np.array(face["shift"]) - np.array(vshift)))}
+            ends = here & {data["top"], data["bottom"]}
+            if ends:
+                side = next(iter(here - ends))
+                new = [cid for pair, cid in data["corners"].items() if side in pair]
+            else:
+                new = [data["corners"][frozenset(here)]]
+            if len(new) == 2:   # keep the polygon simple: nearer the previous vertex first
+                previous_vid, previous_shift = face["polygon"][k - 1]
+                previous = vertices[previous_vid] + np.array(previous_shift) @ box
+                new.sort(key=lambda cid, vs=vshift: np.linalg.norm(
+                    vertices[cid] + np.array(vs) @ box - previous))
+            polygon += [(cid, vshift) for cid in new]
+        face["polygon"] = polygon
+    for vid, data in replace.items():
+        (top_cell, top_image), (bottom_cell, bottom_image) = data["top"], data["bottom"]
+        frame = -np.array(top_image)
+        ring = list(data["corners"].values())
+        centre = np.mean([vertices[c] for c in ring], axis=0)
+        u = vertices[ring[0]] - centre
+        u /= np.linalg.norm(u)
+        normal = -data["axis"]          # from top to bottom
+        w = np.cross(normal, u)
+        ring.sort(key=lambda c: math.atan2(np.dot(vertices[c] - centre, w),
+                                           np.dot(vertices[c] - centre, u)))
+        faces.append({"cells": (top_cell, bottom_cell),
+                      "shift": tuple(int(v) for v in np.array(bottom_image) - np.array(top_image)),
+                      "polygon": [(c, tuple(int(v) for v in frame)) for c in ring]})
+    for face in faces:
+        face["points"] = np.array([vertices[vid] + np.array(sh) @ box
+                                   for vid, sh in face["polygon"]])
+    return {"box": box, "points": points, "vertices": np.array(vertices), "faces": faces}
+
+
+# --------------------------------------------------------------- pictures
+
+def cell_polygons(foam, cell):
+    """The faces of one cell of a flat foam, in that cell's frame."""
+    out = []
+    for face in foam["faces"]:
+        a, b = face["cells"]
+        offset = np.array(face["shift"]) @ foam["box"]
+        if a == cell:
+            out.append(face["points"])
+        if b == cell:
+            out.append(face["points"][::-1] - offset)
+    return out
+
+
+def cell_triangles(mesh, y, cell):
+    """The triangles bounding one cell of a relaxed mesh, in that cell's frame,
+    and the curved foam edges (segments where two of the cell's faces meet)."""
+    p = y[mesh["tri"]] + mesh["shift"] @ mesh["box"]
+    offset = mesh["cell_shift"] @ mesh["box"]
+    as_a, as_b = mesh["cell_a"] == cell, mesh["cell_b"] == cell
+    triangles = np.concatenate([p[as_a], (p - offset[:, None, :])[as_b][:, ::-1]])
+    faces = np.concatenate([mesh["face"][as_a], mesh["face"][as_b]])
+    owner = {}
+    for t, corners in enumerate(triangles):
+        for k in range(3):
+            a, b = corners[k], corners[(k + 1) % 3]
+            key = tuple(sorted((tuple(np.round(a, 6)), tuple(np.round(b, 6)))))
+            owner.setdefault(key, set()).add(int(faces[t]))
+    edges = [np.array(key) for key, f in owner.items() if len(f) > 1]
+    return triangles, edges
+
+
+def draw(ax, polygons, colour, title, edges=True, lines=(), view=(22, 35)):
+    from matplotlib.colors import LightSource
+    from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
+
+    centre = np.concatenate(polygons).mean(axis=0)
+    shifted = [poly - centre for poly in polygons]
+    collection = Poly3DCollection(shifted, facecolors=colour, alpha=0.95, shade=True,
+                                  lightsource=LightSource(azdeg=315, altdeg=35),
+                                  edgecolor="#1b1b1b" if edges else "none",
+                                  linewidths=0.6 if edges else 0.0)
+    ax.add_collection3d(collection)
+    if len(lines):
+        # only the edges on the side facing the camera, drawn on top
+        elevation, azimuth = np.radians(view)
+        eye = np.array([np.cos(elevation) * np.cos(azimuth),
+                        np.cos(elevation) * np.sin(azimuth), np.sin(elevation)])
+        front = [seg - centre for seg in lines if np.dot(seg.mean(axis=0) - centre, eye) > 0]
+        ax.computed_zorder = False
+        collection.set_zorder(1)
+        ax.add_collection3d(Line3DCollection(front, colors="#1b1b1b", linewidths=0.8,
+                                             zorder=2))
+    ax.view_init(elev=view[0], azim=view[1])
+    reach = max(np.abs(np.concatenate(shifted)).max(), 1e-9)
+    for set_limit in (ax.set_xlim, ax.set_ylim, ax.set_zlim):
+        set_limit(-reach, reach)
+    ax.set_box_aspect((1, 1, 1))
+    ax.set_axis_off()
+    ax.set_title(title, fontsize=9)
+
+
+def figures(directory=RESULTS_DIR / "figures"):
+    """Cells of the classical candidates, flat and relaxed, as one PNG."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    directory.mkdir(parents=True, exist_ok=True)
+    panels = []
+    for name, cell, colour, title in (
+        ("fcc", 0, "#c9a227", "FCC: rhombic dodecahedron\n5.3454 (densest packing)"),
+        ("hcp", 0, "#d98c3f", "HCP: trapezo-rhombic dodecahedron\n5.3454 (densest packing)"),
+        ("bcc", 0, "#4f86c6", "BCC: truncated octahedron\n5.3147 flat"),
+    ):
+        box, points = point_set(name)
+        panels.append((cell_polygons(periodic_voronoi(points, box), cell), colour, title,
+                       True, ()))
+    box, points = point_set("bcc")
+    mesh = triangulate(periodic_voronoi(points, box), 2)
+    kelvin = relax(mesh)
+    triangles, lines = cell_triangles(mesh, kelvin["y"], 0)
+    panels.append((list(triangles), "#4f86c6", "Kelvin, curved (relaxed)\n5.3063", False,
+                   lines))
+    box, points = point_set("a15")
+    mesh = triangulate(periodic_voronoi(points, box), 2)
+    phelan = relax(mesh)
+    for cell, colour, title in ((0, "#5aa469", "Weaire-Phelan: 12-face cell\n(relaxed)"),
+                                (2, "#3f8f6b", "Weaire-Phelan: 14-face cell\nfoam 5.2883")):
+        triangles, lines = cell_triangles(mesh, phelan["y"], cell)
+        panels.append((list(triangles), colour, title, False, lines))
+    fig = plt.figure(figsize=(12, 7.5))
+    for k, (polygons, colour, title, edges, lines) in enumerate(panels):
+        ax = fig.add_subplot(2, 3, k + 1, projection="3d")
+        draw(ax, polygons, colour, title, edges, lines, view=(22, 35))
+    fig.suptitle("The Kelvin problem: cost = cell surface / volume^(2/3)  (sphere 4.836)",
+                 fontsize=11)
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    path = directory / "exp042_kelvin_cells.png"
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    return path
+
+
+def axis_choice(foam, axis):
+    """A ``choose`` for ``open_six_cell_vertices``: every square perpendicular to
+    the same coordinate axis."""
+    box, points = foam["box"], foam["points"]
+    target = np.eye(3)[axis]
+
+    def choose(vid, pairs):
+        scores = []
+        for c1, c2 in pairs:
+            d = (points[c1[0]] + np.array(c1[1]) @ box) - (points[c2[0]] + np.array(c2[1]) @ box)
+            scores.append(abs(np.dot(d / np.linalg.norm(d), target)))
+        return int(np.argmax(scores))
+
+    return choose
+
+
+def densest_packing_decay(level=2):
+    """Open the six-cell vertices of the FCC and HCP foams and relax with the
+    box free. Returns cost, final box and the box's shape parameters."""
+    out = {}
+    for name in ("fcc", "hcp"):
+        box, points = point_set(name)
+        foam = periodic_voronoi(points, box)
+        choose = axis_choice(foam, 2) if name == "fcc" else (lambda vid, pairs: 0)
+        opened = open_six_cell_vertices(foam, choose)
+        result = relax(triangulate(opened, level), free_box=True)
+        lengths = np.linalg.norm(result["box"], axis=1)
+        out[name] = {"flat_cost_after_opening": flat_cost(opened)[0],
+                     "relaxed_cost": result["cost"], "box": result["box"].tolist(),
+                     "box_lengths": lengths.tolist(),
+                     "volume_error": result["volume_error"]}
+    return out
+
+
+def decay_figure(directory=RESULTS_DIR / "figures"):
+    """FCC's rhombic dodecahedron, opened as a soap film opens it, and what it
+    relaxes into."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    box, points = point_set("fcc")
+    foam = periodic_voronoi(points, box)
+    opened = open_six_cell_vertices(foam, axis_choice(foam, 2), size=0.08)
+    mesh = triangulate(opened, 2)
+    result = relax(mesh, free_box=True)
+    relaxed_mesh = dict(mesh, box=result["box"])
+    triangles, lines = cell_triangles(relaxed_mesh, result["y"], 0)
+    fig = plt.figure(figsize=(12, 4.4))
+    panels = (
+        (cell_polygons(foam, 0), "#c9a227", "FCC: rhombic dodecahedron\n6 cells meet at 6 corners", True, ()),
+        (cell_polygons(opened, 0), "#d9b54a", "corners opened into squares\n(Plateau's cube frame)", True, ()),
+        (list(triangles), "#4f86c6", f"relaxed, box free: {result['cost']:.4f}\n= Kelvin's foam (Bain path)", False, lines),
+    )
+    for k, (polygons, colour, title, edges, segs) in enumerate(panels):
+        ax = fig.add_subplot(1, 3, k + 1, projection="3d")
+        draw(ax, polygons, colour, title, edges, segs, view=(18, 30))
+    fig.suptitle("The densest-packing foam is not a soap foam: it decays into Kelvin's", fontsize=11)
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
+    path = directory / "exp042_fcc_decays_to_kelvin.png"
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    return path
 
 
 def main() -> int:
@@ -495,9 +812,25 @@ def main() -> int:
         foams.append({"structure": name, "flat_cost": cost, "volume_spread": spread,
                       "cells_per_vertex": {str(k): v for k, v in census.items()},
                       "faces_per_edge": faces_per_edge, "worst_angle_deviation": worst})
+    print("\nRelaxed to curved soap films at equal volumes (levels 1, 2, 3; extrapolated):")
+    relaxed = {}
+    for name in ("bcc", "a15"):
+        result = relaxed_cost(name, levels=(1, 2, 3))
+        relaxed[name] = result
+        print(f"  {name:>4}: {[round(c, 6) for c in result['costs']]} -> "
+              f"{result['extrapolated']:.5f}  (volume error {result['volume_error']:.0e})")
+    print("\nThe densest-packing foams with their six-cell vertices opened, box free (level 2):")
+    decay = densest_packing_decay(2)
+    for name, result in decay.items():
+        print(f"  {name}: flat {result['flat_cost_after_opening']:.5f} -> relaxed "
+              f"{result['relaxed_cost']:.6f}, box edge lengths "
+              f"{[round(x, 4) for x in result['box_lengths']]}")
+    pictures = [str(figures()), str(decay_figure())]
+    print("figures:", *pictures)
     path = RESULTS_DIR / "exp042_kelvin_problem.json"
-    path.write_text(json.dumps({"sphere_bound": SPHERE, "exact": rows, "voronoi": foams},
-                               indent=1))
+    path.write_text(json.dumps({"sphere_bound": SPHERE, "exact": rows, "voronoi": foams,
+                                "relaxed": relaxed, "densest_packing_decay": decay},
+                               indent=1, default=float))
     print(f"\nsaved -> {path}")
     return 0
 
