@@ -5939,3 +5939,106 @@ advantage over the best available classical heuristic — does not hold.
 
 `experiments/exp041_dwave_qac_scaling.py`, `tests/test_dwave_qac_scaling.py`,
 `results/exp041_dwave_qac_scaling.json`, `results/exp041_qac_logical_graph.json`.
+
+---
+
+### Result 97 — the Kelvin problem: the densest-packing foam is not a soap foam, and when it is allowed to become one it turns into Kelvin's
+
+**The question** (Math StackExchange 1494037, 2015, asked by the person who
+requested this programme): is the 3-D analogue of the hexagonal honeycomb the
+rhombic dodecahedral honeycomb? In 2-D, the honeycomb is both the optimal
+equal-area partition (Hales 1999) and the Voronoi diagram of the densest circle
+packing. The question asked whether the same holds in 3-D with FCC, the densest
+sphere packing, whose Voronoi cell is the rhombic dodecahedron. Its asker had
+the ABAB stacking (HCP) in mind as well, whose Voronoi cell is the
+trapezo-rhombic dodecahedron. The underlying problem is Kelvin's: equal-volume
+cells, least interface area.
+
+**Status of the field, checked October 2026:**
+* Kelvin (1887): curved truncated octahedra, the BCC Voronoi cells.
+* Weaire & Phelan (1993): two cell types (A15), 0.3% better. Still the record.
+* Optimality of Weaire–Phelan: open.
+* Hales & Song (arXiv:2609.00997, September 2026) claim a computer-assisted
+  proof that the truncated octahedron is optimal among *parallelohedra* (one
+  flat-faced cell tiling by translations), Bezdek's conjecture.
+* Cesaroni & Novaga (arXiv:2603.27221) prove local minimality among lattice
+  Voronoi cells, and that FCC is *not* a local minimiser.
+
+#### Built
+
+`experiments/exp042_kelvin_problem.py`, 12 tests:
+* **Exact costs** (SymPy). Every Voronoi cell is computed as an exact
+  intersection of half-spaces. The cost is cell surface / volume^(2/3).
+* **Periodic Voronoi foams** with a Plateau census: cells per vertex, faces per
+  edge, angles.
+* **A Surface-Evolver stand-in.** Building Brakke's Evolver from source was not
+  permitted in this environment. Instead: triangulated periodic foams, area
+  minimised at exactly equal cell volumes (augmented Lagrangian with L-BFGS),
+  optionally with the periodic box free. Refinement levels 1–3 are
+  extrapolated as O(h²).
+* **Vertex opening:** a six-cell vertex is replaced by a small square face, as
+  a soap film does in Plateau's cubic wire frame.
+
+#### Measured and proved
+
+| structure | cost | how |
+|---|---|---|
+| sphere (lower bound) | 4.8360 | `(36π)^(1/3)` |
+| **Weaire–Phelan** (A15), relaxed | **5.28834** | levels 1–3 extrapolated; published 5.288 |
+| **Kelvin** (BCC), relaxed | **5.30626** | levels 1–3 extrapolated; published 5.306 |
+| truncated octahedron, flat | 5.314740 | exact: `3·2^(2/3)(1+2√3)/4` |
+| **rhombic dodecahedron (FCC)** | **5.345392** | exact: **`3·2^(5/6)`** |
+| **trapezo-rhombic dodecahedron (HCP)** | **5.345392** | exact: **`3·2^(5/6)`**, identical |
+| hexagonal prism, best height | 5.719106 | exact: `3·2^(2/3)·3^(1/6)` |
+| cube | 6 | exact |
+
+* **The two densest packings give exactly the same cost, `3·2^(5/6)`.** Both are
+  0.74% worse than Kelvin's flat cell and 1.08% worse than Weaire–Phelan.
+* **Why they cannot be optimal, rigorously.** Their faces meet at exactly 120°
+  along every edge, so they pass Plateau's first law, and with equal pressures
+  and flat faces they are stationary. But the census finds vertices where
+  **six cells, eight edges and twelve faces** meet: four per cubic cell in FCC,
+  two per hexagonal cell in HCP, at the octahedral holes of the packing. That
+  is the cone over a cube's edges. Taylor's theorem (Ann. Math. 1976) says an
+  area-minimising foam has only four-cell vertices, so such a vertex can always
+  be locally improved. It is exactly the configuration a soap film refuses in
+  Plateau's cube-frame experiment, where a small square appears in the middle.
+  BCC and A15 have only four-cell vertices. Their flat faces miss 120° by up to
+  10.5° and 11.8°, which is why they curve.
+* **What the densest-packing foam becomes when allowed to be a soap foam.**
+  Open every six-cell vertex into a small square, as the cube frame does. Every
+  cell then has 14 faces, and every vertex has four cells. Then relax at equal
+  volumes with the box free:
+  * **FCC**, all squares perpendicular to one axis: the box deforms to edge
+    lengths `2^(1/6), 2^(1/6), 2^(-1/3)`, i.e. `c/a = 1/√2`. That is the Bain
+    transformation from FCC to BCC. The cost lands at **5.306876**, Kelvin's
+    value at the same refinement (5.30690).
+  * **HCP**: the box shears and the cost lands at **5.306877**, Kelvin again.
+  * Mixed square orientations in FCC (12–18 faces per cell) stall at
+    5.342–5.345, worse.
+
+  So the densest-packing foam is not a foam at all in the soap-film sense. When
+  allowed to become one, it decays into Kelvin's, and Kelvin's is beaten by
+  Weaire–Phelan.
+* **The physical reading, which is the asker's intuition put in its right
+  place.** In wet foams the bubbles are nearly spherical and *do* pack like
+  spheres: FCC is observed at the wet bottom of a foam, turning into Kelvin's
+  BCC at the dry top (van der Net et al., Colloids Surf. A 2007). In 2-D the wet and dry limits share
+  one structure, the triangular packing and its hexagonal dual. In 3-D they
+  split. The rhombic dodecahedron belongs to the wet limit, and the Kelvin
+  problem is the dry one.
+
+#### Grading
+
+**D**, by this repository's rubric. Each statement is either classical (the
+exact costs, Taylor's theorem, Weaire–Phelan's record) or a reproduction (the
+Kelvin and Weaire–Phelan costs). The decay of the opened densest-packing foams
+into Kelvin's along the Bain path is computed here. It is probably folklore in
+foam physics, but it was not found written down in this form. What the result
+adds is a validated toolkit, an exact answer to the 2015 question, and a
+mechanism rather than a counterexample. The open problem — is Weaire–Phelan
+optimal? — is untouched, and NEXT_STEPS ranks the realistic ways to push on it.
+
+`experiments/exp042_kelvin_problem.py`, `tests/test_kelvin_problem.py`,
+`results/exp042_kelvin_problem.json`, `results/figures/exp042_kelvin_cells.png`,
+`results/figures/exp042_fcc_decays_to_kelvin.png`.

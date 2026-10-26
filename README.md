@@ -25,7 +25,7 @@ is indistinguishable and, if anything, the wrong way round.
 
 ## The results here that are proofs (Results 86 and 89)
 
-Ninety-six results, and **two** of them establish something rather than
+Ninety-seven results, and **two** of them establish something rather than
 measuring it. Both are small, both concern the same model, and each begins by
 correcting an earlier entry of my own.
 
@@ -150,7 +150,7 @@ one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
 published; that low λ costs nothing in accuracy here is what is new.
 
 → `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
-The rubric these are graded against, and where all 96 results sit under it, is at
+The rubric these are graded against, and where all 97 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -274,7 +274,46 @@ survive.
 Result 96 in the research log. Needs `numba`; rebuilding the graph needs
 `dwave-networkx`, but it is cached in `results/exp041_qac_logical_graph.json`.
 
-## The answer, since 96 results is a lot to read
+## A side programme in pure mathematics: the Kelvin problem (Result 97)
+
+Asked on Math StackExchange in 2015 by the person who requested this
+programme: **is the 3-D analogue of the hexagonal honeycomb the rhombic
+dodecahedral honeycomb**, the Voronoi diagram of the densest sphere packing? In
+2-D the honeycomb is both the least-perimeter equal-area partition (Hales) and
+the dual of the densest circle packing. The underlying question is Kelvin's:
+equal-volume cells, least interface area.
+
+![candidate cells](results/figures/exp042_kelvin_cells.png)
+
+| structure | cost = cell surface / volume^(2/3) |
+|---|---|
+| sphere (lower bound) | 4.8360 |
+| **Weaire–Phelan** (two cell types, 1993; record, optimality open) | **5.28834** (relaxed here; published 5.288) |
+| Kelvin (curved truncated octahedra, BCC) | 5.30626 (relaxed here; published 5.306) |
+| truncated octahedron, flat | `3·2^(2/3)(1+2√3)/4` = 5.31474 |
+| **rhombic dodecahedron (FCC)** and **trapezo-rhombic dodecahedron (HCP)** | **both exactly `3·2^(5/6)`** = 5.34539 |
+
+**Why the densest-packing foam cannot be the answer.** Its faces meet at
+exactly 120°, but at the packing's octahedral holes six cells meet in one point
+— the cone over a cube, which no soap film forms. Taylor's theorem (1976)
+allows only four. **What happens when it is allowed to become a soap foam:**
+open those points into small squares, as a film does in Plateau's cube frame,
+and relax at equal volumes with the lattice free. FCC slides along the Bain
+path (`c/a → 1/√2`) and HCP shears; **both land exactly on Kelvin's foam**.
+
+![FCC decays into Kelvin's foam](results/figures/exp042_fcc_decays_to_kelvin.png)
+
+The densest-packing picture is the right one in the *wet* limit, where bubbles
+are nearly spheres and FCC is what real foams form. The Kelvin problem is the
+dry limit. In 2-D the two limits coincide; in 3-D they split. Whether
+Weaire–Phelan is optimal remains open. Hales & Song (2026) settled the
+single-flat-cell version: the truncated octahedron wins among parallelohedra.
+
+→ `experiments/exp042_kelvin_problem.py`, `tests/test_kelvin_problem.py`; its
+own relaxation code stands in for Surface Evolver and reproduces both
+published costs.
+
+## The answer, since 97 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.

@@ -44,7 +44,7 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 96:
+Applied honestly, as of Result 97:
 
 | tier | results | note |
 |---|---|---|
@@ -52,9 +52,9 @@ Applied honestly, as of Result 96:
 | **A′** | **93** (narrow), **96** | 93 — IonQ + Ansys: every partition the quantum step handed LS-DYNA is computed exactly classically, faster; it refutes the press release, not the paper's pipeline claim. 96 — D-Wave/USC's "algorithmic quantum speedup in approximate optimization": on the rebuilt instances, classical SQA scales as N^1.09 and SA as N^1.74 against QAC's N^1.69, with PT-ICM's 1.93 reproduced (1.91) |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
-| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94, 95 … |
+| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94, 95, 97 … |
 
-**That is two A and two A′ in ninety-six results**; the two A are both on one model, and Result 72 had already said so from
+**That is two A and two A′ in ninety-seven results**; the two A are both on one model, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
