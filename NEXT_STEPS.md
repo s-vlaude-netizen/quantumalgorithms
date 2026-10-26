@@ -44,7 +44,7 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 97:
+Applied honestly, as of Result 98:
 
 | tier | results | note |
 |---|---|---|
@@ -52,9 +52,9 @@ Applied honestly, as of Result 97:
 | **A′** | **93** (narrow), **96** | 93 — IonQ + Ansys: every partition the quantum step handed LS-DYNA is computed exactly classically, faster; it refutes the press release, not the paper's pipeline claim. 96 — D-Wave/USC's "algorithmic quantum speedup in approximate optimization": on the rebuilt instances, classical SQA scales as N^1.09 and SA as N^1.74 against QAC's N^1.69, with PT-ICM's 1.93 reproduced (1.91) |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
-| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94, 95, 97 … |
+| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94, 95, 97, 98 … |
 
-**That is two A and two A′ in ninety-seven results**; the two A are both on one model, and Result 72 had already said so from
+**That is two A and two A′ in ninety-eight results**; the two A are both on one model, and Result 72 had already said so from
 the other direction. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
@@ -86,7 +86,8 @@ this repository where that is plausible:
 Added October 2026 at the request of the person who asked Math StackExchange
 1494037 in 2015 ("rhombic dodecahedral honeycomb?"). It is pure mathematics,
 kept here because this is the repository that exists. **Status: Result 97 built
-and validated the toolkit and settled the original question.** The open problem
+and validated the toolkit and settled the original question; Result 98 checked
+the Hales–Song certificate independently (it holds).** The open problem
 itself — is Weaire–Phelan (5.2883) optimal among all equal-volume partitions?
 — remains open. What is realistic, and in what order:
 
@@ -111,10 +112,28 @@ itself — is Weaire–Phelan (5.2883) optimal among all equal-volume partitions
    over Selling parameters with the box free, and check that every one lands at
    or above 5.3063. This is evidence, not proof, but it is the curved companion
    to Hales–Song.
-3. **Independent check of Hales–Song's certificate.** Their final inequality is
-   an exact Bernstein certificate. Re-verifying it in SymPy (exact rational
-   arithmetic) is a well-defined, checkable task, and a computer-assisted proof
-   one month old benefits from an independent check.
+3. ~~**Independent check of Hales–Song's certificate.**~~ **Done, Result 98:**
+   rebuilt from the definitions by a different formula; 54 rectangles,
+   1,027,628 coefficients, 0 negative, the same 29,204 zeros as their record.
+   * **What it opened: `f₄ ≥ 0`, the four-dimensional case of their
+     inequality.** The paper's Sections 2–5 hold in every dimension, so a proof
+     of `f₄ = φ³ − κ₄²ψ ≥ 0` (ten zone weights, degree 36, S₅-symmetric)
+     would prove A₄* optimal among four-dimensional lattices of Voronoi's first
+     kind and all K₅-graphical zonotopes. That is the n = 4 case of
+     Cesaroni–Novaga's second open problem (arXiv:2609.02384), and would be
+     tier A.
+     * Evidence: numerically the bound is lowest exactly at equal weights on
+       all 21 strata, and its Hessian there is positive definite modulo
+       scale (eigenvalues 0.0130 ×5, 0.0677 ×4).
+     * Why it is not a weekend job: a brute-force Bernstein cover is out of
+       reach (about 13⁹ coefficients per box).
+     * Routes worth trying:
+       * reduce by S₅ to a fundamental domain;
+       * expand around the equality point, as their all-large chart does;
+       * look for a sum-of-squares certificate in S₅-invariant coordinates.
+   * Not to be over-read: among *all* 4-D parallelohedra the permutohedron
+     loses to the 24-cell (`2^(11/4) = 6.727 < 6.831`), so only the zonotope
+     statement is a candidate.
 4. **Quantum-hardware angle (speculative).** Tetrahedrally close-packed
    arrangements (A15, Frank–Kasper) are also candidate 3-D neutral-atom layouts
    with uniform nearest-neighbour structure. Only worth pursuing if a concrete

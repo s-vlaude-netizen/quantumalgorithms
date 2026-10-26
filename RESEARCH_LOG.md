@@ -6042,3 +6042,141 @@ optimal? — is untouched, and NEXT_STEPS ranks the realistic ways to push on it
 `experiments/exp042_kelvin_problem.py`, `tests/test_kelvin_problem.py`,
 `results/exp042_kelvin_problem.json`, `results/figures/exp042_kelvin_cells.png`,
 `results/figures/exp042_fcc_decays_to_kelvin.png`.
+
+### Result 98 — Hales & Song's proof of Bezdek's conjecture: the computer-assisted step re-derived independently, and it holds
+
+**The claim.** Hales & Song, *The Truncated Octahedral Conjecture*
+(arXiv:2609.00997v2, September 2026), prove K. Bezdek's 2006 conjecture: among
+parallelohedra of fixed volume, the Archimedean truncated octahedron has the
+least surface area. Parallelohedra are the convex cells that tile space by
+translations. The theorem is the flat, one-cell-type case of the Kelvin problem
+of Result 97, and the first optimality theorem in that family.
+
+The proof is analytic except for one inequality in six zone weights:
+
+    f = φ³ − κ²ψ ≥ 0,   κ = (1+2√3)³/128,
+
+where f has degree 18 and coefficients in Q(√3). That inequality is proved by
+an exact Bernstein certificate on 54 rectangles. The paper's acknowledgements
+say the verification package was written by an AI model.
+
+**Why check it.**
+* The certificate is a month old, and its own package is the only thing that
+  has run it.
+* Rebuilding the polynomial means assembling definitions spread over four
+  sections, which is where a transcription error would hide.
+* The theorem already has a second, announced proof (Cesaroni–Novaga,
+  arXiv:2609.02384). The certificate does not have a second check.
+
+#### Built — `experiments/exp044_hales_song_certificate.py`, 9 tests
+
+Their package was neither read nor run. Only its two-line summary of
+coefficient counts was compared at the end.
+
+1. **The polynomial, by a different route.** φ and ψ come straight from the
+   determinant definitions of Section 5:
+   * `φ = det Σ_b (γ_b/|n_b|) n_b n_bᵀ`;
+   * `ψ = d³ det Σ_b (γ_b r_b/|n_b|³) n_b n_bᵀ`.
+
+   The inputs are those of the six-zone model of Section 6.1: the regular
+   tetrahedral frame, the seven cuts, the tree weights γ_b, the cut weights
+   r_b, and d = τ(β) from the matrix-tree theorem. Their verifier assembles the
+   same polynomial from the Cauchy–Binet sums over the 29 normal bases
+   (eqs. 51–52). The work is in SymPy, exact in Q(√3).
+2. **Every fact Appendix A states is reproduced.**
+   * 6083 monomials, multidegree 6 in every variable, homogeneous of degree 18.
+   * `f(1,…,1) = 0`.
+   * Invariance under all 24 relabellings of the frame, which is what licenses
+     normalising the largest weight to `β₃₄ = 1`.
+   * After that normalisation: 6083 monomials, total degrees 12–18.
+   * The factorisations `t¹²` at the all-small corner and `t²` at the all-large
+     corner.
+3. **The cover of Appendix A.3, coefficient by coefficient.**
+   * The rectangles: 28 macro-boxes, 16 opposite-pair subboxes, and 5 + 5
+     corner charts.
+   * The arithmetic: exact tensor-product Bernstein coefficients, from my own
+     Taylor shifts and Bernstein conversion in integers.
+   * The signs: every one decided exactly in ℤ[√3].
+
+#### Measured
+
+| | their package's record | this check |
+|---|---|---|
+| rectangles | 54 | 54 |
+| Bernstein coefficients | 1,027,628 | 1,027,628 |
+| negative | 0 | **0** |
+| zero | 29,204 | 29,204 |
+
+* **The checker can fail.** A κ only 0.1% larger breaks the `t²` factorisation
+  at the all-large corner. A dent that makes g negative inside one ordinary box
+  yields negative coefficients in that box.
+* **The polynomial certified is the one the geometry needs.** 300 random
+  zonotopes Z(β, M) were built as convex hulls:
+  * volume = d(β) to 4e-12;
+  * `ι − 6(φ³/ψ)^(1/6) ≥ 0.053`;
+  * `6(φ³/ψ)^(1/6) − ι(truncated octahedron) ≥ 0.012`;
+  * the exact f agrees with the floating-point definitions to 6e-15.
+* **The theorem itself, numerically.** ι was minimised over all eleven
+  parameters (six weights, M ∈ SL(3)) from 20 random starts:
+  * 19 end at **5.314739699972** = `3(1+2√3)/4^(2/3)`, with equal weights;
+  * one ends at 5.345392 = `3·2^(5/6)`, Kepler's rhombic dodecahedron, on the
+    edge of the family where zones vanish. It is a minimiser within its own
+    class, as the paper's Corollary 6.3 also says;
+  * none goes lower.
+
+#### Four dimensions: Cesaroni–Novaga's second open problem
+
+Sections 2–5 of the paper hold in every dimension n. Only the polynomial
+inequality `f_n ≥ 0` is proved, and only for n = 3.
+
+The independent proof of Cesaroni & Novaga (arXiv:2609.02384) ends with open
+problems. Their second asks: among lattices of *Voronoi's first kind*, whose
+Voronoi cells are the K_{n+1}-graphical zonotopes, for which n is A_n*
+optimal? For n = 4 the Hales–Song chain reduces that question, for every affine
+image as well, to `f₄ ≥ 0`. Checked numerically (exp044):
+
+* **Every stratum.** The bound `8(φ³/ψ)^(1/8)` was minimised on all 21 strata
+  of the ten-weight orthant, which are the connected support graphs on five
+  vertices; a zero weight is a deleted zone.
+  * The lowest value is A₄*'s own `20(16+3√6)/5^(21/8)` =
+    **6.8311236556**, at equal weights.
+  * The next stratum, zones on a 5-cycle, gives 6.8334.
+* **A strict local minimum.** At equal weights, the Hessian of the bound in
+  log-weights has the scale as its only null direction. The other eigenvalues
+  are 0.0130 (×5) and 0.0677 (×4), one block for each non-trivial irreducible
+  piece of S₅ acting on the edges.
+* **The quotient itself.** Minimising ι over the weights and M ∈ SL(4) ends at
+  A₄* from every start.
+
+So, numerically, **A₄* answers their question for n = 4: it is optimal among
+four-dimensional lattices of Voronoi's first kind**, and among all
+K₅-graphical zonotopes and their affine images. This is evidence, not a proof.
+`f₄` has degree 36 in ten variables, beyond a brute-force Bernstein cover.
+
+Outside that class A₄* loses. Their own paper notes the 24-cell, Vor(D₄), at
+`2^(11/4)` = 6.727. Their first open problem, the full four-dimensional case,
+is Result 99's subject.
+
+#### What it says
+
+The computer-assisted step of the Hales–Song proof is correct. The independent
+reconstruction shares no code with theirs and builds the polynomial through a
+different formula. It reaches the identical certificate, down to the count of
+zero coefficients.
+
+Not re-proved here: the analytic Sections 2–5 (the weighted simplex inequality,
+the affine reduction, the Jensen step). The sampled chain inequalities are
+consistent with them, which is evidence and not a proof.
+
+#### Grading
+
+**D** by the rubric: a confirmation, with no new mathematics. It is the check a
+computer-assisted proof written with AI help most needs, and Result 97 reported
+the theorem as "claimed". The four-dimensional part is numerical evidence on a
+published open problem (Cesaroni–Novaga's second, at n = 4), not a proof.
+Proving `f₄ ≥ 0` would settle that case and would be tier A; NEXT_STEPS says
+what it would take.
+
+`experiments/exp044_hales_song_certificate.py`,
+`tests/test_hales_song_certificate.py`,
+`results/exp044_hales_song_certificate.json`.

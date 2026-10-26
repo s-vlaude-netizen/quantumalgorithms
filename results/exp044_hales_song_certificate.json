@@ -1,0 +1,1286 @@
+{
+ "facts": {
+  "f_monomials": 6083,
+  "f_multidegree": [
+   6,
+   6,
+   6,
+   6,
+   6,
+   6
+  ],
+  "f_homogeneous_degree": [
+   18
+  ],
+  "f_at_one": "0",
+  "f_invariant_under_24_relabellings": true,
+  "phi_monomials": 101,
+  "d_at_one": 16,
+  "g_monomials": 6083,
+  "g_multidegree": [
+   6,
+   6,
+   6,
+   6,
+   6
+  ],
+  "g_total_degree_range": [
+   12,
+   18
+  ]
+ },
+ "denominator": "7962624",
+ "reduction_check": {
+  "samples": 300,
+  "min iota - 6(phi^3/psi)^(1/6)": 0.05321761150654325,
+  "min 6(phi^3/psi)^(1/6) - iota(truncated octahedron)": 0.011752440107013484,
+  "max |hull volume / d(beta) - 1|": 3.5342839765917233e-12,
+  "max |f exact - f float| / phi^3 (20 samples)": 5.98459218785334e-15
+ },
+ "direct_minimisation": {
+  "starts": 20,
+  "lowest": 5.314739699971953,
+  "highest": 5.345392308888964,
+  "lowest_minus_truncated_octahedron": -4.440892098500626e-15,
+  "runs": [
+   {
+    "quotient": 5.314739699971954,
+    "weight_spread": 1.000000081617347
+   },
+   {
+    "quotient": 5.3147396999719545,
+    "weight_spread": 1.000000085781425
+   },
+   {
+    "quotient": 5.314739699971954,
+    "weight_spread": 1.0000001043406705
+   },
+   {
+    "quotient": 5.314739699971954,
+    "weight_spread": 1.0000001343268352
+   },
+   {
+    "quotient": 5.314739699971954,
+    "weight_spread": 1.00000007415757
+   },
+   {
+    "quotient": 5.3147396999719545,
+    "weight_spread": 1.0000000605468375
+   },
+   {
+    "quotient": 5.314739699971955,
+    "weight_spread": 1.0000000821989694
+   },
+   {
+    "quotient": 5.3147396999719545,
+    "weight_spread": 1.0000001070645284
+   },
+   {
+    "quotient": 5.3147396999719545,
+    "weight_spread": 1.0000000562366307
+   },
+   {
+    "quotient": 5.314739699971954,
+    "weight_spread": 1.0000000842401728
+   },
+   {
+    "quotient": 5.314739699971953,
+    "weight_spread": 1.0000000566584957
+   },
+   {
+    "quotient": 5.314739699971955,
+    "weight_spread": 1.000000122513025
+   },
+   {
+    "quotient": 5.3147396999719545,
+    "weight_spread": 1.0000000944525869
+   },
+   {
+    "quotient": 5.345392308888964,
+    "weight_spread": 6072899776706.02
+   },
+   {
+    "quotient": 5.314739699971953,
+    "weight_spread": 1.000000054043497
+   },
+   {
+    "quotient": 5.3147396999719545,
+    "weight_spread": 1.0000001864396295
+   },
+   {
+    "quotient": 5.314739699971955,
+    "weight_spread": 1.0000001046563196
+   },
+   {
+    "quotient": 5.314739699971953,
+    "weight_spread": 1.0000000614655404
+   },
+   {
+    "quotient": 5.314739699971954,
+    "weight_spread": 1.0000000382832102
+   },
+   {
+    "quotient": 5.314739699971953,
+    "weight_spread": 1.00000007969425
+   }
+  ]
+ },
+ "bound_strata_n3": [
+  {
+   "edges": 3,
+   "support": [
+    0,
+    1,
+    2
+   ],
+   "minimum": 5.999999999999989
+  },
+  {
+   "edges": 3,
+   "support": [
+    0,
+    1,
+    4
+   ],
+   "minimum": 5.999999999999976
+  },
+  {
+   "edges": 4,
+   "support": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "minimum": 5.679351071573042
+  },
+  {
+   "edges": 4,
+   "support": [
+    0,
+    1,
+    4,
+    5
+   ],
+   "minimum": 5.318118707277576
+  },
+  {
+   "edges": 5,
+   "support": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "minimum": 5.318118707277581
+  },
+  {
+   "edges": 6,
+   "support": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "minimum": 5.314739699971954
+  }
+ ],
+ "dimension_four": {
+  "strata": [
+   {
+    "edges": 4,
+    "support": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "minimum": 7.999999999999987
+   },
+   {
+    "edges": 4,
+    "support": [
+     0,
+     1,
+     2,
+     6
+    ],
+    "minimum": 7.999999999999968
+   },
+   {
+    "edges": 5,
+    "support": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "minimum": 7.630845724521508
+   },
+   {
+    "edges": 4,
+    "support": [
+     0,
+     1,
+     5,
+     8
+    ],
+    "minimum": 7.9999999999999805
+   },
+   {
+    "edges": 5,
+    "support": [
+     0,
+     1,
+     2,
+     4,
+     6
+    ],
+    "minimum": 7.663344580089077
+   },
+   {
+    "edges": 5,
+    "support": [
+     0,
+     1,
+     2,
+     6,
+     8
+    ],
+    "minimum": 7.260580967659156
+   },
+   {
+    "edges": 6,
+    "support": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "minimum": 7.260580967659328
+   },
+   {
+    "edges": 6,
+    "support": [
+     0,
+     1,
+     2,
+     6,
+     8,
+     9
+    ],
+    "minimum": 6.953145184034736
+   },
+   {
+    "edges": 7,
+    "support": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "minimum": 6.953145184034757
+   },
+   {
+    "edges": 5,
+    "support": [
+     0,
+     1,
+     2,
+     4,
+     9
+    ],
+    "minimum": 7.630845884156131
+   },
+   {
+    "edges": 6,
+    "support": [
+     0,
+     1,
+     2,
+     4,
+     5,
+     8
+    ],
+    "minimum": 7.256682546731995
+   },
+   {
+    "edges": 7,
+    "support": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     7
+    ],
+    "minimum": 7.242212444540976
+   },
+   {
+    "edges": 6,
+    "support": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     9
+    ],
+    "minimum": 7.278726108863353
+   },
+   {
+    "edges": 5,
+    "support": [
+     0,
+     1,
+     5,
+     8,
+     9
+    ],
+    "minimum": 6.833442858843577
+   },
+   {
+    "edges": 6,
+    "support": [
+     0,
+     1,
+     2,
+     4,
+     6,
+     9
+    ],
+    "minimum": 6.8334428588435845
+   },
+   {
+    "edges": 7,
+    "support": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     8
+    ],
+    "minimum": 6.833442858843593
+   },
+   {
+    "edges": 7,
+    "support": [
+     0,
+     1,
+     2,
+     4,
+     5,
+     8,
+     9
+    ],
+    "minimum": 6.8334428588435925
+   },
+   {
+    "edges": 8,
+    "support": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "minimum": 6.8334428588436005
+   },
+   {
+    "edges": 8,
+    "support": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     8,
+     9
+    ],
+    "minimum": 6.8334428588436005
+   },
+   {
+    "edges": 9,
+    "support": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8
+    ],
+    "minimum": 6.835490532336585
+   },
+   {
+    "edges": 10,
+    "support": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "minimum": 6.83112365559618
+   }
+  ],
+  "quotient_minima": [
+   6.831123655596182,
+   6.831123655596182,
+   6.83112365559618
+  ],
+  "hessian_at_equal_weights": [
+   -1.7986321640406366e-07,
+   0.012994273554500318,
+   0.012994425176680837,
+   0.012994496237271875,
+   0.012994794810555458,
+   0.012995270327083822,
+   0.06768157662345463,
+   0.06768179542542475,
+   0.06768200929198089,
+   0.06768222788512904
+  ],
+  "permutohedron": 6.831123655596189,
+  "twenty_four_cell": 6.727171322029716
+ },
+ "cover_samples_missed": 0,
+ "rectangles": [
+  {
+   "rectangle": "macro SSSSL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 2744,
+   "smallest_positive_relative": 7.591381906287522e-10,
+   "seconds": 0.15
+  },
+  {
+   "rectangle": "macro SSSLS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 2744,
+   "smallest_positive_relative": 7.591381906287522e-10,
+   "seconds": 0.1
+  },
+  {
+   "rectangle": "macro SSSLL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 2744,
+   "smallest_positive_relative": 1.1460486664491244e-09,
+   "seconds": 0.09
+  },
+  {
+   "rectangle": "macro SSLSS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 2744,
+   "smallest_positive_relative": 7.591381906287522e-10,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro SSLSL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.139937405053747e-10,
+   "seconds": 0.1
+  },
+  {
+   "rectangle": "macro SSLLS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.5955728789212736e-10,
+   "seconds": 0.1
+  },
+  {
+   "rectangle": "macro SSLLL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.1278009996777148e-09,
+   "seconds": 0.14
+  },
+  {
+   "rectangle": "macro SLSSS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 2744,
+   "smallest_positive_relative": 7.591381906287522e-10,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro SLSSL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.5955728789212736e-10,
+   "seconds": 0.17
+  },
+  {
+   "rectangle": "macro SLSLS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.139937405053747e-10,
+   "seconds": 0.17
+  },
+  {
+   "rectangle": "macro SLSLL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.1278009996777148e-09,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro SLLSS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 2744,
+   "smallest_positive_relative": 1.1460486664491244e-09,
+   "seconds": 0.1
+  },
+  {
+   "rectangle": "macro SLLSL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.1278009996777148e-09,
+   "seconds": 0.1
+  },
+  {
+   "rectangle": "macro SLLLS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.1278009996777148e-09,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro SLLLL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 5.702187431066551e-09,
+   "seconds": 0.15
+  },
+  {
+   "rectangle": "macro LSSSS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 882,
+   "smallest_positive_relative": 1.4418342859043514e-10,
+   "seconds": 0.12
+  },
+  {
+   "rectangle": "macro LSSSL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.5955728789212736e-10,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro LSSLS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.5955728789212736e-10,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro LSSLL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 8.371982722386659e-10,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro LSLSS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.5955728789212736e-10,
+   "seconds": 0.12
+  },
+  {
+   "rectangle": "macro LSLSL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 5.480143939277943e-09,
+   "seconds": 0.17
+  },
+  {
+   "rectangle": "13,24 small sub000",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 4.937225527671239e-06,
+   "seconds": 0.16
+  },
+  {
+   "rectangle": "13,24 small sub001",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 8.092793884054756e-06,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "13,24 small sub010",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 8.092793884054756e-06,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "13,24 small sub011",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.3423918367151223e-05,
+   "seconds": 0.15
+  },
+  {
+   "rectangle": "13,24 small sub100",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 5.648828406450908e-06,
+   "seconds": 0.13
+  },
+  {
+   "rectangle": "13,24 small sub101",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.032365683185207e-05,
+   "seconds": 0.13
+  },
+  {
+   "rectangle": "13,24 small sub110",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.032365683185207e-05,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "13,24 small sub111",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.2945533095637643e-05,
+   "seconds": 0.12
+  },
+  {
+   "rectangle": "macro LSLLL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 6.847778117968274e-09,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro LLSSS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.5955728789212736e-10,
+   "seconds": 0.13
+  },
+  {
+   "rectangle": "14,23 small sub000",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 4.937225527671239e-06,
+   "seconds": 0.15
+  },
+  {
+   "rectangle": "14,23 small sub001",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 8.092793884054756e-06,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "14,23 small sub010",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 8.092793884054756e-06,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "14,23 small sub011",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.3423918367151223e-05,
+   "seconds": 0.12
+  },
+  {
+   "rectangle": "14,23 small sub100",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 5.648828406450908e-06,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "14,23 small sub101",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.032365683185207e-05,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "14,23 small sub110",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.032365683185207e-05,
+   "seconds": 0.15
+  },
+  {
+   "rectangle": "14,23 small sub111",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 1.2945533095637643e-05,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro LLSLS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 5.480143939277943e-09,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro LLSLL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 6.847778117968274e-09,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro LLLSS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 8.371982722386659e-10,
+   "seconds": 0.11
+  },
+  {
+   "rectangle": "macro LLLSL",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 6.847778117968274e-09,
+   "seconds": 0.12
+  },
+  {
+   "rectangle": "macro LLLLS",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 6.847778117968274e-09,
+   "seconds": 0.12
+  },
+  {
+   "rectangle": "all-small chart 12",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 882,
+   "smallest_positive_relative": 3.560457040640196e-08,
+   "seconds": 0.12
+  },
+  {
+   "rectangle": "all-small chart 13",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 2744,
+   "smallest_positive_relative": 2.193786432593085e-07,
+   "seconds": 0.09
+  },
+  {
+   "rectangle": "all-small chart 14",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 2744,
+   "smallest_positive_relative": 2.193786432593085e-07,
+   "seconds": 0.1
+  },
+  {
+   "rectangle": "all-small chart 23",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 2744,
+   "smallest_positive_relative": 2.193786432593085e-07,
+   "seconds": 0.09
+  },
+  {
+   "rectangle": "all-small chart 24",
+   "multidegree": [
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 16807,
+   "negative": 0,
+   "zero": 2744,
+   "smallest_positive_relative": 2.193786432593085e-07,
+   "seconds": 0.1
+  },
+  {
+   "rectangle": "all-large chart 12",
+   "multidegree": [
+    16,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 40817,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.938012756587006e-09,
+   "seconds": 0.29
+  },
+  {
+   "rectangle": "all-large chart 13",
+   "multidegree": [
+    16,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 40817,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.938012756587006e-09,
+   "seconds": 0.27
+  },
+  {
+   "rectangle": "all-large chart 14",
+   "multidegree": [
+    16,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 40817,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.938012756587006e-09,
+   "seconds": 0.25
+  },
+  {
+   "rectangle": "all-large chart 23",
+   "multidegree": [
+    16,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 40817,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.938012756587006e-09,
+   "seconds": 0.25
+  },
+  {
+   "rectangle": "all-large chart 24",
+   "multidegree": [
+    16,
+    6,
+    6,
+    6,
+    6
+   ],
+   "coefficients": 40817,
+   "negative": 0,
+   "zero": 0,
+   "smallest_positive_relative": 3.938012756587006e-09,
+   "seconds": 0.34
+  }
+ ],
+ "coefficients": 1027628,
+ "negative": 0,
+ "certified": true
+}

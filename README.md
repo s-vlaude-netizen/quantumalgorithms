@@ -25,7 +25,7 @@ is indistinguishable and, if anything, the wrong way round.
 
 ## The results here that are proofs (Results 86 and 89)
 
-Ninety-seven results, and **two** of them establish something rather than
+Ninety-eight results, and **two** of them establish something rather than
 measuring it. Both are small, both concern the same model, and each begins by
 correcting an earlier entry of my own.
 
@@ -150,7 +150,7 @@ one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
 published; that low λ costs nothing in accuracy here is what is new.
 
 → `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
-The rubric these are graded against, and where all 97 results sit under it, is at
+The rubric these are graded against, and where all 98 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -274,7 +274,7 @@ survive.
 Result 96 in the research log. Needs `numba`; rebuilding the graph needs
 `dwave-networkx`, but it is cached in `results/exp041_qac_logical_graph.json`.
 
-## A side programme in pure mathematics: the Kelvin problem (Result 97)
+## A side programme in pure mathematics: the Kelvin problem (Results 97, 98)
 
 Asked on Math StackExchange in 2015 by the person who requested this
 programme: **is the 3-D analogue of the hexagonal honeycomb the rhombic
@@ -313,7 +313,28 @@ single-flat-cell version: the truncated octahedron wins among parallelohedra.
 own relaxation code stands in for Surface Evolver and reproduces both
 published costs.
 
-## The answer, since 97 results is a lot to read
+**The proof of the flat one-cell case, checked independently (Result 98).**
+Hales & Song's proof that the truncated octahedron is the best parallelohedron
+rests on one computer-assisted inequality: a degree-18 polynomial in six
+variables, certified non-negative by exact Bernstein coefficients. Their
+verifier was written by an AI model. It was rebuilt here from the paper's
+definitions, through a different formula and with separately written code, and
+it gives **the identical certificate**: 54 rectangles, 1,027,628 coefficients,
+0 negative, and the same 29,204 zeros. Minimising directly over every
+parallelohedron of that type lands on the truncated octahedron every time.
+
+**In four dimensions.** Cesaroni & Novaga, who have a second proof, ask among
+other things: among lattices of Voronoi's first kind, for which n is A_n*
+optimal? For n = 4, the Hales–Song chain reduces this to a polynomial
+inequality in ten variables. Numerically that inequality holds on all 21
+boundary strata, with a strict local minimum at A₄*. So A₄* looks optimal in
+that class. This is evidence, not a proof; NEXT_STEPS says what a proof would
+take.
+
+→ `experiments/exp044_hales_song_certificate.py`,
+`tests/test_hales_song_certificate.py`.
+
+## The answer, since 98 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
