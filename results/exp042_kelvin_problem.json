@@ -1,0 +1,94 @@
+{
+ "sphere_bound": 4.835975862049408,
+ "exact": [
+  {
+   "structure": "truncated octahedron (BCC, Kelvin's cell flat)",
+   "cost": 5.314739699971957,
+   "exact": "3*2**(2/3)*(1 + 2*sqrt(3))/4"
+  },
+  {
+   "structure": "rhombic dodecahedron (FCC, densest packing)",
+   "cost": 5.345392308842036,
+   "exact": "3*2**(5/6)"
+  },
+  {
+   "structure": "trapezo-rhombic dodecahedron (HCP, densest packing)",
+   "cost": 5.345392308842036,
+   "exact": "3*2**(5/6)"
+  },
+  {
+   "structure": "hexagonal prism (best height)",
+   "cost": 5.71910575798162,
+   "exact": "3*2**(2/3)*3**(1/6)"
+  },
+  {
+   "structure": "cube (simple cubic Voronoi)",
+   "cost": 6.0,
+   "exact": "6"
+  }
+ ],
+ "voronoi": [
+  {
+   "structure": "sc",
+   "flat_cost": 6.0,
+   "volume_spread": 0.0,
+   "cells_per_vertex": {
+    "8": 1
+   },
+   "faces_per_edge": [
+    4
+   ],
+   "worst_angle_deviation": NaN
+  },
+  {
+   "structure": "bcc",
+   "flat_cost": 5.314739699971957,
+   "volume_spread": 2.220446049250313e-16,
+   "cells_per_vertex": {
+    "4": 12
+   },
+   "faces_per_edge": [
+    3
+   ],
+   "worst_angle_deviation": 10.528779365509308
+  },
+  {
+   "structure": "fcc",
+   "flat_cost": 5.345392308842038,
+   "volume_spread": 6.661338147750939e-16,
+   "cells_per_vertex": {
+    "4": 8,
+    "6": 4
+   },
+   "faces_per_edge": [
+    3
+   ],
+   "worst_angle_deviation": 1.4210854715202004e-14
+  },
+  {
+   "structure": "hcp",
+   "flat_cost": 5.345392308842038,
+   "volume_spread": 2.220446049250313e-16,
+   "cells_per_vertex": {
+    "4": 4,
+    "6": 2
+   },
+   "faces_per_edge": [
+    3
+   ],
+   "worst_angle_deviation": 4.263256414560601e-14
+  },
+  {
+   "structure": "a15",
+   "flat_cost": 5.295025413757971,
+   "volume_spread": 0.03200000000000025,
+   "cells_per_vertex": {
+    "4": 46
+   },
+   "faces_per_edge": [
+    3
+   ],
+   "worst_angle_deviation": 11.810314895778646
+  }
+ ]
+}
