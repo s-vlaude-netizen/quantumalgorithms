@@ -21,6 +21,10 @@ drafts in `notes/`.
 
 ### A. Google Quantum AI verifiable circuit compilation (kickmix, arXiv:2610.23832)
 
+**Parked on 7 Nov at your request.** The Benchmark I circuit stays as it is
+(verified, below). The tuning list, Benchmark II and Benchmark III are notes only;
+nothing is queued.
+
 1. **Benchmark I (exp046), current state.** Circuit with 163 qubits, 1,826
    Toffolis, 1 T and 35 fine rotations (about 27.9 T each), C = 2,071, S = Q x C =
    3.4e5, against the paper's reference Q = 260, C = 7,988, S = 2.08e6. Verified
@@ -57,27 +61,33 @@ drafts in `notes/`.
    will be without you. If you would rather not publish further Benchmark work, say
    so and I will keep it out of the pushes.
 
-### B. Your new idea (7 Nov): bring error correction and realistic noise in
+### B. Your clarified idea (7 Nov): better error-correction circuits, searched as gate sequences
 
-Nothing started. Plan, in the order I would do it:
+My first note read this as pricing the benchmark circuits on a fault-tolerant
+machine; what you meant is improving the error-correction circuits themselves,
+written as gate diagrams or the equivalent Python gate sequences. Nothing started.
+Plan:
 
-1. **Is Q x C the right cost?** Price the verified circuits as a fault-tolerant
-   machine: surface-code distance from the circuit's logical volume and a total
-   failure budget, 2d^2 physical qubits per logical one, CCZ factories and their
-   footprint, runtime from Toffoli depth and factory throughput. Check whether the
-   ranking by S changes (a qubit-lean but Toffoli-heavy variant against the
-   reverse). Starting points: `qres/resources.py` and `qres/noise.py` (Qiskit-Aer
-   fake-backend noise, scalable). Qiskit, Cirq and stim are not installed in the
-   rebuilt `.venv`.
-2. **Noise on the logical circuit itself.** Inject Pauli errors per gate into the
-   bit-sliced simulator (X errors flip bits, Z errors flip the sign word),
-   Monte-Carlo the failure probability of the Benchmark I circuit against the
-   per-gate logical error rate, and see which sections dominate. Also price what the
-   idealised score ignores: measurement-based uncomputation needs classical
-   feed-forward (HMR, then a conditioned CZ).
-3. **Small-distance QEC with realistic noise:** repetition and rotated surface-code
-   memory, circuit-level depolarising noise, MWPM decoder, threshold curve. `stim`
-   and `pymatching` would do it; if installs are blocked, a small own stabiliser
+1. **Testbed.** Small codes ([[4,2,2]], [[5,1,3]], Steane [[7,1,3]], rotated surface
+   code at d = 3 and 5), circuits as plain gate sequences (stim-style text, or Cirq or
+   Qiskit circuits), circuit-level noise from `qres/noise.py` (scaled device models)
+   and a standard depolarising model, a decoder (lookup table for the small codes,
+   matching for the surface code).
+2. **Metric.** Logical error rate per round at a fixed physical error rate (and the
+   pseudo-threshold) against gate count, depth and ancilla count. Report the Pareto
+   front, not one number.
+3. **Search over the circuit, not the code.** CNOT order in syndrome extraction (hook
+   errors), flag-qubit placement, ancilla sharing and reuse, scheduling depth,
+   substituting other native gates (CZ- or iSWAP-based extraction), minimal-CNOT
+   encoders (exhaustive or SAT search for tiny codes). Local search or annealing over
+   gate orderings, with a stabiliser simulation as the fitness.
+4. **Baselines first.** Reproduce the published numbers for the standard circuits
+   before claiming anything, and count an improvement only if it holds in the same
+   noise model against the published circuit with confidence intervals (the rubric
+   at the top of this file).
+5. **Tools.** stim, pymatching, Cirq and Qiskit are not installed in the rebuilt
+   `.venv`, and `qres/noise.py` needs qiskit-aer. If the permission classifier
+   refuses an install, you install it or add a rule; otherwise a small own tableau
    simulator.
 
 ### C. Kelvin problem, to finish
