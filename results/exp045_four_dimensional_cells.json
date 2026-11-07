@@ -1,0 +1,168 @@
+{
+ "exact": {
+  "24-cell (Vor D4)": [
+   "4*2**(3/4)",
+   6.727171322029716
+  ],
+  "cographic K33 zonotope": [
+   "4*sqrt(3)*(sqrt(6) + 24)/27",
+   6.786942232410717
+  ],
+  "permutohedron (Vor A4*)": [
+   "4*5**(3/8)*(3*sqrt(6) + 16)/25",
+   6.831123655596189
+  ],
+  "tesseract (Z^4)": [
+   "8",
+   8.0
+  ]
+ },
+ "named_lattices": {
+  "A4 (root lattice)": {
+   "voronoi": 6.917453360817061,
+   "best_affine_image": 6.917453381137563
+  },
+  "A3* + Z (truncated-octahedron prism)": {
+   "voronoi": 7.312563398753892,
+   "best_affine_image": 7.304458889150635
+  },
+  "A3 + Z (rhombic-dodecahedron prism)": {
+   "voronoi": 7.423792721527745,
+   "best_affine_image": 7.336032359628328
+  },
+  "A2 + A2 (hexagon x hexagon)": {
+   "voronoi": 7.444838872816791,
+   "best_affine_image": 7.444838886005652
+  },
+  "A2 + Z + Z": {
+   "voronoi": 7.833589968981465,
+   "best_affine_image": 7.7174290572475615
+  }
+ },
+ "lattice_search": [
+  {
+   "quotient": 6.831123655596168,
+   "facets": 30,
+   "seconds": 21.6
+  },
+  {
+   "quotient": 6.727171322029692,
+   "facets": 24,
+   "seconds": 23.0
+  },
+  {
+   "quotient": 6.7271713220297,
+   "facets": 24,
+   "seconds": 26.7
+  },
+  {
+   "quotient": 6.727171322029698,
+   "facets": 24,
+   "seconds": 23.1
+  },
+  {
+   "quotient": 6.831123655596174,
+   "facets": 30,
+   "seconds": 22.2
+  },
+  {
+   "quotient": 6.831123655596167,
+   "facets": 30,
+   "seconds": 23.8
+  },
+  {
+   "quotient": 6.727171322029693,
+   "facets": 24,
+   "seconds": 24.6
+  },
+  {
+   "quotient": 6.727171322029689,
+   "facets": 24,
+   "seconds": 29.8
+  },
+  {
+   "quotient": 6.727171322029693,
+   "facets": 24,
+   "seconds": 26.2
+  },
+  {
+   "quotient": 6.727171322029694,
+   "facets": 24,
+   "seconds": 27.1
+  },
+  {
+   "quotient": 6.727171322029696,
+   "facets": 24,
+   "seconds": 30.1
+  },
+  {
+   "quotient": 6.727171322029694,
+   "facets": 24,
+   "seconds": 24.0
+  },
+  {
+   "quotient": 6.727171322029694,
+   "facets": 24,
+   "seconds": 26.7
+  },
+  {
+   "quotient": 6.727171322029691,
+   "facets": 24,
+   "seconds": 22.7
+  },
+  {
+   "quotient": 6.727171322029695,
+   "facets": 24,
+   "seconds": 22.3
+  },
+  {
+   "quotient": 6.831123655596174,
+   "facets": 30,
+   "seconds": 22.0
+  }
+ ],
+ "affine_search": [
+  {
+   "quotient": 6.727171338674318,
+   "facets": 24,
+   "seconds": 64.1
+  },
+  {
+   "quotient": 6.7271713348895705,
+   "facets": 24,
+   "seconds": 59.8
+  },
+  {
+   "quotient": 6.7271713361281,
+   "facets": 24,
+   "seconds": 61.5
+  },
+  {
+   "quotient": 6.72717134475971,
+   "facets": 24,
+   "seconds": 66.1
+  },
+  {
+   "quotient": 6.7271713689400165,
+   "facets": 24,
+   "seconds": 60.0
+  },
+  {
+   "quotient": 6.727171338257954,
+   "facets": 24,
+   "seconds": 62.1
+  },
+  {
+   "quotient": 6.727171337832382,
+   "facets": 24,
+   "seconds": 62.3
+  },
+  {
+   "quotient": 6.727171343487413,
+   "facets": 24,
+   "seconds": 60.3
+  }
+ ],
+ "lowest_lattice": 6.727171322029689,
+ "lowest_affine": 6.7271713348895705
+}

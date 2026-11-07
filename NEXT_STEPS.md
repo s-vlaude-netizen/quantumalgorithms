@@ -8,6 +8,84 @@ what is left, add what the results suggested.
 
 ---
 
+## Resume here — session interrupted 6 Nov 2026, notes written 7 Nov
+
+Written on request so a cold session can continue. Nothing below depends on the
+lost container state. Committed with this note (56 tests green): `qres/kmlite.py`
+and `qres/kmarith.py` (own kickmix-compatible builder and bit-sliced simulator,
+cross-checked against a dense state vector with branching HMR),
+`experiments/exp046_inverse_sqrt_phasing.py`, `exp043_kelvin_search.py`,
+`exp045_four_dimensional_cells.py`, their tests, and drafts in `notes/`.
+
+### A. Google Quantum AI verifiable circuit compilation (kickmix, arXiv:2610.23832)
+
+1. **Benchmark I (exp046), current state.** Circuit with 163 qubits, 1,826
+   Toffolis, 1 T and 35 fine rotations (about 27.9 T each), C = 2,071, S = Q x C =
+   3.4e5, against the paper's reference Q = 260, C = 7,988, S = 2.08e6. All
+   3,133,452 inputs pass **once**, on **my own** simulator; model error 2^-24.20
+   (limit 2^-24). Not yet done:
+   - 64 shots per x (the competition's setting), and the official verifier:
+     `pip install kickmix` was refused by the permission classifier ("Code from
+     External") and I did not work around it. If you want it, install it yourself or
+     add a permission rule.
+   - Pin the target's units exactly: the paper checks against floor(2^65 beta /
+     sqrt x) = isqrt(floor(2^130 beta^2 / x)) (the text extraction drops the
+     radical); I use floor(2^64 / sqrt x). One unit, negligible against a tolerance
+     of at least 6e8 units, but it should match.
+   - `tests/test_inverse_sqrt_phasing.py` (circuit equals the numpy model, error bound).
+   - Tuning: `index_bits` 7-9, `f0/f1/f2`, truncation points, direct subtract versus
+     accumulate, qubits below 163. Toffoli split: product 2 and its uncompute 808 of
+     1,826; shift and unshift 236; lookup and unlookup 230; normalise and
+     denormalise 154.
+2. **Benchmark II** (Reed-Solomon decoding for DQI, reference 1,893 qubits and
+   5.7M Toffolis): not started; ideas are tower-field inversion and a
+   minimal-AND F_{2^12} multiplier. **Benchmark III** (FeMoCo) needs the Kaggle data.
+3. Compare only against the paper's reported baselines, never against other
+   entrants. Kaggle's rules caution against sharing solutions publicly while the
+   competition runs (deadline about 13-20 Jan 2027): nothing gets submitted or
+   posted without you.
+
+### B. Your new idea (7 Nov): bring error correction and realistic noise in
+
+Nothing started. Plan, in the order I would do it:
+
+1. **Is Q x C the right cost?** Price the verified circuits as a fault-tolerant
+   machine: surface-code distance from the circuit's logical volume and a total
+   failure budget, 2d^2 physical qubits per logical one, CCZ factories and their
+   footprint, runtime from Toffoli depth and factory throughput. Check whether the
+   ranking by S changes (a qubit-lean but Toffoli-heavy variant against the
+   reverse). Starting points: `qres/resources.py` and `qres/noise.py` (Qiskit-Aer
+   fake-backend noise, scalable). Qiskit, Cirq and stim are not installed in the
+   rebuilt `.venv`.
+2. **Noise on the logical circuit itself.** Inject Pauli errors per gate into the
+   bit-sliced simulator (X errors flip bits, Z errors flip the sign word),
+   Monte-Carlo the failure probability of the Benchmark I circuit against the
+   per-gate logical error rate, and see which sections dominate. Also price what the
+   idealised score ignores: measurement-based uncomputation needs classical
+   feed-forward (HMR, then a conditioned CZ).
+3. **Small-distance QEC with realistic noise:** repetition and rotated surface-code
+   memory, circuit-level depolarising noise, MWPM decoder, threshold curve. `stim`
+   and `pymatching` would do it; if installs are blocked, a small own stabiliser
+   simulator.
+
+### C. Kelvin problem, to finish
+
+- **Result 99** (4-D cells, Cesaroni-Novaga open problem 1): exp045 is done. The
+  lowest isoperimetric quotient found over lattices and parallelohedra is the
+  24-cell, 6.727171322 = 2^(11/4); A4* (6.831) and the cographic zonotope
+  (6.78694) are higher. Numerical evidence, not a proof. Draft:
+  `notes/result99_four_dimensional_cells_draft.md`.
+- **Result 100** (Frank-Kasper survey and single-cell lattice scan): raw levels 1-2
+  exist for A15, sigma, P, Kelvin, Z, delta, mu, chi, C15, C36; level 3 only for A15,
+  Kelvin, Z, mu; C14 has no run. The unfinished level-3 jobs were stopped when this
+  note was written (raw cache is gitignored). Rerun `python
+  experiments/exp043_kelvin_search.py --only <names> --levels 3`, then
+  `--report-only` for the table, figure and JSON. Draft:
+  `notes/result100_frank_kasper_survey_draft.md`.
+- Then update README, RESEARCH_LOG and the result counts.
+
+---
+
 ## How to judge a result here
 
 A standing rubric, because without one there is no way to tell a contribution
