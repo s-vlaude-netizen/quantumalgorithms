@@ -23,6 +23,7 @@ uncomputed.
 
 from __future__ import annotations
 
+import itertools
 import math
 import sys
 from dataclasses import dataclass
@@ -408,6 +409,79 @@ def score(builder, margin_turns: float):
             "score": builder.n_qubits * cost}
 
 
+def _official_worker(job):
+    """One process of the official-simulator sweep: ``x`` in ``[lo, hi)``, every ``x``
+    simulated ``shots`` times. Returns counts and the smallest margin."""
+    import hashlib
+
+    import kickmix as kx
+
+    text, lo, hi, shots, base_seed, batch_inputs = job
+    circuit = kx.Circuit(text)
+    scratch = [kx.q(i) for i in range(circuit.num_qubits) if i >= X_BITS]
+    mask = (1 << 64) - 1
+    out = {"shots": 0, "failures": 0, "restored_failures": 0, "dirty_shots": 0,
+           "nondeterministic_inputs": 0, "max_error_over_tolerance": 0.0,
+           "min_margin_units": math.inf, "worst_x": 0}
+    for start in range(lo, hi, batch_inputs):
+        xs = np.arange(start, min(start + batch_inputs, hi), dtype=np.int64)
+        shot_x = np.repeat(xs, shots)
+        seed = int.from_bytes(hashlib.sha256(f"{base_seed}:{start}".encode()).digest(), "big")
+        sim = kx.Simulator(batch_size=len(shot_x), debug_print=False, seed=seed)
+        sim.use_same_registers_as(circuit)
+        bits = ((shot_x[None, :] >> np.arange(X_BITS)[:, None]) & 1).astype(bool)
+        sim.write_across_shots("x", bits)
+        sim.do(circuit)
+        out["restored_failures"] += int((sim.read_across_shots("x") != bits).any(axis=0).sum())
+        out["dirty_shots"] += int(np.asarray(sim.read_across_shots(scratch)).any(axis=0).sum())
+        units = np.empty(len(shot_x), dtype=np.uint64)
+        for i in range(len(shot_x)):
+            p = sim.read_shot_phase(i)                       # half turns
+            units[i] = ((p << 63) if isinstance(p, int)
+                        else (p.numerator << 63) // p.denominator) & mask
+        target = np.array([math.isqrt((1 << 128) // int(x)) & mask for x in xs],
+                          dtype=np.uint64)
+        diff = (units - np.repeat(target, shots)).astype(np.int64).astype(np.float64)
+        tol = 2.0 ** 40 / np.sqrt(shot_x.astype(np.float64))
+        ratio = np.abs(diff) / tol
+        out["shots"] += len(shot_x)
+        out["failures"] += int((ratio > 1.0).sum())
+        grid = diff.reshape(len(xs), shots)
+        out["nondeterministic_inputs"] += int((grid != grid[:, :1]).any(axis=1).sum())
+        out["max_error_over_tolerance"] = max(out["max_error_over_tolerance"], float(ratio.max()))
+        margin = tol - np.abs(diff)
+        low = float(margin.min())
+        if low < out["min_margin_units"]:
+            out["min_margin_units"], out["worst_x"] = low, int(shot_x[int(margin.argmin())])
+    return out
+
+
+def verify_official(circuit, shots_per_x: int = 64, workers: int = 4, seed: int = 0,
+                    batch_inputs: int = 4096, lo: int = 1, hi: int = X_MAX + 1):
+    """Run ``x`` in ``[lo, hi)`` through Google's own ``kickmix`` simulator, every input
+    ``shots_per_x`` times, as the competition's verifier does: ``x`` restored, every
+    scratch qubit back in |0>, and the tracked phase within ``2^-24 / sqrt(x)`` turns
+    of ``floor(2^64 / sqrt(x))`` units. The margin is returned in turns."""
+    from concurrent.futures import ProcessPoolExecutor
+
+    from qres import kmofficial
+
+    text = kmofficial.to_text(circuit)
+    bounds = np.linspace(lo, hi, workers + 1).astype(np.int64)
+    jobs = [(text, int(a), int(b), shots_per_x, seed, batch_inputs)
+            for a, b in itertools.pairwise(bounds) if b > a]
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        parts = list(pool.map(_official_worker, jobs))
+    total = {key: sum(p[key] for p in parts)
+             for key in ("shots", "failures", "restored_failures", "dirty_shots",
+                         "nondeterministic_inputs")}
+    worst = min(parts, key=lambda p: p["min_margin_units"])
+    total["max_error_over_tolerance"] = max(p["max_error_over_tolerance"] for p in parts)
+    total["margin_turns"] = worst["min_margin_units"] * 2.0 ** -64
+    total["worst_x"] = worst["worst_x"]
+    return total
+
+
 def cached_tables(design: Design, directory: Path):
     """Fitted coefficient tables, cached because the fit takes about 30 s."""
     directory.mkdir(parents=True, exist_ok=True)
@@ -420,9 +494,32 @@ def cached_tables(design: Design, directory: Path):
     return tables
 
 
-def main() -> int:
+def official_counts(circuit):
+    """Qubit and gate counts as Google's ``kickmix`` reports them, in the shape
+    :func:`score` expects."""
+    from types import SimpleNamespace
+
+    from qres import kmofficial
+
+    official = kmofficial.to_official(circuit)
+    stats = official.operation_statistics()
+    n_toffoli, n_t = stats.num_toffoli_like, stats.num_t_like
+    return SimpleNamespace(n_qubits=official.num_qubits, toffoli=n_toffoli,
+                           rotations={"t": n_t, "fine": stats.num_non_clifford - n_toffoli - n_t})
+
+
+def main(argv=None) -> int:
+    import argparse
+
     from qres.bench import RESULTS_DIR
 
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--official", action="store_true",
+                        help="also run Google's kickmix simulator (pip install kickmix)")
+    parser.add_argument("--shots", type=int, default=64, help="shots per input for --official")
+    parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--kmb", type=Path, help="write the circuit to this .kmb file")
+    args = parser.parse_args(argv)
     design = Design()
     tables = cached_tables(design, RESULTS_DIR / "raw" / "exp046")
     x = all_inputs()
@@ -443,6 +540,17 @@ def main() -> int:
     print(f"simulated {len(x)} inputs in {time.time() - start:.1f} s:",
           {k: v for k, v in result.items() if k != "error_units"})
     print(score(bld, result["margin_turns"]))
+    if args.kmb:
+        from qres import kmofficial
+
+        kmofficial.to_official(circuit).to_file(args.kmb, format="kmb")
+        print("wrote", args.kmb)
+    if args.official:
+        start = time.time()
+        official = verify_official(circuit, shots_per_x=args.shots, workers=args.workers)
+        print(f"official kickmix simulator, {official['shots']} shots in {time.time() - start:.0f} s:",
+              official)
+        print("official score:", score(official_counts(circuit), official["margin_turns"]))
     return 0
 
 

@@ -11,28 +11,36 @@ what is left, add what the results suggested.
 ## Resume here — session interrupted 6 Nov 2026, notes written 7 Nov
 
 Written on request so a cold session can continue. Nothing below depends on the
-lost container state. Committed with this note (56 tests green): `qres/kmlite.py`
+lost container state. Committed with this note (63 tests green): `qres/kmlite.py`
 and `qres/kmarith.py` (own kickmix-compatible builder and bit-sliced simulator,
-cross-checked against a dense state vector with branching HMR),
+cross-checked against a dense state vector with branching HMR, and since 7 Nov
+against Google's simulator via `qres/kmofficial.py`),
 `experiments/exp046_inverse_sqrt_phasing.py`, `exp043_kelvin_search.py`,
-`exp045_four_dimensional_cells.py`, their tests, and drafts in `notes/`.
+`exp045_four_dimensional_cells.py`, `qres/kmofficial.py`, their tests, and
+drafts in `notes/`.
 
 ### A. Google Quantum AI verifiable circuit compilation (kickmix, arXiv:2610.23832)
 
 1. **Benchmark I (exp046), current state.** Circuit with 163 qubits, 1,826
    Toffolis, 1 T and 35 fine rotations (about 27.9 T each), C = 2,071, S = Q x C =
-   3.4e5, against the paper's reference Q = 260, C = 7,988, S = 2.08e6. All
-   3,133,452 inputs pass **once**, on **my own** simulator; model error 2^-24.20
-   (limit 2^-24). Not yet done:
-   - 64 shots per x (the competition's setting), and the official verifier:
-     `pip install kickmix` was refused by the permission classifier ("Code from
-     External") and I did not work around it. If you want it, install it yourself or
-     add a permission rule.
-   - Pin the target's units exactly: the paper checks against floor(2^65 beta /
-     sqrt x) = isqrt(floor(2^130 beta^2 / x)) (the text extraction drops the
-     radical); I use floor(2^64 / sqrt x). One unit, negligible against a tolerance
-     of at least 6e8 units, but it should match.
-   - `tests/test_inverse_sqrt_phasing.py` (circuit equals the numpy model, error bound).
+   3.4e5, against the paper's reference Q = 260, C = 7,988, S = 2.08e6. Verified
+   with Google's own `kickmix` simulator (installed into `.venv` on 7 Nov at your
+   request; my first attempt had been refused by the permission classifier): all
+   3,133,452 inputs x 64 shots = 200,540,928 shots, no failures, x restored, scratch
+   qubits clean, phases identical across shots, worst error 0.87 of the tolerance
+   (margin 7.6e-12 turns). The official operation statistics agree with mine.
+   Reproduce with `python experiments/exp046_inverse_sqrt_phasing.py --official
+   --shots 64 --kmb out.kmb` (about 4 minutes on 4 cores; also writes the `.kmb`).
+   This is my harness replaying the checks the paper describes, not the Kaggle
+   verifier, and the score uses the paper's pricing formula for fine rotations.
+   Tests: `tests/test_kmofficial.py` (converter, and a differential test of my
+   simulator against Google's) and `tests/test_inverse_sqrt_phasing.py`. Not yet
+   done:
+   - Exact target units: the paper quotes floor(2^65 beta / sqrt x) =
+     isqrt(floor(2^130 beta^2 / x)) (the text extraction drops the radical); I
+     compare against floor(2^64 / sqrt x) in units of 2^-64 turns. One unit is
+     negligible against a tolerance of at least 6e8 units, but match it before any
+     submission.
    - Tuning: `index_bits` 7-9, `f0/f1/f2`, truncation points, direct subtract versus
      accumulate, qubits below 163. Toffoli split: product 2 and its uncompute 808 of
      1,826; shift and unshift 236; lookup and unlookup 230; normalise and
@@ -41,9 +49,13 @@ cross-checked against a dense state vector with branching HMR),
    5.7M Toffolis): not started; ideas are tower-field inversion and a
    minimal-AND F_{2^12} multiplier. **Benchmark III** (FeMoCo) needs the Kaggle data.
 3. Compare only against the paper's reported baselines, never against other
-   entrants. Kaggle's rules caution against sharing solutions publicly while the
-   competition runs (deadline about 13-20 Jan 2027): nothing gets submitted or
-   posted without you.
+   entrants. **This repository is public**, and `exp046` (the circuit generator)
+   has been in it since 6 Nov: I pushed it before checking, and I could not read the
+   competition's rules (the saved Kaggle pages were only a JavaScript shell), so I do
+   not know whether public code is allowed while it runs (deadline about 13-20 Jan
+   2027). Nothing has been submitted to Kaggle or posted anywhere else, and nothing
+   will be without you. If you would rather not publish further Benchmark work, say
+   so and I will keep it out of the pushes.
 
 ### B. Your new idea (7 Nov): bring error correction and realistic noise in
 
