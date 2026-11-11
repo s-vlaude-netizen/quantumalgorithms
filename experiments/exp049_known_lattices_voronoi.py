@@ -92,44 +92,13 @@ def voronoi_quotient(basis, norm_factor=4.0, reach=2):
     return hull.area / hull.volume ** ((rank - 1) / rank), hull.volume / covolume, len(vectors)
 
 
-def e8_roots():
-    """The 240 roots of E8: +-e_i +- e_j, and (+-1/2)^8 with an even number of minus signs. They
-    are exactly the Voronoi-relevant vectors, so the cell is {x : x . r <= 1}."""
-    roots = []
-    for i, j in itertools.combinations(range(8), 2):
-        for si, sj in itertools.product((-1.0, 1.0), repeat=2):
-            v = np.zeros(8)
-            v[i], v[j] = si, sj
-            roots.append(v)
-    for signs in itertools.product((-0.5, 0.5), repeat=8):
-        if sum(1 for x in signs if x < 0) % 2 == 0:
-            roots.append(np.array(signs))
-    return np.array(roots)
-
-
-def e8_quotient():
-    """Isoperimetric quotient of the E8 Voronoi cell from its 240 root facets; the volume must be
-    the covolume, 1."""
-    from scipy.spatial import ConvexHull, HalfspaceIntersection
-
-    roots = e8_roots()
-    halfspaces = np.hstack([roots, -np.ones((len(roots), 1))])
-    hull = ConvexHull(HalfspaceIntersection(halfspaces, np.zeros(8), qhull_options="Qx").intersections)
-    return hull.area / hull.volume ** (7 / 8), hull.volume
-
-
 def main(argv=None) -> int:
     import time
 
-    names = argv or ["E8", "E7", "E7*", "D7", "D7*", "D8", "D8*", "A7*", "A8*", "Z7", "Z8"]
+    names = argv or ["E7", "E7*", "D7", "D7*", "A7*", "Z7"]           # E8 and the 8-D cells are slow in qhull
     table = lattices()
     for name in names:
         start = time.time()
-        if name == "E8":
-            quotient, volume = e8_quotient()
-            print(f"E8   dim 8: Iso = {quotient:.6f} (volume {volume:.6f} vs covolume 1, 240 roots, "
-                  f"{time.time() - start:.0f} s)", flush=True)
-            continue
         quotient, volume_ratio, count = voronoi_quotient(table[name], norm_factor=2.0 if name == "E8" else 4.0)
         print(f"{name:4s} dim {table[name].shape[0]}: Iso = {quotient:.6f} (volume / covolume {volume_ratio:.6f}, "
               f"{count} candidate vectors, {time.time() - start:.0f} s)", flush=True)
