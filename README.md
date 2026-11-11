@@ -150,7 +150,7 @@ one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
 published; that low λ costs nothing in accuracy here is what is new.
 
 → `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
-The rubric these are graded against, and where all 100 results sit under it, is at
+The rubric these are graded against, and where all 101 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -368,7 +368,18 @@ provisional**; the log says what would make it more.
 `experiments/exp048_first_kind_global_search.py`,
 `tests/test_an_star_local_optimality.py`, `tests/test_first_kind_global_search.py`.
 
-## The answer, since 100 results is a lot to read
+**Weaire–Phelan's rivals, relaxed with the cell free (Result 101).** Ten
+Frank–Kasper-type structures (A15, σ, Z, μ, P, δ, three Laves polytypes, and α-Mn as a
+control), built from crystal data and relaxed at equal volumes with the periodic box
+free, reproduce the published ranking, **A15 < σ < P < Kelvin < Z < δ < μ < Laves**:
+none beats Weaire–Phelan (5.28834), and the cost of the Frank–Kasper phases rises as
+their mean face count falls. Among 24 random lattices with one cell each, every
+relaxation ends at Kelvin's curved foam. A confirmation (grade D), plus a database
+inconsistency found in the P phase's published cell.
+
+→ `experiments/exp043_kelvin_search.py`, `tests/test_kelvin_search.py`.
+
+## The answer, since 101 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.

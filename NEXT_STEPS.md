@@ -10,14 +10,14 @@ what is left, add what the results suggested.
 
 ## Resume here — session interrupted 6 Nov 2026, notes written 7 Nov
 
-Written on request so a cold session can continue. Nothing below depends on the
-lost container state. Committed with this note (63 tests green): `qres/kmlite.py`
+Written on request so a cold session can continue; the Kelvin part (C) was brought up to
+date on 11 Nov. Nothing below depends on the lost container state. Committed with the
+first version of this note: `qres/kmlite.py`
 and `qres/kmarith.py` (own kickmix-compatible builder and bit-sliced simulator,
 cross-checked against a dense state vector with branching HMR, and since 7 Nov
 against Google's simulator via `qres/kmofficial.py`),
 `experiments/exp046_inverse_sqrt_phasing.py`, `exp043_kelvin_search.py`,
-`exp045_four_dimensional_cells.py`, `qres/kmofficial.py`, their tests, and
-drafts in `notes/`.
+`exp045_four_dimensional_cells.py`, `qres/kmofficial.py` and their tests.
 
 ### A. Google Quantum AI verifiable circuit compilation (kickmix, arXiv:2610.23832)
 
@@ -91,21 +91,18 @@ Plan:
    refuses an install, you install it or add a rule; otherwise a small own tableau
    simulator.
 
-### C. Kelvin problem, to finish
+### C. Kelvin problem (state on 11 Nov)
 
-- **Result 99** (4-D cells, Cesaroni-Novaga open problem 1): exp045 is done. The
-  lowest isoperimetric quotient found over lattices and parallelohedra is the
-  24-cell, 6.727171322 = 2^(11/4); A4* (6.831) and the cographic zonotope
-  (6.78694) are higher. Numerical evidence, not a proof. Draft:
-  `notes/result99_four_dimensional_cells_draft.md`.
-- **Result 100** (Frank-Kasper survey and single-cell lattice scan): raw levels 1-2
-  exist for A15, sigma, P, Kelvin, Z, delta, mu, chi, C15, C36; level 3 only for A15,
-  Kelvin, Z, mu; C14 has no run. The unfinished level-3 jobs were stopped when this
-  note was written (raw cache is gitignored). Rerun `python
-  experiments/exp043_kelvin_search.py --only <names> --levels 3`, then
-  `--report-only` for the table, figure and JSON. Draft:
-  `notes/result100_frank_kasper_survey_draft.md`.
-- Then update README, RESEARCH_LOG and the result counts.
+Written up in `RESEARCH_LOG.md`: **Result 99** (four-dimensional cells, search),
+**Result 100** (A_n* is not the best first-kind lattice from n = 7; the main finding of the
+session) and **Result 101** (Frank-Kasper foams, with the single-cell scan). The open
+Kelvin problem itself, whether Weaire-Phelan is optimal, is unchanged. What is left:
+
+- Refresh Result 101's table when the level-3 relaxations of P and chi finish (they were
+  still running; run `python experiments/exp043_kelvin_search.py --only P,chi --levels 3`
+  if the cache is gone, then `--report-only`, which now reuses the cached single-cell
+  scan). Expect changes in the fourth decimal; the ranking will not move.
+- The follow-ups under item 4 of the Kelvin list further down.
 
 ---
 
@@ -145,7 +142,7 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 100:
+Applied honestly, as of Result 101:
 
 | tier | results | note |
 |---|---|---|
@@ -153,9 +150,9 @@ Applied honestly, as of Result 100:
 | **A′** | **93** (narrow), **96** | 93 — IonQ + Ansys: every partition the quantum step handed LS-DYNA is computed exactly classically, faster; it refutes the press release, not the paper's pipeline claim. 96 — D-Wave/USC's "algorithmic quantum speedup in approximate optimization": on the rebuilt instances, classical SQA scales as N^1.09 and SA as N^1.74 against QAC's N^1.69, with PT-ICM's 1.93 reproduced (1.91) |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
-| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94, 95, 97, 98, 99 … |
+| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94, 95, 97, 98, 99, 101 … |
 
-**That is three A (one provisional) and two A′ in a hundred results**; two of the A are on one model, and Result 72 had already said so from
+**That is three A (one provisional) and two A′ in 101 results**; two of the A are on one model, and Result 72 had already said so from
 the other direction. The third, Result 100, is pure mathematics and the first A here outside quantum chemistry. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.

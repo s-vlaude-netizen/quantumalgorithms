@@ -6454,3 +6454,93 @@ it more.
 `results/exp048_first_kind_global_search.json`,
 `results/figures/exp047_an_star_curvature.png`,
 `results/figures/exp048_first_kind_beats_a_n_star.png`.
+
+
+### Result 101 — the Frank–Kasper rivals of Weaire–Phelan, relaxed with the cell free: none beats it, and among the Frank–Kasper phases the cost rises as the mean face count falls
+
+**The question.** Weaire–Phelan is the soap-film version of one crystal structure,
+A15, a member of the *Frank–Kasper* family: the tetrahedrally close-packed structures
+of metallurgy, whose Voronoi cells have 12, 14, 15 or 16 faces, all pentagons and
+hexagons, with four cells at every vertex. They are the natural place to look for
+something better.
+
+What the literature has:
+* Phelan: σ and H beat Kelvin but lose to Weaire–Phelan.
+* Reddy et al., PNAS 2018: P also beats Kelvin; Z, μ, δ, pσ, M, C14 and C15 do not.
+  They fixed the periodic cell at the crystal's lattice ratios.
+* Cox et al., J. Phys. Condens. Matter 2017: quasiperiodic Frank–Kasper approximants
+  come close to Weaire–Phelan from above.
+* Oudet (Exp. Math. 2011): a Γ-convergence search with no initial guess, in a periodic
+  *cube* with 8–20 cells, finds Weaire–Phelan best.
+
+#### Built — `experiments/exp043_kelvin_search.py`, 22 tests
+
+* **Structures from crystal data.** Ten: A15, σ, Z, μ, P, δ, the Laves polytypes C14,
+  C15 and C36, and α-Mn (χ), which is not Frank–Kasper and serves as a control. Each is
+  generated from space-group generators and its asymmetric unit, with coordinates from
+  the AFLOW prototype library and the Crystallography Open Database; group closures and
+  Wyckoff multiplicities are checked and centred cells are reduced to primitive ones.
+* **A census before relaxing.** Every Frank–Kasper foam has only pentagons and hexagons,
+  the expected 12/14/15/16 face counts, and four cells at every vertex.
+  * **One database error found.** COD 2310313 (the P phase) lists its cell edges in an
+    order that does not fit its own coordinates: the foam then has 9- to 20-face
+    cells. The paper's order (9.070, 16.983, 4.752 Å) gives the Frank–Kasper foam.
+  * **The R phase was dropped.** Its refined, disordered coordinates give 21
+    quadrilateral faces, so it is not the Frank–Kasper foam.
+* **Relaxation.** The exp042 relaxer with equal volumes and the periodic box free,
+  at three mesh levels, Richardson-extrapolated; the cost is normalised by the cells'
+  actual mean volume, which removes the first-order bias of residual volume errors.
+  Against the published Kelvin and Weaire–Phelan values: 2e-5 or better; the scatter
+  between two orderings of the same cells is 4e-6.
+* **A scan of single-cell foams.** 24 random lattices, each giving the Voronoi foam with
+  one cell per lattice point (generically the 14-faced truncated-octahedron type), relaxed
+  with the box free.
+
+#### Measured
+
+| structure | faces per cell | cost | vs Weaire–Phelan | vs Kelvin | levels |
+|---|---|---|---|---|---|
+| **A15 (Weaire–Phelan)** | 13.5000 | **5.28834** | 0 | −0.338% | 1–3 |
+| σ | 13.4667 | 5.29420 | +0.111% | −0.227% | 1–3 |
+| P | 13.4286 | 5.30397 | +0.295% | −0.043% | 1–2 |
+| Kelvin (BCC) | 14.0000 | 5.30626 | +0.339% | 0 | 1–3 |
+| Z | 13.4286 | 5.30669 | +0.347% | +0.008% | 1–3 |
+| δ | 13.4286 | 5.30847 | +0.381% | +0.042% | 1–3 |
+| χ (α-Mn, control) | 13.5172 | 5.31195 | +0.446% | +0.107% | 1–2 |
+| μ | 13.3846 | 5.31394 | +0.484% | +0.145% | 1–3 |
+| C15 | 13.3333 | 5.32420 | +0.678% | +0.338% | 1–3 |
+| C14 | 13.3333 | 5.32420 | +0.678% | +0.338% | 1–3 |
+| C36 | 13.3333 | 5.32421 | +0.678% | +0.338% | 1–3 |
+
+(The sphere is 4.83598. P and χ are extrapolated from two levels, with a last correction
+of 1e-4 against 2e-5 for the others; their level-3 runs were still going when this was
+written. The gaps that matter are 100 times that.)
+
+![Frank–Kasper foams](results/figures/exp043_frank_kasper_costs.png)
+
+* **Single-cell foams.** All 24 relaxations end at cost 5.306875–5.306881 (level 2), with
+  the final lattice within 5.5e-5 of body-centred cubic: every one-cell foam flows to
+  Kelvin's curved foam.
+* **Published values reproduced.** A15 and Kelvin to 1e-6 relative, σ to 7e-6, P to 2e-5.
+
+#### What it says
+
+* **No Frank–Kasper foam among the ten beats Weaire–Phelan**, and the ranking is the
+  published one: A15 < σ < P < Kelvin < Z < δ < μ < the Laves phases.
+* **Among the Frank–Kasper phases the cost rises as the mean face count falls**
+  (A15 13.5, σ 13.467, P/Z/δ 13.429, μ 13.385, Laves 13.333). Kelvin (14 faces) and
+  χ (not Frank–Kasper) do not follow that line.
+* **The three Laves polytypes cost the same to 1e-5** (5.32420, 5.32420, 5.32421).
+* **Kelvin's foam is the attractor of the one-cell foams** in this scan: 24 of 24
+  random starts. That is numerical evidence for the curved companion of Hales–Song's
+  theorem, not a proof, and the starts share one combinatorial type.
+
+#### Grading
+
+**D** by the rubric: a confirmation of published rankings with a free box and a
+careful census, plus three small extras (the Laves polytype C36, the α-Mn control, and
+the P-phase database inconsistency). It does not touch the open question; it
+narrows where an answer would not be.
+
+`experiments/exp043_kelvin_search.py`, `tests/test_kelvin_search.py`,
+`results/exp043_kelvin_search.json`, `results/figures/exp043_frank_kasper_costs.png`.

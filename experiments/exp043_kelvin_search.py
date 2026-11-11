@@ -480,7 +480,13 @@ def main(argv=None) -> int:
         print(f"{r['structure']:10s} {r['census']['mean_faces']:10.4f} {r['extrapolated']:9.5f} "
               f"{r['A']:9.6f} {100 * (r['extrapolated'] / phelan - 1):+7.3f}% "
               f"{100 * (r['extrapolated'] / kelvin - 1):+8.3f}%")
-    scan = single_cell_scan()
+    scan_path = RAW_DIR / "single_cell_scan.json"           # 24 relaxations: cached like the levels
+    if scan_path.exists():
+        scan = json.loads(scan_path.read_text())
+    else:
+        scan = single_cell_scan()
+        scan_path.parent.mkdir(parents=True, exist_ok=True)
+        scan_path.write_text(json.dumps(scan))
     print(f"single-cell lattices: {len(scan['samples'])} random starts, relaxed costs "
           f"{scan['cost_range'][0]:.9f}-{scan['cost_range'][1]:.9f}, largest distance of the "
           f"final lattice from BCC {scan['max_distance_to_bcc']:.1e}")
