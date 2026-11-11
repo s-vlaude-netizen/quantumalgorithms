@@ -355,8 +355,9 @@ lattice of the complete bipartite graph K₄,₄** has a smaller isoperimetric q
 11.12775 against 11.13464, confirmed on a Voronoi cell computed numerically from the
 lattice itself. The family continues, K_{m,m} for odd n and a cone over K_{m,m} with a
 lighter apex for even n, and exact certificates (integers plus interval arithmetic)
-cover every n from 7 to 200. Locally A_n* is a strict minimum up to n = 14 and not from
-n = 15, which is why a local test alone could not see it earlier.
+cover every n from 7 to 200 (and n = 399, 600, 799, 1000, 1599). Locally A_n* is a strict
+minimum up to n = 14 and not from n = 15, which is why a local test alone could not see it
+earlier.
 
 ![cut lattices of complete bipartite graphs against A_n*](results/figures/exp048_first_kind_beats_a_n_star.png)
 

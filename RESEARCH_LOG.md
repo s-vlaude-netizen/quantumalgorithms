@@ -6368,7 +6368,10 @@ Exact certificates, the family and `log(Iso of the lattice / Iso of A_n*)` in un
 
 **194 of the 198 dimensions from n = 3 to 200 are beaten; the four that are not are
 n = 3, 4, 5, 6.** The best gain is 0.22% of the quotient, near n = 17; it then shrinks
-slowly (0.048% at n = 200) but stays negative at every n computed.
+slowly (0.048% at n = 200) but stays negative at every n computed. It is certified
+again at n = 399, 600, 799, 1000 and 1599 (`results/exp048_large_n_certificates.json`):
+`n × log ratio` = −0.103, −0.105, −0.106, −0.107, −0.108, so the gain decays like
+0.11/n.
 
 * **n = 7, independently.** The numerically computed Voronoi cell of the K(4,4)
   lattice (half-space intersection over all lattice vectors with coefficients in
@@ -6425,8 +6428,8 @@ slowly (0.048% at n = 200) but stays negative at every n computed.
 
 #### What it does not say
 
-* Not every n > 200: the gain shrinks but was negative at every n computed. No proof
-  for all n.
+* Not every n > 200: certified at every n to 200 and at 399, 600, 799, 1000 and 1599; the
+  gain shrinks like 0.11/n but was negative at every n computed. No proof for all n.
 * For n = 4, 5, 6 the optimality of A_n* rests on 200 to 500 random starts per
   dimension, not on a proof.
 * The families are certificates, not minimisers. At n = 10 and 11 (12 and 8 starts) the
