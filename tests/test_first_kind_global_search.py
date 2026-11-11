@@ -55,12 +55,15 @@ def _bipartite_rho(n, a):
             for i in range(n + 1)]
 
 
-def test_bipartite_class_sums_agree_with_the_generic_exact_routine():
-    generic = g.exact_beats_a_n_star(7, _bipartite_rho(7, 4))
-    classes = g.bipartite_certificate(4, 4)
+@pytest.mark.parametrize("n", [7, 9, 11])
+def test_bipartite_class_sums_agree_with_the_generic_exact_routine(n):
+    m = (n + 1) // 2
+    generic = g.exact_beats_a_n_star(n, _bipartite_rho(n, m))
+    classes = g.bipartite_certificate(m, m)
     assert generic["smaller"] and classes["smaller"]
     assert classes["log_ratio"] == pytest.approx(generic["log_ratio"], rel=1e-12)
-    assert classes["log_ratio"] == pytest.approx(-6.193403e-4, abs=1e-9)
+    if n == 7:
+        assert classes["log_ratio"] == pytest.approx(-6.193403e-4, abs=1e-9)
 
 
 def test_cone_class_sums_agree_with_the_generic_exact_routine():

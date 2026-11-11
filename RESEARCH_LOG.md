@@ -6424,9 +6424,12 @@ slowly (0.048% at n = 200) but stays negative at every n computed.
   for all n.
 * For n = 4, 5, 6 the optimality of A_n* rests on 200 to 500 random starts per
   dimension, not on a proof.
-* The lattices found are the optimiser's, not proved optimal; the true minimisers of
-  the first-kind class are unknown for every n ≥ 7, and the first-kind class is not the
-  whole story: D₄ beats everything at n = 4 (Result 99).
+* The families are certificates, not minimisers. At n = 10 and 11 (12 and 8 starts) the
+  search found lattices below them: −1.44e-3 against −1.26e-3 for the cone at n = 10,
+  and −2.27e-3 against −1.90e-3 for K(6,6) at n = 11, the latter a weighted 4-regular
+  graph on 12 vertices that is not the cuboctahedron (+2.9e-3). The true minimisers of
+  the first-kind class are unknown for every n ≥ 7, and the class is not the whole
+  story: D₄ beats everything at n = 4 (Result 99), E₇ everything at n = 7.
 * The certificates for n ≥ 8 rest on the Selling-parameter formula, validated here
   against independent computations for n ≤ 7 and at the degenerate (zero-parameter)
   cells of n = 3, 5, 6, 7, but not re-proved for all n.
