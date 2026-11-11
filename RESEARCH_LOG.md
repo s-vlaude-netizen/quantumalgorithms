@@ -6184,7 +6184,7 @@ what it would take.
 
 ### Result 99 — the four-dimensional parallelohedron problem (Cesaroni–Novaga's first open problem): a random search finds the 24-cell, and a zonotope outside the graphical family lies between it and A₄*
 
-**The question.** Cesaroni & Novaga (arXiv:2609.02384, Open problem 1). Let
+**The question.** Cesaroni & Novaga (arXiv:2609.02384, §7, Open problem 7.1). Let
 
     γ₄ = inf over lattices Λ ⊂ ℝ⁴ of  Iso₄(Vor Λ) = (boundary measure) / volume^(3/4).
 
@@ -6270,12 +6270,13 @@ of parallelohedra handled, with an inequality of the Hales–Song kind for each.
 
 ### Result 100 — A_n* is not the best lattice of the first kind for any n from 7 to 200, and not even a local minimum from n = 15 (Cesaroni–Novaga's second open problem, in part)
 
-**The question.** Cesaroni & Novaga (arXiv:2609.02384) list as open: among
-lattices of Voronoi's first kind (those with an obtuse superbase, whose Voronoi
-cells are the K_{n+1}-graphical zonotopes), for which n is A_n* optimal for
-`Iso_n = surface / volume^((n-1)/n)`? They also caution against adopting A_n*
-uncritically as the answer in higher dimensions. Result 98 found numerically that
-at n = 4 the Hales–Song bound is lowest at A_n*.
+**The question.** Cesaroni & Novaga (arXiv:2609.02384, §7), Open problem 7.2: "For general
+n, restrict to lattices admitting an obtuse superbase. Their Voronoi-relevant vectors
+are indexed by the 2^n − 1 nontrivial cuts of K_{n+1} … Determine the minimizer of
+Iso_n in this subclass. In particular, for which n's is A_n* optimal?" Here
+`Iso_n = H^(n-1)(boundary) / H^n(cell)^((n-1)/n)`. They note that the 24-cell beats
+A_4*, "so the sequence A_n* cannot be adopted uncritically". Result 98 found
+numerically that at n = 4 the Hales–Song bound is lowest at A_n*.
 
 **The answer found here: not for n ≥ 7.** The path there matters, because the first
 half is what made the second half findable.
@@ -6295,7 +6296,10 @@ half is what made the second half findable.
    count for all vertices; `C_n` is fixed by A_n* itself. For n = 3 it has the shape
    of the closed formula Cesaroni–Novaga write in the six Selling parameters (area
    `2N(rho)/sqrt(D(rho))`, as I read their summary). It is a function of the
-   `n(n+1)/2` Selling parameters alone: no frames, no matrices.
+   `n(n+1)/2` Selling parameters alone: no frames, no matrices. Their Propositions
+   3.2 and 3.3 state the structure for n = 3, degenerate lattices included: the cell is
+   `A(rho)^(-1/2) Z_rho` when the active graph is connected (`D(rho) > 0`), and its facets
+   are the bipartitions with both sides connected.
 2. **Checked independently before it was used.**
    * Against the determinant-and-cofactor formulas for zonotopes (exp044), for
      random weights and frames: n = 3, 4, 5, 6, to 1e-14.
@@ -6379,7 +6383,7 @@ slowly (0.048% at n = 200) but stays negative at every n computed.
   D₇ 10.9299, D₇* 11.0986, then the K(4,4) cut lattice 11.1277, A₇* 11.1346, ℤ⁷ 14. The
   best first-kind lattices found are far from the best lattices overall, and even D₇*
   is below them. What was settled is the first-kind question; the isoperimetric problem
-  over all lattices (Open problem 1) is a different one.
+  over all lattices (Open problem 7.1, for general n) is a different one.
 * **The local picture** (second variation of Iso at A_n*, per unit perturbation, lattice
   class; 40 digits near the change):
 
@@ -6410,8 +6414,9 @@ slowly (0.048% at n = 200) but stays negative at every n computed.
   K_{m,m} (even n) has a strictly smaller isoperimetric quotient, by exact
   arithmetic.
 * For n ≤ 6 no start of the search ever went below A_n*. With n = 3 proved
-  (Hales–Song, Cesaroni–Novaga), the answer to "for which n is A_n* optimal among
-  first-kind lattices" is, conjecturally, **n ≤ 6**.
+  (Hales–Song, Cesaroni–Novaga), the answer to the second half of Open problem 7.2,
+  "for which n is A_n* optimal", is conjecturally **n ≤ 6**. The first half, the
+  minimiser itself, is untouched.
 * A_n* is a strict local minimum up to n = 14. The better lattices are far away, on
   the boundary of the first-kind cone, which is why a local test could not see them
   before n = 15.
