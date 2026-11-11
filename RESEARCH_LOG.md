@@ -5944,6 +5944,17 @@ advantage over the best available classical heuristic — does not hold.
 
 ### Result 97 — the Kelvin problem: the densest-packing foam is not a soap foam, and when it is allowed to become one it turns into Kelvin's
 
+**In plain words.** The question was whether the cell around each ball in the densest
+stack of cannonballs, the rhombic dodecahedron, is also the best foam cell. It is not,
+and for a concrete reason: at some corners six cells meet at one point, which a soap
+film never allows (a film on a cube-shaped wire frame grows a small square in the
+middle instead). Let the cells open up that way and settle, and they turn into
+Kelvin's foam, which Weaire and Phelan's foam of 1993 in turn beats. The exact surface
+costs were worked out and the published values for the curved foams reproduced. The
+mechanism, the cannonball foam decaying into Kelvin's, is the new part; I did not find
+it written down, though foam physicists probably know it. The Kelvin problem itself,
+whether anything beats Weaire–Phelan, is untouched.
+
 **The question** (Math StackExchange 1494037, 2015, asked by the person who
 requested this programme): is the 3-D analogue of the hexagonal honeycomb the
 rhombic dodecahedral honeycomb? In 2-D, the honeycomb is both the optimal
@@ -6044,6 +6055,16 @@ optimal? — is untouched, and NEXT_STEPS ranks the realistic ways to push on it
 `results/figures/exp042_fcc_decays_to_kelvin.png`.
 
 ### Result 98 — Hales & Song's proof of Bezdek's conjecture: the computer-assisted step re-derived independently, and it holds
+
+**In plain words.** A 2026 paper proves that among cells that tile space by sliding
+copies of one flat shape, Kelvin's truncated octahedron has the least surface. Almost
+all of the proof is on paper, but one step, an inequality in six variables, was checked
+by a computer program that, the paper says, an AI wrote, and nobody else had run it. I
+rebuilt that check from scratch by a different route, without reading or running
+theirs, and it reaches the same certificate down to the exact count (1,027,628 numbers
+examined, none negative). So that step is right. This is a confirmation, not new
+mathematics, and the paper's pen-and-paper parts were not re-proved here. The last part
+of the entry is numerical evidence on a four-dimensional question, not a proof.
 
 **The claim.** Hales & Song, *The Truncated Octahedral Conjecture*
 (arXiv:2609.00997v2, September 2026), prove K. Bezdek's 2006 conjecture: among
@@ -6184,6 +6205,14 @@ what it would take.
 
 ### Result 99 — the four-dimensional parallelohedron problem (Cesaroni–Novaga's first open problem): a random search finds the 24-cell, and a zonotope outside the graphical family lies between it and A₄*
 
+**In plain words.** Four dimensions is where the 3-D proof method stops working, and
+the 2026 Cesaroni–Novaga paper lists the 4-D question as open: is the 24-cell, a
+symmetric four-dimensional shape with 24 faces, the best cell for tiling? I started a
+computer from 84 random shapes and let each reshape itself to cut its surface. 76 ended
+at the 24-cell, 8 stuck on a slightly worse shape, and none went lower. That supports
+the guess and does not prove it: a small set of starting shapes leading somewhere else
+could be missed.
+
 **The question.** Cesaroni & Novaga (arXiv:2609.02384, §7, Open problem 7.1). Let
 
     γ₄ = inf over lattices Λ ⊂ ℝ⁴ of  Iso₄(Vor Λ) = (boundary measure) / volume^(3/4).
@@ -6270,6 +6299,19 @@ of parallelohedra handled, with an inequality of the Hales–Song kind for each.
 
 
 ### Result 100 — A_n* is not the best lattice of the first kind for any n from 7 to 200, and not even a local minimum from n = 15 (Cesaroni–Novaga's second open problem, in part)
+
+**In plain words.** The best cell in 3-D comes from a pattern, written A_n*, that exists
+in every dimension n. The Cesaroni–Novaga paper asked, within a natural class of cells
+(those described by one weight for each pair among n+1 points), for which n that
+pattern is still the best. Searches say it is best up to n = 6 and **not from n = 7
+on**: a cell built from a complete bipartite graph (two groups of points, every point
+of one group linked to every point of the other) has up to 0.22% less surface, certified
+in exact arithmetic for every dimension from 7 to 200 and at a few larger ones. From
+n = 15 the pattern is not even a local optimum. How sure: the formula behind the
+computation was checked against several independent computations, including a cell
+built numerically in dimension 7, but it is not proved for all n. The gains are tiny,
+cells outside this class do better still (about 6.5% in dimension 7), and nobody
+outside this project has reviewed it. A strong lead, not a theorem.
 
 **The question.** Cesaroni & Novaga (arXiv:2609.02384, §7), Open problem 7.2: "For general
 n, restrict to lattices admitting an obtuse superbase. Their Voronoi-relevant vectors
@@ -6466,6 +6508,15 @@ it more.
 
 
 ### Result 101 — the Frank–Kasper rivals of Weaire–Phelan, relaxed with the cell free: none beats it, and among the Frank–Kasper phases the cost rises as the mean face count falls
+
+**In plain words.** The best known foam, Weaire–Phelan, has the geometry of a real
+crystal structure called A15, the structure of the superconductor Nb₃Sn: each of its
+eight cells per cube surrounds one atom of the crystal. A15 belongs to a family of
+metal crystal structures (Frank–Kasper), so ten structures, A15 itself and nine
+rivals, were turned into foams, each allowed to settle to its least surface with the
+cell shape free, and compared. None of the nine beats Weaire–Phelan, and the order
+matches the published one. That is support for Weaire–Phelan being the best, not a
+proof, and it surveys known structures rather than searching for new ones.
 
 **The question.** Weaire–Phelan is the soap-film version of one crystal structure,
 A15, a member of the *Frank–Kasper* family: the tetrahedrally close-packed structures

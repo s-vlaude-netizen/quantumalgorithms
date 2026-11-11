@@ -4,7 +4,7 @@ An experimental workbench for finding quantum algorithms that are actually
 cheaper to run, measured under **real device noise** rather than in the
 noiseless idealisation where most published speedups live.
 
-Two things are in here, and they point in opposite directions:
+Three things are in here. The first two point in opposite directions:
 
 1. **[Quantum algorithm optimisation](#quantum-algorithm-optimisation--what-actually-got-faster)** —
    measured speedups with named baselines. **These worked**, and a literature
@@ -15,8 +15,16 @@ Two things are in here, and they point in opposite directions:
 2. **The search for a quantum advantage** — four problem classes measured against
    honest classical baselines. **This did not**, and the sections below say
    precisely why, per class.
+3. **[A side programme in pure geometry: the Kelvin problem](#a-side-programme-in-pure-mathematics-the-kelvin-problem-results-97101)** —
+   how to cut space into equal cells with the least wall, a question a human asked
+   in 2015 and that this repository took up with a computer. It is pure
+   mathematics, it changes nothing in 1 and 2, and it is here because of who asked
+   and because dense packings and crystal structures are condensed-matter
+   geometry, the same physics that sits under superconducting and atom-array
+   hardware. Its section opens with a plain-words account, who did what, and how
+   sure we are.
 
-Read the second list before quoting anything from the first: every constant
+Read item 2 before quoting anything from item 1: every constant
 factor here sits in front of a requirement 10³–10⁸ away, and **no result in this
 repository changes a complexity exponent.** The one candidate that might have —
 an adaptive ansatz with a smaller parameter count — was measured and does not
@@ -25,9 +33,11 @@ is indistinguishable and, if anything, the wrong way round.
 
 ## The results here that are proofs (Results 86 and 89)
 
-Ninety-eight results, and **two** of them establish something rather than
-measuring it. Both are small, both concern the same model, and each begins by
-correcting an earlier entry of my own.
+A hundred and one results, and **two** of them on the quantum side establish
+something rather than measuring it. Both are small, both concern the same model,
+and each begins by correcting an earlier entry of my own. (Result 100, in the geometry
+side programme further down, is a candidate third: exact certificates, but resting on a
+formula that has been tested rather than proved.)
 
 **The claim.** The tensor-hypercontraction model used in Results 77–80 has an
 `M`-parameter continuous **gauge group**
@@ -274,7 +284,101 @@ survive.
 Result 96 in the research log. Needs `numba`; rebuilding the graph needs
 `dwave-networkx`, but it is cached in `results/exp041_qac_logical_graph.json`.
 
-## A side programme in pure mathematics: the Kelvin problem (Results 97, 98)
+## A side programme in pure mathematics: the Kelvin problem (Results 97–101)
+
+**In plain words.** The question is old and easy to state: *if you fill space with
+equal-sized cells, soap bubbles being the picture, which cell shape uses the least
+wall?* In the plane the answer is the honeycomb. In three dimensions Kelvin proposed
+an answer in 1887, and in 1993 Weaire and Phelan found a slightly better one (0.3%
+less wall, two kinds of cell). **Nobody knows whether anything beats it.** That is the
+Kelvin problem, it is still open, and nothing in this repository solves it. What this
+programme did is chip at the edges with a computer:
+
+* **The question that started it (Result 97).** Stack cannonballs as densely as
+  possible and give each ball the region closest to it: the cell is a rhombic
+  dodecahedron. Is that the best cell? No, and not for the reason one might guess:
+  six cells meet at some of its corners, which no soap film allows. Let it settle into
+  a real soap foam and it becomes Kelvin's foam.
+* **Checking a 2026 proof (Result 98).** Hales and Song proved that among *flat*
+  shapes that tile space by sliding copies of one shape, Kelvin's truncated octahedron
+  has the least surface. Part of the proof is a computer check that, the paper's
+  acknowledgements say, an AI wrote. I rebuilt it independently, by a different route
+  and without reading or running theirs, and it passes with the same numbers.
+* **One dimension up (Result 99).** The natural best shape in four dimensions is the
+  24-cell. From 84 random starting shapes, each left to reshape itself to cut its
+  surface, 76 ended at the 24-cell, 8 stuck on a slightly worse shape, and none went
+  lower. Evidence, not proof: a small basin could be missed.
+* **A tidy guess that fails (Result 100, the main new finding).** The winning shape
+  in three dimensions belongs to a family ("permutohedra") that exists in every
+  dimension, and it is natural to guess the family keeps winning. A 2026 paper asked in
+  which dimensions that is true, within a natural class of shapes. As far as searches
+  can tell it holds up to dimension 6 and **fails from dimension 7 on**: a shape built
+  from a complete bipartite graph (two groups of points, every point in one group
+  linked to every point in the other) has slightly less surface, by up to 0.22%,
+  checked in exact arithmetic for every dimension from 7 to 200 and a few larger. The
+  gap is small, and better shapes of another kind exist altogether (about 6.5% better
+  in dimension 7), so this is a statement about a pattern breaking, not about the
+  best shape.
+* **Foams from crystals (Result 101).** The best known foam has the geometry of a real
+  crystal, the A15 structure of the superconductor Nb₃Sn. Ten crystal structures (A15
+  itself and nine rivals) were turned into foams on the computer and settled to least
+  surface: none of the nine beats Weaire–Phelan, and the order agrees with the
+  published one.
+
+**How sure are we?** Every number comes from a script in this repository (the longest
+foam runs take hours), and the exact certificates of Result 100 re-run for all 198
+dimensions from 3 to 200 in under three minutes. But Result 100 rests on a formula that
+I tested against several independent computations and did not prove, and no
+mathematician outside this project has reviewed it: treat it as a strong lead, not a
+theorem.
+
+**Who did what, and why it is here.**
+* The question (the owner asked it on Math StackExchange in 2015), the starting picture
+  (the cell around a densest-packed sphere), the decision to pursue it, and the
+  continuing effort to understand what the AI is doing are the owner's. That effort is
+  the reason summaries like this one exist, and a standing rule now (NEXT_STEPS, rule 11).
+* The code, the computations, the exact-arithmetic certificates and the write-ups are
+  Claude's, an AI; the commits say so.
+* Why in this repository: partly practical (the owner's separate mathematics repository
+  seemed to be lost or down when this started, and one repository is easier to work in
+  than many), partly thematic. Foams, dense packings and crystal structures are condensed-matter
+  geometry, the physics under superconducting and atom-array quantum hardware. No result
+  here ties to a hardware number, so the link stays marked speculative in NEXT_STEPS.
+
+**Is this "Math 2.0"?** Terence Tao's October 2026 lecture lays out a "Math 1.0" past,
+a present "induced by the excessive emphasis on automated solving of open problems by
+AI", and "my vision for a future 'Math 2.0' where AI tools are used to sustain both the
+internal mathematical community, and the role that mathematical understanding plays in
+advancing and aligning the applications of mathematics to the real world"
+([his post](https://terrytao.wordpress.com/2026/10/10/math-2-0/)). The owner's view is
+that this project fits that spirit: a human's question and curiosity set the direction,
+the machine does the computing, and the results are explained so a human can follow
+them. Claude, who writes this README, agrees in part.
+* *It fits:* the direction is human-set; the AI explores and computes instead of
+  announcing a solved famous problem (the Kelvin problem is not claimed solved);
+  plain-language explanation is a stated goal; AI authorship is disclosed; the claims are
+  checkable (scripts, tests, exact certificates, several independent computations); and
+  the subject touches the physical world through crystal structures.
+* *A tension:* the programme began as "can you fix this open problem?", which is the
+  automated solving of open problems that Tao says is over-emphasised. What moves it
+  toward his picture is that it claims no solution, and spends its effort on checking
+  someone else's proof (Result 98), on mapping where the answer is not (Results 99–101)
+  and on explanation.
+* *Gaps:* two rules of thumb in Tao's
+  [living summary of his views on AI](https://teorth.github.io/tao-web/ai-views.html)
+  (drafted by an AI and reviewed by him, as the page says) bear on this. One is "I would
+  caution against using AI tools without the ability to independently verify their
+  output." Here the checking was done by the same AI, by independent *methods* but not
+  by an independent *person*, and my literature search was shallow. The other is that
+  if you "would be unable to coherently present the output of the AI in a class
+  presentation and be able to answer questions about it without further AI
+  assistance, it should not be part of your workflow." That is the bar the plain-words
+  summaries aim at; it has not been tested, so the owner following the work and asking
+  for explanations is understanding in progress, not yet understanding achieved. Until
+  a human expert has checked Result 100, "strong lead" is the honest word.
+
+This is the owner's and Claude's own reading, not an endorsement by Tao.
+
 
 Asked on Math StackExchange in 2015 by the person who requested this
 programme: **is the 3-D analogue of the hexagonal honeycomb the rhombic

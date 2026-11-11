@@ -1350,3 +1350,13 @@ knowing whether that is the cost model's fault or a real fact.
     impossible; that inconsistency is what exposed the bug above. Print both
     where they can be compared — five of this project's bugs produced entirely
     plausible individual numbers, and not one was caught by reading the code.
+11. **Every result gets a plain-language summary first, written for a human who does
+    not follow the code**: what was asked, what was found, how sure we are, who
+    checked it. The owner reads these to follow the work, and a result that cannot be
+    explained plainly is not yet understood (Tao's rule of thumb, as his living summary
+    of views on AI states it: if you could not coherently present the AI's output in a
+    class and answer questions on it without further AI help, it should not be part of
+    your workflow). It goes at the top of the log entry
+    as an "In plain words" paragraph and in the README where the result is summarised.
+    Say who verified what, and name the gap if the only checker was the AI that found
+    it.
