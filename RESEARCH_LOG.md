@@ -6227,9 +6227,10 @@ technique breaks: not every lattice is of Voronoi's first kind, and there are
 | Vor(A₄), the root lattice | 6.917453361 | | +2.83% |
 | tesseract, Vor(ℤ⁴) | 8 | 8 | +18.9% |
 
-* **Lattices: 16 random starts, about 25 s each.**
-  * 12 end at the 24-cell: 24 facets, 6.727171322.
-  * 4 end at the A₄* permutohedron: 30 facets, 6.831123656. So A₄* is a genuine
+* **Lattices: 76 random starts** (16 in the first run, 60 more later with other seeds,
+  `results/exp045_extra_lattice_starts.json`), 25 to 80 s each.
+  * 68 end at the 24-cell: 24 facets, 6.727171322.
+  * 8 end at the A₄* permutohedron: 30 facets, 6.831123656. So A₄* is a genuine
     local minimum among *all* lattices, not only those of the first kind.
   * Nothing else, and nothing lower.
 * **Parallelohedra (affine images): 8 starts, about 62 s each.** All 8 end at a
@@ -6242,14 +6243,14 @@ technique breaks: not every lattice is of Voronoi's first kind, and there are
 
 #### What it says
 
-* The data are consistent with γ₄ = `2^(11/4)`, attained by the 24-cell. All 20
-  runs that did not stop at A₄* ended at its value, with its facet count and none
-  lower, and no third local minimum appeared.
+* The data are consistent with γ₄ = `2^(11/4)`, attained by the 24-cell. All 76
+  runs that did not stop at A₄* (68 lattice, 8 affine) ended at its value, with its
+  facet count and none lower, and no third local minimum appeared.
 * Candidates that the graphical-zonotope viewpoint cannot see do not beat it. The
   cographic K₃,₃ zonotope is better than A₄*, so restricting to first-kind
   lattices (Open problem 2, Result 98) hides a better four-dimensional
   parallelohedron, but it still sits 0.89% above the 24-cell.
-* The search is small: 24 starts in a nine-dimensional shape space, so a basin
+* The search is modest: 84 starts in a nine-dimensional shape space, so a basin
   that holds a few percent of the space could be missed. The random lattice
   starts never landed on the K₃,₃ zonotope, which is a critical point within its
   own affine class; whether it is a local minimum over all lattices was not tested.

@@ -336,9 +336,9 @@ take.
 
 **Four dimensions, searched (Result 99).** The natural candidates are the 24-cell
 (Voronoi cell of D₄, `2^(11/4)` = 6.7272) and the permutohedron (A₄*, 6.8311). A
-random-start search over all four-dimensional lattices and all their affine images
-ends at the 24-cell every time, except for a quarter of the lattice starts, which
-stop at A₄* (a genuine local minimum). A zonotope outside the graphical family, the
+random-start search over all four-dimensional lattices (76 starts) and all their
+affine images (8) ends at the 24-cell every time, except for about one lattice start
+in nine, which stops at A₄* (a genuine local minimum). A zonotope outside the graphical family, the
 cographic K₃,₃ cell, with exact quotient `(32√3 + 4√2)/9` = 6.7869, lies between the
 two. Numerical evidence for Cesaroni–Novaga's first open problem, not a proof.
 
