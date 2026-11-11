@@ -6280,7 +6280,7 @@ at n = 4 the Hales–Song bound is lowest at A_n*.
 **The answer found here: not for n ≥ 7.** The path there matters, because the first
 half is what made the second half findable.
 
-#### Built — `experiments/exp047_an_star_local_optimality.py` (22 tests) and `exp048_first_kind_global_search.py` (8 tests)
+#### Built — `exp047_an_star_local_optimality.py` (22 tests), `exp048_first_kind_global_search.py` (8) and `exp049_known_lattices_voronoi.py` (7)
 
 1. **The quotient of a first-kind lattice in one formula.** Let `b_0 .. b_n` be an
    obtuse superbase (`sum b_i = 0`) with Selling parameters `rho_ij = -b_i . b_j >= 0`.
@@ -6374,6 +6374,12 @@ slowly (0.048% at n = 200) but stays negative at every n computed.
   (K(3,3)) and 6 (K(3,4)), to 1e-9 or better. Brute-force zonotopes (determinants and
   cofactors, no tree counts): n = 7 K(4,4), n = 9 K(5,5), log ratios identical to
   seven digits.
+* **Context: lattices of the second kind** (exp049, Voronoi cells computed numerically from
+  the lattice, volume checked against the covolume). At n = 7: E₇ 10.4020, E₇* 10.4871,
+  D₇ 10.9299, D₇* 11.0986, then the K(4,4) cut lattice 11.1277, A₇* 11.1346, ℤ⁷ 14. The
+  best first-kind lattices found are far from the best lattices overall, and even D₇*
+  is below them. What was settled is the first-kind question; the isoperimetric problem
+  over all lattices (Open problem 1) is a different one.
 * **The local picture** (second variation of Iso at A_n*, per unit perturbation, lattice
   class; 40 digits near the change):
 
@@ -6439,9 +6445,9 @@ are numerics (**D**). A proof for all n, and the true minimisers, are what would
 it more.
 
 `experiments/exp047_an_star_local_optimality.py`,
-`experiments/exp048_first_kind_global_search.py`,
+`experiments/exp048_first_kind_global_search.py`, `experiments/exp049_known_lattices_voronoi.py`,
 `tests/test_an_star_local_optimality.py`, `tests/test_first_kind_global_search.py`,
-`results/exp047_an_star_local_optimality.json`,
+`tests/test_known_lattices_voronoi.py`, `results/exp047_an_star_local_optimality.json`,
 `results/exp048_first_kind_global_search.json`,
 `results/figures/exp047_an_star_curvature.png`,
 `results/figures/exp048_first_kind_beats_a_n_star.png`.
