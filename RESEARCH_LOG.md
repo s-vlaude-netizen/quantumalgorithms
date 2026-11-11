@@ -6514,16 +6514,15 @@ What the literature has:
 | Kelvin (BCC) | 14.0000 | 5.30626 | +0.339% | 0 | 1–3 |
 | Z | 13.4286 | 5.30669 | +0.347% | +0.008% | 1–3 |
 | δ | 13.4286 | 5.30847 | +0.381% | +0.042% | 1–3 |
-| χ (α-Mn, control) | 13.5172 | 5.31195 | +0.446% | +0.107% | 1–2 |
+| χ (α-Mn, control) | 13.5172 | 5.31195 | +0.446% | +0.107% | 1–3 |
 | μ | 13.3846 | 5.31394 | +0.484% | +0.145% | 1–3 |
 | C15 | 13.3333 | 5.32420 | +0.678% | +0.338% | 1–3 |
 | C14 | 13.3333 | 5.32420 | +0.678% | +0.338% | 1–3 |
 | C36 | 13.3333 | 5.32421 | +0.678% | +0.338% | 1–3 |
 
-(The sphere is 4.83598. χ is extrapolated from two levels, with a last correction of 1.6e-4
-against 2e-5 for the structures with three; its level-3 run was still going when this was
-written, and the gaps that matter are 100 times that. P's third level, 2 hours on one core,
-changed its cost by less than 1e-5.)
+(The sphere is 4.83598. All ten are extrapolated from three mesh levels. The third level
+of P took 2 hours on one core and that of χ 51 minutes; neither moved the cost by more
+than 1e-5.)
 
 ![Frank–Kasper foams](results/figures/exp043_frank_kasper_costs.png)
 
