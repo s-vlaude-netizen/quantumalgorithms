@@ -149,7 +149,7 @@ Applied honestly, as of Result 100:
 
 | tier | results | note |
 |---|---|---|
-| **A** | **86, 89**, **100** (provisional) | the THC gauge group and its exact identifiability boundary, both small; Result 100, A_n* is not a local optimum among lattices from n = 15 |
+| **A** | **86, 89**, **100** (provisional) | the THC gauge group and its exact identifiability boundary, both small; Result 100, A_n* is not the best first-kind lattice from n = 7 |
 | **A′** | **93** (narrow), **96** | 93 — IonQ + Ansys: every partition the quantum step handed LS-DYNA is computed exactly classically, faster; it refutes the press release, not the paper's pipeline claim. 96 — D-Wave/USC's "algorithmic quantum speedup in approximate optimization": on the rebuilt instances, classical SQA scales as N^1.09 and SA as N^1.74 against QAC's N^1.69, with PT-ICM's 1.93 reproduced (1.91) |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
@@ -189,8 +189,8 @@ Added October 2026 at the request of the person who asked Math StackExchange
 kept here because this is the repository that exists. **Status: Result 97 built
 and validated the toolkit and settled the original question; Result 98 checked
 the Hales–Song certificate independently (it holds); Results 99 and 100 took up
-Cesaroni–Novaga's open problems 1 and 2 (a four-dimensional search; A_n* is not a
-local optimum among lattices from n = 15).** The open problem
+Cesaroni–Novaga's open problems 1 and 2 (a four-dimensional search; A_n* is not the
+best first-kind lattice from n = 7).** The open problem
 itself — is Weaire–Phelan (5.2883) optimal among all equal-volume partitions?
 — remains open. What is realistic, and in what order:
 
@@ -238,20 +238,20 @@ itself — is Weaire–Phelan (5.2883) optimal among all equal-volume partitions
      loses to the 24-cell (`2^(11/4) = 6.727 < 6.831`), so only the zonotope
      statement is a candidate.
 4. **Follow-ups from Results 99 and 100** (pure mathematics, in order of value):
-   * **Prove the sign for every n ≥ 15.** The second variation along the `(n-1, 2)`
-     piece is an explicit sum over classes of binomial-weighted terms (see
-     `exact_terms_fast` in exp047). It is negative at every n computed (numerically
-     to 100, exact certificates to 1000) and was still falling slowly (−1.28 at
-     n = 90). An asymptotic argument would close the "for which n" question from
-     above.
-   * **Where do the minimisers go for n ≥ 15?** The descent ray ends at the edge of
-     the first-kind cone; continue into second-kind lattices, where cells lose
-     facets. Also test the candidates Cesaroni–Novaga name for large n, the Voronoi
-     cells of D₄, E₈ and Leech: their second variation needs the cells' known facet
-     structures, not the Selling formula.
-   * **Is A_n* the best first-kind lattice for 4 ≤ n ≤ 14?** Only *local* optimality
-     is shown. The Selling formula makes a global search cheap (`n(n+1)/2` positive
-     parameters, `2^n` subsets per evaluation): random starts for n = 5 to 10 first.
+   * **What are the minimisers among first-kind lattices for n ≥ 7?** The optimiser's
+     lattices are cut lattices of K(m,m) and of a weighted cone over it; they are not
+     proved optimal. Search weighted complete multipartite graphs and general Selling
+     parameters for n = 10 to 14 (the analytic gradient makes `2^n` subsets per
+     evaluation affordable up to n ≈ 14), and look at what the optimum is as n grows.
+   * **Compare with the lattices of the second kind.** D₄ beats everything at n = 4
+     (Result 99). For n = 7 and 8 compute the Voronoi cells of E₇, E₇*, D₇*, E₈ (and the
+     Leech candidate Cesaroni–Novaga name at n = 24) with their known facet structures
+     and see whether any beats the K(4,4) cut lattice (11.12775 at n = 7).
+   * **Prove it for all n ≥ 7.** The log ratio of K_{m,m} to A_n* is an explicit sum of
+     integer terms with square roots; it was negative at every n computed (to 200) and
+     decays slowly (−0.48e-3 at n = 200). An asymptotic argument would close the
+     question from above. Also: a certificate-style proof that A_n* is optimal for
+     n = 4, 5, 6 (today 500 random starts each), in the style of Hales–Song.
    * Whether to tell Cesaroni and Novaga is the owner's call; nothing has been sent.
 5. **Quantum-hardware angle (speculative).** Tetrahedrally close-packed
    arrangements (A15, Frank–Kasper) are also candidate 3-D neutral-atom layouts

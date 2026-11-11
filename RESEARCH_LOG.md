@@ -6268,7 +6268,7 @@ of parallelohedra handled, with an inequality of the Hales–Song kind for each.
 `results/exp045_four_dimensional_cells.json`.
 
 
-### Result 100 — A_n* is not a local minimum of the isoperimetric quotient among lattices from n = 15 on, and is one up to n = 14 (Cesaroni–Novaga's second open problem, in part)
+### Result 100 — A_n* is not the best lattice of the first kind for any n from 7 to 200, and not even a local minimum from n = 15 (Cesaroni–Novaga's second open problem, in part)
 
 **The question.** Cesaroni & Novaga (arXiv:2609.02384) list as open: among
 lattices of Voronoi's first kind (those with an obtuse superbase, whose Voronoi
@@ -6277,149 +6277,171 @@ cells are the K_{n+1}-graphical zonotopes), for which n is A_n* optimal for
 uncritically as the answer in higher dimensions. Result 98 found numerically that
 at n = 4 the Hales–Song bound is lowest at A_n*.
 
-**Why a local test settles a global question here.** A_n* has a strictly obtuse
-superbase (`f_i · f_j = -1/n`), so *every* lattice near it is of the first kind.
-A descent direction at A_n* therefore refutes optimality among first-kind lattices,
-and among all lattices, at once.
+**The answer found here: not for n ≥ 7.** The path there matters, because the first
+half is what made the second half findable.
 
-#### Built — `experiments/exp047_an_star_local_optimality.py`, 21 tests
+#### Built — `experiments/exp047_an_star_local_optimality.py` (22 tests) and `exp048_first_kind_global_search.py` (8 tests)
 
 1. **The quotient of a first-kind lattice in one formula.** Let `b_0 .. b_n` be an
-   obtuse superbase (`sum b_i = 0`) with Selling parameters `rho_ij = -b_i . b_j > 0`.
-   By Voronoi, the `2^(n+1) - 2` vectors `v_S = sum_{i in S} b_i` are exactly the
-   relevant vectors and the cell is a zonotope; facet `F_S` is a sum of two
-   graphical zonotopes in orthogonal subspaces. Hence
+   obtuse superbase (`sum b_i = 0`) with Selling parameters `rho_ij = -b_i . b_j >= 0`.
+   By Voronoi, the vectors `v_S = sum_{i in S} b_i` are the relevant vectors and the
+   cell is a zonotope; facet `F_S` is a sum of two graphical zonotopes in orthogonal
+   subspaces. Hence
 
        Iso = C_n · U(rho) / d(rho)^(1 - 1/(2n)),      U = sum_S tau(S) tau(S^c) sqrt(r(S)),
 
    where `tau` is the weighted spanning-tree count of the complete graph on a
-   subset, `r(S) = |v_S|^2` the weight of the cut `(S, S^c)`, and `d = det(Gram)`
-   the count for all vertices; `C_n` is fixed by A_n* itself. For n = 3 it has the
-   shape of the closed formula Cesaroni–Novaga write in the six Selling parameters
-   (area `2N(rho)/sqrt(D(rho))`, as I read their summary). For all n it is a
-   function of the `n(n+1)/2` Selling parameters alone: no frames, no matrices.
+   subset, `r(S) = |v_S|^2` the weight of the cut `(S, S^c)`, and `d = det(Gram)` the
+   count for all vertices; `C_n` is fixed by A_n* itself. For n = 3 it has the shape
+   of the closed formula Cesaroni–Novaga write in the six Selling parameters (area
+   `2N(rho)/sqrt(D(rho))`, as I read their summary). It is a function of the
+   `n(n+1)/2` Selling parameters alone: no frames, no matrices.
 2. **Checked independently before it was used.**
    * Against the determinant-and-cofactor formulas for zonotopes (exp044), for
-     random weights and random frames: n = 3, 4, 5, 6, to 1e-14.
-   * Against the numerically computed Voronoi cell (half-space intersection) of
-     the lattices `A·A_n*`: n = 3, 4, 5, to 1e-13.
-   * The second variation itself against brute-force zonotopes: n = 5, 6, 7, to
-     1e-5. The cone-volume identity `sum_S tau(S) tau(S^c) r(S) = n d` at n = 9.
-3. **The second variation at A_n*.** `S_{n+1}` splits the symmetric traceless
-   matrices into two irreducible pieces, the standard one (dimension n) and
-   `(n-1, 2)` (dimension `(n+1)(n-2)/2`), so the Hessian has two eigenvalues. The
-   full 14 x 14 Hessian at n = 5 has exactly the two predicted (1.1685 ×9 and
-   3.5658 ×5) and no gradient. Sums over all `2^n` subsets are replaced by sums over
-   classes (pattern on the four special vertices of the direction, number of the
-   others): n up to 100 in double precision, 40–60 digits around the change.
-4. **An exact certificate.** The family `rho_01 = rho_23 = 1 + delta`, `rho_02 =
-   rho_13 = 1 - delta`, all others 1 is the `(n-1, 2)` direction, linear in
-   `rho`. On a vertex set of size `N` with `s` special vertices the Laplacian is
-   `N I - J + Delta`, so `tau = N^(N-s-2) det(N I_s + Delta_s)`: a 4 x 4
-   determinant, no matter how large n is. Spanning-tree counts and cut weights are
-   exact rationals; only the square roots and the final comparison
-   `(U/U_0)^(2n) < (d/d_0)^(2n-1)` use interval arithmetic (60 digits).
+     random weights and frames: n = 3, 4, 5, 6, to 1e-14.
+   * Against numerically computed Voronoi cells (half-space intersection) of the
+     lattices `A·A_n*`: n = 3, 4, 5, to 1e-13.
+   * The second variation against brute-force zonotopes: n = 5, 6, 7, to 1e-5.
+3. **Local analysis at A_n*.** By `S_{n+1}` symmetry the Hessian has two eigenvalues,
+   one per irreducible piece of the symmetric traceless matrices: the standard piece
+   and `(n-1, 2)`. Near A_n* every lattice is of the first kind. Sums over the `2^n`
+   subsets are reduced to classes (n up to 100); a 14 x 14 full Hessian at n = 5
+   confirms the two eigenvalues and the zero gradient.
+4. **Global search, analytic gradient.** `d log tau / d rho_ij` is an effective
+   resistance, so `grad f` costs about three evaluations. Random-start L-BFGS over
+   the `n(n+1)/2` log-parameters, 40 to 200 starts per n, spreads 0.1 to 2.5.
+5. **What the optimiser found, and an exact certificate for it.** At n = 7, 8, 9, from
+   14% to 48% of the starts end at a lattice with most Selling parameters at their
+   lower bound: equal on the edges of **K(4,4)** at n = 7, on **K(5,5)** at n = 9, and at
+   n = 8 on a cone over K(4,4) whose apex has weight ≈ 0.54. These are the first members
+   of two families, K_{m,m} (odd n = 2m − 1) and the cone K_{1,m,m} with apex weight ≈ 0.5
+   (even n = 2m). Selling parameters 0 or 1 on the edges of a graph G give the *cut
+   lattice* of G; A_n* is the case G = K_{n+1}. For both families the class sums are closed-form
+   (`tau(K_{x,y}) = x^(y-1) y^(x-1)`; for the cone, the eigenvalues of a 3 x 3 quotient
+   matrix), so the comparison with A_n* is exact integers or rationals, with
+   interval arithmetic (60 digits) only for the square roots and the test
+   `(U/U_0)^(2n) < (d/d_0)^(2n-1)`.
 
-![second variation of the quotient at A_n*](results/figures/exp047_an_star_curvature.png)
+![the cut lattices of complete bipartite graphs against A_n*](results/figures/exp048_first_kind_beats_a_n_star.png)
 
 #### Measured
 
-Second variation of `Iso` at A_n* per unit perturbation, lattice class:
+Global search (random-start L-BFGS):
 
-| n | standard piece | (n−1, 2) piece | affine class, (n−1, 2), ×10⁻³ |
+| n | starts | at A_n* | below A_n* | lowest, log(Iso / Iso A_n*) |
+|---|---|---|---|---|
+| 4 | 200 | 200 | 0 | 0 |
+| 5 | 200 | 171 | 0 | 0 (others end at +1.285e-3, K(3,3), a local minimum) |
+| 6 | 200 | 154 | 0 | 0 |
+| 7 | 80 | 56 | 11 | −6.193e-4 |
+| 8 | 40 | 25 | 7 | −5.911e-4 |
+| 9 | 40 | 19 | 19 | −1.488e-3 |
+
+A further 300 starts at n = 4, 5, 6 and 120 at n = 7 (spreads up to 3.5) gave the same.
+
+Exact certificates, the family and `log(Iso of the lattice / Iso of A_n*)` in units of 10⁻³:
+
+| n | lattice | log ratio, ×10⁻³ | below A_n*? |
 |---|---|---|---|
-| 3 | 3.1178 | +1.67287 | +52.269 |
-| 4 | 3.3670 | +1.39893 | +27.869 |
-| 5 | 3.5658 | +1.16856 | +15.967 |
-| 8 | 3.9851 | +0.65943 | +3.669 |
-| 10 | 4.1778 | +0.41794 | +1.346 |
-| 12 | 4.3296 | +0.22536 | +0.324 |
-| 13 | 4.3944 | +0.14275 | +0.042 |
-| **14** | 4.4531 | **+0.06752** | **−0.153** |
-| **15** | 4.5068 | **−0.00135** | −0.287 |
-| 16 | 4.5560 | −0.06468 | −0.379 |
-| 17 | 4.6013 | −0.12315 | −0.440 |
-| 20 | 4.7186 | −0.27471 | −0.520 |
-| 30 | 4.9816 | −0.61687 | −0.443 |
-| 50 | 5.2520 | −0.97070 | |
-| 100 | 5.5184 | −1.32123 | |
+| 3 | K(2,2) = FCC | +5.751 | no |
+| 4 | cone K(1,2,2) | +3.220 | no |
+| 5 | K(3,3) | +1.285 | no |
+| 6 | cone K(1,3,3) | +0.660 | no |
+| **7** | **K(4,4)** | **−0.619** | **yes** |
+| 8 | cone K(1,4,4), apex 11/20 | −0.583 | yes |
+| 9 | K(5,5) | −1.488 | yes |
+| 10 | cone K(1,5,5), apex 21/40 | −1.255 | yes |
+| 11 | K(6,6) | −1.903 | yes |
+| 12 | cone K(1,6,6), apex 21/40 | −1.616 | yes |
+| 14 | cone K(1,7,7), apex 21/40 | −1.806 | yes |
+| 16 | cone K(1,8,8), apex 21/40 | −1.898 | yes |
+| 17 | K(9,9) | −2.197 | yes |
+| 20 | cone K(1,10,10), apex 1/2 | −1.939 | yes |
+| 30 | cone K(1,15,15), apex 1/2 | −1.782 | yes |
+| 50 | cone K(1,25,25), apex 1/2 | −1.385 | yes |
+| 100 | cone K(1,50,50), apex 1/2 | −0.853 | yes |
+| 200 | cone K(1,100,100), apex 1/2 | −0.479 | yes |
 
-The affine class (weights and frame both free) is shown for n ≤ 30; beyond that
-its entries are smaller than the double-precision noise.
+**194 of the 198 dimensions from n = 3 to 200 are beaten; the four that are not are
+n = 3, 4, 5, 6.** The best gain is 0.22% of the quotient, near n = 17; it then shrinks
+slowly (0.048% at n = 200) but stays negative at every n computed.
 
-* **3 ≤ n ≤ 14: both pieces positive.** The smallest margin is the `(n-1, 2)` piece at
-  n = 14, +0.0675181203517822487.
-* **n = 15: the `(n-1, 2)` piece is negative**, −0.00135162601883598776 at 40
-  digits, identical to 20 digits for two step sizes. The standard piece stays
-  positive for every n computed.
-* **Explicit lattices below A_n*.** `exp(eps T) A_n*` with `T` the unit
-  `(n-1, 2)` direction, every Selling parameter positive:
+* **n = 7, independently.** The numerically computed Voronoi cell of the K(4,4)
+  lattice (half-space intersection over all lattice vectors with coefficients in
+  {−1, 0, 1}; 6902 vertices; volume 64.000000 = √det Gram) has `Iso =
+  11.1277494067`, against 11.1346434054 for A_7*. The formula gives
+  11.127749406634. The same at the degenerate cells of n = 3 (FCC, `3·2^(5/6)`), 5
+  (K(3,3)) and 6 (K(3,4)), to 1e-9 or better. Brute-force zonotopes (determinants and
+  cofactors, no tree counts): n = 7 K(4,4), n = 9 K(5,5), log ratios identical to
+  seven digits.
+* **The local picture** (second variation of Iso at A_n*, per unit perturbation, lattice
+  class; 40 digits near the change):
 
-  | n | eps | Iso(A_n*) | Iso(lattice) | change |
-  |---|---|---|---|---|
-  | 15 | 0.02 | 21.896160927 | 21.896160404 | −5.2e-7 |
-  | 15 | 0.05 | 21.896160927 | 21.896149337 | −1.16e-5 |
-  | 16 | 0.05 | 23.207726481 | 23.207635661 | −9.1e-5 |
-  | 17 | 0.05 | 24.514818825 | 24.514654849 | −1.6e-4 |
+  | n | standard piece | (n−1, 2) piece |
+  |---|---|---|
+  | 3 | 3.1178 | +1.67287 |
+  | 4 | 3.3670 | +1.39893 |
+  | 8 | 3.9851 | +0.65943 |
+  | 12 | 4.3296 | +0.22536 |
+  | **14** | 4.4531 | **+0.06752** |
+  | **15** | 4.5068 | **−0.00135** |
+  | 16 | 4.5560 | −0.06468 |
+  | 20 | 4.7186 | −0.27471 |
+  | 50 | 5.2520 | −0.97070 |
+  | 100 | 5.5184 | −1.32123 |
 
-* **Exact certificates: 54 of 54.** For every n from 15 to 60 and for n = 70, 80,
-  100, 150, 200, 300, 500, 1000, the lattice with `delta = 1/2000` has a smaller
-  quotient than A_n*, with the two sides of the comparison separated as intervals.
-  At n = 15 the gap is 1.8e-12 in `(U/U_0)^(2n)`, against interval widths below
-  1e-58. The control: for every n from 4 to 14 and `delta` in {1/2000, 1/200, 1/50,
-  1/20, 1/10, 1/4, 1/2} no lattice of the family is smaller.
-* **How much smaller.** Along the ray `exp(eps T) A_n*` until a Selling parameter is
-  within 1% of zero (the edge of the first-kind cone), the quotient falls by a relative 4.0e-6 at
-  n = 15, 1.2e-5 at n = 16, 2.2e-5 at n = 20, 1.5e-5 at n = 30, 5e-7 at n = 100.
-  Tiny, but the sign is what the question asks about.
-* **The affine class loses its minimum one dimension earlier**, at n = 14
-  (Schur complement +4.2e-5 at n = 13, −1.5e-4 at n = 14, 40 digits).
-* **Why Result 98's method stops.** The smallest eigenvalue of the Hessian of the
-  Hales–Song bound at equal weights is 0.0073, 0.0040, 0.0021, 0.00092, 0.00019 for
-  n = 5 to 9 and **−0.00027 at n = 10**. From n = 10 the bound itself dips below its
-  value at A_n* near equal weights, so no chain of that kind can prove A_n* optimal
-  there. The bound lies below the true quotient, which is why the true curvature
-  stays positive up to n = 14.
+  So A_n* is a strict local minimum for 3 ≤ n ≤ 14, and for n ≥ 15 an explicit lattice
+  arbitrarily close to it does better (exact certificates: rational Selling
+  parameters, `rho_01 = rho_23 = 2001/2000`, `rho_02 = rho_13 = 1999/2000`, others 1;
+  54 dimensions from 15 to 1000). The affine class (weights and frame both free) loses
+  its minimum at n = 14. The Hales–Song bound's own Hessian turns negative at n = 10
+  (+0.00019 at n = 9, −0.00027 at n = 10), which is where Result 98's method runs out.
 
 #### What it says
 
-* **A_n* is not optimal among first-kind lattices, nor among all lattices, for
-  every n from 15 to 60 and for n = 70, 80, 100, 150, 200, 300, 500, 1000.** An
-  explicit rational lattice, arbitrarily close to A_n*, does strictly better.
-* **For 3 ≤ n ≤ 14, A_n* is a strict local minimum among lattices** (high-precision
-  second variation, both pieces positive).
-* Open problem 2 therefore has the answer "at most n ≤ 14". For n = 3 it is
-  Hales–Song. For 4 ≤ n ≤ 14 only *local* optimality is shown here; and among all
-  lattices A_n* is already beaten at n = 4 by D₄ (Result 99), a lattice of the second
-  kind. Whether A_n* is the best first-kind lattice for 4 ≤ n ≤ 14 is open.
-* The true minimisers for n ≥ 15 are unknown. The descent ray ends at the boundary
-  of the first-kind cone, where cells lose facets.
+* **A_n* is not optimal among lattices of Voronoi's first kind for any n from 7 to
+  200.** An explicit cut lattice of K_{m,m} (odd n) or of the weighted cone over
+  K_{m,m} (even n) has a strictly smaller isoperimetric quotient, by exact
+  arithmetic.
+* For n ≤ 6 no start of the search ever went below A_n*. With n = 3 proved
+  (Hales–Song, Cesaroni–Novaga), the answer to "for which n is A_n* optimal among
+  first-kind lattices" is, conjecturally, **n ≤ 6**.
+* A_n* is a strict local minimum up to n = 14. The better lattices are far away, on
+  the boundary of the first-kind cone, which is why a local test could not see them
+  before n = 15.
+* The gains are small (at most 0.22%). The structure is not: the best first-kind
+  lattices found are cut lattices of bipartite graphs, not the complete graph.
 
 #### What it does not say
 
-* Not every n ≥ 15 is covered. Certified: 15–60 and eight larger values; the second
-  variation is negative at every n computed to 100 and was still decreasing
-  (−1.28 at n = 90). A proof for all n would need the sign of an explicit sum over
-  classes of binomial-weighted terms; not attempted.
-* The certificate is rigorous *given the Selling-parameter formula*. Its ingredients
-  (Voronoi's theorem on first-kind cells, the facet structure of graphical
-  zonotopes) are classical; the formula was validated against three independent
-  computations at n ≤ 7, not re-proved for all n here.
-* The effect is small, a relative 1e-5 at most along the ray.
-* My search of the literature was shallow (a few web searches, and the
-  Cesaroni–Novaga paper's own open-problem list). I found nothing stating this, which
-  is not the same as it being new.
+* Not every n > 200: the gain shrinks but was negative at every n computed. No proof
+  for all n.
+* For n = 4, 5, 6 the optimality of A_n* rests on 200 to 500 random starts per
+  dimension, not on a proof.
+* The lattices found are the optimiser's, not proved optimal; the true minimisers of
+  the first-kind class are unknown for every n ≥ 7, and the first-kind class is not the
+  whole story: D₄ beats everything at n = 4 (Result 99).
+* The certificates for n ≥ 8 rest on the Selling-parameter formula, validated here
+  against independent computations for n ≤ 7 and at the degenerate (zero-parameter)
+  cells of n = 3, 5, 6, 7, but not re-proved for all n.
+* My search of the literature was shallow (a few web searches and the
+  Cesaroni–Novaga paper's open-problem list). I found nothing stating this, which is
+  not the same as it being new.
 
 #### Grading
 
-**A, provisional.** A statement about a published open problem that the script
-establishes for the stated n by exact arithmetic, not a neighbouring one. It stays
-provisional for the two reasons above: the formula is validated rather than proved,
-and the literature check was shallow. The "strict local minimum for n ≤ 14" half is
-high-precision numerics (**D**). A proof for all n ≥ 15, and the true minimisers for
-n ≥ 15, are what would make it more.
+**A, provisional.** A statement about a published open problem that the scripts
+establish for each stated n by exact arithmetic, backed at n = 7 by a Voronoi cell
+computed numerically from the lattice itself. It stays provisional because the
+formula is validated rather than proved for all n and the literature check was
+shallow. The "strict local minimum for n ≤ 14" and "none below A_n* for n ≤ 6" halves
+are numerics (**D**). A proof for all n, and the true minimisers, are what would make
+it more.
 
 `experiments/exp047_an_star_local_optimality.py`,
-`tests/test_an_star_local_optimality.py`,
+`experiments/exp048_first_kind_global_search.py`,
+`tests/test_an_star_local_optimality.py`, `tests/test_first_kind_global_search.py`,
 `results/exp047_an_star_local_optimality.json`,
-`results/figures/exp047_an_star_curvature.png`.
+`results/exp048_first_kind_global_search.json`,
+`results/figures/exp047_an_star_curvature.png`,
+`results/figures/exp048_first_kind_beats_a_n_star.png`.

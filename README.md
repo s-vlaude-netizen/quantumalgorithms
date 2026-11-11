@@ -345,26 +345,28 @@ two. Numerical evidence for Cesaroni–Novaga's first open problem, not a proof.
 → `experiments/exp045_four_dimensional_cells.py`,
 `tests/test_four_dimensional_cells.py`.
 
-**A_n* stops being a local optimum at n = 15 (Result 100).** Cesaroni–Novaga ask for
-which n the dual root lattice A_n* (Voronoi cell: the permutohedron) minimises
-surface area among lattices of the first kind. Near A_n* every lattice is of the
-first kind, and its Voronoi cell's surface and volume are explicit in the lattice's
-Selling parameters, through spanning-tree counts of the complete graph. By symmetry
-the second variation of the isoperimetric quotient at A_n* has two eigenvalues, and
-one of them **changes sign between n = 14 and n = 15**. For 3 ≤ n ≤ 14, A_n* is a
-strict local minimum. For n = 15 to 60 and eight larger values up to 1000, an
-explicit lattice with rational Selling parameters has a *smaller* quotient,
-certified in exact rational and interval arithmetic.
+**A_n* is not the best lattice of the first kind from n = 7 on (Result 100).**
+Cesaroni–Novaga ask for which n the dual root lattice A_n* (Voronoi cell: the
+permutohedron) minimises surface area among lattices of the first kind. For such a
+lattice the Voronoi cell's surface and volume are explicit in its Selling parameters,
+through spanning-tree counts of the complete graph; with an analytic gradient a global
+search is cheap. Nothing goes below A_n* for n ≤ 6. At n = 7 something does: the **cut
+lattice of the complete bipartite graph K₄,₄** has a smaller isoperimetric quotient,
+11.12775 against 11.13464, confirmed on a Voronoi cell computed numerically from the
+lattice itself. The family continues, K_{m,m} for odd n and a cone over K_{m,m} with a
+lighter apex for even n, and exact certificates (integers plus interval arithmetic)
+cover every n from 7 to 200. Locally A_n* is a strict minimum up to n = 14 and not from
+n = 15, which is why a local test alone could not see it earlier.
 
-![second variation of the quotient at A_n*](results/figures/exp047_an_star_curvature.png)
+![cut lattices of complete bipartite graphs against A_n*](results/figures/exp048_first_kind_beats_a_n_star.png)
 
-The effect is small (a relative 1e-5 at most along the descent). The certificate
-rests on a formula I validated against three independent computations for n ≤ 7 but
-did not re-prove, and my search of the literature was shallow. Graded **A,
+The gain is small (at most 0.22%), the certificates rest on a formula I validated for
+n ≤ 7 but did not re-prove, and my search of the literature was shallow. Graded **A,
 provisional**; the log says what would make it more.
 
 → `experiments/exp047_an_star_local_optimality.py`,
-`tests/test_an_star_local_optimality.py`.
+`experiments/exp048_first_kind_global_search.py`,
+`tests/test_an_star_local_optimality.py`, `tests/test_first_kind_global_search.py`.
 
 ## The answer, since 100 results is a lot to read
 
