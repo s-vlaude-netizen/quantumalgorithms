@@ -1,4 +1,4 @@
-### Result 99 — the Frank–Kasper rivals of Weaire–Phelan, relaxed with the cell free: none comes close, and the order follows the mean face count
+### Result 101 — the Frank–Kasper rivals of Weaire–Phelan, relaxed with the cell free: none comes close, and the order follows the mean face count
 
 **The question.** Weaire–Phelan is the soap-film version of one crystal
 structure, A15, a member of the *Frank–Kasper* family. These are the

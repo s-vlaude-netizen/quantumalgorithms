@@ -21,9 +21,10 @@ drafts in `notes/`.
 
 ### A. Google Quantum AI verifiable circuit compilation (kickmix, arXiv:2610.23832)
 
-**Parked on 7 Nov at your request.** The Benchmark I circuit stays as it is
-(verified, below). The tuning list, Benchmark II and Benchmark III are notes only;
-nothing is queued.
+**Back on the todo list (11 Nov, at your request), behind the geometry work.** It was
+parked on 7 Nov. The Benchmark I circuit stays as it is (verified, below); the tuning
+list, Benchmark II and Benchmark III are the open items. Nothing here runs until the
+Kelvin items in C are written up.
 
 1. **Benchmark I (exp046), current state.** Circuit with 163 qubits, 1,826
    Toffolis, 1 T and 35 fine rotations (about 27.9 T each), C = 2,071, S = Q x C =
@@ -144,18 +145,18 @@ that nearly every "speedup" here was a published method correctly implemented.
 
 ### Where this repository's results actually sit
 
-Applied honestly, as of Result 98:
+Applied honestly, as of Result 100:
 
 | tier | results | note |
 |---|---|---|
-| **A** | **86, 89** | the THC gauge group, and its exact identifiability boundary; both small |
+| **A** | **86, 89**, **100** (provisional) | the THC gauge group and its exact identifiability boundary, both small; Result 100, A_n* is not a local optimum among lattices from n = 15 |
 | **A′** | **93** (narrow), **96** | 93 — IonQ + Ansys: every partition the quantum step handed LS-DYNA is computed exactly classically, faster; it refutes the press release, not the paper's pipeline claim. 96 — D-Wave/USC's "algorithmic quantum speedup in approximate optimization": on the rebuilt instances, classical SQA scales as N^1.09 and SA as N^1.74 against QAC's N^1.69, with PT-ICM's 1.93 reproduced (1.91) |
 | **B** | 47 (arguably), **87**, **90** | batched+lazy ADAPT; the exact O(T) λ reduction, whose goal CDF already covers; THC's λ lowered along exact minimisers at no accuracy cost |
 | **C** | 42, 50, 51, 85 | classical wins, with the size where it stops (85's *reading* corrected by 88) |
-| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94, 95, 97, 98 … |
+| **D** | most of the rest | 55, 66, 68, 72, 74, 75, 81, 82, 83, 84, 88, 91, 92, 94, 95, 97, 98, 99 … |
 
-**That is two A and two A′ in ninety-eight results**; the two A are both on one model, and Result 72 had already said so from
-the other direction. The rubric is not a scoreboard to improve; it is a filter
+**That is three A (one provisional) and two A′ in a hundred results**; two of the A are on one model, and Result 72 had already said so from
+the other direction. The third, Result 100, is pure mathematics and the first A here outside quantum chemistry. The rubric is not a scoreboard to improve; it is a filter
 to apply *before* starting something, because tier-D work is much easier to
 begin and this file is where the choice gets made.
 
@@ -187,7 +188,9 @@ Added October 2026 at the request of the person who asked Math StackExchange
 1494037 in 2015 ("rhombic dodecahedral honeycomb?"). It is pure mathematics,
 kept here because this is the repository that exists. **Status: Result 97 built
 and validated the toolkit and settled the original question; Result 98 checked
-the Hales–Song certificate independently (it holds).** The open problem
+the Hales–Song certificate independently (it holds); Results 99 and 100 took up
+Cesaroni–Novaga's open problems 1 and 2 (a four-dimensional search; A_n* is not a
+local optimum among lattices from n = 15).** The open problem
 itself — is Weaire–Phelan (5.2883) optimal among all equal-volume partitions?
 — remains open. What is realistic, and in what order:
 
@@ -234,7 +237,23 @@ itself — is Weaire–Phelan (5.2883) optimal among all equal-volume partitions
    * Not to be over-read: among *all* 4-D parallelohedra the permutohedron
      loses to the 24-cell (`2^(11/4) = 6.727 < 6.831`), so only the zonotope
      statement is a candidate.
-4. **Quantum-hardware angle (speculative).** Tetrahedrally close-packed
+4. **Follow-ups from Results 99 and 100** (pure mathematics, in order of value):
+   * **Prove the sign for every n ≥ 15.** The second variation along the `(n-1, 2)`
+     piece is an explicit sum over classes of binomial-weighted terms (see
+     `exact_terms_fast` in exp047). It is negative at every n computed (numerically
+     to 100, exact certificates to 1000) and was still falling slowly (−1.28 at
+     n = 90). An asymptotic argument would close the "for which n" question from
+     above.
+   * **Where do the minimisers go for n ≥ 15?** The descent ray ends at the edge of
+     the first-kind cone; continue into second-kind lattices, where cells lose
+     facets. Also test the candidates Cesaroni–Novaga name for large n, the Voronoi
+     cells of D₄, E₈ and Leech: their second variation needs the cells' known facet
+     structures, not the Selling formula.
+   * **Is A_n* the best first-kind lattice for 4 ≤ n ≤ 14?** Only *local* optimality
+     is shown. The Selling formula makes a global search cheap (`n(n+1)/2` positive
+     parameters, `2^n` subsets per evaluation): random starts for n = 5 to 10 first.
+   * Whether to tell Cesaroni and Novaga is the owner's call; nothing has been sent.
+5. **Quantum-hardware angle (speculative).** Tetrahedrally close-packed
    arrangements (A15, Frank–Kasper) are also candidate 3-D neutral-atom layouts
    with uniform nearest-neighbour structure. Only worth pursuing if a concrete
    hardware question comes with it.

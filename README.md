@@ -150,7 +150,7 @@ one H₄ tensor with λ from 7.02 to 14 156. Graded **B**: low-λ THC fitting is
 published; that low λ costs nothing in accuracy here is what is new.
 
 → `experiments/exp035_thc_fibre.py`, `tests/test_thc_fibre.py`.
-The rubric these are graded against, and where all 98 results sit under it, is at
+The rubric these are graded against, and where all 100 results sit under it, is at
 the top of [`NEXT_STEPS.md`](NEXT_STEPS.md).
 
 ## The same question asked of double factorisation — opposite answer (Result 87)
@@ -334,7 +334,39 @@ take.
 → `experiments/exp044_hales_song_certificate.py`,
 `tests/test_hales_song_certificate.py`.
 
-## The answer, since 98 results is a lot to read
+**Four dimensions, searched (Result 99).** The natural candidates are the 24-cell
+(Voronoi cell of D₄, `2^(11/4)` = 6.7272) and the permutohedron (A₄*, 6.8311). A
+random-start search over all four-dimensional lattices and all their affine images
+ends at the 24-cell every time, except for a quarter of the lattice starts, which
+stop at A₄* (a genuine local minimum). A zonotope outside the graphical family, the
+cographic K₃,₃ cell, with exact quotient `(32√3 + 4√2)/9` = 6.7869, lies between the
+two. Numerical evidence for Cesaroni–Novaga's first open problem, not a proof.
+
+→ `experiments/exp045_four_dimensional_cells.py`,
+`tests/test_four_dimensional_cells.py`.
+
+**A_n* stops being a local optimum at n = 15 (Result 100).** Cesaroni–Novaga ask for
+which n the dual root lattice A_n* (Voronoi cell: the permutohedron) minimises
+surface area among lattices of the first kind. Near A_n* every lattice is of the
+first kind, and its Voronoi cell's surface and volume are explicit in the lattice's
+Selling parameters, through spanning-tree counts of the complete graph. By symmetry
+the second variation of the isoperimetric quotient at A_n* has two eigenvalues, and
+one of them **changes sign between n = 14 and n = 15**. For 3 ≤ n ≤ 14, A_n* is a
+strict local minimum. For n = 15 to 60 and eight larger values up to 1000, an
+explicit lattice with rational Selling parameters has a *smaller* quotient,
+certified in exact rational and interval arithmetic.
+
+![second variation of the quotient at A_n*](results/figures/exp047_an_star_curvature.png)
+
+The effect is small (a relative 1e-5 at most along the descent). The certificate
+rests on a formula I validated against three independent computations for n ≤ 7 but
+did not re-prove, and my search of the literature was shallow. Graded **A,
+provisional**; the log says what would make it more.
+
+→ `experiments/exp047_an_star_local_optimality.py`,
+`tests/test_an_star_local_optimality.py`.
+
+## The answer, since 100 results is a lot to read
 
 The task was: find quantum algorithms that are useful for real problems, with a
 measurable reduction in runtime or resources at equal or better quality.
