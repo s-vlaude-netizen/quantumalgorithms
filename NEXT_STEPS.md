@@ -98,10 +98,10 @@ Written up in `RESEARCH_LOG.md`: **Result 99** (four-dimensional cells, search),
 session) and **Result 101** (Frank-Kasper foams, with the single-cell scan). The open
 Kelvin problem itself, whether Weaire-Phelan is optimal, is unchanged. What is left:
 
-- Refresh Result 101's table when the level-3 relaxations of P and chi finish (they were
-  still running; run `python experiments/exp043_kelvin_search.py --only P,chi --levels 3`
-  if the cache is gone, then `--report-only`, which now reuses the cached single-cell
-  scan). Expect changes in the fourth decimal; the ranking will not move.
+- Refresh Result 101's table when chi's level-3 relaxation finishes (P's is in: it moved
+  nothing; run `python experiments/exp043_kelvin_search.py --only chi --levels 3` if the
+  cache is gone, then `--report-only`, which now reuses the cached single-cell scan).
+  Expect changes in the fourth decimal; the ranking will not move.
 - The follow-ups under item 4 of the Kelvin list further down.
 
 ---
