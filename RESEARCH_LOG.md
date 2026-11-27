@@ -6666,7 +6666,7 @@ reproduces the FCC value +5.7509e-3 at n = 3 and grows to +58.05e-3 at n = 14.)
 
 For n = 7, 8, 9 nothing beats the families of Result 100 (searches over circulants find only K(4,4) and K(5,5) there).
 At n = 10 and 11 the optimum is a weighted circulant (also found, with no symmetry imposed, by the unconstrained
-search: 8 and 3 hits). For n = 12 to 16 the entries are the best of all two-generator circulants, with the second
+search: 9 of 120 starts at n = 10, 3 of 60 at n = 11). For n = 12 to 16 the entries are the best of all two-generator circulants, with the second
 weight optimised at n = 12, 13, 14; at n = 15 and 16 only the unweighted ones were run, so those two values are
 lower bounds for what circulants can do. Degree matters: the plain cycle (degree 2) is the root lattice and is far
 worse; the best unweighted 6-regular circulants are -1.42, -2.27, -2.70 at n = 12, 13, 14, worse than the
@@ -6679,8 +6679,8 @@ worse; the best unweighted 6-regular circulants are -1.42, -2.27, -2.70 at n = 1
   0.47% (Result 100's families peak at 0.22%).
 * The better lattices are cut lattices (weights 1, or close to 1) of 4-regular circulant graphs. For n = 12 and
   n = 16 the generators {±1, ±5 mod 13} and {±1, ±4 mod 17} are the elements of order dividing 4 of the unit
-  group; for n = 14 they are the square roots of 1 mod 15. This is an observation from seven dimensions, not
-  a theorem, and n = 11 and 13 do not fit it.
+  group; for n = 14 they are the square roots of 1 mod 15. This is an observation from a few dimensions, not
+  a theorem, and n = 10, 11, 13 and 15 do not fit it.
 * **Not established:** that these are the minimisers (the unrestricted global search was only run to n = 12,
   and its n = 12 run had not converged; beyond that only circulants were searched); that the trend continues
   past n = 16; anything asymptotic (the gains of Result 100's families decay like 0.11/n; these had not begun
