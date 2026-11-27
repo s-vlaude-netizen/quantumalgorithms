@@ -66,6 +66,27 @@ def test_circulant_beats_previous_best_at_n_10():
     assert v < cone - 1.5e-4
 
 
+def _circulant(n, gens):
+    rho = {}
+    for i in range(n + 1):
+        for d, w in gens.items():
+            j = (i + d) % (n + 1)
+            rho[(min(i, j), max(i, j))] = Fraction(w)
+    return rho
+
+
+def test_unweighted_four_regular_circulants_beat_the_bipartite_families():
+    """Result 102: exact certificates at n = 11, 12, 14 (previous best certified: K(6,6) -1.9034e-3, cone K(1,6,6) -1.616e-3,
+    cone K(1,7,7) -1.806e-3)."""
+    cases = ((11, {2: 1, 3: Fraction(471, 500)}, -2.625533e-3, -1.9034e-3),
+             (12, {1: 1, 5: 1}, -3.053040e-3, -1.616e-3),
+             (14, {1: 1, 4: 1}, -4.342408e-3, -1.806e-3))
+    for n, gens, expected, previous in cases:
+        v = float(certify(n, _circulant(n, gens)))
+        assert abs(v - expected) < 2e-9
+        assert v < previous - 5e-4
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):
