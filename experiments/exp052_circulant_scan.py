@@ -19,6 +19,8 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from experiments.exp050_first_kind_search_numpy import Problem, lbfgs  # noqa: E402
+from experiments.exp051_certify_first_kind import certify  # noqa: E402
+from fractions import Fraction  # noqa: E402
 
 
 def class_structure(prob: Problem, group=None):
@@ -65,11 +67,19 @@ def run(n, starts, sigma, seed, group=None):
     return out
 
 
+def exact_value(n, cls, prob, weights, floor=1e-6, denom=10**6):
+    """Round the class weights to rationals (weights below `floor` of the largest become 0) and certify exactly."""
+    w = [Fraction(v).limit_denominator(denom) if v > floor else Fraction(0) for v in weights]
+    rho = {prob.pairs[k]: w[cls[k]] for k in range(len(prob.pairs)) if w[cls[k]] != 0}
+    return float(certify(n, rho)), [str(x) for x in w]
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, required=True); ap.add_argument("--starts", type=int, default=30)
     ap.add_argument("--sigma", type=float, default=2.0); ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--group", type=str, default="", help="orders of the cyclic factors, e.g. 6,2 for Z_6 x Z_2")
+    ap.add_argument("--certify", action="store_true", help="certify the best distinct results in exact arithmetic")
     a = ap.parse_args()
     group = tuple(int(t) for t in a.group.split(",")) if a.group else None
     res = run(a.n, a.starts, a.sigma, a.seed, group)
@@ -79,6 +89,20 @@ if __name__ == "__main__":
     print("   distance-class weights d=1..:", [round(v, 4) for v in best["c"]])
     distinct = sorted({round(r['dlog'] * 1e3, 3) for r in res})[:5]
     print("   lowest distinct end values (e-3):", distinct)
+    if a.certify:
+        prob = Problem(a.n); cls, ncl = class_structure(prob, group)
+        seen = []
+        print("   exact (rational, integer-arithmetic) certificates of the best distinct results:")
+        for r in res:
+            key = round(r["dlog"] * 1e6)
+            if key in seen:
+                continue
+            seen.append(key)
+            ev, ws = exact_value(a.n, cls, prob, r["c"])
+            r["exact_dlog"] = ev; r["exact_weights"] = ws
+            print(f"     float {r['dlog']*1e3:+.4f}e-3  ->  exact {ev*1e3:+.4f}e-3   weights {ws}")
+            if len(seen) >= 3:
+                break
     outdir = Path(__file__).resolve().parents[1] / "results"
     tag = ("_g" + "x".join(map(str, group))) if group else ""
     (outdir / f"exp052_n{a.n}{tag}_seed{a.seed}.json").write_text(json.dumps({"n": a.n, "group": list(group) if group else None, "results": res[:10]}, indent=1))

@@ -132,11 +132,19 @@ class Problem:
 
 def lbfgs(fun, x0, maxit=400, m=10, gtol=1e-10, ftol=1e-15):
     """Plain L-BFGS with backtracking (Armijo) line search; fun(x) -> (f, g)."""
+    FLOOR = -27.6      # weights below exp(-27.6) ~ 1e-12 of the largest are held at that floor: the floating-point determinants
+                       # and inverses are not reliable below it (they gave spurious values at weights ~1e-40), and the
+                       # contribution of such weights to the quotient is far below the digits quoted anyway.
     def safe(z):
         try:
-            fz, gz = fun(np.clip(z, -30.0, 30.0))
+            z0 = z - np.max(z)
+            mask = z0 < FLOOR
+            zc = np.where(mask, FLOOR, z0)
+            fz, gz = fun(zc)
             if not (np.isfinite(fz) and np.all(np.isfinite(gz))):
                 return np.inf, np.zeros_like(z)
+            gz = np.array(gz, dtype=float)
+            gz[mask] = 0.0                      # clipped coordinates do not move the function
             return fz, gz
         except np.linalg.LinAlgError:
             return np.inf, np.zeros_like(z)
