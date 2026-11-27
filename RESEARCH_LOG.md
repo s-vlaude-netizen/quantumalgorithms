@@ -6604,3 +6604,96 @@ narrows where an answer would not be.
 
 `experiments/exp043_kelvin_search.py`, `tests/test_kelvin_search.py`,
 `results/exp043_kelvin_search.json`, `results/figures/exp043_frank_kasper_costs.png`.
+
+### Result 102 — the best lattices of the first kind are not the bipartite ones of Result 100: from n = 10 a ring-like cell, each point linked to four others, does better (exact certificates for n = 10 to 16)
+
+**In plain words.** Result 100 showed that, within the natural class of cells described by
+one weight for each pair among n + 1 points, the standard pattern A_n* stops being best at
+n = 7 and that cells built from a complete bipartite graph do better. It called those
+"certificates, not minimisers". This result looks at what does better still. From n = 10 up,
+a cell built from a *ring-like* graph in which every point is linked to just four others
+(point i to i ± a and i ± b around a circle of n + 1 points) has clearly less surface than any
+bipartite cell: at n = 16 about 0.47% less than A_n*, against 0.19% for the best bipartite cell,
+and the gap was still growing over the range checked. Every figure below is an exact calculation
+for one explicit lattice with rational weights. That shows these lattices are better than the
+earlier ones; it does **not** show they are the best, and nothing beyond n = 16 was computed.
+
+**The question.** Cesaroni & Novaga's Open problem 7.2 (arXiv:2609.02384): determine the minimiser
+of the isoperimetric quotient among lattices with an obtuse superbase (Voronoi's first kind), and
+for which n it is A_n*. Result 100 answered the second half in part (not A_n* for 7 <= n <= 200)
+and left the first half open, with K(m,m) and its cone as the best lattices found.
+
+#### Built
+
+* `experiments/exp050_first_kind_search_numpy.py` — the global search of exp048 re-implemented with
+  numpy only (scipy and mpmath are not installed here): the same quotient (`log U - (1 - 1/(2n)) log d`),
+  analytic gradient from effective resistances, a plain L-BFGS written for it. Checked against finite
+  differences (1e-9), against the zero gradient at A_n*, and against the certified values of Result 100
+  (K(3,3), K(4,4), K(5,5)). It reproduces the recorded behaviour at n = 7, 8, 9 (23 of 40 starts end at
+  K(4,4)'s -0.619e-3 at n = 7; the n = 8 and n = 9 optima -0.591e-3 and -1.488e-3).
+* `experiments/exp051_certify_first_kind.py` — an **exact** certificate: integer determinants
+  (Bareiss) for the spanning-tree counts and cut weights of a rational lattice, 60-digit decimals only for
+  the square roots and logarithms. It reproduces all four values certified in Result 100 (+1.2851e-3,
+  -0.6193e-3, -1.4879e-3, -1.2546e-3). Cuts with a disconnected side are skipped without computing.
+* `experiments/exp052_circulant_scan.py` (parameters constant on distance classes of an abelian group),
+  `exp053_circulant_enumerate.py` (two-generator circulants with an optimised second weight) and
+  `exp054_unweighted_circulants_exact.py` (every unweighted circulant with 2 or 3 generators, exact).
+* `tests/test_first_kind_numpy.py` — 6 tests, including the exact values at n = 10, 11, 12, 14.
+
+#### A false start, kept because it changes how to read floating-point searches
+
+The floating-point search first reported -4.34e-3 at n = 14 for a lattice whose weights were
+`[1, 1e-65, 1e-64, ...]`, i.e. the 15-cycle, whose lattice is the root lattice A_14. Rounded to rationals and
+certified exactly it is **+58.05e-3**, and a closed form for the projection of a cube (below) agrees. So the
+float value was an artefact: determinants and inverses of near-singular matrices are unreliable once some
+weights fall below about 1e-12 of the largest (spurious values appeared at 1e-40). The search now holds
+such weights at a floor, and **every value quoted below is an exact certificate of a rational lattice**;
+floating-point values only locate candidates. (Closed forms used for the check: the cell of the root lattice
+A_n is the projection of the (n+1)-cube along its diagonal, with Iso = n sqrt(2(n+1)) / (n+1)^((n-1)/(2n)); it
+reproduces the FCC value +5.7509e-3 at n = 3 and grows to +58.05e-3 at n = 14.)
+
+#### Measured (exact; log Iso of the lattice minus log Iso of A_n*, units of 1e-3; negative = better)
+
+| n | best before (Result 100's families, re-certified here) | best found now | lattice (weights on the differences of Z_(n+1)) |
+|---|---|---|---|
+| 10 | -1.2546 (cone K(1,5,5)) | **-1.4418** | 1 on ±1, 113357/92243 (about 1.2289) on ±3 |
+| 11 | -1.9028 (K(6,6)) | **-2.6255** | 1 on ±2, 471/500 on ±3 |
+| 12 | -1.6162 (cone K(1,6,6)) | **-3.0530** | 1 on ±1 and on ±5 (4-regular, all weights equal) |
+| 13 | -2.0979 (K(7,7)) | **-3.5093** | 1 on ±1, 79087/78281 on ±4 (all equal: -3.5085) |
+| 14 | -1.8055 (cone K(1,7,7)) | **-4.3424** | 1 on ±1 and on ±4 |
+| 15 | -2.1785 (K(8,8)) | **-4.1084** | 1 on ±1 and on ±4 |
+| 16 | -1.8984 (cone K(1,8,8)) | **-4.7504** | 1 on ±1 and on ±4 |
+
+For n = 7, 8, 9 nothing beats the families of Result 100 (searches over circulants find only K(4,4) and K(5,5) there).
+At n = 10 and 11 the optimum is a weighted circulant (also found, with no symmetry imposed, by the unconstrained
+search: 8 and 3 hits). For n = 12 to 16 the entries are the best of all two-generator circulants, with the second
+weight optimised at n = 12, 13, 14; at n = 15 and 16 only the unweighted ones were run, so those two values are
+lower bounds for what circulants can do. Degree matters: the plain cycle (degree 2) is the root lattice and is far
+worse; the best unweighted 6-regular circulants are -1.42, -2.27, -2.70 at n = 12, 13, 14, worse than the
+4-regular ones at the same n.
+
+#### What it says, and what it does not
+
+* **K(m,m) and its cones are not the minimisers among first-kind lattices for n from 10 to 16**; the improvement
+  grows from 0.19e-3 at n = 10 to 2.9e-3 at n = 16 in log ratio, i.e. the best gain over A_n* is at least
+  0.47% (Result 100's families peak at 0.22%).
+* The better lattices are cut lattices (weights 1, or close to 1) of 4-regular circulant graphs. For n = 12 and
+  n = 16 the generators {±1, ±5 mod 13} and {±1, ±4 mod 17} are the elements of order dividing 4 of the unit
+  group; for n = 14 they are the square roots of 1 mod 15. This is an observation from seven dimensions, not
+  a theorem, and n = 11 and 13 do not fit it.
+* **Not established:** that these are the minimisers (the unrestricted global search was only run to n = 12,
+  and its n = 12 run had not converged; beyond that only circulants were searched); that the trend continues
+  past n = 16; anything asymptotic (the gains of Result 100's families decay like 0.11/n; these had not begun
+  to by n = 16). The quotient formula is the one of Result 100, validated independently against numerically
+  computed Voronoi cells only up to n = 7, so the new lattices at n >= 10 inherit that open validation.
+* Cesaroni–Novaga's Open problem 7.2 stays open; what this adds is that the bipartite lattices are not its answer
+  for n >= 10.
+
+#### Grading
+
+**A, provisional**, with the same standing as Result 100: explicit lattices, exact arithmetic, and an
+unreviewed formula. The floating-point false start above is the reason the exact certifier exists.
+
+`experiments/exp050_first_kind_search_numpy.py`, `exp051_certify_first_kind.py`, `exp052_circulant_scan.py`,
+`exp053_circulant_enumerate.py`, `exp054_unweighted_circulants_exact.py`, `tests/test_first_kind_numpy.py`,
+`results/exp050_*.json`, `results/exp052_*.json`, `results/exp053_*.json`, `results/exp054_*.json`.

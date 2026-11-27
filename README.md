@@ -284,7 +284,7 @@ survive.
 Result 96 in the research log. Needs `numba`; rebuilding the graph needs
 `dwave-networkx`, but it is cached in `results/exp041_qac_logical_graph.json`.
 
-## A side programme in pure mathematics: the Kelvin problem (Results 97–101)
+## A side programme in pure mathematics: the Kelvin problem (Results 97–102)
 
 **In plain words.** The question is old and easy to state: *if you fill space with
 equal-sized cells, soap bubbles being the picture, which cell shape uses the least
@@ -319,6 +319,14 @@ programme did is chip at the edges with a computer:
   gap is small, and better shapes of another kind exist altogether (about 6.5% better
   in dimension 7), so this is a statement about a pattern breaking, not about the
   best shape.
+* **What beats those shapes (Result 102).** The bipartite shapes of Result 100 are not the
+  best in their class either. From dimension 10 on, a shape built from a ring-like graph
+  (every point linked to four others around a circle) has clearly less surface: about
+  0.47% less than the standard pattern in dimension 16, against 0.19% for the bipartite
+  shape. Exact arithmetic for explicit shapes in dimensions 10 to 16; not a proof that
+  these are the best, and nothing computed beyond 16. A first computer search had
+  reported a spurious win that the exact check caught, which is why it is described in
+  the log.
 * **Foams from crystals (Result 101).** The best known foam has the geometry of a real
   crystal, the A15 structure of the superconductor Nb₃Sn. Ten crystal structures (A15
   itself and nine rivals) were turned into foams on the computer and settled to least

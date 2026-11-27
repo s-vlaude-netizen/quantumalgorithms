@@ -57,11 +57,36 @@ def to_integers(n, rho):
     return W, den
 
 
+def _connected_masks(n, W):
+    """conn[m] = True iff the subgraph induced on the vertex set m by the positive entries of W is connected."""
+    N1 = n + 1
+    full = (1 << N1) - 1
+    adj = [sum(1 << u for u in range(N1) if u != v and W[v][u] > 0) for v in range(N1)]
+    conn = bytearray(full + 1)
+    for m in range(1, full + 1):
+        reach = m & -m
+        while True:
+            nxt = reach
+            r = reach
+            while r:
+                low = r & -r
+                nxt |= adj[low.bit_length() - 1] & m
+                r ^= low
+            if nxt == reach:
+                break
+            reach = nxt
+        conn[m] = 1 if reach == m else 0
+    return conn
+
+
 def tau_cut_data(n, W):
     N1 = n + 1
     full = (1 << N1) - 1
     tau = {}
+    conn = _connected_masks(n, W)
     for m in range(1, full):
+        if not (conn[m] and conn[full - m]):
+            tau[m] = 0; continue                         # a side is disconnected: both spanning-tree counts vanish in the product
         mem = [v for v in range(N1) if (m >> v) & 1]
         s = len(mem)
         if s == 1:
