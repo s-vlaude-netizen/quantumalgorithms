@@ -6605,7 +6605,7 @@ narrows where an answer would not be.
 `experiments/exp043_kelvin_search.py`, `tests/test_kelvin_search.py`,
 `results/exp043_kelvin_search.json`, `results/figures/exp043_frank_kasper_costs.png`.
 
-### Result 102 — the best lattices of the first kind are not the bipartite ones of Result 100: from n = 10 a ring-like cell, each point linked to four others, does better (exact certificates for n = 10 to 16)
+### Result 102 — the best lattices of the first kind are not the bipartite ones of Result 100: from n = 10 a ring-like cell, each point linked to four others, does better (exact certificates for n = 10 to 17)
 
 **In plain words.** Result 100 showed that, within the natural class of cells described by
 one weight for each pair among n + 1 points, the standard pattern A_n* stops being best at
@@ -6613,10 +6613,10 @@ n = 7 and that cells built from a complete bipartite graph do better. It called 
 "certificates, not minimisers". This result looks at what does better still. From n = 10 up,
 a cell built from a *ring-like* graph in which every point is linked to just four others
 (point i to i ± a and i ± b around a circle of n + 1 points) has clearly less surface than any
-bipartite cell: at n = 16 about 0.47% less than A_n*, against 0.19% for the best bipartite cell,
+bipartite cell: at n = 17 about 0.65% less than A_n*, against 0.22% for the best bipartite cell,
 and the gap was still growing over the range checked. Every figure below is an exact calculation
 for one explicit lattice with rational weights. That shows these lattices are better than the
-earlier ones; it does **not** show they are the best, and nothing beyond n = 16 was computed.
+earlier ones; it does **not** show they are the best, and nothing beyond n = 17 was computed.
 
 **The question.** Cesaroni & Novaga's Open problem 7.2 (arXiv:2609.02384): determine the minimiser
 of the isoperimetric quotient among lattices with an obtuse superbase (Voronoi's first kind), and
@@ -6663,28 +6663,29 @@ reproduces the FCC value +5.7509e-3 at n = 3 and grows to +58.05e-3 at n = 14.)
 | 14 | -1.8055 (cone K(1,7,7)) | **-4.3424** | 1 on ±1 and on ±4 |
 | 15 | -2.1785 (K(8,8)) | **-4.1084** | 1 on ±1 and on ±4 |
 | 16 | -1.8984 (cone K(1,8,8)) | **-4.7504** | 1 on ±1 and on ±4 |
+| 17 | -2.1965 (K(9,9)) | **-6.5281** | 1 on ±1 and on ±5 |
 
 For n = 7, 8, 9 nothing beats the families of Result 100 (searches over circulants find only K(4,4) and K(5,5) there).
 At n = 10 and 11 the optimum is a weighted circulant (also found, with no symmetry imposed, by the unconstrained
 search: 9 of 120 starts at n = 10, 3 of 60 at n = 11). For n = 12 to 16 the entries are the best of all two-generator circulants, with the second
-weight optimised at n = 12, 13, 14; at n = 15 and 16 only the unweighted ones were run, so those two values are
+weight optimised at n = 12, 13, 14; at n = 15, 16 and 17 only the unweighted ones were run, so those values are
 lower bounds for what circulants can do. Degree matters: the plain cycle (degree 2) is the root lattice and is far
 worse; the best unweighted 6-regular circulants are -1.42, -2.27, -2.70 at n = 12, 13, 14, worse than the
 4-regular ones at the same n.
 
 #### What it says, and what it does not
 
-* **K(m,m) and its cones are not the minimisers among first-kind lattices for n from 10 to 16**; the improvement
-  grows from 0.19e-3 at n = 10 to 2.9e-3 at n = 16 in log ratio, i.e. the best gain over A_n* is at least
-  0.47% (Result 100's families peak at 0.22%).
+* **K(m,m) and its cones are not the minimisers among first-kind lattices for n from 10 to 17**; the improvement
+  grows from 0.19e-3 at n = 10 to 4.3e-3 at n = 17 in log ratio, i.e. the best gain over A_n* is at least
+  0.65% (Result 100's families peak at 0.22%).
 * The better lattices are cut lattices (weights 1, or close to 1) of 4-regular circulant graphs. For n = 12 and
   n = 16 the generators {±1, ±5 mod 13} and {±1, ±4 mod 17} are the elements of order dividing 4 of the unit
   group; for n = 14 they are the square roots of 1 mod 15. This is an observation from a few dimensions, not
-  a theorem, and n = 10, 11, 13 and 15 do not fit it.
+  a theorem, and n = 10, 11, 13, 15 and 17 do not fit it.
 * **Not established:** that these are the minimisers (the unrestricted global search was only run to n = 12,
   and its n = 12 run had not converged; beyond that only circulants were searched); that the trend continues
-  past n = 16; anything asymptotic (the gains of Result 100's families decay like 0.11/n; these had not begun
-  to by n = 16). The quotient formula is the one of Result 100, validated independently against numerically
+  past n = 17; anything asymptotic (the gains of Result 100's families decay like 0.11/n; these had not begun
+  to by n = 17). The quotient formula is the one of Result 100, validated independently against numerically
   computed Voronoi cells only up to n = 7, so the new lattices at n >= 10 inherit that open validation.
 * Cesaroni–Novaga's Open problem 7.2 stays open; what this adds is that the bipartite lattices are not its answer
   for n >= 10.
