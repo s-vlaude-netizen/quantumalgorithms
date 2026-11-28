@@ -323,8 +323,9 @@ programme did is chip at the edges with a computer:
   best in their class either. From dimension 10 on, a shape built from a ring-like graph
   (every point linked to four others around a circle) has clearly less surface: about
   0.65% less than the standard pattern in dimension 17, against 0.22% for the bipartite
-  shape. Exact arithmetic for explicit shapes in dimensions 10 to 17; not a proof that
-  these are the best, and nothing computed beyond 17. A first computer search had
+  shape. Exact arithmetic for explicit shapes in dimensions 10 to 17, and for the simplest
+  ring-like shapes up to dimension 20 (about 0.79% less surface than the standard pattern
+  there); not a proof that these are the best. A first computer search had
   reported a spurious win that the exact check caught, which is why it is described in
   the log.
 * **Foams from crystals (Result 101).** The best known foam has the geometry of a real
