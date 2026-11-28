@@ -6669,7 +6669,8 @@ For n = 7, 8, 9 nothing beats the families of Result 100 (searches over circulan
 At n = 10 and 11 the optimum is a weighted circulant (also found, with no symmetry imposed, by the unconstrained
 search: 9 of 120 starts at n = 10, 3 of 60 at n = 11). For n = 12 to 16 the entries are the best of all two-generator circulants, with the second
 weight optimised at n = 12, 13, 14; at n = 15, 16 and 17 only the unweighted ones were run, so those values are
-lower bounds for what circulants can do. Degree matters: the plain cycle (degree 2) is the root lattice and is far
+lower bounds for what circulants can do (the second weight was optimised later, see the last addendum of this result:
+n = 15 and 17 improve to -4.2045 and -6.5346, n = 16 stays at -4.7504). Degree matters: the plain cycle (degree 2) is the root lattice and is far
 worse; the best unweighted 6-regular circulants are -1.42, -2.27, -2.70 at n = 12, 13, 14, worse than the
 4-regular ones at the same n.
 
@@ -6713,10 +6714,40 @@ n = 20 took 19 min 24 s on one core; `results/exp054_n18_k2.json`, `results/exp0
 At n = 18 the others are {1,7} -4.0103, {1,3} +2.3318, {1,2} +28.23; at n = 19 they are {1,4} -6.3761, {2,5} -5.7292,
 {1,5} -5.6201, {4,5} -5.5153, {1,6} -3.8769, {1,3} +2.918, {1,9} +8.735, {1,2} +29.74; at n = 20 they are {1,6} -7.8969,
 {1,4} -6.6173, {1,9} -3.6954, {1,3} +3.5085, {3,7} +7.5693, {1,7} +7.5717, {1,2} +31.17. So the best gain over A_n* is at
-least 0.78% at n = 20 (0.76% at n = 19, 0.65% at n = 17), and the gain was still growing; but it is not monotone (n = 15 and
-n = 18 are worse than n = 14 and n = 17), and the winning pair changes with n. {±1, ±8} of Z_21 fits the observation above
+least 0.78% at n = 20 (0.76% at n = 19, 0.65% at n = 17), and the gain was still growing; but it is not monotone for the
+unweighted values (n = 15 and n = 18 are worse than n = 14 and n = 17; with the second weight optimised n = 18 no longer
+dips, see the next addendum), and the winning pair changes with n. {±1, ±8} of Z_21 fits the observation above
 about elements of order dividing 4 of the unit group (8 squared is 1 mod 21), but the n = 19 winner {±1, ±8} of Z_20 does
 not (8 is not a unit mod 20), and at n = 20 the runner-up {1,6} is within 0.03e-3 of the winner. Only unweighted circulants were run, so these are
 lower bounds for what circulants can do (optimising the second weight changed the best value by 0.43e-3 at n = 10 and by
-less than 0.04e-3 at n = 11 to 14). Nothing here shows minimality, and the open validation of the quotient formula beyond
+less than 0.04e-3 at n = 11 to 14; at n = 18 it changes it by 0.40e-3, see the next addendum, so the n = 19 and n = 20
+values above may move too). Nothing here shows minimality, and the open validation of the quotient formula beyond
 n = 7 applies to these values too.
+
+#### Addendum (28 Nov 2026): the second weight optimised at n = 15 to 18
+
+`exp053_circulant_enumerate.py --n N` for N = 15, 16, 17, 18: every two-generator circulant {±a, ±b} of Z_(n+1) with weight 1 on a and
+w on b, w searched on (0.05, 1.6] (a 21-point grid in log w, then golden-section refinement); the three best candidates are then
+certified exactly with a rational w (`results/exp053_n15.json` to `exp053_n18.json`; the n = 18 run took 1 h 51 min wall-clock).
+Units of 1e-3 as above, negative = better than A_n*:
+
+| n | best unweighted (exp054, exact) | best with the second weight optimised (exact) | lattice | difference |
+|--:|--:|--:|---|--:|
+| 15 | -4.1084 | **-4.2045** | ±1, ±4 of Z_16, weight 63730/68977 (about 0.924) on ±4 | -0.0961 |
+| 16 | -4.7504 | **-4.7504** | ±1, ±4 of Z_17, weight 1 (the optimiser returned 0.9999993) | 0 |
+| 17 | -6.5281 | **-6.5346** | ±1, ±5 of Z_18, weight 67811/69956 (about 0.969) on ±5 | -0.0065 |
+| 18 | -6.2564 | **-6.6570** | ±1, ±4 of Z_19, weight 86446/71669 (about 1.206) on ±4 | -0.4006 |
+
+* At n = 18 the weight matters: 0.40e-3, against at most 0.1e-3 at n = 11 to 17. The six best entries of the search all have the same
+  value (-6.65697797...e-3, agreeing to 1e-12 in absolute terms); they are one lattice seen through the units of Z_19 (multiplying
+  {1, 4} by 2, 7, 3, 5 and 8 gives {2, 8}, {7, 9}, {3, 7}, {1, 5} and {6, 8}, the last two with the two weights swapped), so within this
+  family the optimum is unique up to relabelling. The float and exact values agree to 1e-12 at every entry that was certified.
+* With the second weight optimised the best values read -1.4418, -2.6255, -3.0530, -3.5093, -4.3424, -4.2045, -4.7504, -6.5346,
+  -6.6570 for n = 10 to 18: the only step backwards is n = 14 to 15. The dip at n = 18 in the unweighted list was an artefact of
+  fixing the weight at 1. The best gain over A_n* is about 0.66% at n = 18.
+* The unweighted values at n = 19 (-7.6975) and n = 20 (-7.9252) have not been re-run with a free second weight; given n = 18 they could
+  change, and the winning pair with them.
+* Limits: only the two-generator family has a free weight here (three generators were run unweighted to n = 14); w above 1.6 on the
+  larger generator was not searched (the winning weight ratios found are all within a factor 1.21 of 1, but a different pair could in
+  principle want a larger ratio); the one-dimensional search is a grid plus a local refinement, not a proof of the optimum in w.
+  Nothing here shows minimality, and the open validation of the quotient formula beyond n = 7 applies to these values too.
