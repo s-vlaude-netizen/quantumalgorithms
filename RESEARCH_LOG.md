@@ -6724,11 +6724,13 @@ less than 0.04e-3 at n = 11 to 14; at n = 18 it changes it by 0.40e-3, see the n
 values above may move too). Nothing here shows minimality, and the open validation of the quotient formula beyond
 n = 7 applies to these values too.
 
-#### Addendum (28 Nov 2026): the second weight optimised at n = 15 to 18
+#### Addendum (28 Nov 2026): the second weight optimised at n = 15 to 19
 
-`exp053_circulant_enumerate.py --n N` for N = 15, 16, 17, 18: every two-generator circulant {±a, ±b} of Z_(n+1) with weight 1 on a and
+`exp053_circulant_enumerate.py --n N` for N = 15, 16, 17, 18, 19: every two-generator circulant {±a, ±b} of Z_(n+1) with weight 1 on a and
 w on b, w searched on (0.05, 1.6] (a 21-point grid in log w, then golden-section refinement); the three best candidates are then
-certified exactly with a rational w (`results/exp053_n15.json` to `exp053_n18.json`; the n = 18 run took 1 h 51 min wall-clock).
+certified exactly with a rational w (`results/exp053_n15.json` to `exp053_n19.json`; the n = 18 run took 1 h 51 min wall-clock; n = 19 was
+split over four processes with the new `--shard I/4` and `--merge 4` options: 77 min for the slowest shard, 5 min to merge and certify; the
+per-pair values of all 45 pairs are in `results/exp053_n19_shard*of4.json`).
 Units of 1e-3 as above, negative = better than A_n*:
 
 | n | best unweighted (exp054, exact) | best with the second weight optimised (exact) | lattice | difference |
@@ -6737,16 +6739,19 @@ Units of 1e-3 as above, negative = better than A_n*:
 | 16 | -4.7504 | **-4.7504** | ±1, ±4 of Z_17, weight 1 (the optimiser returned 0.9999993) | 0 |
 | 17 | -6.5281 | **-6.5346** | ±1, ±5 of Z_18, weight 67811/69956 (about 0.969) on ±5 | -0.0065 |
 | 18 | -6.2564 | **-6.6570** | ±1, ±4 of Z_19, weight 86446/71669 (about 1.206) on ±4 | -0.4006 |
+| 19 | -7.6975 | **-7.6977** | ±1, ±8 of Z_20, weight 78509/78099 (about 1.005) on ±8 | -0.00025 |
 
 * At n = 18 the weight matters: 0.40e-3, against at most 0.1e-3 at n = 11 to 17. The six best entries of the search all have the same
   value (-6.65697797...e-3, agreeing to 1e-12 in absolute terms); they are one lattice seen through the units of Z_19 (multiplying
   {1, 4} by 2, 7, 3, 5 and 8 gives {2, 8}, {7, 9}, {3, 7}, {1, 5} and {6, 8}, the last two with the two weights swapped), so within this
   family the optimum is unique up to relabelling. The float and exact values agree to 1e-12 at every entry that was certified.
 * With the second weight optimised the best values read -1.4418, -2.6255, -3.0530, -3.5093, -4.3424, -4.2045, -4.7504, -6.5346,
-  -6.6570 for n = 10 to 18: the only step backwards is n = 14 to 15. The dip at n = 18 in the unweighted list was an artefact of
-  fixing the weight at 1. The best gain over A_n* is about 0.66% at n = 18.
-* The unweighted values at n = 19 (-7.6975) and n = 20 (-7.9252) have not been re-run with a free second weight; given n = 18 they could
-  change, and the winning pair with them.
+  -6.6570, -7.6977 for n = 10 to 19: the only step backwards is n = 14 to 15. The dip at n = 18 in the unweighted list was an artefact of
+  fixing the weight at 1. The best gain over A_n* is about 0.66% at n = 18 and 0.77% at n = 19.
+* At n = 19 the free weight hardly matters for the winner ({±1, ±8} of Z_20, weight 1.005, a change of 0.00025e-3), so the unweighted
+  -7.6975 stood. The other classes move a lot: {2, 5} goes from -5.73 (unweighted) to -7.09 at weight 0.72 (listed as {5, 6} with weight
+  1.38), {1, 4} from -6.38 to -6.70 at weight 1.17, and the four best entries (one lattice up to the units of Z_20) are all the winner.
+  The unweighted n = 20 value (-7.9252) has not been re-run with a free weight yet.
 * Limits: only the two-generator family has a free weight here (three generators were run unweighted to n = 14); w above 1.6 on the
   larger generator was not searched (the winning weight ratios found are all within a factor 1.21 of 1, but a different pair could in
   principle want a larger ratio); the one-dimensional search is a grid plus a local refinement, not a proof of the optimum in w.
