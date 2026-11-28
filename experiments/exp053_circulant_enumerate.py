@@ -6,6 +6,12 @@ exact certificate.  Output: for each n the ten best (a, b, w) with the floating-
 log Iso - log Iso(A_n*).
 
 usage: python experiments/exp053_circulant_enumerate.py --n 12 [--top 10]
+
+For large n the pairs (a, b) can be split over processes (set OPENBLAS_NUM_THREADS=1 for each): run
+  python experiments/exp053_circulant_enumerate.py --n 19 --shard I/K        for I = 0 .. K-1   (writes results/exp053_n19_shardIofK.json)
+then
+  python experiments/exp053_circulant_enumerate.py --n 19 --merge K          (certifies the best three, writes results/exp053_n19.json).
+Every pair is evaluated by the same code as in the unsplit run; only the assignment of pairs to processes differs.
 """
 from __future__ import annotations
 
@@ -46,12 +52,22 @@ def golden(fun, lo, hi, iters=28):
     return x, fun(x)
 
 
-def enumerate_n(n, top=10):
+def setup(n):
     prob = Problem(n); N1 = prob.N1; fa = prob.f_an()
     dist = np.array([min((j - i) % N1, (i - j) % N1) for (i, j) in prob.pairs])
+    return prob, N1, fa, dist
+
+
+def evaluate_pairs(n, shard=0, shards=1):
+    """Floating-point optimum over w for every pair (a, b) whose running index is congruent to `shard` mod `shards`."""
+    prob, N1, fa, dist = setup(n)
     out = []
+    idx = -1
     for a in range(1, N1 // 2 + 1):
         for b in range(a + 1, N1 // 2 + 1):
+            idx += 1
+            if idx % shards != shard:
+                continue
             ca, cb = dist == a, dist == b
             fun = lambda lw: f_of(prob, fa, ca, cb, math.exp(lw))
             grid = np.linspace(math.log(0.05), math.log(1.6), 21)
@@ -59,7 +75,12 @@ def enumerate_n(n, top=10):
             k = int(np.argmin(vals)); lo, hi = grid[max(k - 1, 0)], grid[min(k + 1, len(grid) - 1)]
             lw, fv = golden(fun, lo, hi, iters=22)
             out.append({"a": a, "b": b, "w": math.exp(lw), "float": fv, "w_is_1": abs(math.exp(lw) - 1) < 1e-3})
-    out.sort(key=lambda r: r["float"])
+    return out
+
+
+def best_with_certificates(n, out, top=10):
+    prob, N1, fa, dist = setup(n)
+    out = sorted(out, key=lambda r: r["float"])
     res = out[:top]
     for r in res[:3]:
         w = Fraction(r["w"]).limit_denominator(10**5)
@@ -73,13 +94,37 @@ def enumerate_n(n, top=10):
     return res
 
 
+def enumerate_n(n, top=10):
+    return best_with_certificates(n, evaluate_pairs(n), top)
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--n", type=int, required=True); ap.add_argument("--top", type=int, default=10)
+    ap.add_argument("--shard", type=str, default=None, help="I/K: evaluate only the pairs with running index = I mod K and write a shard file")
+    ap.add_argument("--merge", type=int, default=None, help="K: merge the K shard files of this n, certify the best three, write the result")
+    ap.add_argument("--out", type=str, default=None, help="output path (default results/exp053_n<n>.json; with --merge the shard files are read from the same directory)")
     a = ap.parse_args()
-    res = enumerate_n(a.n, a.top)
+    results_dir = Path(__file__).resolve().parents[1] / "results"
+    if a.shard is not None:
+        i, k = (int(x) for x in a.shard.split("/"))
+        part = evaluate_pairs(a.n, i, k)
+        path = Path(a.out) if a.out else results_dir / f"exp053_n{a.n}_shard{i}of{k}.json"
+        path.write_text(json.dumps({"n": a.n, "shard": i, "shards": k, "pairs": part}, indent=1))
+        print(f"n={a.n} shard {i}/{k}: {len(part)} pairs -> {path}")
+        sys.exit(0)
+    if a.merge is not None:
+        allp = []
+        src = Path(a.out).parent if a.out else results_dir
+        for i in range(a.merge):
+            d = json.loads((src / f"exp053_n{a.n}_shard{i}of{a.merge}.json").read_text())
+            assert d["n"] == a.n and d["shard"] == i and d["shards"] == a.merge
+            allp += d["pairs"]
+        res = best_with_certificates(a.n, allp, a.top)
+    else:
+        res = enumerate_n(a.n, a.top)
     print(f"n={a.n} (Z_{a.n+1}): best two-generator circulants (generators a, b; weight 1 on a, w on b)")
     for r in res:
         ex = f"   exact {r['exact']*1e3:+.4f}e-3 (w = {r['w_rational']})" if "exact" in r else ""
         print(f"   a={r['a']:2d} b={r['b']:2d} w={r['w']:.4f}   float {r['float']*1e3:+.4f}e-3{ex}")
-    out = Path(__file__).resolve().parents[1] / "results" / f"exp053_n{a.n}.json"
+    out = Path(a.out) if a.out else results_dir / f"exp053_n{a.n}.json"
     out.write_text(json.dumps({"n": a.n, "results": res}, indent=1))
