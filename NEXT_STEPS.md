@@ -236,10 +236,9 @@ itself — is Weaire–Phelan (5.2883) optimal among all equal-volume partitions
 4. **Follow-ups from Results 99 and 100** (pure mathematics, in order of value):
    * **(Partly answered by Result 102 for n = 10 to 16: weighted 4-regular circulants beat K(m,m) and its cones
      by up to 2.9e-3 in log ratio, exact certificates; the unrestricted search was only run to n = 12, so what remains is
-     the unrestricted minimiser for n >= 13, whether the trend continues past 16 (it does up to n = 20: second weight
-     optimised to n = 18, only unweighted two-generator circulants at n = 19 and 20, where the weight could still move
-     the value and the winning pair; Result 102 addenda), and which Cayley graphs win when
-     n + 1 has no element of order 4.)** **What are the minimisers among first-kind lattices for n ≥ 7?** The optimiser's
+     the unrestricted minimiser for n >= 13, whether the trend continues past 16 (it does up to n = 20 for two-generator
+     circulants with the second weight optimised: it mattered at n = 15 and 18, not at 19 and 20; Result 102 addenda), and
+     which Cayley graphs win when n + 1 has no element of order 4.)** **What are the minimisers among first-kind lattices for n ≥ 7?** The optimiser's
      lattices are cut lattices of K(m,m) and of a weighted cone over it; they are not
      proved optimal. Search weighted complete multipartite graphs and general Selling
      parameters for n = 10 to 14 (the analytic gradient makes `2^n` subsets per

@@ -6605,7 +6605,7 @@ narrows where an answer would not be.
 `experiments/exp043_kelvin_search.py`, `tests/test_kelvin_search.py`,
 `results/exp043_kelvin_search.json`, `results/figures/exp043_frank_kasper_costs.png`.
 
-### Result 102 — the best lattices of the first kind are not the bipartite ones of Result 100: from n = 10 a ring-like cell, each point linked to four others, does better (exact certificates for n = 10 to 17)
+### Result 102 — the best lattices of the first kind are not the bipartite ones of Result 100: from n = 10 a ring-like cell, each point linked to four others, does better (exact certificates for n = 10 to 17; addenda to n = 20)
 
 **In plain words.** Result 100 showed that, within the natural class of cells described by
 one weight for each pair among n + 1 points, the standard pattern A_n* stops being best at
@@ -6720,17 +6720,20 @@ dips, see the next addendum), and the winning pair changes with n. {±1, ±8} of
 about elements of order dividing 4 of the unit group (8 squared is 1 mod 21), but the n = 19 winner {±1, ±8} of Z_20 does
 not (8 is not a unit mod 20), and at n = 20 the runner-up {1,6} is within 0.03e-3 of the winner. Only unweighted circulants were run, so these are
 lower bounds for what circulants can do (optimising the second weight changed the best value by 0.43e-3 at n = 10 and by
-less than 0.04e-3 at n = 11 to 14; at n = 18 it changes it by 0.40e-3, see the next addendum, so the n = 19 and n = 20
-values above may move too). Nothing here shows minimality, and the open validation of the quotient formula beyond
+less than 0.04e-3 at n = 11 to 14; the next addendum optimises it for n = 15 to 20: 0.40e-3 at n = 18, at most 0.00025e-3 at
+n = 19 and n = 20, so the n = 19 and n = 20 values above stand as the best two-generator circulants). Nothing here shows minimality, and the open validation of the quotient formula beyond
 n = 7 applies to these values too.
 
-#### Addendum (28 Nov 2026): the second weight optimised at n = 15 to 19
+#### Addendum (28 Nov 2026): the second weight optimised at n = 15 to 20
 
-`exp053_circulant_enumerate.py --n N` for N = 15, 16, 17, 18, 19: every two-generator circulant {±a, ±b} of Z_(n+1) with weight 1 on a and
+`exp053_circulant_enumerate.py --n N` for N = 15, 16, 17, 18, 19, 20: every two-generator circulant {±a, ±b} of Z_(n+1) with weight 1 on a and
 w on b, w searched on (0.05, 1.6] (a 21-point grid in log w, then golden-section refinement); the three best candidates are then
-certified exactly with a rational w (`results/exp053_n15.json` to `exp053_n19.json`; the n = 18 run took 1 h 51 min wall-clock; n = 19 was
-split over four processes with the new `--shard I/4` and `--merge 4` options: 77 min for the slowest shard, 5 min to merge and certify; the
-per-pair values of all 45 pairs are in `results/exp053_n19_shard*of4.json`).
+certified exactly with a rational w (`results/exp053_n15.json` to `exp053_n20.json`; the n = 18 run took 1 h 51 min wall-clock; n = 19 and
+n = 20 were split over four processes with the new `--shard I/4` and `--merge 4` options, the per-pair values of all 45 pairs being in
+`results/exp053_n19_shard*of4.json` and `exp053_n20_shard*of4.json`. n = 19 took 77 min for the slowest shard and 5 min to merge and certify.
+The first n = 20 attempt was killed by the memory limit (four gradient evaluations at 3.5 GB each); the rerun uses the new value-only
+evaluation `Problem.value` (bitwise identical to `value_grad(x)[0]` in every comparison, 1.6 GB at n = 20): 52 min for the slowest shard, 9 min to
+merge and certify).
 Units of 1e-3 as above, negative = better than A_n*:
 
 | n | best unweighted (exp054, exact) | best with the second weight optimised (exact) | lattice | difference |
@@ -6740,18 +6743,22 @@ Units of 1e-3 as above, negative = better than A_n*:
 | 17 | -6.5281 | **-6.5346** | ±1, ±5 of Z_18, weight 67811/69956 (about 0.969) on ±5 | -0.0065 |
 | 18 | -6.2564 | **-6.6570** | ±1, ±4 of Z_19, weight 86446/71669 (about 1.206) on ±4 | -0.4006 |
 | 19 | -7.6975 | **-7.6977** | ±1, ±8 of Z_20, weight 78509/78099 (about 1.005) on ±8 | -0.00025 |
+| 20 | -7.9252 | **-7.9252** | ±1, ±8 of Z_21, weight 1 (the optimiser returned 0.9999993) | 0 |
 
 * At n = 18 the weight matters: 0.40e-3, against at most 0.1e-3 at n = 11 to 17. The six best entries of the search all have the same
   value (-6.65697797...e-3, agreeing to 1e-12 in absolute terms); they are one lattice seen through the units of Z_19 (multiplying
   {1, 4} by 2, 7, 3, 5 and 8 gives {2, 8}, {7, 9}, {3, 7}, {1, 5} and {6, 8}, the last two with the two weights swapped), so within this
   family the optimum is unique up to relabelling. The float and exact values agree to 1e-12 at every entry that was certified.
 * With the second weight optimised the best values read -1.4418, -2.6255, -3.0530, -3.5093, -4.3424, -4.2045, -4.7504, -6.5346,
-  -6.6570, -7.6977 for n = 10 to 19: the only step backwards is n = 14 to 15. The dip at n = 18 in the unweighted list was an artefact of
-  fixing the weight at 1. The best gain over A_n* is about 0.66% at n = 18 and 0.77% at n = 19.
+  -6.6570, -7.6977, -7.9252 for n = 10 to 20: the only step backwards is n = 14 to 15. The dip at n = 18 in the unweighted list was an
+  artefact of fixing the weight at 1. The best gain over A_n* is about 0.66% at n = 18, 0.77% at n = 19 and 0.79% at n = 20.
 * At n = 19 the free weight hardly matters for the winner ({±1, ±8} of Z_20, weight 1.005, a change of 0.00025e-3), so the unweighted
   -7.6975 stood. The other classes move a lot (floating-point values, not certified): {2, 5} goes from -5.73 (unweighted) to -7.09 at weight 0.72 (listed as {5, 6} with weight
   1.38), {1, 4} from -6.38 to -6.70 at weight 1.17, and the four best entries (one lattice up to the units of Z_20) are all the winner.
-  The unweighted n = 20 value (-7.9252) has not been re-run with a free weight yet.
+* At n = 20 the winner is the unweighted one again, {±1, ±8} of Z_21 at weight 1 (exact -7.925206e-3, the same as the unweighted
+  certificate; the three certified entries {4, 10}, {1, 8}, {2, 5} are one lattice up to the units of Z_21). The runner-up {1, 6} moves only
+  from -7.8969 to -7.8978 (float) at weight 0.986. So the unweighted n = 19 and n = 20 values of the previous addendum stand; the free weight
+  mattered at n = 15 and n = 18 and at n = 10, and nowhere else in this range.
 * Limits: only the two-generator family has a free weight here (three generators were run unweighted to n = 14); w above 1.6 on the
   larger generator was not searched (the winning weight ratios found are all within a factor 1.21 of 1, but a different pair could in
   principle want a larger ratio); the one-dimensional search is a grid plus a local refinement, not a proof of the optimum in w.
