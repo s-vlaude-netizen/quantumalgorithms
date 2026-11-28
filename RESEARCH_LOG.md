@@ -6698,3 +6698,22 @@ unreviewed formula. The floating-point false start above is the reason the exact
 `experiments/exp050_first_kind_search_numpy.py`, `exp051_certify_first_kind.py`, `exp052_circulant_scan.py`,
 `exp053_circulant_enumerate.py`, `exp054_unweighted_circulants_exact.py`, `tests/test_first_kind_numpy.py`,
 `results/exp050_*.json`, `results/exp052_*.json`, `results/exp053_*.json`, `results/exp054_*.json`.
+
+#### Addendum (28 Nov 2026): n = 18 and 19, unweighted two-generator circulants only
+
+`exp054_unweighted_circulants_exact.py --n 18` and `--n 19`, exact certificates as above (n = 19 took 9 min 53 s on one core;
+`results/exp054_n18_k2.json`, `results/exp054_n19_k2.json`):
+
+| n | best unweighted 4-regular circulant | log Iso ratio to A_n* (units of 1e-3) |
+|---|---|---|
+| 18 | generators ±1, ±4 of Z_19 | -6.2564 |
+| 19 | generators ±1, ±8 of Z_20 | -7.6975 |
+
+At n = 18 the others are {1,7} -4.0103, {1,3} +2.3318, {1,2} +28.23; at n = 19 they are {1,4} -6.3761, {2,5} -5.7292,
+{1,5} -5.6201, {4,5} -5.5153, {1,6} -3.8769, {1,3} +2.918, {1,9} +8.735, {1,2} +29.74. So the best gain over A_n* is at
+least 0.76% at n = 19 (0.65% at n = 17), and the gain was still growing; but it is not monotone (n = 15 and n = 18 are
+worse than n = 14 and n = 17), the winning pair changes with n, and {±1, ±8} of Z_20 does not fit the observation above about
+elements of order dividing 4 of the unit group (8 is not a unit mod 20). Only unweighted circulants were run, so these are
+lower bounds for what circulants can do (optimising the second weight changed the best value by 0.43e-3 at n = 10 and by
+less than 0.04e-3 at n = 11 to 14). Nothing here shows minimality, and the open validation of the quotient formula beyond
+n = 7 applies to these values too.
