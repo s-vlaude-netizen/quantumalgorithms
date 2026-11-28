@@ -91,3 +91,14 @@ if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):
             fn(); print("ok", name)
+
+
+def test_value_only_path_matches_value_grad():
+    # exp053 uses Problem.value (no gradient); it must agree with value_grad(x)[0], including tiny weights
+    rng = np.random.default_rng(11)
+    for n in (4, 6, 8, 10):
+        prob = Problem(n)
+        for _ in range(3):
+            x = rng.normal(0, 1.0, len(prob.pairs))
+            x[rng.integers(len(x))] = math.log(1e-12)
+            assert abs(prob.value(x) - prob.value_grad(x)[0]) < 1e-12

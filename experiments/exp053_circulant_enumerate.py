@@ -35,7 +35,7 @@ def f_of(prob, fa, cls_a, cls_b, w):
     rho = np.full(len(prob.pairs), ZERO)
     rho[cls_a] = 1.0
     rho[cls_b] = w
-    return prob.value_grad(np.log(rho))[0] - fa
+    return prob.value(np.log(rho)) - fa
 
 
 def golden(fun, lo, hi, iters=28):

@@ -126,8 +126,21 @@ class Problem:
         grad_rho = gU_vec / U - self.c * Rfull[self.iu]
         return f, grad_rho * rho_vec
 
+    def value(self, x):
+        """Same f(x) as value_grad(x)[0], computed without the inverses and the gradient: far less memory and time."""
+        rho_vec = np.exp(x)
+        R = self.rho_matrix(rho_vec)
+        tau, _ = self.tau_and_resistances(R, need_res=False)
+        Zr = self.Z @ R
+        rcut = (Zr * (1.0 - self.Z)).sum(1)
+        coef = tau * tau[self.partner] * np.sqrt(rcut)
+        U = 0.5 * coef.sum()
+        Lfull = -R.copy(); np.fill_diagonal(Lfull, R.sum(1))
+        sign, logd = np.linalg.slogdet(Lfull[1:, 1:])
+        return math.log(U) - self.c * logd
+
     def f_an(self):
-        return self.value_grad(np.zeros(len(self.pairs)))[0]
+        return self.value(np.zeros(len(self.pairs)))
 
 
 def lbfgs(fun, x0, maxit=400, m=10, gtol=1e-10, ftol=1e-15):
