@@ -6749,7 +6749,7 @@ Units of 1e-3 as above, negative = better than A_n*:
   -6.6570, -7.6977 for n = 10 to 19: the only step backwards is n = 14 to 15. The dip at n = 18 in the unweighted list was an artefact of
   fixing the weight at 1. The best gain over A_n* is about 0.66% at n = 18 and 0.77% at n = 19.
 * At n = 19 the free weight hardly matters for the winner ({±1, ±8} of Z_20, weight 1.005, a change of 0.00025e-3), so the unweighted
-  -7.6975 stood. The other classes move a lot: {2, 5} goes from -5.73 (unweighted) to -7.09 at weight 0.72 (listed as {5, 6} with weight
+  -7.6975 stood. The other classes move a lot (floating-point values, not certified): {2, 5} goes from -5.73 (unweighted) to -7.09 at weight 0.72 (listed as {5, 6} with weight
   1.38), {1, 4} from -6.38 to -6.70 at weight 1.17, and the four best entries (one lattice up to the units of Z_20) are all the winner.
   The unweighted n = 20 value (-7.9252) has not been re-run with a free weight yet.
 * Limits: only the two-generator family has a free weight here (three generators were run unweighted to n = 14); w above 1.6 on the
