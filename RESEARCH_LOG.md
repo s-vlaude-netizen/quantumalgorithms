@@ -6757,8 +6757,8 @@ Units of 1e-3 as above, negative = better than A_n*:
   1.38), {1, 4} from -6.38 to -6.70 at weight 1.17, and the four best entries (one lattice up to the units of Z_20) are all the winner.
 * At n = 20 the winner is the unweighted one again, {±1, ±8} of Z_21 at weight 1 (exact -7.925206e-3, the same as the unweighted
   certificate; the three certified entries {4, 10}, {1, 8}, {2, 5} are one lattice up to the units of Z_21). The runner-up {1, 6} moves only
-  from -7.8969 to -7.8978 (float) at weight 0.986. So the unweighted n = 19 and n = 20 values of the previous addendum stand; the free weight
-  mattered at n = 15 and n = 18 and at n = 10, and nowhere else in this range.
+  from -7.8969 to -7.8978 (float) at weight 0.986. So the unweighted n = 19 and n = 20 values of the previous addendum stand. Over n = 10 to 20 the free weight
+  changed the best value by more than 0.05e-3 only at n = 10 (0.43), n = 15 (0.096) and n = 18 (0.40).
 * Limits: only the two-generator family has a free weight here (three generators were run unweighted to n = 14); w above 1.6 on the
   larger generator was not searched (the winning weight ratios found are all within a factor 1.21 of 1, but a different pair could in
   principle want a larger ratio); the one-dimensional search is a grid plus a local refinement, not a proof of the optimum in w.
